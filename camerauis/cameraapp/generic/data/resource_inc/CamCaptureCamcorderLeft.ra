@@ -1,0 +1,303 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+
+//----------------------------------------------------
+//   
+//    r_cam_layout_zoom_pane_camcorder_left
+//    Location for the Zoom Pane background frame.
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_layout_zoom_pane_camcorder_left
+    {
+    l = 299; 
+    t = 61;  
+    W = 11;  
+    H = 118; 
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_layout_zoom_pane_shaft_camcorder_left
+//    Location for the Zoom Pane shaft, drawn *within* the frame
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_layout_zoom_pane_shaft_camcorder_left
+    { 
+    l = 301;    
+    t = 63;     
+    W = 7;     
+    H = 114;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_layout_zoom_pane_horiz_camcorder_left
+//    Location for the Zoom Pane background frame.
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_layout_zoom_pane_horiz_camcorder_left
+    {
+    l = 101; 
+    t = 35;  
+    W = 118;  
+    H = 11; 
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_layout_zoom_pane_shaft_horiz_camcorder_left
+//    Location for the Zoom Pane shaft, drawn *within* the frame
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_layout_zoom_pane_shaft_horiz_camcorder_left
+    { 
+    l = 103;    
+    t = 37;     
+    W = 114;     
+    H = 7;
+    }
+
+
+
+// ---------------------------------------------------
+//
+//    r_cam_counter_icon_rect_camcorder_left
+//    Layout rect for icon in photo navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_counter_icon_rect_camcorder_left
+    {
+    l = 276; t = 223; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_counter_icon_rect_ah_camcorder_left
+//    Arabic/Hebrew layout rect for icon in photo navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_counter_icon_rect_ah_camcorder_left
+    {
+    l = 276; t = 223; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_memory_location_left
+//    Layout rect for icon in photo navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_precap_memory_location_left
+    {
+    l = 257; t = 222; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_memory_location_ah_left
+//    Arabic/Hebrew layout rect for icon in photo navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_precap_memory_location_ah_left
+    {
+    l = 257; t = 222; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_img_precap_memory_location_left
+//    Layout rect for icon in photo navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_memory_location_left
+    {
+    l = 302; t = 222; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_img_precap_memory_location_ah_left
+//    Arabic/Hebrew layout rect for icon in photo navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_memory_location_ah_left
+    {
+    l = 302; t = 222; W = 11; H = 16;
+    }
+
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_file_type_left
+//    Layout rect for video file type icon in video navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_precap_file_type_left
+    {
+    l = 302; t = 221; W = 9; H = 14;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_file_type_ah_left
+//    Arabic/Hebrew layout rect for video file type icon in video navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_precap_file_type_ah_left
+    {
+    l = 302; t = 221; W = 9; H = 14;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_img_precap_quality_icons_left
+//    Layout rect for image resolution icon in image navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_quality_icons_left
+    {
+    l = 247; t = 221; W = 24; H = 14;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_img_precap_quality_icons_ah_left
+//    Arabic/Hebrew layout rect for image resolution icon in image navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_quality_icons_ah_left
+    {
+    l = 247; t = 221; W = 24; H = 14;
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_video_filetype_pane_camcorder_left
+//    Video file type indicator - uses side pane resource
+//    Allows specifying position and size for all 
+//    video file type indicators
+//
+//----------------------------------------------------
+//
+RESOURCE CAMERA_SIDEPANE r_cam_video_filetype_pane_camcorder_left
+    {
+    indicators = 
+        {
+        CAMERA_INDICATOR
+            {
+            indicator_id = ECamIndicatorVideoFileType;
+            coords =
+                {
+                CAMERA_INDICATOR_COORDS
+                    { tl_x = 0;
+                      tl_y = 0;
+                      br_x = 0;
+                      br_y = 0; }
+                };
+            bitmaps =
+                {
+                CAMERA_BITMAP { bitmap_id = EMbmCameraappQgn_prop_cam4_codec_mp4; },
+                CAMERA_BITMAP { bitmap_id = EMbmCameraappQgn_prop_cam4_codec_mp4_mask; },
+                CAMERA_BITMAP { bitmap_id = EMbmCameraappQgn_prop_cam4_codec_3gp; },
+                CAMERA_BITMAP { bitmap_id = EMbmCameraappQgn_prop_cam4_codec_3gp_mask; }
+                };
+            }
+        };
+    }
+
+    
+//-----------------------------------------------------------------------------
+//
+//    r_cam_video_precap_quality_icons_left
+//    The size and position of the video resolution icon
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_precap_quality_icons_left
+    { l = 276; t = 223; W = 19; H = 11; }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_video_cap_limit_quality_icons_left
+//    The size and position of the video resolution icon during capture
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_quality_icons_left
+    { l = 152; t = 223; W = 19; H = 11; }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_video_cap_unlimit_quality_icons_left
+//    The size and position of the video resolution icon during capture
+//    when the progress bar is not visible.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_unlimit_quality_icons_left
+    { l = 152; t = 223; W = 19; H = 11; }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_video_cap_limit_file_type_left
+//    The size and position of the video filetype icon during capture
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_file_type_left
+    { l = 66; t = 228; W = 11; H = 16; }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_vidfiletype_capture_icon_rect_camcorder_noprogbar_left
+//    The size and position of the video filetype icon during capture
+//    when the progress bar is not visible.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_vidfiletype_capture_icon_rect_noprogbar_camcorder_left
+    { l = 66; t = 228; W = 11; H = 16; }
+
+
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_location_left
+    {
+    //r = 247; t = 221; W = 24; H = 14;
+    //r = 223; t = 221; W = 16; H = 16;
+    l = 211; t = 221; W = 16; H = 16;
+    }
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_location_left_ah
+    {
+    //r = 247; t = 221; W = 24; H = 14;
+    //r = 223; t = 221; W = 16; H = 16;
+    l = 211; t = 221; W = 16; H = 16;
+    }

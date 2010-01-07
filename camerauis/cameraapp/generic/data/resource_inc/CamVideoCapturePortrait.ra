@@ -1,0 +1,811 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+
+#include "camportraitnaviconstants.rh"
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_remaining_time_portrait
+//    Layout for remaining recording time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_precap_remaining_time_portrait
+    {
+    font = ELatinPlain12; 
+    C    = 0; 
+    r    = KRemainingTimeRight; 
+    B    = KNaviPaneHeight - KNaviBottomClearance; 
+    W    = KRemainingTimePreCaptureWidth; 
+    J    = ELayoutAlignRight;
+    //font = EAknLogicalFontSecondaryFont; C=0; l=0; r=15; B=KNaviPaneFontBasePT - 3; W=36; J=ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_remaining_time_ah_portrait
+//    Arabic/Hebrew layout for remaining recording time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_precap_remaining_time_ah_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=90; /*r=KNaviPaneFontRightBorderPT - 1;*/ B=KNaviPaneFontBasePT - 3; J=ELayoutAlignLeft;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_remaining_time_portrait
+//    Layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_remaining_time_portrait
+  {
+  //font = ELatinPlain12; C=215; r=15; B=KNaviPaneFontBasePT - 2; W=KRemainingTimeInCaptureWidth; J=ELayoutAlignRight;
+  font = ELatinPlain12; 
+  C    = 215; 
+  r    = KRemainingTimeRight; 
+  B    = KNaviPaneHeight - KNaviBottomClearance; 
+  W    = KRemainingTimeInCaptureWidth; 
+  J    = ELayoutAlignRight;
+  }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_remaining_time_portrait
+//    Layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_remaining_time_portrait
+  {
+  //font = ELatinPlain12; C=215; r=15; B=KNaviPaneFontBasePT - 3; W=KRemainingTimeInCaptureWidth; J=ELayoutAlignRight;
+  font = ELatinPlain12; 
+  C    = 215; 
+  r    = KRemainingTimeRight; 
+  B    = KNaviPaneHeight - KNaviBottomClearance; 
+  W    = KRemainingTimeInCaptureWidth; 
+  J    = ELayoutAlignRight;
+  }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_remaining_time_ah_portrait
+//    Layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_remaining_time_ah_portrait
+    {
+    font = ELatinPlain12; C=215; r=12 + 80; B=KNaviPaneFontBasePT - 4; W=KRemainingTimeInCaptureWidth; J=ELayoutAlignRight;
+    }
+    
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_remaining_time_ah_portrait
+//    Arabic/Hebrew layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_remaining_time_ah_portrait
+    {
+    font = ELatinPlain12; C=215; l=14; B=KNaviPaneFontBasePT - 2; J=ELayoutAlignLeft;
+    }
+
+
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_elapsed_time_portrait
+//    Layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_elapsed_time_portrait
+  {
+  //font=ELatinPlain12; C=35; l=12; B=KNaviPaneFontBasePT - 1; W=KElapsedTimeInCaptureWidth; J=ELayoutAlignLeft;
+
+  font = ELatinPlain12; 
+  C    = 35; 
+  r    = KElapsedTimeRight;
+  B    = KNaviPaneHeight - KNaviBottomClearance; 
+  W    = KElapsedTimeInCaptureWidth; 
+  J    = ELayoutAlignRight;
+  }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_elapsed_time_ah_portrait
+//    Arabic/Hebrew layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_elapsed_time_ah_portrait
+    {
+    font = ELatinPlain12; C=35; r=10; B=KNaviPaneFontBasePT - KNaviBottomClearance; J=ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_elapsed_time_portrait
+//    Layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_elapsed_time_portrait
+    {
+    //font = ELatinPlain12; C=35; l=12; B=KNaviPaneFontBasePT - 1; W=24; J=ELayoutAlignLeft;
+    //font = ELatinPlain12; C=35; l=49; B=KNaviPaneFontBasePT - 3; W=KElapsedTimeInCaptureWidth; J=ELayoutAlignLeft;
+    font = ELatinPlain12; 
+    C    = 35; 
+    r    = KElapsedTimeRight;
+    B    = KNaviPaneHeight - KNaviBottomClearance; 
+    W    = KElapsedTimeInCaptureWidth; 
+    J    = ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_elapsed_time_ah_portrait
+//    Arabic/Hebrew layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_elapsed_time_ah_portrait
+    {
+    font = ELatinPlain12; C=35; r=0 + 50; B=KNaviPaneFontBasePT - KNaviBottomClearance; J=ELayoutAlignRight;
+    }
+    
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_video_size_layout_portrait
+//    Layout for video size in post-capture navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_video_size_layout_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=0; r=KNaviPaneFontRightBorderPT; B=KNaviPaneFontBasePT; W=36; J=ELayoutAlignRight;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_video_size_layout_ah_portrait
+//    Layout for video size in post-capture navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_video_size_layout_ah_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=10; B=KNaviPaneFontBasePT; J=ELayoutAlignLeft;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_progress_bar_portrait
+//    Layout for progress bar during capture in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_progress_bar_portrait
+    {
+    r = KProgressBarRight;
+    //t = (KNaviPaneHeight - KProgressBarHeight) / 2;
+    b = KNaviBottomClearance;    
+    W = KProgressBarWidth;
+    H = KProgressBarHeight;
+    //l=37; t=8; W=71; H=10;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_progress_bar_ah_portrait
+//    Arabic/Hebrew layout for progress bar during capture in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_progress_bar_ah_portrait
+    {
+    r=37; t=8; W=71; H=10;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_memory_location_portrait
+//    Layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_memory_location_portrait
+    {
+    //r = 5; t = 7; W = 9; H = 11;
+    //l = 136; t = 5; W = 9; H = 11;
+    r = KMemoryIconRight;
+    //t = (KNaviPaneHeight-KMemoryIconHeight)/2;
+    b = KNaviBottomClearance;
+    W = KMemoryIconWidth;
+    H = KMemoryIconHeight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_memory_location_ah_portrait
+//    Arabic/Hebrew layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_memory_location_ah_portrait
+    {
+    l = 0; t = 6; W = 21; H = 28;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimit_memory_location_portrait
+//    Layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_unlimit_memory_location_portrait
+    {
+    //r = 5; t = 7; W = 9; H = 11;
+    //l = 124; t = 5; W = 9; H = 11;
+    r = KMemoryIconRight;
+    //t = (KNaviPaneHeight-KMemoryIconHeight)/2;
+    b = KNaviBottomClearance;
+    W = KMemoryIconWidth;
+    H = KMemoryIconHeight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimit_memory_location_ah_portrait
+//    Arabic/Hebrew layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_unlimit_memory_location_ah_portrait
+    {
+    l = 10; t = 5; W = 21; H = 28;
+    }
+        
+//-----------------------------------------------------------------------------
+//
+//    r_cam_recpause_indicator_layout_vid_main_rect
+//    Layout rect for the recording and paused indicators in the main video pane.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_recpause_indicator_layout_vid_main_rect_portrait
+    {
+    l=8; t=6; W=18; H=18;
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_video_quality_slider_array_portrait
+//    Legend data for the video quality slider
+//----------------------------------------------------
+//   
+RESOURCE ARRAY r_cam_video_quality_slider_array_portrait
+    {
+    items = 
+        {
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 8; W = 26; H = 22; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_res_cif;
+//            mask_id = EMbmCameraappQgn_indi_lcam_res_cif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 4; W = 22; H = 32; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_mp4;
+//            mask_id = EMbmCameraappQgn_indi_lcam_vid_mp4_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 136; W = 26; H = 22; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_res_qcif;
+//            mask_id = EMbmCameraappQgn_indi_lcam_res_qcif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 132; W = 22; H = 32; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_3gp;
+//            mask_id = EMbmCameraappQgn_indi_lcam_vid_3gp_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 260; W = 26; H = 22; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_res_sqcif;
+//            mask_id = EMbmCameraappQgn_indi_lcam_res_sqcif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 256; W = 22; H = 32; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_3gp;
+//            mask_id = EMbmCameraappQgn_indi_lcam_vid_3gp_mask;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_video_quality_slider_array_ah
+//    Legend data for the video quality slider (Arabic/Hebrew)
+//----------------------------------------------------
+//   
+RESOURCE ARRAY r_cam_video_quality_slider_array_ah_portrait
+    {
+    items = 
+        {
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 8; W = 26; H = 22; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_res_cif;
+//            mask_id = EMbmCameraappQgn_indi_lcam_res_cif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 4; W = 22; H = 32; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_mp4;
+//            mask_id = EMbmCameraappQgn_indi_lcam_vid_mp4_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 136; W = 26; H = 22; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_res_qcif;
+//            mask_id = EMbmCameraappQgn_indi_lcam_res_qcif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 132; W = 22; H = 32; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_3gp;
+//            mask_id = EMbmCameraappQgn_indi_lcam_vid_3gp_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 260; W = 26; H = 22; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_res_sqcif;
+//            mask_id = EMbmCameraappQgn_indi_lcam_res_sqcif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 256; W = 22; H = 32; };
+//            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_3gp;
+//            mask_id = EMbmCameraappQgn_indi_lcam_vid_3gp_mask;
+            }
+        };
+    }
+
+/*
+//----------------------------------------------------
+//   
+//    r_cam_video_quality_slider_array_cam2_portrait
+//    Legend data for the video quality slider ( for camera 2 )
+//----------------------------------------------------
+//   
+RESOURCE ARRAY r_cam_video_quality_slider_array_cam2_portrait
+    {
+    items = 
+        {
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 8; W = 26; H = 22; };
+            bitmap_id = EMbmCameraappQgn_indi_lcam_res_qcif;
+            mask_id = EMbmCameraappQgn_indi_lcam_res_qcif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 4; W = 22; H = 32; };
+            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_3gp;
+            mask_id = EMbmCameraappQgn_indi_lcam_vid_3gp_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 2; t = 260; W = 26; H = 22; };
+            bitmap_id = EMbmCameraappQgn_indi_lcam_res_sqcif;
+            mask_id = EMbmCameraappQgn_indi_lcam_res_sqcif_mask;
+            },
+        CAM_SLIDER_LEGEND_ITEM
+            {
+            item = ECamSliderLegendItemIcon;
+            position = AVKON_LAYOUT_RECT { l = 32; t = 56; W = 22; H = 32; };
+            bitmap_id = EMbmCameraappQgn_indi_lcam_vid_3gp;
+            mask_id = EMbmCameraappQgn_indi_lcam_vid_3gp_mask;
+            }
+        };
+    }
+*/
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_video_name_layout_portrait
+//    Layout for video name in post-capture navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_video_name_layout_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=0; r=56; B=KNaviPaneFontBasePT; W=36; J=ELayoutAlignLeft;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_video_name_layout_ah_portrait
+//    Arabic/Hebrew layout for video name in post-capture
+//    navi-counter for secondary camera
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_video_name_layout_ah_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; r=KNaviPaneFontRightBorderPT; B=KNaviPaneFontBasePT; J=ELayoutAlignRight;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_video_pre_capture_view
+//    Video pre-capture view
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_cam_video_pre_capture_view_portrait
+    {
+    menubar = r_cam_video_pre_capture_menubar_portrait;
+    cba = r_cam_softkeys_options_exit;    
+    toolbar = r_cam_video_precapture_toolbar_portrait;  
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_pre_capture_menubar
+//   Menubar for video pre-capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_video_pre_capture_menubar_portrait
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_video_pre_capture_menu_portrait;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_pre_capture_menu_portrait
+//   Options menu for video pre capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_video_pre_capture_menu_portrait
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSwitchCamera;
+            txt = qtn_lcam_options_cam2;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSettings;
+            txt = qtn_lcam_cmd_settings;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdNewPhoto;
+            txt = qtn_lcam_options_photo_mode;
+            },            
+        MENU_ITEM
+            {
+            command = ECamCmdPhotos;
+            txt = qtn_lcam_options_go_to_photos;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_video_post_capture_view
+//    Video post-capture view
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_cam_video_post_capture_view_portrait
+    {
+    menubar = r_cam_video_post_capture_menubar_portrait;
+    cba = r_cam_softkeys_options_back_toggletoolbar_portrait;
+    toolbar = r_cam_video_postcapture_toolbar_portrait;
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_post_capture_menubar
+//   Menubar for video post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_video_post_capture_menubar_portrait
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_video_post_capture_menu_portrait;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_post_capture_menu_portrait
+//   Options menu for video post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_video_post_capture_menu_portrait
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSend;
+            txt = qtn_options_send_via;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSendToCallerMultimedia;
+            txt = qtn_lcam_options_send_to_call;
+            },
+        MENU_ITEM
+            {
+            command = KAiwCmdAssign; 
+            txt = qtn_lcam_use_video_postcapture_menu;
+            cascade = AIW_INTELLIGENT_CASCADE_ID;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdShareOnOvi;
+            // AIW provider fills the menu item title.
+            // No submenu, only 1 provider acccepted.
+            txt     = "";
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdRenameVideo;
+            txt = qtn_lcam_cmd_rename_video;
+            },          
+        MENU_ITEM
+            {
+            command = ECamCmdPhotos;
+            txt = qtn_lcam_options_go_to_photos;
+            }, 
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_limit_recording_icon_portrait
+//   Recording icon during capture, limited feature
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_limit_recording_icon_portrait
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+          tl_x   = KNaviPaneWidth - (KRecordingIconRight + KRecordingIconWidth);
+					tl_y   = KNaviPaneHeight - KRecordingIconHeight - KNaviBottomClearance;
+					width  = KRecordingIconWidth;
+					height = KRecordingIconHeight;
+					//tl_x = 0;
+					//tl_y = 9;
+					//width = 9;
+					//height = 9;
+					}
+				};
+			}
+		};
+	}
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_limit_recording_icon_ah_portrait
+//   Recording icon during capture, limited feature, Arabic/Hebrew
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_limit_recording_icon_ah_portrait
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+					tl_x = 140;
+					tl_y = 9;
+					width = 9;
+					height = 9;
+					}
+				};
+			}
+		};
+	}
+		
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_unlimit_recording_icon_portrait
+//   Recording icon during capture, unlimited feature
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_unlimit_recording_icon_portrait
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+					tl_x = 80;
+					tl_y = 7;
+					width = 9;
+					height = 9;
+					}
+				};
+			}
+		};
+	}
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_unlimit_recording_ah_icon_portrait
+//   Recording icon during capture, unlimited feature, Arabic/Hebrew
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_unlimit_recording_icon_ah_portrait
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+					tl_x = 60;
+					tl_y = 7;
+					width = 9;
+					height = 9;
+					}
+				};
+			}
+		};
+	}
+
+//---------------------------------------------------------
+//
+//    r_cam_softkeys_options_exit__record
+//    Softkeys definition which uses ECamMSKCmdAppRecord
+//    to handle the MSK event, without MSK label.
+//
+//---------------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit__record
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ECamMSKCmdAppRecord; txt = ""; }
+        };
+    }
+	
+//---------------------------------------------------------
+//
+//    r_cam_softkeys_options_exit__record_secondary
+//    Softkeys definition which uses ECamMSKCmdAppRecord
+//    to handle the MSK event, without MSK label.
+//
+//---------------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit__record_secondary
+    {
+	buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ECamMSKCmdAppRecord; txt = ""; }
+        };
+    }
+	
+//---------------------------------------------------------
+//
+//    r_cam_softkeys_options_exit__record_txt
+//    Softkeys definition which uses ECamMSKCmdAppCapture
+//    to handle the MSK event, with MSK label.
+//
+//---------------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit__record_txt
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ECamMSKCmdAppRecord; txt = qtn_lcam_msk_record; }
+        };
+    }
+

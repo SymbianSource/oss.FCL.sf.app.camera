@@ -1,0 +1,87 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_embedded_static_settings_data
+//    Default values for the photo embedded static setting items
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SETTING_ITEMS_DATA r_cam_photo_embedded_static_settings_data
+    {
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemPhotoSize;
+            default = ECamPhotoSizeVGA;
+            },
+                    
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemPhotoShowFocusPoint;
+            default = ECamSettOn;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemShowCapturedPhoto;
+            default = ECamSettOn;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_video_embedded_static_settings_data
+//    Default values for the video embedded static setting items
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SETTING_ITEMS_DATA r_cam_video_embedded_static_settings_data
+    {
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemVideoResolution;
+            default = ECamVideoResolutionQCIF;
+            },
+  
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemVideoClipLength;
+            default = ECamVideoClipShort;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemVideoFileType;
+            default = ECamVideoH263;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemVideoShowCapturedVideo;
+            default = ECamSettOn;
+            }
+        };
+    }
+

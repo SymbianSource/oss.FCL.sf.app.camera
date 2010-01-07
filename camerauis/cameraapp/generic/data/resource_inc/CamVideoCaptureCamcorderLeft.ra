@@ -1,0 +1,536 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_remaining_time_left
+//    Layout for remaining recording time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_precap_remaining_time_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=221; r=67; B=234; W=32; J=ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_precap_remaining_time_ah_left
+//    Arabic/Hebrew layout for remaining recording time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_precap_remaining_time_ah_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=221; r=67; B=234; W=32; J=ELayoutAlignRight;
+    }
+
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_elapsed_time_left
+//    Layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_elapsed_time_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=35; l=128; r=160; B=234; W=32; J=ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_elapsed_time_ah_left
+//    Arabic/Hebrew layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_elapsed_time_ah_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=35; l=221; B=234; W=56; J=ELayoutAlignLeft;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_elapsed_time_left
+//    Layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_elapsed_time_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=35; l=128; r=160; B=234; W=32; J=ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_elapsed_time_ah_left
+//    Arabic/Hebrew layout for elapsed time in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_elapsed_time_ah_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=35; l=221; B=234; W=56; J=ELayoutAlignLeft;
+    }
+    
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_remaining_time_left
+//    Layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_remaining_time_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=215; l=221; r=320-221-32; B=234; W=32; J=ELayoutAlignLeft;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limited_remaining_time_ah_left
+//    Arabic/Hebrew layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_limited_remaining_time_ah_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=215; l=128; r=160; B=234; W=32; J=ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_remaining_time_left
+//    Layout for remaining time in navi pane when the progress bar is not visible
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_remaining_time_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=215; l=221; r=320-221-32; B=234; W=32; J=ELayoutAlignLeft;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimited_remaining_time_ah_left
+//    Arabic/Hebrew layout for remaining time in navi pane when the progress bar is not visible
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_video_cap_unlimited_remaining_time_ah_left
+    {
+    font = EAknLogicalFontSecondaryFont; C=215; l=128; r=160; B=234; W=32; J=ELayoutAlignRight;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_progress_bar_left
+//    Layout for progress bar during capture in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_progress_bar_left
+    {
+    l=164; t=225; W=53; H=10;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_progress_bar_ah_left
+//    Arabic/Hebrew layout for progress bar during capture in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_progress_bar_ah_left
+    {
+    l=164; t=225; W=53; H=10;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_memory_location_left
+//    Layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_memory_location_left
+    {
+    l = 257; t = 222; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_limit_memory_location_ah_left
+//    Arabic/Hebrew layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_limit_memory_location_ah_left
+    {
+    l = 257; t = 222; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimit_memory_location_left
+//    Layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_unlimit_memory_location_left
+    {
+    l = 257; t = 222; W = 11; H = 16;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_video_cap_unlimit_memory_location_ah_left
+//    Arabic/Hebrew layout rect for memory location icon while recording in navi pane progress.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_video_cap_unlimit_memory_location_ah_left
+    {
+    l = 257; t = 222; W = 11; H = 16;
+    }
+        
+//-----------------------------------------------------------------------------
+//
+//    r_cam_recpause_indicator_layout_vid_main_rect_left
+//    Layout rect for the recording and paused indicators in the main video pane.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_recpause_indicator_layout_vid_main_rect_camcorder_left
+    {
+    l=114; t=226; W=9; H=9;
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_video_name_layout_left
+//    Layout for video name in post-capture navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_video_name_layout_camcorder_left
+	{
+    font = EAknLogicalFontSecondaryFont; C=35; r=9; B=13; W=100; J=ELayoutAlignRight;
+	}
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_video_name_layout_ah_left
+//    Arabic/Hebrew layout for video name in post-capture
+//    navi-counter for secondary camera
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_video_name_layout_ah_camcorder_left
+	{
+	font = EAknLogicalFontSecondaryFont; C=35; r=9; B=13; W=100; J=ELayoutAlignRight;
+	}
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_precap_navicounter_decorations_camcorder_left
+//   Decorations for the navicounter in video precap
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_precap_navicounter_decorations_camcorder_left
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x = 215;
+					tl_y = 219; // 220;
+					width = 60;
+					}
+				};
+			}
+		};
+	}
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_limit_recording_icon_left
+//   Decorations and recording icon during capture, limited feature
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_limit_recording_icon_left
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationDVFBlanker;
+			decoration = 
+				{
+				CAM_DVF_BLANKER
+					{
+					tl_x   = 112;
+					tl_y   = 219; // 220;
+					width  = 160;
+					height = 20;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x  = 112;
+					tl_y  = 219; // 220;
+					width = 160;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+					tl_x   = 112+5;
+					tl_y   = 219+6;// 220+6;
+					width  = 9;
+					height = 9;
+					}
+				};
+			}
+		};
+	}
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_limit_recording_icon_ah_left
+//   Decorations and recording icon during capture, limited feature
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_limit_recording_icon_ah_left
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationDVFBlanker;
+			decoration = 
+				{
+				CAM_DVF_BLANKER
+					{
+					tl_x   = 112;
+					tl_y   = 219; // 220;
+					width  = 160;
+					height = 20;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x  = 112;
+					tl_y  = 219; // 220;
+					width = 160;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+					tl_x   = 112+5;
+					tl_y   = 219+6;// 220+6;
+					width  = 9;
+					height = 9;
+					}
+				};
+			}
+		};
+	}
+	
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_unlimit_recording_icon_left
+//   Decorations and recording icon during capture, unlimited feature
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_unlimit_recording_icon_left
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationDVFBlanker;
+			decoration = 
+				{
+				CAM_DVF_BLANKER
+					{
+					tl_x   = 112;
+					tl_y   = 219; // 220;
+					width  = 160;
+					height = 20;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x  = 112;
+					tl_y  = 219; // 220;
+					width = 160;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+					tl_x   = 112+5;
+					tl_y   = 219+6; // 220+6;
+					width  = 9;
+					height = 9;
+					}
+				};
+			}
+		};
+	}
+
+// ---------------------------------------------------------
+//   
+//   r_cam_video_cap_unlimit_recording_icon_ah_left
+//   Decorations and recording icon during capture, unlimited feature, Arabic/Hebrew
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_cap_unlimit_recording_icon_ah_left
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationDVFBlanker;
+			decoration = 
+				{
+				CAM_DVF_BLANKER
+					{
+					tl_x   = 112;
+					tl_y   = 219; // 220;
+					width  = 160;
+					height = 20;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x  = 112;
+					tl_y  = 219; // 220;
+					width = 160;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationRecordingIcon;
+			decoration = 
+				{
+				CAM_RECORDING_ICON
+					{
+					tl_x   = 112+5;
+					tl_y   = 219+6; // 220+6;
+					width  = 9;
+					height = 9;
+					}
+				};
+			}
+		};
+	}
+// ---------------------------------------------------------
+//   
+//   r_cam_video_postcap_navicounter_decorations_camcorder_left
+//   Decorations for the progress bar in video precap
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_video_postcap_navicounter_decorations_camcorder_left
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x = 150;
+					tl_y = 0;
+					width = 167;
+					}
+				};
+			},
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x  = 237;
+					tl_y  = 219; // 220;
+					width = 56;
+					}
+				};
+			}
+		};
+	}

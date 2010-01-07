@@ -1,0 +1,154 @@
+/*
+* Copyright (c) 2005-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*        This is project specification file for the camera plug-in for
+*        General Settings.
+*
+*/
+
+
+MACRO       CAMERAAPP_PLUGIN_BUILD
+#define     CAMERAAPP_PLUGIN_BUILD
+
+#include <data_caging_paths.hrh>    
+#include <platform_paths.hrh>
+
+CAPABILITY          CAP_ECOM_PLUGIN
+TARGET              gscameraplugin.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x2000F8E0
+VENDORID            VID_DEFAULT
+
+SOURCEPATH          ../src
+SOURCE              GSCamcorderPluginImplementationTable.cpp 
+SOURCE              GSCamcorderPlugin.cpp 
+SOURCE              GSCamcorderPluginContainer.cpp
+
+SOURCE              GSCamcorderSettingsBaseView.cpp
+SOURCE              GSCamcorderSettingsContainer.cpp
+
+SOURCE              GSCamPhotoSettingsList.cpp
+SOURCE              GSCamPhotoSettingsView.cpp
+
+SOURCE              GSCamVideoSettingsList.cpp
+SOURCE              GSCamVideoSettingsView.cpp
+
+SOURCE              GSCamQualitySettingSlider.cpp
+SOURCE              GSCamQualitySettingContainer.cpp
+SOURCE              GSCamQualitySettingItem.cpp
+SOURCE              GSCamQualitySettingPage.cpp
+SOURCE              GSCustomQualitySettingItem.cpp
+
+SOURCE              CamLocationSettingContainer.cpp
+SOURCE              CamLocationSettingItem.cpp
+SOURCE              CamLocationSettingPage.cpp
+
+SOURCE              GSCamDefaultNameSettingItem.cpp
+SOURCE              GSCamdefaultnamesettingpage.cpp
+
+SOURCEPATH          ../../common/src
+SOURCE              CamVideoQualityLevel.cpp
+SOURCE              CamStaticSettingsModel.cpp
+SOURCE              CamWaitDialog.cpp
+SOURCE              CamPanic.cpp
+SOURCE              CamUtility.cpp
+
+SOURCE              CamCaptureSetupListItem.cpp
+SOURCE              CamCaptureSetupListBoxModel.cpp
+SOURCE              CamCaptureSetupListBox.cpp
+SOURCE              CamCaptureSetupListItemDrawer.cpp
+SOURCE              caminfolistboxitembase.cpp
+
+SOURCE              camconfiguration.cpp
+SOURCE              camconfigurationutility.cpp
+
+
+USERINCLUDE         ../inc
+USERINCLUDE         ../data
+USERINCLUDE         ../../common/data
+USERINCLUDE         ../../common/inc
+USERINCLUDE         ../../camerauiconfigmanager/inc
+
+USERINCLUDE         ../../inc
+
+// Default system include paths for application layer modules.
+APP_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH          ../data
+
+// ECOM resource definition
+START RESOURCE      2000F8E0.rss 
+TARGET              gscameraplugin.rsc 
+END // ECOM resource definition
+
+// Plugin resources
+START RESOURCE      gscamerapluginrsc.rss 
+HEADER
+TARGETPATH          RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END // Plugin resources
+
+// Plugin resources
+START RESOURCE      gscamerapluginrscv2.rss 
+HEADER
+TARGETPATH          RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END // Plugin resources
+
+LANGUAGE_IDS
+LIBRARY             GSEcomPlugin.lib
+LIBRARY             PlatformEnv.lib // PathInfo
+LIBRARY             euser.lib
+LIBRARY             ecom.lib
+LIBRARY             efsrv.lib
+LIBRARY             avkon.lib
+LIBRARY             bafl.lib 
+LIBRARY             cone.lib 
+LIBRARY             eikcoctl.lib 
+LIBRARY             eikcore.lib 
+LIBRARY             commonengine.lib//For RConeResourceLoader
+LIBRARY             GSFramework.lib
+LIBRARY             egul.lib // CGulIcon
+LIBRARY             aknskins.lib // AknsUtils.h
+LIBRARY             centralrepository.lib
+LIBRARY             FeatMgr.lib           // Feature manager 
+LIBRARY             AknNotify.lib         // for CAknGlobalNote.h
+LIBRARY             AknIcon.lib     // AknIconUtils
+LIBRARY             GSListBox.lib         // For CGSListBoxItemTextArray
+LIBRARY             charconv.lib // utf
+LIBRARY             commondialogs.lib  // CAknMemorySelectionDialog
+LIBRARY             eikctl.lib
+LIBRARY             NewService.lib
+LIBRARY             eikdlg.lib
+LIBRARY             bitgdi.lib
+LIBRARY             aknlayout2.lib
+LIBRARY             aknlayout2scalable.lib
+LIBRARY             CdlEngine.lib
+LIBRARY             camerauiconfigmanager.lib
+
+#ifdef __SERIES60_HELP
+LIBRARY             hlplch.lib            // for "Help" options menu
+#endif
+LIBRARY fbscli.lib 
+LIBRARY ws32.lib
+LIBRARY     imagingconfigmanager.lib
+LIBRARY     touchfeedback.lib 
+
+#ifdef RD_UI_TRANSITION_EFFECTS_LIST
+LIBRARY aknlistloadertfx.lib
+#endif //RD_UI_TRANSITION_EFFECTS_LIST
+
+//  - used only by Codewarrior for convenience.
+DOCUMENT            2000F8E0.rss
+// End of File

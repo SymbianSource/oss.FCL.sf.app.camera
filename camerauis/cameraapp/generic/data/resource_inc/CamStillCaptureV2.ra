@@ -1,0 +1,514 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+
+
+
+//----------------------------------------------------
+//   
+//    r_cam_still_pre_capture_title_name
+//    Title name used in still pre-capture view
+//
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_cam_still_pre_capture_title_name
+    {
+    txt = qtn_lcam_title_text_camera;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_image_saving_cancel_note
+//    Dialog to display cancel image saving 
+//    confirmation note
+//
+// ---------------------------------------------------
+//
+RESOURCE DIALOG r_cam_image_saving_cancel_note
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = "";
+                };
+            }
+        };
+    }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_image_saving_cancel_note_text
+//    Cancel confirmation query text.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_image_saving_cancel_note_text
+    {
+    buf = qtn_lcam_note_cancel_images;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_loading_image_wait_note
+//    Wait note shown when setting background image
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_cam_loading_image_wait_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = ELoadingImageWaitNote;
+            control = AVKON_NOTE 
+                {
+                layout = EWaitLayout;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                singular_label = qtn_lcam_loading_image;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_move_to_still_image_interest
+//    This resource is used to register an interest in 
+//    still-image Application InterWork (AIW)
+//
+//----------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_cam_move_to_still_image_interest
+    {
+    items = 
+        {
+        AIW_CRITERIA_ITEM   // PRINT still image
+            {
+            id = ECamCmdPrint;
+            serviceCmd = KAiwCmdPrint;        
+            contentType = "image/*";
+            serviceClass = KAiwClassMenu;          
+            maxProviders = 5;         
+            }
+        };
+    }
+    
+//----------------------------------------------------
+//   
+//    r_cam_move_to_still_image_interest_at
+//    This resource is used to register an interest in 
+//    still-image Application InterWork (AIW) for use by
+//	  Active Toolbar - which only supports QuickPrint app
+//
+//----------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_cam_move_to_still_image_interest_at
+    {
+    items = 
+        {
+        AIW_CRITERIA_ITEM   // PRINT still image
+            {
+            id = ECamCmdPrint;
+            serviceCmd = KAiwCmdPrint;        
+            contentType = "image/*";
+            serviceClass = KAiwClassBase;          
+            maxProviders = 1;         
+            loadOptions = AIW_OPTIONS_ROM_ONLY; 
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_move_to_still_image_sequence_interest
+//    This resource is used to register an interest in 
+//    still-image Application InterWork (AIW)
+//
+//----------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_cam_move_to_still_image_sequence_interest
+    {
+    items = 
+        {
+        AIW_CRITERIA_ITEM   // PRINT still image
+            {
+            id = ECamCmdPrint;
+            serviceCmd = KAiwCmdPrint;        
+            contentType = "image/*";
+            serviceClass = KAiwClassMenu;
+            maxProviders = 5;          
+            }
+        };
+    }
+    
+//----------------------------------------------------
+//   
+//    r_cam_share_on_ovi_interest
+//    This resource is used to register an interest in 
+//    Share on Ovi Application InterWork (AIW)
+//
+//----------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_cam_share_on_ovi_interest
+    {
+    items = 
+        {
+        AIW_CRITERIA_ITEM   // Upload still image
+            {
+            id = ECamCmdShareOnOvi;
+            serviceCmd = KAiwCmdUpload;        
+            //contentType = "image/*";
+            contentType = "*";
+            serviceClass = KAiwClassMenu;
+            maxProviders = 1;          
+            }
+        };
+    }
+    
+//----------------------------------------------------
+//   
+//    r_cam_set_as_call_image_interest
+//    This resource is used to register an interest in 
+//    Set as contact call image Application InterWork (AIW)
+//
+//----------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_cam_set_as_call_image_interest
+    {
+    items = 
+        {
+        AIW_CRITERIA_ITEM   // 
+            {
+            id = KAiwCmdAssign;
+            serviceCmd = KAiwCmdAssign;        
+            contentType = "*";
+            serviceClass = KAiwClassMenu; 
+            //maxProviders = 1;        
+            //defaultProvider = 0x1020728f;         
+            }
+        };
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_saving_images_progress_note
+//    Dialog to display whilst saving images
+//
+// ---------------------------------------------------
+//
+RESOURCE DIALOG r_cam_saving_images_progress_note
+    {   
+    flags = EAknProgressNoteFlags | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = ESavingImagesProgressNote;
+            control = AVKON_NOTE 
+                {
+                layout = EWaitLayout;
+                singular_label = qtn_lcam_note_saving_images;
+                imagefile = AVKON_ICON_FILE; 
+                imageid = EMbmAvkonQgn_note_progress;
+                imagemask = EMbmAvkonQgn_note_progress_mask;
+                };
+            }
+        };
+    }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_self_timer_menu
+//    Cascade menu option for showing the self-timer periods
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_self_timer_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSelfTimer1;
+            txt = qtn_lcam_st_2_v2;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSelfTimer2;
+            txt = qtn_lcam_st_10_v2;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSelfTimer3;
+            txt = qtn_lcam_st_20_v2;
+            }
+        };
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_still_post_capture_delete_note
+//    Dialog to display delete image confirmation note
+//
+// ---------------------------------------------------
+//
+RESOURCE DIALOG r_cam_still_post_capture_delete_note
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = "";
+                };
+            }
+        };
+    }
+
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_still_post_capture_delete_note_text
+//    Delete confirmation query text.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_still_post_capture_delete_note_text
+    {
+    buf = qtn_lcam_note_delete_photo;
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_timelapse_post_capture_menubar
+//   Menubar for timelapse capture post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_timelapse_post_capture_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_timelapse_post_capture_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_timelapse_post_capture_menu
+//   Options menu for timelapse post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_timelapse_post_capture_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdNewPhoto;
+            txt = qtn_lcam_options_new_photos;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdDelete;
+            txt = qtn_lcam_options_delete;
+            },      
+        MENU_ITEM
+            {
+            command = ECamCmdDeleteSequence;
+            txt = qtn_lcam_options_deleteall;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdPhotos;
+            txt = qtn_lcam_options_go_to_photos;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_still_post_capture_ok_menubar
+//   Ok menubar for still image post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_still_post_capture_ok_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_still_post_capture_ok_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_still_post_capture_ok_menu
+//   Context specific ok options menu for still 
+//   image post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_still_post_capture_ok_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdNewPhoto;
+            txt = qtn_lcam_options_new_photo;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdDelete;
+            txt = qtn_lcam_options_delete;
+            }
+        };
+    }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_still_pre_capture_menu_burst_off_text
+//    Switch to normal mode text
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_still_pre_capture_menu_burst_off_text
+    {
+    buf = qtn_lcam_deact_seq_mode;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_still_scene_setting_title
+//    Title name used in still scene settings view
+//
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_cam_still_scene_setting_title
+     {
+     txt = qtn_lcam_title_text_scenes_phot;
+     }
+
+//----------------------------------------------------
+//   
+//    r_cam_still_sequence_mode_setting_title
+//    Title name used in still sequence mode settings view
+//
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_cam_still_sequence_mode_setting_title
+     {
+     txt = qtn_lcam_selector_title_tl;
+     }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_img_precap_reticule
+//    The size and position of the still reticule
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_reticule 
+		{ 
+		//l = 80; t = 60; W = 160; H = 120; 
+        l = 200; t = 90; W = 240; H = 180;
+
+//    { r = 142 ; t = 106; W = 36; H = 27; }
+		} 
+    
+//-----------------------------------------------------------------------------
+//
+//    r_cam_img_precap_flash_icon
+//    The size and position of flash charging indicator
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_img_precap_flash_icon
+    { r = 249 ; t = 3; W = 16; H = 16; }    
+
+
+
+//----------------------------------------------------
+//   
+//    r_cam_saving_image_wait_note
+//    Wait note shown when saving image after capture
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_cam_processing_wait_note
+    {
+    flags = EAknWaitNoteFlags | EEikDialogFlagNoBackgroundFade;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGenProcessingWaitNote;
+            control = AVKON_NOTE 
+                {
+                layout = EWaitLayout;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                singular_label = qtn_gen_note_processing;
+                };
+            }
+        };
+    }
+
+

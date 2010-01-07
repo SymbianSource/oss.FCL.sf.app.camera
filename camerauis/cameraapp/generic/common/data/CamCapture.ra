@@ -1,0 +1,137 @@
+/*
+* Copyright (c)  Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+//****************************************************************
+// THE FOLLOWING ARE RESOURCES NEEDED BY CAMERA ONLY
+//***************************************************************
+
+#ifndef CAMERAAPP_PLUGIN_BUILD
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_still_pre_capture_menu_primary_camera
+//    Switch to primary camera text
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_pre_capture_menu_primary_camera
+    {
+    buf = qtn_lcam_options_cam1;
+    }
+
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_capture_display_on_text
+//    Turn icons back on
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_capture_display_on_text
+    {
+    buf = qtn_lcam_options_display_on2;
+    }
+
+
+//-----------------------------------------------------------------------------
+// Advanced / novice user mode setting item texts in precapture options menu.
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_precapture_menu_adv_usermode_on_text 
+  {
+  buf = qtn_lcam_options_advanced_ap_on;
+  }
+
+RESOURCE TBUF r_cam_precapture_menu_adv_usermode_off_text 
+  { 
+  buf = qtn_lcam_options_advanced_ap_off;
+  }
+
+#endif //CAMERAAPP_PLUGIN_BUILD
+
+
+// *******************************************************************
+// THE FOLLOWING DEFINITIONS ARE NEEDED FOR BOTH CAMERA AND CAMPLUGIN
+// *******************************************************************
+
+
+// Resolution icon dimensions
+#define KResolutionCIFIconWidth           13
+#define KResolutionCIFIconHeight          11
+#define KResolutionQCIFIconWidth          13
+#define KResolutionQCIFIconHeight         11
+#define KResolution5MPIconWidth           19
+#define KResolution5MPIconHeight          16
+#define KResolutionSQCIFIconWidth         13
+#define KResolutionSQCIFIconHeight        11
+#define KResolutionQXGAIconWidth          19
+#define KResolutionQXGAIconHeight         16
+#define KResolutionUXGAIconWidth          19
+#define KResolutionUXGAIconHeight         16
+#define KResolutionSXGAIconWidth          27
+#define KResolutionSXGAIconHeight         12
+#define KResolutionSVGAIconWidth          24
+#define KResolutionSVGAIconHeight         14
+#define KResolutionVGAIconWidth           19
+#define KResolutionVGAIconHeight          16
+#define KResolutionBurstQXGAIconWidth     19
+#define KResolutionBurstQXGAIconHeight    16
+#define KResolutionBurstUXGAIconWidth     19
+#define KResolutionBurstUXGAIconHeight    16
+#define KResolutionBurstSXGAIconWidth     27
+#define KResolutionBurstSXGAIconHeight    12
+#define KResolutionBurstSVGAIconWidth     19
+#define KResolutionBurstSVGAIconHeight    12
+#define KResolutionBurstVGAIconWidth      19
+#define KResolutionBurstVGAIconHeight     16
+#define KResolutionVideoTVIconWidth       19
+#define KResolutionVideoTVIconHeight      11
+#define KResolutionVideoEmailIconWidth    17
+#define KResolutionVideoEmailIconHeight   11
+#define KResolutionVideoMMSIconWidth      17
+#define KResolutionVideoMMSIconHeight     11
+
+
+// Status indicator icon dimensions
+#define KIndicatorFlashIconWidth            18
+#define KIndicatorFlashIconHeight           18
+#define KIndicatorSelfTimerIconWidth        18
+#define KIndicatorSelfTimerIconHeight       18
+#define KIndicatorBurstModeIconWidth        18
+#define KIndicatorBurstModeIconHeight       18
+#define KIndicatorStabilisationIconWidth    18
+#define KIndicatorStabilisationIconHeight   18
+#define KIndicatorVideoModeIconWidth        11
+#define KIndicatorVideoModeIconHeight       16
+#define KIndicatorSceneIconWidth            26
+#define KIndicatorSceneIconHeight           32
+#define KIndicatorCaptureTypeIconWidth	    23
+#define KIndicatorCaptureTypeIconHeight	    18
+#define KIndicatorShakeWarningIconWidth     18
+#define KIndicatorShakeWarningIconHeight    18
+
+#define KIndicatorAudioMuteIconCCWidth        18
+#define KIndicatorAudioMuteIconCCHeight       18
+#define KIndicatorAudioMuteIconPTWidth        11
+#define KIndicatorAudioMuteIconPTHeight       13
+#define KIndicatorAudioMuteIconVMWidth        11
+#define KIndicatorAudioMuteIconVMHeight       13
+
+// Temp. move unused indicators off-screen
+#define KIndicatorUnusedx           500
+#define KIndicatorUnusedy           500
+

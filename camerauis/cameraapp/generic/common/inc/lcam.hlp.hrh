@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+
+//
+// lcam.hlp.hrh
+//
+
+//
+//
+//
+
+#ifndef __LCAM_HLP_HRH__
+#define __LCAM_HLP_HRH__
+
+
+_LIT( KLCAM_HLP_VIEWFINDER_VIDEO,     "LCAM_HLP_VIEWFINDER_VIDEO"    ); //Video mode viewfinder
+_LIT( KLCAM_HLP_VIEWFINDER_PHOTO,     "LCAM_HLP_VIEWFINDER_PHOTO"    ); //Image mode viewfinder
+_LIT( KLCAM_HLP_POST_VIDEO,           "LCAM_HLP_POST_VIDEO"          ); //Video post-capture view
+_LIT( KLCAM_HLP_POST_PHOTO,           "LCAM_HLP_POST_PHOTO"          ); //Photo post-capture view
+_LIT( KLCAM_HLP_POST_SEQ,             "LCAM_HLP_POST_SEQ"            ); //Photos taken in a sequence post-capture view
+_LIT( KLCAM_HLP_STANDBY_STATE,        "LCAM_HLP_STANDYBY_STATE"      ); //Camera standby view
+_LIT( KLCAM_HLP_STANDYBY_EM,          "LCAM_HLP_STANDBY_EM"          ); //Embedded camera standby view
+_LIT( KLCAM_HLP_VIEWFINDER_VIDEO_EM,  "LCAM_HLP_VIEWFINDER_VIDEO_EM" ); //Record videos in applications
+_LIT( KLCAM_HLP_VIEWFINDER_PHOTO_EM,  "LCAM_HLP_VIEWFINDER_PHOTO_EM" ); //Take photos in applications
+_LIT( KLCAM_HLP_SETTINGS_VIDEO,       "LCAM_HLP_SETTINGS_VIDEO"      ); //Video settings view
+_LIT( KLCAM_HLP_SETTINGS_PHOTO,       "LCAM_HLP_SETTINGS_PHOTO"      ); //Image settings view
+_LIT( KLCAM_HLP_SCENES_VIDEO,         "LCAM_HLP_SCENES_VIDEO"        ); //Video scenes view
+_LIT( KLCAM_HLP_SCENES_PHOTO,         "LCAM_HLP_SCENES_PHOTO"        ); //Photo scenes view
+_LIT( KLCAM_HLP_SETTINGS_PHOUSER,     "LCAM_HLP_SETTINGS_PHOUSER"    ); //User scene setup view
+_LIT( KLCAM_HLP_LIGHT_SENSITIVITY,    "LCAM_HLP_LIGHT_SENSITIVITY"   ); // ISO value setting page
+_LIT( KLCAM_HLP_ADVANCED_SEQUENCE,    "LCAM_HLP_ADVANCED_SEQUENCE"   ); // Advanced sequence mode setting page.
+_LIT( KLCAM_HLP_CUST_TOOLBAR,         "LCAM_HLP_CUST_TOOLBAR"        ); // Customise toolbar view
+_LIT( KLCAM_HLP_SETTINGS,             "LCAM_HLP_SETTINGS"            ); // General settings View
+
+#endif

@@ -1,0 +1,1395 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+#include "CamConstantsCamcorder.hrh"
+
+#define K9FirstColumnCellOffset     34
+#define K9SecondColumnCellOffset    118
+#define K9ThirdColumnCellOffset     202
+#define K9TopRowCellTop             5
+#define K9MiddleRowCellTop          69
+#define K9BottomRowCellTop          133
+#define K9CellWidth                 84
+#define K9CellHeight                64
+#define K9FirstColumnHighOffset     35
+#define K9SecondColumnHighOffset    119
+#define K9ThirdColumnHighOffset     203
+#define K9TopRowHighTop             6
+#define K9MiddleRowHighTop          70
+#define K9BottomRowHighTop          134
+#define K9HighWidth                 82
+#define K9HighHeight                62
+#define K9FirstColumnMarkOffset     106
+#define K9SecondColumnMarkOffset    190
+#define K9ThirdColumnMarkOffset     274
+#define K9TopRowMarkTop             12
+#define K9MiddleRowMarkTop          72
+#define K9BottomRowMarkTop          132
+#define K9MarkWidth                 10
+#define K9MarkHeight                10
+#define K9FirstColumnThumbOffset    36
+#define K9SecondColumnThumbOffset   120
+#define K9ThirdColumnThumbOffset    204
+#define K9TopRowThumbTop            7
+#define K9MiddleRowThumbTop         71
+#define K9BottomRowThumbTop         135
+#define K9ThumbWidth                80
+#define K9ThumbHeight               60
+#define K9ThumbnailWidth            80
+#define K9ThumbnailHeight           60
+#define K6FirstColumnCellOffset     4
+#define K6SecondColumnCellOffset    108
+#define K6ThirdColumnCellOffset     212
+#define K6TopRowCellTop             20
+#define K6BottomRowCellTop          99
+#define K6CellWidth                 104
+#define K6CellHeight                79
+#define K6FirstColumnHighOffset     5
+#define K6SecondColumnHighOffset    109
+#define K6ThirdColumnHighOffset     213
+#define K6TopRowHighTop             21
+#define K6BottomRowHighTop          100
+#define K6HighWidth                 102
+#define K6HighHeight                77
+#define K6FirstColumnMarkOffset     93
+#define K6SecondColumnMarkOffset    197
+#define K6ThirdColumnMarkOffset     301
+#define K6TopRowMarkTop             24
+#define K6BottomRowMarkTop          103
+#define K6MarkWidth                 10
+#define K6MarkHeight                10
+#define K6FirstColumnThumbOffset    6
+#define K6SecondColumnThumbOffset   110
+#define K6ThirdColumnThumbOffset    214
+#define K6TopRowThumbTop            22
+#define K6BottomRowThumbTop         101
+#define K6ThumbWidth                100
+#define K6ThumbHeight               75
+#define K6ThumbnailWidth            100
+#define K6ThumbnailHeight           75
+#define KTimelapseSliderLeft        160
+#define KTimelapseSliderLeftAH      160 //Left positions were identical in original
+#define KTimelapseSliderTop         20
+#define KTimelapseSliderWidth       16
+#define KTimelapseSliderHeight      160
+#define KTimelapseSliderThumbWidth  16
+#define KTimelapseSliderThumbHeight 12
+#define KTimelapseSliderLegendWidth 60
+#define KTimelapseSliderLeftLegendLeft      (0)
+#define KTimelapseSliderLeftLegendLeftAH    (0)
+#define KTimelapseSliderLeftLegendRight     (KTimelapseSliderLeft   + 9)
+#define KTimelapseSliderRightLegendLeft     (KTimelapseSliderLeft   + KTimelapseSliderWidth + 9)
+#define KTimelapseSliderRightLegendLeftAH   (KTimelapseSliderLeftAH + KTimelapseSliderWidth + 9)
+#define KTimelapseSliderRightLegendRight    (0)
+#define KTimelapseSliderLegendSpacing       ( ( KTimelapseSliderHeight - 8 ) / 8)
+#define KSliderLegend1Bottom           (KTimelapseSliderTop + 8)
+#define KSliderLegend2Bottom        (KSliderLegend1Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderLegend3Bottom        (KSliderLegend2Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderLegend4Bottom        (KSliderLegend3Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderLegend5Bottom        (KSliderLegend4Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderLegend6Bottom        (KSliderLegend5Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderLegend7Bottom        (KSliderLegend6Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderLegend8Bottom        (KSliderLegend7Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderLegend9Bottom        (KSliderLegend8Bottom + KTimelapseSliderLegendSpacing)
+#define KSliderWaypointLeft         78
+#define KSliderWaypointRight        150
+
+
+// ---------------------------------------------------
+//
+//    r_cam_burst_delete_multiple_note
+//    Dialog to display delete multiple image 
+//    confirmation note
+//
+// ---------------------------------------------------
+//
+RESOURCE DIALOG r_cam_burst_delete_multiple_note
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = "";
+                };
+            }
+        };
+    }
+
+
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_burst_delete_multiple_note_text
+//    Delete confirmation query text for multiple files
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_burst_delete_multiple_note_text
+    {
+    buf = qtn_fldr_del_items_query;
+    }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_burst_post_capture_grid_array
+//    Array storing the positions of the components in the Burst post-capture
+//    thumbnail grid
+//    NOTE: Cell_rect has to be a pixel wider and higher so adjacent cells
+//          share a border
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_cam_burst_post_capture_grid_array
+    {
+    items= 
+        {
+        CAM_BURST_GRID_ITEM // Cell 0 (top left)
+            {                                                   
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnCellOffset; t=K9TopRowCellTop; W=K9CellWidth; H=K9CellHeight; 
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnHighOffset; t=K9TopRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnMarkOffset; t=K9TopRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnThumbOffset; t=K9TopRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 1 (top middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnCellOffset; t=K9TopRowCellTop; W=K9CellWidth; H=K9CellHeight; 
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnHighOffset; t=K9TopRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnMarkOffset; t=K9TopRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnThumbOffset; t=K9TopRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 2 (top right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnCellOffset; t=K9TopRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnHighOffset; t=K9TopRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnMarkOffset; t=K9TopRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnThumbOffset; t=K9TopRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 3 (middle left)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnCellOffset; t=K9MiddleRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnHighOffset; t=K9MiddleRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnMarkOffset; t=K9MiddleRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnThumbOffset; t=K9MiddleRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 4 (middle middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnCellOffset; t=K9MiddleRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnHighOffset; t=K9MiddleRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnMarkOffset; t=K9MiddleRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnThumbOffset; t=K9MiddleRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 5 (middle right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnCellOffset; t=K9MiddleRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnHighOffset; t=K9MiddleRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnMarkOffset; t=K9MiddleRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnThumbOffset; t=K9MiddleRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 6 (bottom left)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnCellOffset; t=K9BottomRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnHighOffset; t=K9BottomRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnMarkOffset; t=K9BottomRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9FirstColumnThumbOffset; t=K9BottomRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 7 (bottom middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnCellOffset; t=K9BottomRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnHighOffset; t=K9BottomRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnMarkOffset; t=K9BottomRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9SecondColumnThumbOffset; t=K9BottomRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 8 (bottom right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnCellOffset; t=K9BottomRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnHighOffset; t=K9BottomRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnMarkOffset; t=K9BottomRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K9ThirdColumnThumbOffset; t=K9BottomRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            }
+        };
+    }
+
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_burst_post_capture_grid_array_ah
+//    Array storing the positions of the components in the Burst post-capture
+//    thumbnail grid (Arabic/Hebrew version)
+//    NOTE: Cell_rect has to be a pixel wider and higher so adjacent cells
+//          share a border
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_cam_burst_post_capture_grid_array_ah
+    {
+    items= 
+        {
+        CAM_BURST_GRID_ITEM // Cell 0 (top right)
+            {                                                   
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnCellOffset; t=K9TopRowCellTop; W=K9CellWidth; H=K9CellHeight; 
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnHighOffset; t=K9TopRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnMarkOffset; t=K9TopRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnThumbOffset; t=K9TopRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 1 (top middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnCellOffset; t=K9TopRowCellTop; W=K9CellWidth; H=K9CellHeight; 
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnHighOffset; t=K9TopRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnMarkOffset; t=K9TopRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnThumbOffset; t=K9TopRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 2 (top left)
+           {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnCellOffset; t=K9TopRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnHighOffset; t=K9TopRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnMarkOffset; t=K9TopRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnThumbOffset; t=K9TopRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 3 (middle left)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnCellOffset; t=K9MiddleRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnHighOffset; t=K9MiddleRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnMarkOffset; t=K9MiddleRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnThumbOffset; t=K9MiddleRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 4 (middle middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnCellOffset; t=K9MiddleRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnHighOffset; t=K9MiddleRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnMarkOffset; t=K9MiddleRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnThumbOffset; t=K9MiddleRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 5 (middle right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnCellOffset; t=K9MiddleRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnHighOffset; t=K9MiddleRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnMarkOffset; t=K9MiddleRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnThumbOffset; t=K9MiddleRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 6 (bottom left)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnCellOffset; t=K9BottomRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnHighOffset; t=K9BottomRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnMarkOffset; t=K9BottomRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9FirstColumnThumbOffset; t=K9BottomRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 7 (bottom middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnCellOffset; t=K9BottomRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnHighOffset; t=K9BottomRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnMarkOffset; t=K9BottomRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9SecondColumnThumbOffset; t=K9BottomRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 8 (bottom right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnCellOffset; t=K9BottomRowCellTop;  W=K9CellWidth; H=K9CellHeight; 
+                };
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnHighOffset; t=K9BottomRowHighTop; W=K9HighWidth; H=K9HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnMarkOffset; t=K9BottomRowMarkTop; W=K9MarkWidth; H=K9MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K9ThirdColumnThumbOffset; t=K9BottomRowThumbTop; W=K9ThumbWidth; H=K9ThumbHeight; 
+                };
+            }
+        };
+    }
+
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_burst_post_capture_grid_array_upto_six
+//    Array storing the positions of the components in the Burst post-capture
+//    thumbnail grid
+//    NOTE: Cell_rect has to be a pixel wider and higher so adjacent cells
+//          share a border
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_cam_burst_post_capture_grid_array_upto_six
+    {
+    items= 
+        {
+        CAM_BURST_GRID_ITEM // Cell 0 (top left)
+            {                                                   
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnCellOffset; t=K6TopRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnHighOffset; t=K6TopRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnMarkOffset; t=K6TopRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnThumbOffset; t=K6TopRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 1 (top middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnCellOffset; t=K6TopRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnHighOffset; t=K6TopRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnMarkOffset; t=K6TopRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnThumbOffset; t=K6TopRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 2 (top right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnCellOffset; t=K6TopRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnHighOffset; t=K6TopRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnMarkOffset; t=K6TopRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnThumbOffset; t=K6TopRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 3 (bottom left)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnCellOffset; t=K6BottomRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnHighOffset; t=K6BottomRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnMarkOffset; t=K6BottomRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6FirstColumnThumbOffset; t=K6BottomRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 4 (bottom middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnCellOffset; t=K6BottomRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnHighOffset; t=K6BottomRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnMarkOffset; t=K6BottomRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6SecondColumnThumbOffset; t=K6BottomRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 5 (bottom right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnCellOffset; t=K6BottomRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnHighOffset; t=K6BottomRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnMarkOffset; t=K6BottomRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                l=K6ThirdColumnThumbOffset; t=K6BottomRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            }
+        };
+    }
+
+
+
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_burst_post_capture_grid_array_upto_six_ah
+//    Array storing the positions of the components in the Burst post-capture
+//    thumbnail grid
+//    NOTE: Cell_rect has to be a pixel wider and higher so adjacent cells
+//          share a border
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_cam_burst_post_capture_grid_array_upto_six_ah
+    {
+    items= 
+        {
+        CAM_BURST_GRID_ITEM // Cell 0 (top right)
+            {                                                   
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnCellOffset; t=K6TopRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnHighOffset; t=K6TopRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnMarkOffset; t=K6TopRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnThumbOffset; t=K6TopRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 1 (top middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnCellOffset; t=K6TopRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnHighOffset; t=K6TopRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnMarkOffset; t=K6TopRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnThumbOffset; t=K6TopRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 2 (top left)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnCellOffset; t=K6TopRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnHighOffset; t=K6TopRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnMarkOffset; t=K6TopRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnThumbOffset; t=K6TopRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+
+        CAM_BURST_GRID_ITEM // Cell 3 (bottom right)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnCellOffset; t=K6BottomRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnHighOffset; t=K6BottomRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnMarkOffset; t=K6BottomRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6FirstColumnThumbOffset; t=K6BottomRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 4 (bottom middle)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnCellOffset; t=K6BottomRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnHighOffset; t=K6BottomRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnMarkOffset; t=K6BottomRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6SecondColumnThumbOffset; t=K6BottomRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            },
+        CAM_BURST_GRID_ITEM // Cell 5 (bottom left)
+            {
+            cell_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnCellOffset; t=K6BottomRowCellTop; W=K6CellWidth; H=K6CellHeight;  
+                }; 
+            high_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnHighOffset; t=K6BottomRowHighTop; W=K6HighWidth; H=K6HighHeight; 
+                };
+            mark_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnMarkOffset; t=K6BottomRowMarkTop; W=K6MarkWidth; H=K6MarkHeight; 
+                };
+            thmb_rect = AVKON_LAYOUT_RECT 
+                { 
+                r=K6ThirdColumnThumbOffset; t=K6BottomRowThumbTop; W=K6ThumbWidth; H=K6ThumbHeight; 
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_burst_post_capture_grid_scrollbar_position
+//    Position of the scroll bar when more than 6 grid items on screen.
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_burst_post_capture_grid_scrollbar_position
+    { 
+    l = 315;  
+    t = 0;
+    W = 16; 
+    H = KCentralPaneHeightCC; 
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_burst_post_capture_grid_scrollbar_position_ah
+//    Position of the scroll bar when more than 6 grid items on screen.
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_burst_post_capture_grid_scrollbar_position_ah
+    { 
+    l = 5;  
+    t = 0;
+    W = 16; 
+    H = KCentralPaneHeightCC; 
+    }
+
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_burst_post_capture_thumb_size
+//    The size of thumbnail images (in pixels) to be shown by burst thumbnail 
+//    grid control
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE CAM_RECT_SIZE r_cam_burst_post_capture_thumb_size
+    { 
+    width  = K6ThumbnailWidth; 
+    height = K6ThumbnailHeight; 
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_burst_thumbnail_menubar
+//   Menubar for burst thumbnail view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_burst_thumbnail_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_burst_thumbnail_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_burst_thumbnail_menu
+//   Options menu for burst thumbnail view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_burst_thumbnail_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdOpenPhoto;
+            txt = qtn_lcam_options_open_photo;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSend;
+            txt = qtn_options_send_via;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSendToCallerMultimedia;
+            txt = qtn_lcam_options_send_to_call;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdDelete;
+            txt = qtn_lcam_options_delete;
+            },
+        MENU_ITEM
+            {
+            command = KAiwCmdAssign;
+            txt     = qtn_lcam_use_image_postcapture_menu;
+            cascade = AIW_INTELLIGENT_CASCADE_ID; 
+            },         
+        MENU_ITEM
+            {
+            command = ECamCmdShareOnOvi;
+            // AIW provider fills the menu item title.
+            // No submenu, only 1 provider acccepted.
+            txt     = "";
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdPhotos;
+            txt = qtn_lcam_options_go_to_photos;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdMarkUnmarkMenu;
+            txt = qtn_options_list;
+            cascade = R_AVKON_MENUPANE_MARKABLE_LIST_IMPLEMENTATION;
+            },            
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_burst_thumbnail_ok_menubar
+//   Ok menubar for burst thumbnail grid view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_burst_thumbnail_ok_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_burst_thumbnail_ok_menu;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_burst_thumbnail_ok_menu
+//   Context specific ok options menu for burst
+//   thumbnail grid view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_burst_thumbnail_ok_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdDelete;
+            txt = qtn_lcam_options_delete;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSend;
+            txt = qtn_options_send_via;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSendToCallerMultimedia;
+            txt = qtn_lcam_options_send_to_call;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdMarkUnmarkMenu;
+            txt = qtn_options_list;
+            cascade = R_AVKON_MENUPANE_MARKABLE_LIST_IMPLEMENTATION;
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_burst_thumbnail_view
+//    Thumbnail view after burst capture
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_cam_burst_thumbnail_view
+    {
+    menubar = r_cam_burst_thumbnail_menubar;
+    cba = R_CAM_SOFTKEYS_OPTIONS_BACK__SELECT;
+    toolbar = r_cam_burst_postcapture_toolbar;
+    }
+
+
+// ---------------------------------------------------
+//
+//    r_cam_timelapse_image_text_layout
+//    Layout for captured and remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_timelapse_image_text_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=26; B=234; W=100; J=ELayoutAlignLeft;
+    // font = EAknLogicalFontSecondaryFont; C=0; l=296; r=224; B=234; W=32; J=ELayoutAlignLeft;
+    }
+    
+// ---------------------------------------------------
+//
+//    r_cam_timelapse_image_text_layout_ah_camcorder
+//    Arabic/Hebrew layout for captured and remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_timelapse_image_text_layout_ah
+    {
+    //font = EAknLogicalFontSecondaryFont; C=0; l=26; B=234; W=100; J=ELayoutAlignLeft;
+    font = EAknLogicalFontSecondaryFont; C=0; l=45; B=234; W=100; J=ELayoutAlignLeft;
+    }    
+
+// ---------------------------------------------------
+//
+//    r_cam_timelapse_countdown_text_layout
+//    Layout for remaining time till next timelapse capture
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_timelapse_countdown_text_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=130; B=234; W=100; J=ELayoutAlignLeft;
+    // font = EAknLogicalFontSecondaryFont; C=0; l=224; r=174; B=234; W=45; J=ELayoutAlignLeft;
+    }  
+    
+// ---------------------------------------------------
+//
+//    r_cam_timelapse_countdown_text_layout_ah_camcorder
+//    Arabic/Hebrew layout for remaining time till next timelapse capture
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_timelapse_countdown_text_layout_ah
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=130; B=234; W=100; J=ELayoutAlignLeft;
+    }      
+    
+// ---------------------------------------------------
+//
+//    r_cam_timelapse_captured_text_layout
+//    Layout for count of captured images in post capture view
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_timelapse_captured_text_layout
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=20; B=234; W=100; J=ELayoutAlignLeft;
+    }  
+    
+// ---------------------------------------------------
+//
+//    r_cam_timelapse_captured_text_layout_ah
+//    Arabic/Hebrew layout for count of captured images in post capture view
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_timelapse_captured_text_layout_ah
+    {
+    //font = EAknLogicalFontSecondaryFont; C=0; l=20; B=234; W=100; J=ELayoutAlignLeft;
+    font = EAknLogicalFontSecondaryFont; C=0; l=22; B=234; W=100; J=ELayoutAlignLeft;
+    }      
+    
+// ---------------------------------------------------------
+//   
+//   r_cam_timelapse_in_capture_navicounter_decorations
+//   Decorations for the navicounter during timelapse capture
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_timelapse_in_capture_navicounter_decorations
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x  = 0;   // 20; // 0
+					tl_y  = 219; // 220;
+					width = 180; //220; // 200;
+					}
+				};
+			}
+		};
+	}
+	
+// ---------------------------------------------------------
+//   
+//   r_cam_timelapse_post_capture_navicounter_decorations
+//   Decorations for the navicounter in timelapse post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE CAM_DECORATIONS r_cam_timelapse_post_capture_navicounter_decorations
+	{
+	decorations = 
+		{
+		CAM_DECORATION
+			{
+			type = ECamScreenDecorationBlendedBackground;
+			decoration = 
+				{
+				CAM_BLENDED_BACKGROUND
+					{
+					tl_x  = 0;   
+					tl_y  = 219; 
+					width = 167;
+					}
+				};
+			}
+		};
+	}
+	
+//----------------------------------------------------
+//   
+//    r_cam_timelapse_images_captured
+//    String for the count of captured images in timelapse 
+//    postcapture view
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_timelapse_images_captured
+    {
+    buf = qtn_lcam_images_captured;
+    }		
+    
+//----------------------------------------------------
+//   
+//    r_cam_timelapse_countdown_time
+//    String for the remaining time till next capture
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_timelapse_countdown_time
+    {
+    buf = qtn_lcam_time_cap;
+    }    
+
+//----------------------------------------------------
+//   
+//    r_cam_sequence_icon_rect
+//    Position of the sequence capture icon 
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_sequence_icon_rect
+    { 
+    r = 199;
+    // Background top at 219
+    // Background height 20
+    // Icon height 16
+    // => Icon top at 219 + (20/2 - 16/2) = 221 when centered
+    t = 221;
+    W = 16; 
+    H = 16; 
+    }  
+    
+//----------------------------------------------------
+//   
+//    r_cam_sequence_icon_rect_ah
+//    Position of the sequence capture icon 
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_sequence_icon_rect_ah
+    { 
+    //l = 5;
+    r = 280;
+    t = 221;
+    W = 16;
+    H = 16;
+    }       
+    
+//----------------------------------------------------
+//
+//    r_cam_time_lapse_title
+//    Time lapse slider title string
+//
+//----------------------------------------------------
+RESOURCE TITLE_PANE r_cam_time_lapse_title
+     {
+     txt = qtn_lcam_selector_title_tl; //qtn_lcam_title_tl;
+     }        
+    
+     
+    
+// Time lapse listbox
+RESOURCE ARRAY r_cam_capture_setup_list_sequence_mode
+    {
+    items=
+        {
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_adv_seq_off;
+            setting_value_id = ECamTimeLapseOff;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence;
+            },
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_burst;
+            setting_value_id = ECamTimeLapseMin;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_burst;
+            },
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_seq_5secs;
+            setting_value_id = ECamTimeLapse5sec;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_5s;
+            },            
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_seq_10secs;
+            setting_value_id = ECamTimeLapse10sec;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_10s;
+            },
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_seq_30secs;
+            setting_value_id = ECamTimeLapse30sec;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_30s;
+            },
+        CAPTURE_SETUP_LIST_ITEM    
+            {
+            item_text = qtn_lcam_set_seq_1min;
+            setting_value_id = ECamTimeLapse1min;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_1min;
+            },  
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_seq_5min;
+            setting_value_id = ECamTimeLapse5min;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_5min;
+            },                               
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_seq_10min;
+            setting_value_id = ECamTimeLapse10min;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_10min;
+            },                                                        
+        CAPTURE_SETUP_LIST_ITEM
+            {
+            item_text = qtn_lcam_set_seq_30min;
+            setting_value_id = ECamTimeLapse30min;
+            bitmap_id = EMbmCameraappQgn_indi_cam4_sequence_30min;
+            }  
+        };
+    }
+    
+RESOURCE ARRAY r_cam_capture_setup_list_sequence_mode_summary
+    {
+    items =
+        {
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapseOff;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence;
+            summary_title_text = qtn_lcam_set_adv_seq_off;
+            summary_description_text = qtn_lcam_set_adv_seq_off_ex;
+            },
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapseMin;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_burst;
+            summary_title_text = qtn_lcam_set_burst;
+            summary_description_text = qtn_lcam_set_burst2_ex;
+            },
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapse5sec;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_5s;
+            summary_title_text = qtn_lcam_set_seq_5secs;
+            summary_description_text = qtn_lcam_set_seq_5secs_ex;
+            },               
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapse10sec;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_10s;
+            summary_title_text = qtn_lcam_set_seq_10secs;
+            summary_description_text = qtn_lcam_set_seq_10secs_ex;
+            },                     
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapse30sec;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_30s;
+            summary_title_text = qtn_lcam_set_seq_30secs;
+            summary_description_text = qtn_lcam_set_seq_30secs_ex;
+            },
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapse1min;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_1min;
+            summary_title_text = qtn_lcam_set_seq_1min;
+            summary_description_text = qtn_lcam_set_seq_1min_ex;
+            },
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapse5min;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_5min;
+            summary_title_text = qtn_lcam_set_seq_5min;
+            summary_description_text = qtn_lcam_set_seq_5min_ex;
+            },                        
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapse10min;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_10min;
+            summary_title_text = qtn_lcam_set_seq_10min;
+            summary_description_text = qtn_lcam_set_seq_10min_ex;
+            },
+        CAM_MODE_SELECT_SUMMARY
+            {
+            setting_value_id = ECamTimeLapse30min;
+            summary_icon = EMbmCameraappQgn_indi_cam4_sequence_30min;
+            summary_title_text = qtn_lcam_set_seq_30min;
+            summary_description_text = qtn_lcam_set_seq_30min_ex;
+            }            
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_infolistbox_menubar
+//   Menubar for InfoListBox
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_infolistbox_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_infolistbox_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_scene_infolistbox_menu
+//   Options menu for InfoListBox
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_infolistbox_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSelect;
+            txt = qtn_lcam_options_select;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }            
+    

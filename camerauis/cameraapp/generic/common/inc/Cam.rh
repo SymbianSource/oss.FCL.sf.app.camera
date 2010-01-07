@@ -1,0 +1,724 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource STRUCT definitions specifically for the camera*
+*/
+
+
+
+//  INCLUDES
+#include "Cam.hrh"
+#include "CamSettings.hrh"
+#include "CamSettingsInternal.hrh"
+ 
+
+
+//  MACROS  
+
+
+//  STRUCTURE DEFINITIONS
+
+
+#ifndef CAMERAAPP_PLUGIN_BUILD
+
+//****************************************************
+// REMEMBER ALL THE RESOURCES SPECIFIC TO CAMERA ONLY
+//****************************************************
+//----------------------------------------------------
+//   
+//    CAM_DYNAMIC_SETTING_ITEM_DATA
+//    The initialisation data for a dynamic setting item. 
+//
+//----------------------------------------------------
+//
+STRUCT CAM_DYNAMIC_SETTING_ITEM_DATA
+    {
+    // Settings model Id for this item.
+    WORD id;              
+    
+    // Default value.
+    WORD default;
+    }
+
+#endif //CAMERAAPP_PLUGIN_BUILD
+
+
+
+//****************************************************************
+// REMEMBER ALL THE RESOURCES BELOW ARE FOR BOTH CAMERA AND PLUGIN
+//****************************************************************
+
+// -----------------------------------------------------------------------------
+// CAMERA_BITMAP
+// This structure is for defining the bitmaps of a sidepane indicator.
+// -----------------------------------------------------------------------------
+//
+STRUCT CAMERA_BITMAP
+    {
+    LONG bitmap_id;
+    }
+
+// -----------------------------------------------------------------------------
+// CAMERA_INDICATOR_COORDS
+// This structure is for defining the position of a side pane indicator.
+// -----------------------------------------------------------------------------
+//
+STRUCT CAMERA_INDICATOR_COORDS
+    {
+    WORD tl_x;    // top left x co-ordinate
+    WORD tl_y;    // top left y co-ordinate
+    WORD br_x;    // bottom right x co-ordinate
+    WORD br_y;    // bottom right y co-ordinate
+    }
+
+// -----------------------------------------------------------------------------
+// CAMERA_INDICATOR
+// This structure is for defining a side pane indicator. 
+// -----------------------------------------------------------------------------
+//
+STRUCT CAMERA_INDICATOR
+    {
+    WORD indicator_id;
+    STRUCT coords; 
+    STRUCT bitmaps[];
+    }
+
+// -----------------------------------------------------------------------------
+// CAMERA_SIDEPANE
+// This structure is for defining a camera side pane.
+// -----------------------------------------------------------------------------
+//
+STRUCT CAMERA_SIDEPANE
+    {
+    STRUCT indicators[];
+    }
+
+// -----------------------------------------------------------------------------
+// CAPTURE_SETUP_LIST_ITEM
+// This structure is for defining a list item in a capture
+// set-up list control
+// -----------------------------------------------------------------------------
+//
+STRUCT CAPTURE_SETUP_LIST_ITEM
+    {
+    LTEXT item_text;
+    WORD setting_value_id;
+    LONG bitmap_id = -1; // no bitmap
+    }
+
+// -----------------------------------------------------------------------------
+// LOCATION_SETTING_LIST_ITEM
+// This structure is for defining a list item in a location
+// set-up list control
+// -----------------------------------------------------------------------------
+//
+STRUCT LOCATION_SETTING_LIST_ITEM
+    {
+    LTEXT item_text;
+    WORD setting_value_id;
+    LONG bitmap_id = -1; // no bitmap
+    }
+
+STRUCT CAM_LOCATION_SELECT_SUMMARY
+    {
+    WORD setting_value_id;
+    LONG summary_icon = -1;
+    LTEXT summary_description_text;
+    }
+    
+STRUCT CAM_LOCATION_SELECT_SUMMARY_LAYOUT
+    {
+    STRUCT summary_rect;
+    STRUCT summary_inner_rect;
+    STRUCT summary_icon;
+    STRUCT summary_description[];
+    }
+
+
+
+//----------------------------------------------------
+//   
+//    CAM_CAPTURE_SETUP_MENU_DATA
+//    All the contents and layout data for a capture setup menu. 
+//
+//----------------------------------------------------
+//
+STRUCT CAM_CAPTURE_SETUP_MENU_DATA
+    {
+	// Data for the layout of the listbox.
+	STRUCT listbox_layout;
+    // Data for the list box item contents.
+    STRUCT contents[]; 
+	// Data for the layout of the text items in the listbox.
+	STRUCT text_layout;
+	// Data for the layout of the bitmaps in the list box.
+	STRUCT bitmap_layout;
+	// Data for icon text layout.
+	STRUCT icontext_layout;
+	// The offset of the highlighted rectangle (when list item selected)
+	// from the normal rectangle of a list item.
+	WORD highlighted_offset;
+	// The height of a list item.
+	WORD list_item_height;
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_CAPTURE_SETUP_MENU_ITEM_REF
+//    Reference to a capture setup menu item.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_CAPTURE_SETUP_MENU_ITEM_REF
+    {
+	LLINK capture_setup_menu_item_ref = 0;
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_CAPTURE_SETUP_MENU_ITEM_ARRAY
+//    Array of all data for a capture setup menu item
+//
+//----------------------------------------------------
+//
+STRUCT CAM_CAPTURE_SETUP_MENU_ITEM_ARRAY
+    {
+	// Settings model Id for this setting item
+	WORD id;
+
+	// Text for this capture setup menu item.
+	LTEXT text;
+
+    // Data for a capture setup menu item
+    STRUCT capture_setup_menu_item[]; 
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_CAPTURE_SETUP_MENU_ITEM_DATA
+//    Data for a single setting of a capture setup menu item.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_CAPTURE_SETUP_MENU_ITEM_DATA
+    {
+    // Id for this setting value
+    WORD id;              
+    
+    // Id of the bitmap that is associated with this setting value (-1 default = none).
+    WORD bitmap = -1;
+
+    // Text to be used instead of an icon for this setting value ("" default = none).
+	LTEXT icontext = "";
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_CAPTURE_SETUP_MENU_LISTBOX
+//    Data for capture setup menu listbox
+//
+//----------------------------------------------------
+//
+STRUCT CAM_CAPTURE_SETUP_MENU_LISTBOX
+    {
+    WORD bottomOffset;  // vertical distance from bottom of screen of capture setup menu
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_CAPTURE_SETUP_MENU_LISTBOX
+//    Data for capture setup menu listbox
+//
+//----------------------------------------------------
+//
+STRUCT CAM_CAPTURE_SETUP_MENU_LISTBOX_ITEMDRAWER
+    {
+    WORD textWidth;     // width of the area allocated to drawing text, in pixels
+    WORD bitmapWidth;   // width of the area allocated to drawing bitmaps, in pixels
+    WORD itemVerticalMargin;
+    WORD highlightOffset;
+    WORD textLeftMargin;
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    CAM_BURST_GRID_ITEM
+//    Data for drawing of the Burst capture Thumbnail grid
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_BURST_GRID_ITEM
+    {
+    STRUCT cell_rect;    // outline rectangle for each cell in the grid
+    STRUCT high_rect;    // outline rectangle for the cell highlight
+    STRUCT mark_rect;    // outline rectangle for the "mark" of the cell
+    STRUCT thmb_rect;    // outline rectangle for the thumbnail draw area
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    CAM_RECT_SIZE
+//    
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_RECT_SIZE
+    {
+    WORD   width;   
+    WORD   height;  
+    }
+  
+// -----------------------------------------------------------------------------
+//
+//    CAM_SLIDER_EV_ITEM
+//    Data for drawing of the EV Slider legend
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_SLIDER_EV_ITEM
+    {
+	WORD item = ECamSliderLegendItemText;
+	LTEXT text = ""; 
+	LONG bitmap_id = 0;
+	LONG mask_id = 0;     
+    }
+
+// -----------------------------------------------------------------------------
+//
+//    CAM_SLIDER_LEGEND_ITEM
+//    Data for drawing of the Slider legend
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_SLIDER_LEGEND_ITEM
+    {
+	WORD item = ECamSliderLegendItemText;
+    STRUCT position;  
+	LTEXT  text = ""; 
+	LONG bitmap_id = 0;
+	LONG mask_id = 0;
+    }
+
+
+// -----------------------------------------------------------------------------
+//
+//    CAM_SLIDER_CONTRAST_LEGEND_ITEM
+//    Data for drawing of the Slider legend for Contrast
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_SLIDER_CONTRAST_LEGEND_ITEM
+    {
+	WORD item = ECamSliderLegendItemText;
+	LTEXT  text = ""; 
+	LONG bitmap_id = 0;
+	LONG mask_id = 0;
+    }
+
+
+//----------------------------------------------------
+//   
+//    CAM_USER_SCENE_SETUP_LIST_DATA
+//    Data for a user scene setup list
+//
+//----------------------------------------------------
+//
+STRUCT CAM_USER_SCENE_SETUP_LIST_DATA
+    {
+    // List title
+	LLINK title_id = 0;
+
+	// Array of all items for a user scene setup list 
+    STRUCT user_scene_setup_list_items[]; 
+    }
+
+
+//----------------------------------------------------
+//   
+//    CAM_USER_SCENE_SETUP_LIST_ITEM_REF
+//    Reference to a user scene setup list item.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_USER_SCENE_SETUP_LIST_ITEM_REF
+    {
+	LLINK user_scene_setup_list_item_ref = 0;
+    }
+
+
+//----------------------------------------------------
+//   
+//    CAM_USER_SCENE_SETUP_LIST_ITEM_DATA
+//    All data for an item in the user scene list item.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_USER_SCENE_SETUP_LIST_ITEM_DATA
+    {
+	// Settings model Id for the setting type associated with this item
+	// e.g. white balance, or colour effect.
+	WORD id;
+
+	// Text associated with the setting type.
+	LTEXT text;
+
+    // Array of all possible values for this user scene setup list item
+    STRUCT user_scene_setup_list_item_values[]; 
+    }
+
+
+//----------------------------------------------------
+//   
+//    CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+//    A possible value, and associated text 
+//    for an item of the user scene setup list.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+    {
+    // Settings model Id for this user setup scene list item value
+    WORD id;              
+    
+    // Associated text with the user setup scene list item value.
+    LTEXT text;
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_STATIC_SETTING_ITEM_DATA
+//    The initialisation data for a static setting item. 
+//
+//----------------------------------------------------
+//
+STRUCT CAM_STATIC_SETTING_ITEM_DATA
+    {
+    // Settings model Id for this item.
+    WORD id;              
+    
+	// The shared data key for the item.
+	LTEXT key;
+
+    // Default value, if there is no value in shared data.
+    //WORD default;
+
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_SETTING_ITEMS_DEFAULT_DATA
+//    Default values for a list of settings items.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_SETTING_ITEMS_DEFAULT_DATA
+    {
+    // Array of all possible values for this user scene setup list item
+    STRUCT settings_default_values[]; 
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_NON_STATIC_SETTING_ITEM_DATA
+//    The data for a non-static setting item. 
+//
+//----------------------------------------------------
+//
+STRUCT CAM_NON_STATIC_SETTING_ITEM_DATA
+    {
+    // Settings model Id for this item.
+    WORD id;              
+    
+    // Default value.
+    WORD default;
+    }
+
+
+
+//----------------------------------------------------
+//   
+//    CAM_SCENE_SETTING_ITEM_DATA
+//    The data for a scene setting item. 
+//
+//----------------------------------------------------
+//
+STRUCT CAM_SCENE_SETTING_ITEM_DATA
+    {
+    // Settings model Id for this scene item.
+    WORD id;              
+
+    // Array of settings for this scene item
+    STRUCT scene_items[]; 
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_SCENE_SETTINGS_DATA_REF
+//    Reference to a scene's settings data.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_SCENE_SETTINGS_DATA_REF
+    {
+	LLINK scene_settings_data_ref = 0;
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_SETTING_ITEMS_DATA
+//    Data for a list of settings items.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_SCENE_SETTING_DATA
+    {
+	WORD scene_item_id;
+    // Array of setting items data.
+    STRUCT settings_items[]; 
+    }
+
+
+//----------------------------------------------------
+//   
+//    CAM_SETTING_ITEMS_DATA
+//    Data for a list of settings items.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_SETTING_ITEMS_DATA
+    {
+    // Array of setting items data.
+    STRUCT settings_items[]; 
+    }
+
+// -----------------------------------------------------------------------------
+// CAM_ENGINE_UPDATE
+// This structure is for defining whether the engine needs to be updated with
+// settings after a prepare.
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_ENGINE_UPDATE
+    {
+    WORD update;    
+	}
+
+// -----------------------------------------------------------------------------
+// CAM_VIDEO_QUALITY_LEVEL
+// Structure holding parameters for video quality setting item
+// 
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_VIDEO_QUALITY_LEVEL
+    {
+    // Id for this quality level 
+    WORD id;              
+    
+    // Id of the resolution to use (may be overridden by separate
+    // resolution setting)
+    WORD resolution;
+
+    // Target frame rate of video (frames per second)
+    DOUBLE frame_rate;         
+
+    // Desired bit rate of video (bits per second)
+    LONG bit_rate;
+
+    // Desired bit rate of audio (bits per second)
+    LONG audio_bit_rate;
+
+    // Mime type for video. If not specified, the value in shared data
+    // (101F8667.ini) is used.
+    LTEXT mime_type = "";
+        
+    // Preferred supplier for MMF camcorder plugin. If not specified, the
+    // value in shared data (101F8667.ini) is used.
+    LTEXT16 preferred_supplier = "";
+
+    // Video codec. If not specified, the
+    // value in shared data (101F8667.ini) is used.
+    LTEXT video_type = "";
+
+    // Audio codec (FOURCC). If not specified, the
+    // value in shared data (101F8667.ini) is used.
+    LTEXT audio_type = "";
+
+    // video file type id
+    WORD file_type = ECamVideoMpeg4;
+
+    // video length (long or short)
+    WORD video_length = ECamVideoClipMax;
+    //
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_VIDEO_QUALITY_ARRAY
+//    Array of all video quality levels
+//
+//----------------------------------------------------
+//
+STRUCT CAM_VIDEO_QUALITY_ARRAY
+    {
+    // Data for all quality levels
+    STRUCT quality_levels[]; 
+    }
+
+// -----------------------------------------------------------------------------
+// CAM_PHOTO_QUALITY_LEVEL
+// Structure holding parameters for photo quality setting item
+// 
+// -----------------------------------------------------------------------------
+//
+STRUCT CAM_PHOTO_QUALITY_LEVEL
+    {
+    // Id for this quality level 
+    WORD id;              
+    
+    // Id of the resolution to use (may be overridden by separate
+    // resolution setting)
+    WORD resolution;
+
+    // Photo quality
+    WORD quality;
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_PHOTO_QUALITY_ARRAY
+//    Array of all photo quality levels
+//
+//----------------------------------------------------
+//
+STRUCT CAM_PHOTO_QUALITY_ARRAY
+    {
+    // Data for all quality levels
+    STRUCT quality_levels[]; 
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_RESOLUTION
+//    Numeric data for a photo/video resolution preset.
+//
+//----------------------------------------------------
+//
+STRUCT CAM_RESOLUTION
+    {
+    WORD width;
+    WORD height;
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_RESOLUTION_ARRAY
+//    Array of all photo/video resolutions
+//
+//----------------------------------------------------
+//
+STRUCT CAM_RESOLUTION_ARRAY
+    {
+    // Data for video resolutions
+    STRUCT resolutions[]; 
+    }
+
+//----------------------------------------------------
+//   
+//    CAM_QUALITY_SLIDER
+//    Text strings for quality slider control
+//
+//----------------------------------------------------
+//
+STRUCT CAM_QUALITY_SLIDER
+	{
+	LTEXT title_text = "";
+	LTEXT subtitle_text_top = "";
+	LTEXT subtitle_text_bottom = "";
+	LTEXT remaining_text = "";
+	STRUCT setting_title_texts[];
+	STRUCT setting_desc_texts[];
+    WORD setting_enum[];
+	}
+
+//----------------------------------------------------
+//   
+//    CAM_QUALITY_SLIDER_LAYOUT
+//    Layouts for quality slider control
+//
+//----------------------------------------------------
+//
+STRUCT CAM_QUALITY_SLIDER_LAYOUT
+	{
+	STRUCT slider_position;
+	STRUCT subtitle_top;
+	STRUCT subtitle_bottom;
+	STRUCT setting_title;
+	STRUCT setting_descriptions[];
+	STRUCT remaining_title;
+	STRUCT remaining_text;
+	STRUCT storage_icon;
+	STRUCT desc_rect;
+	STRUCT desc_inner_rect1;
+	STRUCT desc_inner_rect2;
+	}
+	
+STRUCT CAM_DECORATIONS
+	{
+	STRUCT decorations[];
+	}
+
+STRUCT CAM_DECORATION
+	{
+	WORD type;
+	STRUCT decoration;
+	}
+
+STRUCT CAM_BLENDED_BACKGROUND
+	{
+	WORD tl_x;
+	WORD tl_y;
+	WORD width;
+	}
+
+STRUCT CAM_DVF_BLANKER
+	{
+	WORD tl_x;
+	WORD tl_y;
+	WORD width;
+	WORD height;
+	}
+
+STRUCT CAM_RECORDING_ICON
+	{
+	WORD tl_x;
+	WORD tl_y;
+	WORD width;
+	WORD height;
+	}
+
+#include "CamModeSelect.rh"
+
+STRUCT CAM_ACTIVE_PALETTE_ITEM
+    {
+    LONG item_id    = -1;
+    LONG cmd_id;
+    BYTE position   = -1;
+    BYTE isVisible  = 1;
+    BYTE type;
+    }
+    
+ STRUCT CAM_AP_POST_CAPTURE_ITEM
+ 	{
+ 	LTEXT text;
+ 	LONG bitmap_id;
+ 	}
+ 	
+ STRUCT CAM_AP_TT_ITEM
+    {
+    LTEXT text;
+    } 	
+

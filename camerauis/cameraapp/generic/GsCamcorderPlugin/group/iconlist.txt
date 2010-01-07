@@ -1,0 +1,7 @@
+-c8,8 qgn_lcam_gen_sett_list.svg
+-c8,8 qgn_lcam_gen_sett_camera_folder_image.svg
+-c8,8 qgn_lcam_gen_sett_camera_folder_video.svg
+-1    qgn_lcam_gen_sett_camera_tab_image.svg
+-1    qgn_lcam_gen_sett_camera_tab_video.svg
+
+

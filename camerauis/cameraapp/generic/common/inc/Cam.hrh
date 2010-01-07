@@ -1,0 +1,342 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource header file for Camera Application*
+*/
+
+
+#ifndef CAM_HRH
+#define CAM_HRH
+
+ 
+
+// This is number of *user-changeable* characters in name base for 
+// videos and photos, for example "Image" from "Image0001.jpg"
+#define KMaxNameBaseLength          		27  
+
+// Maximum length of the Default Album
+#define KMaxAlbumNameLength                 30
+// Maximum length of image of toolbar customization data string
+#define KMaxToolbarDataStringLength 256
+
+// Max filename length *including* numbering eg "Image9999" from "Image9999.jpg"
+#define KMaxNameBaseLengthPlusNumbering 	31  
+
+#ifndef __WINS__
+    //#define EProductKeyCaptureHalf EStdKeyApplication19
+ 
+#else
+    #define EProductKeyCaptureHalf 53
+#endif
+   // #define EProductKeyCapture EStdKeyDevice7
+
+
+// DATA TYPES
+
+// enumerate command codes
+enum TCamCmd
+  {
+  ECamCmdNewVideo = 1,  // start value must not be 0
+  ECamCmdToggleMulti,
+  ECamCmdToggleFacetracking,
+  ECamCmdSingleCapture,
+  ECamCmdSequence,
+  ECamCmdTimeLapse,
+  ECamCmdPhotos,
+  ECamCmdShootSetup,
+  ECamCmdSelfTimer1,   
+  ECamCmdSelfTimer2,
+  ECamCmdSelfTimer3,
+  ECamCmdFlash,
+  ECamCmdUserScene,
+  ECamCmdSettings,
+  ECamCmdNewPhoto,
+  ECamCmdAddAudio,
+  ECamCmdEdit,
+  ECamCmdEditRestore,
+  ECamCmdSelectRestore,
+  ECamCmdUserSceneSelected,  
+  ECamCmdDelete,
+  ECamCmdAddToAlbum,
+  ECamCmdProperties,
+  ECamCmdDeleteSequence,
+  ECamCmdSendToCallerMultimedia,
+  ECamCmdPause,
+  ECamCmdLock,
+  ECamCmdUnlock,
+  ECamCmdContinue,
+  ECamCmdPlay,
+  ECamCmdSelfTimerCancel,
+  ECamCmdCaptureSetupSceneStill,
+  ECamCmdCaptureSetupWhiteBalanceStill,
+  ECamCmdCaptureSetupExposureStill,
+  ECamCmdCaptureSetupColourFilterStill,
+  ECamCmdCaptureSetupFlashStill,
+  ECamCmdCaptureSetupSceneVideo,
+  ECamCmdCaptureSetupWhiteBalanceVideo,
+  ECamCmdCaptureSetupColourFilterVideo,
+  ECamCmdCaptureSetupSceneUser,
+  ECamCmdCaptureSetupWhiteBalanceUser,
+  ECamCmdCaptureSetupExposureUser,
+  ECamCmdCaptureSetupColourFilterUser,
+  ECamCmdCaptureSetupFlashUser,
+  ECamCmdUserSceneReset,
+  ECamCmdSelect, // select for embedded views
+  ECamCmdMarkUnmarkMenu,
+  ECamCmdOpenPhoto,     // Open a file from burst post-capture grid
+  ECamCmdSceneSettingList,
+  ECamCmdGoToStandby, 
+  ECamCmdExitStandby,
+  ECamCmdConfirmationQuerySportsSceneChange,   
+  ECamCmdSelfTimerActivate,
+  ECamCmdSelfTimerMenu,
+  ECamCmdMute, // Mute/unmute for embedded video
+  ECamCmdUnmute,
+  ECamCmdQuickSend,
+  ECamCmdInternalExit,  
+  ECamCmdSlideClosedExit,
+  ECamCmdPopUpMenuZoom, 
+  
+  ECamCmdSwitchCamera,
+  ECamCmdRenameImage,
+  ECamCmdRenameVideo, 
+  ECamCmdStop,
+  ECamCmdCaptureSetupBrightnessStill,
+  ECamCmdCaptureSetupContrastStill,
+  ECamCmdCaptureSetupBrightnessVideo,
+  ECamCmdCaptureSetupContrastVideo,
+  ECamCmdCaptureSetupBrightnessUser,
+  ECamCmdCaptureSetupContrastUser,
+  
+  ECamCmdTimeLapseSlider,
+  ECamCmdOpenSetup, 
+  ECamCmdTimeLapsePhoto, 
+  
+  ECamCmdCaptureSetupImageSharpnessStill,
+  ECamCmdCaptureSetupColourSaturationStill,
+  ECamCmdCaptureSetupColourSaturationVideo,  
+  ECamCmdCaptureSetupImageSharpnessUser,
+  ECamCmdCaptureSetupColourSaturationUser,
+  
+  ECamCmdCaptureSetupMenu,
+  
+  ECamCmdToggleCourtesyUI,
+  ECamCmdRedrawScreen,
+  
+  ECamCmdToggleVideoFlash, 
+  ECamCmdCaptureSetupFlashVideo,
+  ECamCmdPrintIntent,
+  ECamCmdPrintPlugin,
+  ECamCmdOneClickUpload,
+  
+  ECamCmdCaptureSetupLightSensitivityUser,
+  
+  ECamCmdRaiseCourtesyUI,
+  ECamCmdSwitchToPrecapture,
+  
+  ECamCmdActivateFreeMemoryView,
+  ECamCmdCaptureSetupSelfTimer,
+  ECamCmdCaptureSetupLightSensitivityStill,
+  ECamCmdCaptureSetupLightSensitivityVideo,
+  
+  ECamCmdViewfinderGrid, // Viewfinder grid on/off
+  ECamCmdSwitchUserMode, // Toggle advanced/novice user mode
+  ECamCmdHistogram,      // Histogram on/off
+
+  // Customise toolbar view commands
+  ECamCmdCustomiseToolbar, // Open customise toolbar view
+  ECamCmdCustomiseToolbarChange,
+  ECamCmdCustomiseToolbarAdd,
+  ECamCmdCustomiseToolbarRemove,
+  ECamCmdCustomiseToolbarUp,
+  ECamCmdCustomiseToolbarDown,
+  ECamCmdCustomiseToolbarReset,
+  
+  ECamCmdSend, // NOTE any new commands should be placed before this
+               // with the exception of the AIW command below
+  ECamCmdAIWCommands = 200, // AIW needs to have its own area
+  ECamCmdEditPhoto,
+  ECamCmdEditVideo,
+  ECamCmdPrint,
+  ECamCmdShareOnOvi,
+  ECamMSKCmdAppChange,
+  ECamMSKCmdAppCapture,
+  ECamMSKCmdAppRecord,
+  ECamMSKCmdSelect,
+  ECamCmdRestoreCameraSettings,
+  
+  ECamCmdCaptureImage,
+  ECamCmdRecord,
+  ECamCmdToolbarExtension,  // Command ID for toolbar extension button
+  ECamCmdToolbarMarkUnmark, // for sequence post capture view
+  ECamCmdToggleActiveToolbar // switches activepalette visibility
+
+  };
+
+enum TCamWaitNoteCtrls
+    {
+    ESavingVideoWaitNote = 1,
+    ESavingImagesProgressNote,
+    ELoadingImageWaitNote,
+    ESavingImageWaitNote,
+    EFreeingMemoryWaitNote,
+    EGenProcessingWaitNote
+    };
+
+// indicators are in different orders for different products
+
+enum TCamIndicatorIds
+    {
+    ECamIndicatorScene = 0,
+    ECamIndicatorFlash,
+    ECamIndicatorSelfTimer,
+    ECamIndicatorBurstMode,
+    ECamIndicatorVideoStabiliser,
+    ECamIndicatorImageShakeWarning,
+    ECamIndicatorAudioMute,
+    ECamIndicatorFaceTracking,
+    ECamIndicatorVideoFileType,
+	ECamIndicatorCaptureMode,
+    ECamIndicatorVideoFlash,
+	ECamIndicatorFocus,
+	ECamIndicatorGenericSetup,
+	ECamIndicatorResolution,
+	ECamIndicatorTotal // This MUST be last in the enum!
+    };
+
+enum TCamSoundId
+    {
+    ECamVideoStartSoundId = 1,
+    ECamVideoStopSoundId,
+    ECamVideoPauseSoundId,
+    ECamVideoResumeSoundId,
+    ECamInCallToneId,
+    ECamStillCaptureSoundId1,
+    ECamStillCaptureSoundId2,
+    ECamStillCaptureSoundId3,
+    ECamStillCaptureSoundId4,
+    ECamSelfTimerSoundId,
+    ECamAutoFocusComplete,
+    ECamAutoFocusFailed, 
+    ECamBurstCaptureSoundId1,
+    ECamBurstCaptureSoundId2,
+    ECamBurstCaptureSoundId3,
+    ECamBurstCaptureSoundId4
+    };
+    
+enum TCamSliderLegendItem
+    {
+    ECamSliderLegendItemText,
+    ECamSliderLegendItemIcon
+    };
+
+enum TCamActivePaletteItemType
+	{
+	// Item with fixed tooltip and icon.
+	// Does not have any particular setting associated with it.
+	ECamActivePaletteItemTypeCommand,
+	ECamActivePaletteItemTypePreCapture,
+	ECamActivePaletteItemTypePreCaptureNonSetting,
+	ECamActivePaletteItemTypePostCapture,
+	ECamActivePaletteItemTypePostCapturePrintIntent
+	};
+	
+enum TCamExtAutoFocus
+    {
+    ECamExtAutoFocusFocusing,
+    ECamExtAutoFocusFailed,
+    ECamExtAutoFocusFocused
+    };
+
+enum TScreenDecorationType
+	{
+	ECamScreenDecorationBlendedBackground,
+	ECamScreenDecorationDVFBlanker, // Direct Viewfinder blanker
+	ECamScreenDecorationRecordingIcon
+	};
+
+enum TCamObserverEvent
+    {
+    ECamObserverEventDefault,
+    ECamObserverEventRecordingIconUpdated,
+    ECamObserverEventNaviModelUpdated,
+	ECamObserverEventCaptureProcessComplete 
+    };
+
+enum TCamViewState
+    {
+    // ---------------------------------
+    // Marker(s) - no new ids here!
+    ECamViewStateRangeInternalMin,
+
+    // ---------------------------------
+    // "Internal"
+    // - views inherited from CCamViewBase!!!
+    ECamViewStatePreCapture,
+    ECamViewStatePostCapture,
+    ECamViewStateBurstThumbnail,
+    ECamViewStateStandby,
+    ECamViewStateUserSceneSetup,
+    ECamViewStateWhiteBalanceUser,
+    ECamViewStateColourFilterUser,
+    ECamViewStateFlashUser,
+    ECamViewStateSceneUser,
+    ECamViewStateSceneStill,
+    ECamViewStateCaptureSetupMenu,
+    ECamViewStateSceneSettingList,
+    ECamViewStateExposureUser,
+    ECamViewStateCustomiseToolbar,
+    ECamViewStatePrePortraitCapture,
+    // ---------------------------------
+    // Marker(s) - no new ids here!
+    ECamViewStateRangeInternalMax,
+    ECamViewStateRangeExternalMin,
+
+    // ---------------------------------
+    // "External" 
+    // - non CCamViewBase inherited views.
+    ECamViewStateSettings,  
+    ECamViewStateViaPlayer,
+    ECamViewStateGsCamcorderPlugin,
+
+    // ---------------------------------
+    // Marker(s) - no new ids here!
+    ECamViewStateRangeExternalMax,
+    ECamViewStateCount
+    // ---------------------------------
+    };
+
+/**
+ * Custom messages for controlling view activation
+ */
+enum TCamViewMessage
+    {
+    ECamViewMessageStandby = 1,
+    ECamViewMessageCaptureSetupMenu,
+    ECamViewMessageSceneSettingList,
+    ECamViewMessageDeactivateFirst
+    };
+
+/**
+ * Exit codes for settings plug-in.
+ */
+enum TCamSettingsPluginExitMessage
+    {
+    ECameraPluginExit = 0,
+    ECameraInternalExit,
+    ECameraCompleteExit
+    };
+
+#endif // CAM_HRH
+
+// End of File

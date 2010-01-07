@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemDefinition schema="3.0.0">
+  <package id="camera" name="Camera Apps">
+    <collection id="camerauis" name="Camera UIs">
+      <component id="activepalette" filter="s60" name="Active Palette">
+        <unit bldFile="camerauis/activepalette/group"/>
+      </component>
+      <component id="cameraapp" filter="s60" name="Camera Application">
+      	<!--  can only have one unit. Need to use #includes, merge the bld.infs or split into two components-->
+        <unit bldFile="camerauis/cameraapp/group"/>
+        <unit bldFile="camerauis/cameraapp/help/group"/>
+        <!-- should theese be #included from the above? -->
+        <!-- <unit bldFile="camerauis/cameraapp/generic/camerauiconfigmanager/group"/> -->
+        <!-- <unit bldFile="camerauis/cameraapp/generic/gscamcorderplugin/group"/> -->
+      </component>
+    </collection>
+    <collection id="camera_info" name="Camera Apps Info">
+      <component id="camera_plat" filter="s60" name="Camera Apps Platform Interfaces" class="api">
+        <unit bldFile="camera_plat/group"/>
+        <!-- should these tests be #included from the above? -->
+        <!-- <unit bldFile="camera_plat/active_palette_2_api/tsrc/group"/> -->
+        <!-- <unit bldFile="camera_plat/camcorder_ui_constants_api/tsrc/group"/> -->
+      </component>
+    </collection>
+  </package>
+</SystemDefinition>

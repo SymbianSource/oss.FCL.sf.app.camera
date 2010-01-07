@@ -1,0 +1,94 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project Active Palette
+*
+*/
+
+
+// ===========================================================================
+// Target definition
+TARGET          ActivePalette.dll
+TARGETTYPE      dll
+UID             0x1000008d 0x10208A6D
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+
+// ---------------------------------------------------------------------------
+// Includes
+#include <defaultcaps.hrh>
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+#include "../Inc/ActivePalette2BuildConfig.h"
+
+// ---------------------------------------------------------------------------
+// Sources
+SOURCEPATH ../Src
+
+#ifdef AP2_USE_3D_RENDERING
+SOURCE  ActivePalette2HUI.cpp
+#endif
+
+#ifdef AP2_USE_2D_RENDERING
+SOURCE  ActivePalette2BasicUI.cpp
+SOURCE  ActivePalette2Tooltip.cpp
+SOURCE  activepalette2tooltipfading.cpp
+SOURCE  activepalette2tooltipfactory.cpp
+SOURCE  ActivePalette2StylerFactory.cpp
+SOURCE  ActivePalette2Styler.cpp
+SOURCE  ActivePalette2OpaqueStyler.cpp
+SOURCE  ActivePalette2SemiTransparentStyler.cpp
+SOURCE  ActivePalette2SemiTransparentFadingStyler.cpp
+SOURCE  ActivePalette2CheckerboardStyler.cpp
+#endif 
+
+SOURCE  ActivePalette2Factory.cpp
+SOURCE  ActivePalette2EventData.cpp
+SOURCE  ActivePalette2NavigationKeys.cpp
+SOURCE  ActivePalette2DllMain.cpp
+SOURCE  ActivePalette2GenericPlugin.cpp
+SOURCE  ActivePalette2Item.cpp
+SOURCE  ActivePalette2Model.cpp
+SOURCE  activepalette2configuration.cpp
+SOURCE  ActivePalette2Utils.cpp
+SOURCE  ActivePalette2ItemVisible.cpp
+SOURCE  CActivePalettePluginBase.cpp
+
+// ---------------------------------------------------------------------------
+// Headers
+USERINCLUDE ../Inc
+
+// ---------------------------------------------------------------------------
+// Libraries
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY euser.lib cone.lib bitgdi.lib fbscli.lib ws32.lib gdi.lib flogger.lib 
+LIBRARY bafl.lib avkon.lib egul.lib AknSkins.lib AknIcon.lib 
+#ifdef AP2_USE_3D_RENDERING
+LIBRARY hitchcock.lib
+#endif
+#ifdef AP2_USE_GUILIB_RENDERING
+LIBRARY guilib.lib
+#endif
+
+// ---------------------------------------------------------------------------
+// Def-files
+#ifdef AP2_USE_3D_RENDERING
+DEFFILE ActivePalette2_2d_3d.def
+#else
+DEFFILE ActivePalette2_2d.def
+#endif
+
+// ===========================================================================
+// end of file

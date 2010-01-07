@@ -1,0 +1,103 @@
+/*
+* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resources for the camera application
+*
+*
+*/
+
+
+NAME SCRF
+
+// ===========================================================================
+// Includes
+ 
+#include <AvkonIcons.hrh>
+#include <appinfo.rh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.rh> // signature          
+#include <avkon.rsg>
+#include <aknsconstants.hrh>
+#include <cameraapp.mbg>
+
+#include <cam.loc>   // qtn_lcam_title_text_photo 
+#include "Cam.hrh"
+#include "CamSettings.hrh"
+#include "CamSettingsInternal.hrh"
+#include "Cam.rh"
+
+// ===========================================================================
+// Resource definitions
+
+// ---------------------------------------------------------
+//   
+//    Define the resource file signature 
+//    This resource should be empty.
+//
+// ---------------------------------------------------------
+//
+RESOURCE RSS_SIGNATURE
+    {
+    }
+
+// ---------------------------------------------------------
+//   
+//    Default Document Name
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF { buf=qtn_lcam_title_text_photo; }
+
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_exit  
+//    Softkeys definition which uses ECamCmdInternalExit
+//    instead of EAknSoftkeyExit (as in r_avkon_softkeys_exit)
+//
+//----------------------------------------------------
+RESOURCE CBA r_cameraapp_softkeys_options_exit
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; }
+        };
+    }
+
+RESOURCE EIK_APP_INFO
+    {
+    cba = r_cameraapp_softkeys_options_exit;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_localisable_app_info
+//    Localisable app info
+//
+//----------------------------------------------------
+//
+RESOURCE LOCALISABLE_APP_INFO r_cam_localisable_app_info
+    {
+    short_caption = qtn_apps_lcam_grid;
+    caption_and_icon = 
+    CAPTION_AND_ICON_INFO
+        {
+        caption = qtn_apps_lcam_list;
+        number_of_icons = 1;
+        icon_file = "z:\\resource\\apps\\cameraapp_aif.mif";
+        };
+    }
+
+// ===========================================================================
+// end of file
