@@ -59,4 +59,5 @@ EXPORTS
 	?SupportedSecondaryCameraZoomOutKeysL@CCameraUiConfigManager@@QAEXAAV?$RArray@H@@@Z @ 58 NONAME ; void CCameraUiConfigManager::SupportedSecondaryCameraZoomOutKeysL(class RArray<int> &)
 	?IsDSAViewFinderSupported@CCameraUiConfigManager@@QBEHH@Z @ 59 NONAME ; int CCameraUiConfigManager::IsDSAViewFinderSupported(int) const
 	?CriticalLevelRamMemoryFocusGained@CCameraUiConfigManager@@QBEHXZ @ 60 NONAME ; int CCameraUiConfigManager::CriticalLevelRamMemoryFocusGained(void) const
+	?SupportedScreenModesL@CCameraUiConfigManager@@QAEXAAV?$RArray@H@@@Z @ 61 NONAME ; void CCameraUiConfigManager::SupportedScreenModesL(class RArray<int> &)
 

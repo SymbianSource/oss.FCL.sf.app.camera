@@ -469,7 +469,7 @@ CCamPostCaptureViewBase::HandleForegroundEventL( TBool aForeground )
       {
       if(!iPartialBackground)
           {
-      appUi->RaisePostCaptureCourtesyUI();
+          appUi->RaisePostCaptureCourtesyUI();
           }
       }
     else if ( iSuppressAPUntilCameraReady ) 
@@ -478,7 +478,7 @@ CCamPostCaptureViewBase::HandleForegroundEventL( TBool aForeground )
       }
     iPartialBackground = EFalse;
     
-    if ( iController.CameraSwitchQueued() )   
+    if ( appUi && iController.CameraSwitchQueued() )   
         {
         appUi->HandleCommandL( ECamCmdSwitchCamera );
         }

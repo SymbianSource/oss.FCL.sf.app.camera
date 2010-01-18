@@ -107,6 +107,7 @@ void CCamUserSceneSetupViewBase::HandleCommandL( TInt aCommand )
             break;           
         case ECamCmdCaptureSetupSceneUser:
             {
+            StatusPane()->MakeVisible( EFalse );
             SwitchToSceneSettingModeL();
             }
             break;

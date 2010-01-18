@@ -209,12 +209,12 @@ CCamVideoPreCaptureContainer
         break;
         }
       // ---------------------------------------------------
-      case ECamEventImageQualityChanged:
-	    {
-	    // To get correct viewfinder resolution:
-		TCamVideoResolution res = iController.GetCurrentVideoResolution();
-		iVFRes = iController.VideoViewFinderResourceId( res );
-		}
+//      case ECamEventImageQualityChanged:
+//	    {
+//	    // To get correct viewfinder resolution:
+//		TCamVideoResolution res = iController.GetCurrentVideoResolution();
+//		iVFRes = iController.VideoViewFinderResourceId( res );
+//		}
       // ---------------------------------------------------
       case ECamEventRecordComplete:    
         {

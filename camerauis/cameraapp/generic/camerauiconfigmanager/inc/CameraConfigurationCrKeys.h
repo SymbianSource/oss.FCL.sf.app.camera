@@ -86,7 +86,7 @@ const TUint32 KCamCrFeatureImageSceneModeNight              = 0x048;
 const TUint32 KCamCrFeatureImageSceneModeNightPotrait       = 0x049;
 const TUint32 KCamCrFeatureBurstFileSizeEstimateFactor      = 0x04A;
 const TUint32 KCamCrFeatureZoomDelays                       = 0x04B;
-
+const TUint32 KCamCrFeatureScreenModes                      = 0x04C;
 
 // Cr key for Settings where we check both for feature support 
 // And configured setting items

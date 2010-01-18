@@ -104,6 +104,7 @@ enum TCamDynamicSettings
     ECamDynamicSettingBurstFileSizeEstimateFactor,
     
     ECamDynamicSettingZoomDelays,
+    ECamDynamicSettingScreenModes,
     
     // video scene mode and scene specific setting cr keys
     ECamDynamicSettingVideoSceneModeNormal,

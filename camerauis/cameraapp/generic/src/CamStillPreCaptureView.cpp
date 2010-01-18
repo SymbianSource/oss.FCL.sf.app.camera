@@ -738,6 +738,7 @@ void CCamStillPreCaptureView::UpdateCbaL()
       }    
     else
       {
+      ViewCba()->MakeVisible( ETrue );
       SetSoftKeysL( R_CAM_SOFTKEYS_ACTIVATE_CANCEL__SELECT );                
       }
     }

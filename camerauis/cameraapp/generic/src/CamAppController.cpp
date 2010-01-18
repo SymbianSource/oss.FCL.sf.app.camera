@@ -32,7 +32,6 @@
 #include <barsread.h>
 #include <AknUtils.h>
 #include <akntoolbar.h>
-#include <ProductVariant.hrh>
 #include <centralrepository.h>
 
 #include <ctsydomainpskeys.h>
@@ -105,6 +104,7 @@
 #include "camvideotime.h"
 #include "CamGSInterface.h"
 #include "CameraUiConfigManager.h"
+#include "camsnapshotrotator.h"
 #include <bitmaptransforms.h> 
 
 #ifdef _DEBUG
@@ -593,6 +593,8 @@ CCamAppController::~CCamAppController()
       {
       delete iRotatorAo;
       }
+
+  delete iSnapShotRotator;
   PRINT( _L("Camera <= ~CCamAppController") );
   }
 
@@ -2262,6 +2264,13 @@ CCamAppController::SnapshotImage() const
   PRINT ( _L("Camera => CCamAppController::SnapshotImage") ); 
   PRINT1( _L("Camera <> CCamAppController::SnapshotImage .. current image index: %d"), iCurrentImageIndex ); 
   PRINT1( _L("Camera => CCamAppController::SnapshotImage .. saved current image: %d"), SavedCurrentImage() ); 
+
+  if ( iSnapShotRotator->IsActive() )
+    {
+    // Avoid flickering. Do not show original snapshot, if it needs to be rotated
+    PRINT( _L("Camera <= CCamAppController::SnapshotImage - return null") );
+    return NULL;
+    }
 
   //Sometime burst capture array includes more than one image in single capture mode, 
   //so just display the latest image here.
@@ -4731,6 +4740,7 @@ void CCamAppController::ConstructL()
   iImageSaveActive       = CCamImageSaveActive::NewL( *this , *this );        
   iCaptureArray          = CCamBurstCaptureArray::NewL( *iImageSaveActive );
   iRotationArray         = CCamBurstCaptureArray::NewL( *iImageSaveActive );
+  iSnapShotRotator       = CCamSnapShotRotator::NewL( *this );
   iSequenceFilenameArray = new( ELeave ) CDesCArraySeg( KTimelapseArrayGranularity );
   iSoundPlayer           = CCamAudioPlayerController::NewL( *this, *this );
 
@@ -6182,7 +6192,15 @@ void CCamAppController::HandleSnapshotEvent( TInt aStatus,
     PRINT( _L("Camera <> CCamAppController: status in KErrNone..") );
     __ASSERT_ALWAYS( aBitmap, CamPanic( ECamPanicNullPointer ) );
 
-          
+    if( iInfo.iActiveCamera == ECamActiveCameraSecondary &&
+        iCaptureOrientation == ECamOrientation90 &&
+        ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) &&
+        ECamSettOn == IntegerSettingValue( ECamSettingItemShowCapturedPhoto ) )
+        {
+        PRINT( _L( "Camera <> Rotate portrait secondary camera snapshot image 180 degrees" ) )
+        TRAP_IGNORE( iSnapShotRotator->RotateL( aBitmap ) );
+        }
+     
     CopySnapshotIfNeeded( *aBitmap, aStatus );
      
     // Removed filename reservation when snapshot arrives.
@@ -6326,8 +6344,8 @@ CCamAppController::HandleImageCaptureEventL( TInt             aStatus,
         // check if snapshot bitmap needs to be rotated before creating a thumbnail from it
         TBool rotate( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) &&
                       ECamSettOn == IntegerSettingValue( ECamSettingItemShowCapturedPhoto ) &&
-                      iCaptureOrientation != ECamOrientation0 &&
-                      iInfo.iActiveCamera == ECamActiveCameraPrimary );
+                      iCaptureOrientation != ECamOrientation0 );
+
         if ( ECamImageCaptureBurst != iInfo.iImageMode )
           {
           //create thumbnail or rotate first if needed
@@ -7337,6 +7355,7 @@ void CCamAppController::LoadSecondaryCameraSettingsL()
   OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, CCAMAPPCONTROLLER_LOADSECONDARYCAMERASETTINGSL, "e_CCamAppController_LoadSecondaryCameraSettingsL 1" );
   PRINT( _L("Camera => CCamAppController::LoadSecondaryCameraSettingsL" ))
   iSettingsModel->StorePrimaryCameraSettingsL();
+  iSettingsModel->StoreUserSceneSettingsL();
 
   PRINT( _L("Camera <> CCamAppController::LoadSecondaryCameraSettingsL B" ))
   
@@ -7505,17 +7524,10 @@ void CCamAppController::SetImageOrientationL()
     if( iConfigManager && iConfigManager->IsOrientationSensorSupported()
     		&& iCameraController )
         {
-        if ( ECamActiveCameraPrimary == iInfo.iActiveCamera )
-            {
-            // Camera controller asks for the current orientation through
-            // our ImageOrientation(). Value for that was updated in 
-            // DataReceived() callback.
-            iCameraController->DirectSettingsChangeL( ECameraSettingOrientation );
-            }
-        else
-            {
-            // No action in secondary camera.
-            }
+        // Camera controller asks for the current orientation through
+        // our ImageOrientation(). Value for that was updated in 
+        // DataReceived() callback.
+        iCameraController->DirectSettingsChangeL( ECameraSettingOrientation );
         }
     PRINT( _L("Camera <= CCamAppController::SetImageOrientationL"))   
     }
@@ -10900,5 +10912,14 @@ TBool CCamAppController::VideoInitNeeded()
     {
     return iVideoInitNeeded;  
     }
-        
+    
+// ---------------------------------------------------------------------------
+// StoreUserSceneSettingsL
+// Stores the UserScene settings
+// ---------------------------------------------------------------------------
+//  
+void CCamAppController::StoreUserSceneSettingsL()
+    {
+    iSettingsModel->StoreUserSceneSettingsL();	    
+    }      
 //  End of File  

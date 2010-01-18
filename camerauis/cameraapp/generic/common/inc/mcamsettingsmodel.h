@@ -291,6 +291,12 @@ class MCamSettingsModel
     * @since 5.0
     */
     virtual void StoreFaceTrackingValue() = 0;
+    
+    /**
+    * Store UserScene settings
+    * @since 5.1
+    */
+    virtual void StoreUserSceneSettingsL() = 0;
   };
 // ===========================================================================
 

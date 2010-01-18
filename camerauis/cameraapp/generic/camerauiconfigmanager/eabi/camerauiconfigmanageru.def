@@ -63,4 +63,5 @@ EXPORTS
 	_ZTI25CCameraUiConfigManagerImp @ 62 NONAME
 	_ZTV22CCameraUiConfigManager @ 63 NONAME
 	_ZTV25CCameraUiConfigManagerImp @ 64 NONAME
+	_ZN22CCameraUiConfigManager21SupportedScreenModesLER6RArrayIiE @ 65 NONAME
 

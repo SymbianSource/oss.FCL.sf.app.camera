@@ -297,6 +297,7 @@ void CCameraUiConfigManagerImp::LoadAllDynamicSettingsL()
             case ECamDynamicSettingMaxExtendedZoomLimits:
             case ECamDynamicSettingMaxDigitalZoomLimits:
             case ECamDynamicSettingZoomDelays:
+            case ECamDynamicSettingScreenModes:
                 {
                 PRINT1( _L("Camera <> CCameraUiConfigManagerImp::LoadAllDynamicSettingsL() %d" ), settingId )
                 LoadConfiguredSettingItemValuesFromCrL( settingId,
@@ -797,6 +798,9 @@ CCameraUiConfigManagerImp::MapSettingItemToCrItemsKeyL( const TInt aSettingItem 
         case ECamDynamicSettingZoomDelays:
                 crKey = KCamCrFeatureZoomDelays;
                 break;
+        case ECamDynamicSettingScreenModes:
+                crKey = KCamCrFeatureScreenModes;
+                break;
         default:
             PRINT( _L("Camera <> CCameraUiConfigManagerImp::MapSettingItemToCrItemsKeyL, leave!!!" ) )
             User::Leave( KErrNotSupported );
@@ -840,6 +844,7 @@ TBool CCameraUiConfigManagerImp::LoadCrForFeatureSupport( const TInt aSettingId 
         case ECamDynamicSettingVideoSceneModeNight:
         case ECamDynamicSettingVideoSceneModeLowLight:
         case ECamDynamicSettingZoomDelays:
+        case ECamDynamicSettingScreenModes:
              loadFromCr = EFalse;
              break;
         default:

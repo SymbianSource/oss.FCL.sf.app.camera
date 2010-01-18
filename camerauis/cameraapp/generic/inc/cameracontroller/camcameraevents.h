@@ -39,6 +39,7 @@ enum TCamCameraEventId
 
   ECamCameraEventReserveGain,
   ECamCameraEventReserveLose,
+  ECamCameraEventReserveRequested,
 
   ECamCameraEventPowerOn,
   ECamCameraEventPowerOff,      
@@ -156,6 +157,7 @@ static const TUint16* KCamCameraEventNames[] =
 
   (const TUint16*)_S16("ECamCameraEventReserveGain"),
   (const TUint16*)_S16("ECamCameraEventReserveLose"),
+  (const TUint16*)_S16("ECamCameraEventReserveRequested"),
   (const TUint16*)_S16("ECamCameraEventPowerOn"),
   (const TUint16*)_S16("ECamCameraEventPowerOff"),      
   (const TUint16*)_S16("ECamCameraEventIveRecover"),

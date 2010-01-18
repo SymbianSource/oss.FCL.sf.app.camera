@@ -281,6 +281,15 @@ void CCamAppUi::ConstructL()
   
   TBool uiOrientationOverride = iController.UiConfigManagerPtr()->IsUIOrientationOverrideSupported();
   
+  // Get the screenmode values used for setting  the orientation
+  RArray<TInt> screenModeValues;
+  if ( uiOrientationOverride )
+      {
+      iController.UiConfigManagerPtr()->SupportedScreenModesL( screenModeValues );
+      iLandscapeScreenMode = screenModeValues[0];
+      iPortraitScreenMode = screenModeValues[1];
+      }
+  
   // The embedded views are set after ConstructL completes
   // but the value is only of interest if the app is embedded
   iEmbeddedViewSet = !IsEmbedded();
@@ -385,7 +394,7 @@ void CCamAppUi::ConstructL()
     if( uiOrientationOverride )
       {
       //set orientation to CCamera	
-      iController.SetCameraOrientationModeL( CFbsBitGc::EGraphicsOrientationRotated90 );
+      iController.SetCameraOrientationModeL( iLandscapeScreenMode );
       // and complete the cameracontroller construction
       iController.CompleteCameraConstructionL();
       }
@@ -403,7 +412,7 @@ void CCamAppUi::ConstructL()
     if( uiOrientationOverride )
       {
       //set orientation to CCamera	
-      iController.SetCameraOrientationModeL( CFbsBitGc::EGraphicsOrientationRotated270 );
+      iController.SetCameraOrientationModeL( iPortraitScreenMode );
       // and complete the cameracontroller construction
       iController.CompleteCameraConstructionL();
       }     
@@ -455,6 +464,7 @@ OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP7_CCAMAPPUI_CONSTRUCTL, "e_ReadUiOri
       {
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP8_CCAMAPPUI_CONSTRUCTL, "e_EngineConstructionDelayed 1" );
       iController.CompleteConstructionL();
+      iController.StoreUserSceneSettingsL();
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP9_CCAMAPPUI_CONSTRUCTL, "e_EngineConstructionDelayed 0" );
 
       } 
@@ -1943,13 +1953,14 @@ CCamAppUi::HandleCameraEventL( TInt              /*aStatus*/,
         }
     // -----------------------------------------------------        
     case ECamCameraEventPowerOnRequested:
+    case ECamCameraEventReserveRequested:
       {
       // event only send if UIOrientationOverride feature is supported,
       // in that case UI construction is divided into two parts, call here 
       // to complete the construction	if in first startup
       if( iFirstBoot )
           {	
-          PRINT( _L( "Camera <> CCamAppUi::HandleCameraEventL ECamCameraEventPowerOnRequested" ) )	
+          PRINT( _L( "Camera <> CCamAppUi::HandleCameraEventL ECamCameraEventReserveRequested/ECamCameraEventPowerOnRequested" ) )	
           if ( iWaitTimer->IsActive() )
               {
               PRINT( _L( "Camera <> timer already active" ) )
@@ -8265,6 +8276,8 @@ void CCamAppUi::CompleteAppUIConstructionL()
     // Load the settings model static settings
     PRINT( _L("Camera <> call CCamAppController::LoadStaticSettingsL..") )
     iController.LoadStaticSettingsL( IsEmbedded() );
+    // store the userscene settings
+    iController.StoreUserSceneSettingsL();
 
 /*#ifndef __WINSCW__    
         if ( !iSFIUtils )
@@ -8318,12 +8331,7 @@ void CCamAppUi::CompleteAppUIConstructionL()
 
     // Check to see if we are set to use mmc storage but the card has
     // been removed.  
-    if( iController.CheckMemoryToUseL() )
-  	    {
-        // Record that we need to show the mmc removal note when the ui is 
-        // ready.
-        iMMCRemoveNoteRequired = ETrue;  	
-  	    }
+    iController.CheckMemoryToUseL();
 
     // create navi-pane and navi-porgress bar for use in camcorder mode 
     PRINT( _L("Camera <> CCamAppUi::CompleteAppUIConstructionL create navicounter control") );

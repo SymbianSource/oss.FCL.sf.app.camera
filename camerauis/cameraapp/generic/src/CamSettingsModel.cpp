@@ -1603,7 +1603,6 @@ void CCamSettingsModel::StorePrimaryCameraSettingsL()
     iStaticModel->StorePrimaryCameraSettingsL();
     CopySettingsL(iDynamicPhotoIntSettings, iDynamicPhotoIntSettingsBackup);
     CopySettingsL(iDynamicVideoIntSettings, iDynamicVideoIntSettingsBackup);
-    CopySettingsL(iUserSceneSettings, iUserSceneSettingsBackup);
     }
 
 // ---------------------------------------------------------------------------
@@ -2336,7 +2335,17 @@ void CCamSettingsModel::CopySettingsL(RPointerArray<TIntSetting>& aSrc,
             index++;
             }while(index < count);
         }
-    
+    }
+
+// ---------------------------------------------------------------------------
+// CCamSettingsModel::StoreUserSceneSettingsL
+//
+// Store UserScene Settings
+// ---------------------------------------------------------------------------
+// 
+void CCamSettingsModel::StoreUserSceneSettingsL()
+    {
+    CopySettingsL(iUserSceneSettings, iUserSceneSettingsBackup);   
     }
 
 // ===========================================================================

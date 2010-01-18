@@ -22,7 +22,6 @@
 // ===========================================================================
 //  INCLUDES
 #include <e32base.h>
-#include <ProductVariant.hrh>
 
 #include <cflistener.h> // publish zoom state related
 #include <cfclient.h>
@@ -106,7 +105,7 @@ class MCamStaticSettings;
 class CCamGSInterface;
 class CCameraUiConfigManager;
 class CCamPropertyWatcher;
-
+class CCamSnapShotRotator;
 
 
 class CCamFlashStatus;
@@ -2192,6 +2191,11 @@ public:
          */
         TBool VideoInitNeeded();
         
+        /**
+         * Stores the UserScene settings
+         */
+        void StoreUserSceneSettingsL();
+        
   private:
 
     // -----------------------------------------------------
@@ -2560,10 +2564,11 @@ public:
     TBool iDeepSleepTimerExpired;
     // not owned by camappcontroller
     CCameraUiConfigManager* iConfigManager;
-    TBool iVideoInitNeeded; // Used to decide if the need to call CAE video init //PS
+    TBool iVideoInitNeeded; // Used to decide if the need to call CAE video init
     CCamSyncRotatorAo* iRotatorAo;
     CFbsBitmap* iRotatedSnapshot;
     CCamBurstCaptureArray* iRotationArray;
+    CCamSnapShotRotator* iSnapShotRotator;
     // orientation at capture time
     TCamImageOrientation  iCaptureOrientation;
     

@@ -535,7 +535,23 @@ TInt CGSCamcorderPlugin::IntegerSettingValue( const TInt aSettingItem )
     {
     if ( LaunchedFromGS() )
         {
-        return iSettingsModel->IntegerSettingValue( aSettingItem );
+        TInt settingValue = iSettingsModel->IntegerSettingValue( aSettingItem );
+
+        if (  ( ECamSettingItemPhotoMediaStorage == aSettingItem || 
+                ECamSettingItemVideoMediaStorage == aSettingItem ) && 
+              ( settingValue == ECamMediaStorageCard ) &&
+              ( CamUtility::MemoryCardStatus() != ECamMemoryCardInserted ) )
+          {
+          if ( CamUtility::MassMemoryDrive() > 0 )
+              {
+              settingValue = ECamMediaStorageMassStorage;
+              }
+          else
+              {
+              settingValue = ECamMediaStoragePhone;
+              }
+          }
+        return settingValue;
         }
     else
         {

@@ -608,6 +608,12 @@ class CCamSettingsModel : public CBase,
                  RPointerArray<TIntSetting>& aDest, 
                  TBool aRestore = EFalse);
 
+    /**
+    * Store UserScene Settings 
+    * @since 5.1
+    */
+    void StoreUserSceneSettingsL();
+    
   private: // Functions from base classes
 
     /**

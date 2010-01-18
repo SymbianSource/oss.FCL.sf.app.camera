@@ -965,7 +965,10 @@ void CCamCaptureSetupSlider::NonTouchEVLayoutL( const TRect& aParentRect )
 //
 void CCamCaptureSetupSlider::HandlePointerEventL(const TPointerEvent& aPointerEvent)
     {   
-   
+    if(!Rect().Contains(aPointerEvent.iPosition))
+        {
+        return;
+        }
     CCoeControl::HandlePointerEventL( aPointerEvent );
 
     // This is the max bitmap offset from the top of the shaft that the thumb can be

@@ -1009,6 +1009,7 @@ TBool CCamZoomPane::HandlePointerEventL( const TPointerEvent& aPointerEvent )
         
     // Only allow drag if the zoom is already active
     if ( type == TPointerEvent::EDrag &&
+            tchZoomArea.Contains( aPointerEvent.iPosition ) &&
          iTouchActive )
         { 
         TBool ret = StartTouchZoomL( aPointerEvent.iPosition.iY );
@@ -1017,7 +1018,9 @@ TBool CCamZoomPane::HandlePointerEventL( const TPointerEvent& aPointerEvent )
         }  
     
     // Clean up when the touch events are stopped
-    if ( type == TPointerEvent::EButton1Up )
+    if ( type == TPointerEvent::EButton1Up ||
+            (type == TPointerEvent::EDrag &&
+                    !tchZoomArea.Contains( aPointerEvent.iPosition )))
         {
         // don't do anything for stray touches
         if ( iTouchActive )

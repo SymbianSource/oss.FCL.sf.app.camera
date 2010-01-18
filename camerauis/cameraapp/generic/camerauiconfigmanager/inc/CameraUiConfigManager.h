@@ -454,7 +454,13 @@ class CCameraUiConfigManager : public CBase
         * @return ETrue if continuous autofocus feature is enabled
         */
         IMPORT_C TBool IsContinuosAutofocusSupported() const; 
-        
+        /*
+        * @aSupportedValues[0] -> Value for iLandscapeScreenMode
+        * @aSupportedValues[1] -> Value for iPortraitScreenmode
+        */
+        IMPORT_C void SupportedScreenModesL( 
+                                    RArray<TInt>& aSupportedValues );
+
  private:
         void ConstructL();
   

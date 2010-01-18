@@ -161,10 +161,6 @@ enum TCamCmd
   ECamCmdCustomiseToolbarUp,
   ECamCmdCustomiseToolbarDown,
   ECamCmdCustomiseToolbarReset,
-  
-  ECamCmdSend, // NOTE any new commands should be placed before this
-               // with the exception of the AIW command below
-  ECamCmdAIWCommands = 200, // AIW needs to have its own area
   ECamCmdEditPhoto,
   ECamCmdEditVideo,
   ECamCmdPrint,
@@ -179,8 +175,11 @@ enum TCamCmd
   ECamCmdRecord,
   ECamCmdToolbarExtension,  // Command ID for toolbar extension button
   ECamCmdToolbarMarkUnmark, // for sequence post capture view
-  ECamCmdToggleActiveToolbar // switches activepalette visibility
-
+  ECamCmdToggleActiveToolbar, // switches activepalette visibility
+  
+  ECamCmdSend, // NOTE any new commands should be placed before this
+               // with the exception of the AIW command below
+  ECamCmdAIWCommands = 200 // AIW needs to have its own area
   };
 
 enum TCamWaitNoteCtrls

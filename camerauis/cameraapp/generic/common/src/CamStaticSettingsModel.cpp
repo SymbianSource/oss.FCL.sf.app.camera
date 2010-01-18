@@ -1082,7 +1082,7 @@ void CCamStaticSettingsModel::ResetSettingItem( const TInt aCenRepKeyId )
 //
 void CCamStaticSettingsModel::StorePrimaryCameraSettingsL()
     {
-    PRINT( _L("Camera => CCamSettingsModel::StorePrimaryCameraSettingsL"))
+    PRINT( _L("Camera => CCamStaticSettingsModel::StorePrimaryCameraSettingsL"))
     TInt settingIndex = SearchInSettingsListFor( iStaticPhotoIntSettings, 
                                                  ECamSettingItemPhotoQuality );
     if ( settingIndex != KErrNotFound )
@@ -1098,6 +1098,7 @@ void CCamStaticSettingsModel::StorePrimaryCameraSettingsL()
         iPrimaryCameraSettings.iVideoQuality = 
             iStaticVideoIntSettings[settingIndex]->iValueId;
         }
+    PRINT( _L("Camera <= CCamStaticSettingsModel::StorePrimaryCameraSettingsL"))    
     }
 
 // ---------------------------------------------------------------------------

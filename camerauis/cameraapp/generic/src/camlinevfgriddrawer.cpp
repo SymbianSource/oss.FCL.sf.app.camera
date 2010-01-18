@@ -289,7 +289,7 @@ CCamLineVfGridDrawer::SetLinesL( const TRect& aDrawingRect,
   while( j < aVerticalLines )
     {
     // Max used to make sure no div-by-zero
-    TInt currentX = ((j+indexOffset)*width) / Max(1,aVerticalLines+countOffset) - KPenWidth/2;
+    TInt currentX = leftX + ((j+indexOffset)*width) / Max(1,aVerticalLines+countOffset) - KPenWidth/2;
     iLineArray.Append( TRect( currentX, topY, currentX, bottomY ) );
     j++;
     }

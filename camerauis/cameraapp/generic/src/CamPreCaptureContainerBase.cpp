@@ -236,20 +236,28 @@ void CCamPreCaptureContainerBase::BaseConstructL( const TRect& aRect )
       SetLocationIndicatorVisibility();
       }
 
-  TInt color;
-  TInt gray;
+  TBool dsaAlways = iController.IsDirectScreenVFSupported( ETrue ) && 
+                    iController.IsDirectScreenVFSupported( EFalse );
+                 
+  if ( !dsaAlways )
+      {
+      // If bitmap VF is not possible in this configuration, 
+      // offscreen bitmap is not needed
+      TInt color;
+      TInt gray;
   
-  TDisplayMode displaymode =
-      CEikonEnv::Static()->WsSession().GetDefModeMaxNumColors( color, gray );
+      TDisplayMode displaymode =
+          CEikonEnv::Static()->WsSession().GetDefModeMaxNumColors( color, gray );
   
-  // set up the offscreen bitmap
-  iOffScreenBitmap = new ( ELeave ) CFbsBitmap();
+      // set up the offscreen bitmap
+      iOffScreenBitmap = new ( ELeave ) CFbsBitmap();  
   
-  User::LeaveIfError( iOffScreenBitmap->Create( Rect().Size(), EColor16MU/*displaymode*/ ) );
+      User::LeaveIfError( iOffScreenBitmap->Create( Rect().Size(), EColor16MU/*displaymode*/ ) );
   
-  PRINT1( _L("Camera => CCamPreCaptureContainerBase::BaseConstructL disp mode (%d)"), displaymode )
-  iBitmapDevice = CFbsBitmapDevice::NewL( iOffScreenBitmap );
-  User::LeaveIfError( iBitmapDevice->CreateContext( iBitmapGc ) );
+      PRINT1( _L("Camera => CCamPreCaptureContainerBase::BaseConstructL disp mode (%d)"), displaymode )
+      iBitmapDevice = CFbsBitmapDevice::NewL( iOffScreenBitmap );
+      User::LeaveIfError( iBitmapDevice->CreateContext( iBitmapGc ) );
+      }
 
   iRect = ViewFinderFrameRect();
   // if using direct viewfinding pass Rect to control
@@ -435,8 +443,8 @@ CCamPreCaptureContainerBase::OfferKeyEventL( const TKeyEvent& aKeyEvent,
         }
 
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
-
-    if ( appUi && appUi->CheckCourtesyKeyEventL( aKeyEvent, aType, ETrue ) == EKeyWasConsumed )
+	__ASSERT_DEBUG(appUi, CamPanic(ECamPanicNullPointer) );
+    if ( appUi->CheckCourtesyKeyEventL( aKeyEvent, aType, ETrue ) == EKeyWasConsumed )
         {
         PRINT( _L("Camera <= CCamPreCaptureContainerBase::OfferKeyEventL courtesy key") );
         return EKeyWasConsumed;
@@ -480,7 +488,7 @@ CCamPreCaptureContainerBase::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             && 0         == aKeyEvent.iRepeats )
         {
         TBool MSKCapture(EFalse);
-        if ( appUi && !appUi->IsToolBarVisible() && aKeyEvent.iScanCode == EStdKeyDevice3 )
+        if ( !appUi->IsToolBarVisible() && aKeyEvent.iScanCode == EStdKeyDevice3 )
             {
             MSKCapture = ETrue;
             }

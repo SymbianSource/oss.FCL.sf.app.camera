@@ -1765,9 +1765,12 @@ class CCamAppUi : public CCamAppUiBase,
         T2ndCamOrientation iLockedQwertyState; 
         TBool iUiConstructionComplete;
         CCamMemoryMonitor* iMemoryMonitor;
-        
+		        
         //Flag to monitor viewfinder window handle switch
         TBool iViewFinderInTransit;
+
+		TInt iLandscapeScreenMode;
+        TInt iPortraitScreenMode;
         };
 
 // ===========================================================================

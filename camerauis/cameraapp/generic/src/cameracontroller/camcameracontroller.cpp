@@ -1534,7 +1534,7 @@ CCamCameraController::SetOrientationModeL( TInt aOrientation )
 #endif // CAMERAAPP_CAE_FOR_VIDEO
 
     PRINT1( _L("Camera <> OrientationOverride custom i/f pointer:%d"), iCustomInterfaceUIOrientationOverride );
-    iCustomInterfaceUIOrientationOverride->SetOrientationModeL( aOrientation );
+    TRAP_IGNORE(iCustomInterfaceUIOrientationOverride->SetOrientationModeL( aOrientation ));
     
   PRINT( _L("Camera <= CCamCameraController::SetOrientationModeL") );
   }
@@ -2416,6 +2416,13 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
         orientation( MCameraOrientation::EOrientation0 );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &orientation );
 
+      if ( iInfo.iCurrentCamera != KPrimaryCameraIndex && 
+           orientation == MCameraOrientation::EOrientation90 )
+        {
+        PRINT( _L("Camera <> Rotate portrait secondary camera image 270 degrees") );
+        orientation = MCameraOrientation::EOrientation270;
+        }
+
       PRINT1( _L("Camera <> setting camera orientation to [0x%02x]"), orientation );
       iCustomInterfaceOrientation->SetOrientationL( orientation );
       break;
@@ -2528,6 +2535,15 @@ CCamCameraController
 
     CAMERAAPP_PERF_CONTROLLER_START( ECamRequestReserve );
     iCamera->Reserve();
+    // If UIOrientationOverrideAPI is used, ui construction is completed while
+    // waiting for Reserve to complete, event sent here to continue ui construction
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+    if ( appUi->AppController().UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )    
+      {
+      NotifyObservers( KErrNone, 
+                       ECamCameraEventReserveRequested,
+                       ECamCameraEventClassBasicControl );
+      }
     }
   // -------------------------------------------------------
   // Power on
@@ -2539,14 +2555,6 @@ CCamCameraController
     CAMERAAPP_PERF_CONTROLLER_START( ECamRequestPowerOn );
 
     iCamera->PowerOn(); 
-    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
-    if ( appUi->AppController().UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )    
-      {
-      NotifyObservers( KErrNone, 
-                       ECamCameraEventPowerOnRequested,
-                       ECamCameraEventClassBasicControl );
-      }
-    
     }
   // -------------------------------------------------------
   // Unknown

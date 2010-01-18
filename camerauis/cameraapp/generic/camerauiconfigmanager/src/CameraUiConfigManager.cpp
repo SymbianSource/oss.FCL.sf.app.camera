@@ -694,7 +694,11 @@ EXPORT_C TInt CCameraUiConfigManager::IsQwerty2ndCamera() const
 //
 EXPORT_C TBool CCameraUiConfigManager::IsUIOrientationOverrideSupported() const
     {
+#if defined(__WINS__) || defined(__WINSCW__)
+    return EFalse;
+#else    
     return iConfigManagerImp->IsFeatureSupported( ECamDynamicSettingUIOrientationOverride );
+#endif    
     }
 
 // ----------------------------------------------------------------------------------
@@ -743,5 +747,15 @@ EXPORT_C TBool CCameraUiConfigManager::IsContinuosAutofocusSupported() const
     {
     return iConfigManagerImp->IsFeatureSupported( ECamDynamicSettingContinuousAF );
     }
-		
+	
+// ----------------------------------------------------------------------------------
+// CCameraUiConfigManager::SupportedScreenModesL
+// ----------------------------------------------------------------------------------
+//    
+EXPORT_C void CCameraUiConfigManager::SupportedScreenModesL( 
+                                        RArray<TInt>& aSupportedValues )
+    {
+    iConfigManagerImp->SupportedSettingItemsL( ECamDynamicSettingScreenModes,
+                                               aSupportedValues );
+    }	
 //End of File
