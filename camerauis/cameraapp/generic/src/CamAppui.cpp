@@ -2599,6 +2599,9 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
             }
             
         TrySwitchViewL();
+        // After restoring settings, still capture view should be active 
+        // -> Update all toolbar icons for still-capture view. 
+        iStillCaptureView->UpdateToolbarIconsL();
         break;
         }
     // -----------------------------------------------------

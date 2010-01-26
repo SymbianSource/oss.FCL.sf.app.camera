@@ -1445,24 +1445,50 @@ void CCamSettingsModel::ActivateUserSceneSettingsL()
 // That is, it updates the rest of the video dynamic setings.
 // ---------------------------------------------------------------------------
 //
-void CCamSettingsModel::VideoSceneHasChangedL( TInt /*aSettingValue*/ )
+void CCamSettingsModel::VideoSceneHasChangedL( TInt aSettingValue )
     {
     // Set all the video capture setup values to their defaults,
     // except for the scene setting.
     TInt settingsCount = iDynamicVideoIntSettings.Count();
     TInt i;
     for ( i = 0; i < settingsCount; ++i )
+      {
+      //video light is used for LED flash not for xenon flash
+      if ( iDynamicVideoIntSettings[i]->iItemId == ECamSettingItemDynamicVideoFlash )
         {
-        // If the setting item is not the scene change it's value.
-        if ( iDynamicVideoIntSettings[i]->iItemId != ECamSettingItemDynamicVideoScene )
-            {
-            SetIntegerSettingValueL( iDynamicVideoIntSettings[i]->iItemId, 
-                iDynamicVideoIntDefaults[i] );
-            }
+        if ( iUiConfigManager->IsVideoLightSupported() && !iUiConfigManager->IsXenonFlashSupported() )
+          {
+          // Set the capture setup flash setting to that of the new scene.
+          TInt sceneFlash = DefaultSettingValueForVideoScene( aSettingValue, ECamSettingItemSceneFlashMode );      
+          SetIntegerSettingValueL( ECamSettingItemDynamicVideoFlash, sceneFlash );          
+          }
         }
+      // If the setting item is not the scene change it's value.
+      else if ( iDynamicVideoIntSettings[i]->iItemId != ECamSettingItemDynamicVideoScene ) 
+        {
+        SetIntegerSettingValueL( iDynamicVideoIntSettings[i]->iItemId, 
+              iDynamicVideoIntDefaults[i] );
+        }
+      }
 
     // Update the engine with the scene settings.
     //UpdateEngineWithSceneSettingsL( iVideoScenes, aSettingValue );
+    }
+
+
+// ---------------------------------------------------------------------------
+// CCamSettingsModel::DefaultSettingValueForVideoScene
+// Returns the default value of a setting for a video scene item.
+// ---------------------------------------------------------------------------
+//
+TInt CCamSettingsModel::DefaultSettingValueForVideoScene( TInt aSceneId, TInt aSettingId ) const
+    {
+    TInt sceneIndex = FindSceneInSceneList( aSceneId, iVideoScenes );
+   
+    TInt settingIndex = SearchInSettingsListFor( 
+        iVideoScenes[sceneIndex]->iSettings, aSettingId );
+    
+    return iVideoScenes[sceneIndex]->iSettings[settingIndex]->iValueId;
     }
 
 

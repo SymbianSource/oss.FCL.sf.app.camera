@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -247,12 +247,12 @@ void CCamCaptureSetupListItemDrawer::DrawActualItem( TInt aItemIndex,
     // ...text colour index if this item is selected.
     if( Flags() & CListItemDrawer::ESingleClickDisabledHighlight )
         {
-        aItemIsSelected = aItemIsCurrent;
+        // Single clickable items don't have a highlight
         aItemIsCurrent = EFalse;
         }
 
     if ( aItemIsCurrent )
-		{
+        {
         index = EAknsCIQsnTextColorsCG10; // highlighted text colour
         }
 

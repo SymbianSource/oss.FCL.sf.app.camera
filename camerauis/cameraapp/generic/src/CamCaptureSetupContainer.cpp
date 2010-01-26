@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -666,6 +666,7 @@ void CCamCaptureSetupContainer::HandleListBoxEventL( CEikListBox* aListBox,
               break;  
         
         case EEventItemClicked:
+        case EEventPenDownOnItem: // Fall through
             {
             MCamListboxModel* model = static_cast<MCamListboxModel*>( aListBox->Model() );
             iControlHandler.HandleSettingValueUpdateL( model->ItemValue( aListBox->CurrentItemIndex() ) ); 

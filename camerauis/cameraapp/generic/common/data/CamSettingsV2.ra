@@ -1065,6 +1065,23 @@ RESOURCE AVKON_SETTING_PAGE r_cam_settings_quality_settings_page
 	extension = r_setting_page_extension;
 	}
 
+//----------------------------------------------------
+//
+//    r_cam_settings_location_settings_page   
+//   
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_cam_settings_location_settings_page
+    {
+    // the type and editor resource are included so that the
+    // settings page can be constructed without crashing but are not used
+    // The custom quality control is used instead
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_cam_setting_listbox;  
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK; 
+    extension = r_setting_page_extension;              
+    }
 
 // VIDEO SETTINGS RESOURCES
 

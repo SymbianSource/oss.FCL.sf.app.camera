@@ -1667,7 +1667,7 @@ CHARACTER_SET UTF8
 //d:Hardware failure error note text
 //l:main_list_empty_pane
 //
-#define qtn_lcam_standby_hardware_failure "Unexpected error occurred. Power off the device and restart"
+#define qtn_lcam_standby_hardware_failure "Unexpected error occured, please re-start camera application. If re-start doesn't help, please reboot the device"
 
 //d:Camera in use error note text
 //l:main_list_empty_pane
@@ -1683,7 +1683,7 @@ CHARACTER_SET UTF8
 //d:All memory full error note text
 //l:popup_note_window
 //
-#define qtn_lcam_note_allmemory_full "Memory full. Unable to save image. Delete some data first"
+#define qtn_lcam_note_allmemory_full "All drives are full. Please delete some data and try again."
 
 //d:Internal memory full note text
 //l:popup_note_window
@@ -4197,5 +4197,27 @@ CHARACTER_SET UTF8
 //l:list_set_graphic_pane_t1
 //
 #define qtn_lcam_sett_attr_cont_af_off "Off"
+
+//d:Popup info note for camera first-time-use
+//d:This is shown as a warning to the user 
+//d:for the default value of location setting.
+//l:popup_info_list_pane_t1
+#define qtn_lcam_descr_location_ftu "Location notification: Captured photos and videos will be tagged with your location. If you share the photos and videos, the location data may also be visible to third parties who have access to that picture. Phone will use network to get the location data and data transfer charges may apply. If you want to disable the geotagging, you can do it in camera settings."
+
+//d:Set as default scene mode setting title
+//d:Shown in user scene setting list
+//l:list_setting_pane_t1
+#define qtn_lcam_set_user_default "Set as default scene mode" 
+
+//d: 'Yes' value for 'Set as default scene mode' (qtn_lcam_set_user_default)
+//d: in 'Image user scene' view (Image mode > Scene modes > User defined open)
+//l: list_single_pane_t1
+#define qtn_lcam_set_user_default_yes "Yes"
+
+//d: 'No' value for 'Set as default scene mode' (qtn_lcam_set_user_default)
+//d: in 'Image user scene' view (Image mode > Scene modes > User defined open)
+//l: list_single_pane_t1
+#define qtn_lcam_set_user_default_no "No"
+
 
 // end of file

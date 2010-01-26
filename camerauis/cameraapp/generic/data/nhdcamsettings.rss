@@ -2167,26 +2167,6 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_videolight
                     TBAR_CTRL
                         {
                         type = EAknCtButton;
-                        id = ECamCmdNewPhoto;
-                        control = AVKON_BUTTON
-                            {
-                            flags = KAknButtonNoFrame;
-                            states =
-                                {
-                                AVKON_BUTTON_STATE
-                                    {
-                                    bmpfile = CAMERAAPP_BITMAP_FILE;
-                                    bmpid = EMbmCameraappQgn_indi_cam4_camera;
-                                    bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask;
-                                    txt = qtn_lcam_tb_switch_mode;
-                                    extension = r_cam_ext_qgn_indi_cam4_camera;
-                                    }
-                                };
-                            };
-                        },
-                    TBAR_CTRL
-                        {
-                        type = EAknCtButton;
                         id = ECamCmdCaptureSetupWhiteBalanceVideo;
                         control = AVKON_BUTTON
                             {
@@ -2232,6 +2212,26 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_videolight
                                     bmpmask = EMbmCameraappQgn_indi_cam4_goto_gallery_mask;
                                     txt = qtn_lcam_tb_go_to_photos;
                                     extension = r_cam_ext_qgn_indi_cam4_goto_photos;
+                                    }
+                                };
+                            };
+                        },
+                    TBAR_CTRL
+                        {
+                        type = EAknCtButton;
+                        id = ECamCmdNewPhoto;
+                        control = AVKON_BUTTON
+                            {
+                            flags = KAknButtonNoFrame;
+                            states =
+                                {
+                                AVKON_BUTTON_STATE
+                                    {
+                                    bmpfile = CAMERAAPP_BITMAP_FILE;
+                                    bmpid = EMbmCameraappQgn_indi_cam4_camera;
+                                    bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask;
+                                    txt = qtn_lcam_tb_switch_mode;
+                                    extension = r_cam_ext_qgn_indi_cam4_camera;
                                     }
                                 };
                             };
@@ -2325,26 +2325,6 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
                     TBAR_CTRL
                         {
                         type = EAknCtButton;
-                        id = ECamCmdNewPhoto;
-                        control = AVKON_BUTTON
-                            {
-                            flags = KAknButtonNoFrame;
-                            states =
-                                {
-                                AVKON_BUTTON_STATE
-                                    {
-                                    bmpfile = CAMERAAPP_BITMAP_FILE;
-                                    bmpid = EMbmCameraappQgn_indi_cam4_camera;
-                                    bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask;
-                                    txt = qtn_lcam_tb_switch_mode;
-                                    extension = r_cam_ext_qgn_indi_cam4_camera;
-                                    }
-                                };
-                            };
-                        },
-                    TBAR_CTRL
-                        {
-                        type = EAknCtButton;
                         id = ECamCmdCaptureSetupWhiteBalanceVideo;
                         control = AVKON_BUTTON
                             {
@@ -2390,6 +2370,26 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
                                     bmpmask = EMbmCameraappQgn_indi_cam4_goto_gallery_mask;
                                     txt = qtn_lcam_tb_go_to_photos;
                                     extension = r_cam_ext_qgn_indi_cam4_goto_photos;
+                                    }
+                                };
+                            };
+                        },
+                    TBAR_CTRL
+                        {
+                        type = EAknCtButton;
+                        id = ECamCmdNewPhoto;
+                        control = AVKON_BUTTON
+                            {
+                            flags = KAknButtonNoFrame;
+                            states =
+                                {
+                                AVKON_BUTTON_STATE
+                                    {
+                                    bmpfile = CAMERAAPP_BITMAP_FILE;
+                                    bmpid = EMbmCameraappQgn_indi_cam4_camera;
+                                    bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask;
+                                    txt = qtn_lcam_tb_switch_mode;
+                                    extension = r_cam_ext_qgn_indi_cam4_camera;
                                     }
                                 };
                             };

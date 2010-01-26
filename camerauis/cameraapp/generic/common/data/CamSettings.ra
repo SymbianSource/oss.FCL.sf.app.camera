@@ -1059,6 +1059,23 @@ RESOURCE AVKON_SETTING_PAGE r_cam_settings_quality_settings_page
 	extension = r_setting_page_extension;
 	}
 
+//----------------------------------------------------
+//
+//    r_cam_settings_location_settings_page   
+//   
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_cam_settings_location_settings_page
+    {
+    // the type and editor resource are included so that the
+    // settings page can be constructed without crashing but are not used
+    // The custom quality control is used instead
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_cam_setting_listbox;  
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    extension = r_setting_page_extension;             
+    }
 
 // VIDEO SETTINGS RESOURCES
 
@@ -1155,7 +1172,7 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_cam_video_settings_with_location_item_list_ca
             // The quality page resource is used to prevent crashing in the construction phase
             // The type and editor resource are included but are not used
             // The custom quality control is used instead
-            setting_page_resource = r_cam_settings_quality_settings_page;
+            setting_page_resource = r_cam_settings_location_settings_page;
             associated_resource = r_cam_photo_location_texts;
             name = qtn_lcam_sett_attr_rec_location;
             },
@@ -1518,7 +1535,7 @@ r_cam_photo_settings_with_location_item_list_camcorder
             // The quality page resource is used to prevent crashing in the construction phase
             // The type and editor resource are included but are not used
             // The custom quality control is used instead
-            setting_page_resource = r_cam_settings_quality_settings_page;
+            setting_page_resource = r_cam_settings_location_settings_page;
             associated_resource = r_cam_photo_location_texts;
             name = qtn_lcam_sett_attr_rec_location;
             },
@@ -2694,7 +2711,7 @@ RESOURCE ARRAY r_cam_off_on_loc_text_list_summary
             {
             setting_value_id = ECamLocationOff;
             summary_icon = -1;
-            summary_description_text = qtn_lcam_descr_location_off;
+            summary_description_text = qtn_lcam_descr_location_on; 
             },
         CAM_LOCATION_SELECT_SUMMARY
             {

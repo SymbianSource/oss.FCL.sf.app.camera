@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -230,7 +230,6 @@ void CCamLocationSettingContainer::ConstructFromResourceL( TResourceReader& /*aR
 		    ( parent->IntegerSettingValue( listInt ) );
 		}
 	iListBox->SetContainerWindowL( *iParent );
-    iListBox->DisableSingleClick( ETrue );
 	
 	TRect listboxRect;
 	ReadListboxLayoutL(listboxRect);
@@ -755,6 +754,7 @@ void CCamLocationSettingContainer::HandleListBoxEventL( CEikListBox* aListBox,
         
         case EEventEnterKeyPressed:
         case EEventItemDoubleClicked:
+        case EEventItemSingleClicked:
               {
                TKeyEvent key;
                key.iRepeats = 0;

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -124,6 +124,16 @@ void CCamUserSceneSetupContainer::UpdateListItems( void )
 //
 void CCamUserSceneSetupContainer::UpdateCurrentListItem()
     {
+    CEikButtonGroupContainer* cba = CEikButtonGroupContainer::Current();   
+    if ( cba )
+        {
+        CEikCba* eikCba = static_cast<CEikCba*>( cba->ButtonGroup() );
+        if( eikCba )
+            {
+            // Hide LSK for single clickable settings
+            eikCba->EnableItemSpecificSoftkey( ETrue );
+            }
+        }  
     TInt selectedItemIndex = iUserSceneSetupList->CurrentItemIndex();
     UpdateListItem( selectedItemIndex );
     }
@@ -159,6 +169,20 @@ void CCamUserSceneSetupContainer::HandleListBoxEventL
 void CCamUserSceneSetupContainer::HandleSelectionL( void )
     {
     TInt CommandId = CommandIdForActivatingCurrentItemControl();
+    CEikButtonGroupContainer* cba = CEikButtonGroupContainer::Current();
+    if ( cba && CommandId != ECamCmdCaptureSetupFlashUser )
+        {
+        CEikCba* eikCba = static_cast<CEikCba*>( cba->ButtonGroup() );
+        if( eikCba )
+            {
+            // Make LSK visible for the sliders.
+            // Sliders, like exposure compensation, are not listboxes, 
+            // thus single click cannot be disabled for those.
+            // All setting items, except flash, are double clickable and
+            // they have a visible LSK
+            eikCba->EnableItemSpecificSoftkey( EFalse );
+            }    
+        }
     iView.HandleCommandL( CommandId );
     }
     
@@ -189,20 +213,19 @@ void CCamUserSceneSetupContainer::ConstructL
 
     CreateWindowL();
 
-	// Create the listbox in the right style
+    // Create the listbox in the right style
     iUserSceneSetupList = new ( ELeave ) CAknSettingStyleListBox;
-   	iUserSceneSetupList->ConstructL( this, CEikListBox::ELeftDownInViewRect );
-    iUserSceneSetupList->DisableSingleClick( ETrue );
+    iUserSceneSetupList->ConstructL( this, CEikListBox::ELeftDownInViewRect );
 
-	TPoint pos = iEikonEnv->EikAppUi()->ClientRect().iTl;
-	TSize size = iUserSceneSetupList->MinimumSize();
-	SetExtent( pos, size ); 
+    TPoint pos = iEikonEnv->EikAppUi()->ClientRect().iTl;
+    TSize size = iUserSceneSetupList->MinimumSize();
+    SetExtent( pos, size ); 
 
 
-	// Setup the scroll bar
-	iUserSceneSetupList->CreateScrollBarFrameL( ETrue );
-	iUserSceneSetupList->ScrollBarFrame()->
-        SetScrollBarVisibilityL( CEikScrollBarFrame::EOn, 
+    // Setup the scroll bar
+    iUserSceneSetupList->CreateScrollBarFrameL( ETrue );
+    iUserSceneSetupList->ScrollBarFrame()->
+    SetScrollBarVisibilityL( CEikScrollBarFrame::EOn, 
             CEikScrollBarFrame::EAuto );
             
     iTitleResourceId = aResourceId;

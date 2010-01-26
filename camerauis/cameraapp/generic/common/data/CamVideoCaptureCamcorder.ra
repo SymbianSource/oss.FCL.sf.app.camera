@@ -956,12 +956,6 @@ RESOURCE MENU_PANE r_cam_video_post_capture_menu_camcorder
             },
         MENU_ITEM
             {
-            command = KAiwCmdAssign;
-            txt = qtn_lcam_use_video_postcapture_menu;
-            cascade = AIW_INTELLIGENT_CASCADE_ID;
-            },
-        MENU_ITEM
-            {
             command = ECamCmdShareOnOvi;
             // AIW provider fills the menu item title.
             // No submenu, only 1 provider acccepted.

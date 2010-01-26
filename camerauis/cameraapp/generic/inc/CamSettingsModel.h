@@ -500,6 +500,15 @@ class CCamSettingsModel : public CBase,
     */
     void VideoSceneHasChangedL( TInt aSettingValue );
 
+    /**
+    * Returns the default value of a setting for a video scene item.
+    * @param aSceneId the id of the scene item.
+    * @param aSetting the id of the setting item.
+    * @return the default value
+    * @since 2.8
+    */
+    TInt DefaultSettingValueForVideoScene( TInt aSceneId, TInt aSetting ) const;
+
 
     /**
     * Returns the maximum allowed quality for a photo scene.

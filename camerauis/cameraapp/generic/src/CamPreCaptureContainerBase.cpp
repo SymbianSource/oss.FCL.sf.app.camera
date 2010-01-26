@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -236,8 +236,11 @@ void CCamPreCaptureContainerBase::BaseConstructL( const TRect& aRect )
       SetLocationIndicatorVisibility();
       }
 
-  TBool dsaAlways = iController.IsDirectScreenVFSupported( ETrue ) && 
-                    iController.IsDirectScreenVFSupported( EFalse );
+  TBool dsaAlways( EFalse ); // Offscreen bitmap is needed with the emulator
+  #ifndef __WINS__
+  dsaAlways = iController.IsDirectScreenVFSupported( ETrue ) && 
+              iController.IsDirectScreenVFSupported( EFalse );
+  #endif
                  
   if ( !dsaAlways )
       {
@@ -2509,11 +2512,24 @@ TRect CCamPreCaptureContainerBase::ResolutionIndicatorRect() const
     if ( CamUtility::IsNhdDevice() )
         {
         TInt variant = Layout_Meta_Data::IsLandscapeOrientation();
-        indicatorPane.LayoutRect( Rect(),
-            AknLayoutScalable_Apps::cam4_indicators_pane( variant ) ); 
+        if ( appUi->TargetMode() ==  ECamControllerVideo ) 
+            {
+            TRect rect;
+            TAknLayoutRect vidProgressPane;
+            AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, rect );
+            vidProgressPane.LayoutRect( rect,
+                AknLayoutScalable_Apps::vid4_progress_pane( variant ) );  
+            resolutionIconLayout.LayoutRect( vidProgressPane.Rect(),
+                AknLayoutScalable_Apps::vid4_progress_pane_g1() );
+            }
+        else
+            {
+            indicatorPane.LayoutRect( Rect(),
+                AknLayoutScalable_Apps::cam4_indicators_pane( variant ) ); 
 
-        resolutionIconLayout.LayoutRect( indicatorPane.Rect(),
-            AknLayoutScalable_Apps::cam4_indicators_pane_g1() );
+            resolutionIconLayout.LayoutRect( indicatorPane.Rect(),
+                AknLayoutScalable_Apps::cam4_indicators_pane_g1() );
+            }
         }
     else
         {
