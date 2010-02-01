@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -172,7 +172,6 @@ CCamVideoPreCaptureContainer
           case ECamCapturing:
             {
             iRecordState = ECamRecording;
-            iFileTypeIndicator->SetRect(iFileTypeIndicatorVidcapPosition);
             iResolutionIndicators[iCurrentIndicator]->SetRect(iResolutionIndicatorVidcapPosition);
             break;
             }
@@ -539,13 +538,6 @@ void CCamVideoPreCaptureContainer::CreateFiletypeIndicatorL()
             AknLayoutScalable_Apps::vid4_progress_pane( variant ) );  
         layoutRect.LayoutRect( vidProgressPane.Rect(),
             AknLayoutScalable_Apps::vid4_progress_pane_g2() );
-
-        TAknLayoutRect vidIndicatorPane;
-        vidIndicatorPane.LayoutRect( rect,
-            AknLayoutScalable_Apps::vid4_indicators_pane( variant ) );
-
-        fileTypeIconLayout.LayoutRect( vidIndicatorPane.Rect(),
-                AknLayoutScalable_Apps::vid4_indicators_pane_g2() );
         }
     else
         {
@@ -558,9 +550,8 @@ void CCamVideoPreCaptureContainer::CreateFiletypeIndicatorL()
         fileTypeIconLayout = layoutRect;
         }
 
-    iFileTypeIndicatorVidcapPosition = layoutRect.Rect();
-    iFileTypeIndicator->SetRect( fileTypeIconLayout.Rect() );
-    iFileTypeIndicatorPosition = fileTypeIconLayout.Rect();
+    iFileTypeIndicator->SetRect( layoutRect.Rect() );
+    iFileTypeIndicatorPosition = layoutRect.Rect();
     // Initialise the indicator
     SetFileTypeIndicator();
     }

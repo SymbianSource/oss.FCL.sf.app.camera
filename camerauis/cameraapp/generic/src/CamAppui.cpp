@@ -7318,11 +7318,6 @@ void CCamAppUi::SetPreCaptureModeL(TCamPreCaptureMode aMode)
 	                fixedToolbar->SetToolbarObserver( iStillCaptureView );
 	                SetToolbarVisibility();
 
-	                if ( IsEmbedded() )
-	                    {
-	                    iStillCaptureView->HideButton( ECamCmdNewVideo );
-	                    }                        
-
 	                // Make sure toolbar extension button has no background
 	                CAknButton* extensionButton = static_cast<CAknButton*>(
 	                    fixedToolbar->ControlOrNull( ECamCmdToolbarExtension ) );
@@ -7367,11 +7362,7 @@ void CCamAppUi::SetPreCaptureModeL(TCamPreCaptureMode aMode)
                     
                     fixedToolbar->SetToolbarObserver( iVideoCaptureView );
                     SetToolbarVisibility();
-                    if ( IsEmbedded() )
-                        {
-                        iVideoCaptureView->HideButton( ECamCmdNewPhoto );
-                        }
-                    
+                       
                     // Make sure toolbar extension button has no background
                     CAknButton* extensionButton = static_cast<CAknButton*>(
                       fixedToolbar->ControlOrNull( ECamCmdToolbarExtension ) );

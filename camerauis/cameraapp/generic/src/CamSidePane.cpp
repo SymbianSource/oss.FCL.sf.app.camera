@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -999,8 +999,16 @@ void CCamSidePane::TouchLayout() const
                 {
                 case ECamIndicatorCaptureMode:
                     {
-                    l.LayoutRect( rect,
+                    if ( ECamControllerVideo == iMode )
+                        {
+                        l.LayoutRect( rect,
+                           AknLayoutScalable_Apps::main_video4_pane_g1( variant ) );
+                        }
+                    else
+                        {
+                        l.LayoutRect( rect,
                            AknLayoutScalable_Apps::main_camera4_pane_g1( variant ) );
+                        }
                     iIndicators[i]->SetRect( l.Rect() );
                     break;
                     }
@@ -1021,14 +1029,14 @@ void CCamSidePane::TouchLayout() const
                 case ECamIndicatorVideoStabiliser: 
                     {
                     l.LayoutRect( rect,
-                        AknLayoutScalable_Apps::main_video4_pane_g5( variant ) );
+                            AknLayoutScalable_Apps::main_video4_pane_g3( variant ) );
                     iIndicators[i]->SetRect( l.Rect() );
                     break;
                     }
-			    case ECamIndicatorFaceTracking: 
+                case ECamIndicatorFaceTracking: 
                     {
                      l.LayoutRect( rect,
-                        AknLayoutScalable_Apps::main_camera4_pane_g6( variant ) );
+                       AknLayoutScalable_Apps::main_camera4_pane_g2( variant ) );
                      iIndicators[i]->SetRect( l.Rect() );
                      break;  
                     }

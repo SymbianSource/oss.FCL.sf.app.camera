@@ -78,6 +78,7 @@ LOCAL_C CApaApplication* NewApplication()
 //
 GLDEF_C TInt E32Main()
     {
+    OstTrace0( CAMERAAPP_PERFORMANCE, DUP2__E32MAIN, "e_CAM_PRI_OFF_TO_ON 1" ); // Should be defined in DeviceModeHanlder/SysAp
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, _E32MAIN, "e_E32Main 1" );
     TInt ret = EikStart::RunApplication(NewApplication);
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP1__E32MAIN, "e_E32Main 0" );

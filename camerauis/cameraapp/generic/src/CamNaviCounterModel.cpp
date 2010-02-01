@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -1933,7 +1933,7 @@ void CCamNaviCounterModel::TouchLayoutL()
 
     TAknLayoutRect vidIndicatorPane;
     vidIndicatorPane.LayoutRect( iExtent,
-            AknLayoutScalable_Apps::vid4_indicators_pane( variant ) );
+        AknLayoutScalable_Apps::vid4_progress_pane( variant ) );// vid4_indicators_pane should be used
 
     iVidPreStorageIconRect.LayoutRect( vidIndicatorPane.Rect(),
             AknLayoutScalable_Apps::vid4_indicators_pane_g3( indicatorVariant ) );
@@ -2070,7 +2070,7 @@ void CCamNaviCounterModel::TouchLayoutL()
         {
         iAudioMuteIconRect.LayoutRect(
             iExtent,
-            AknLayoutScalable_Apps::main_video4_pane_g3( variant ) );
+            AknLayoutScalable_Apps::main_video4_pane_g2( variant ) );
         }
     }
 

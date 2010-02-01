@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -2091,7 +2091,7 @@ CHARACTER_SET UTF8
 //d:This text is used in both image and video mode.
 //l:main_cset_text2_pane_t1
 //
-#define qtn_lcam_descr_location_on "Location data will be recorded to each image or video if GPS co-ordinates are found. It might take many minutes to acquire these co-ordinates, best conditions are obtained in open areas away from tall buildings."	
+#define qtn_lcam_descr_location_on "Captured photos and videos will be tagged with your location. If photos or videos are shared, the location data may also be visible to third parties. Phone will use network to get the location data. Data transfer charges may apply."
 
 //d:Description text for qtn_lcam_location_set_off setting.
 //d:Visible in location data setting page.
@@ -4202,7 +4202,7 @@ CHARACTER_SET UTF8
 //d:This is shown as a warning to the user 
 //d:for the default value of location setting.
 //l:popup_info_list_pane_t1
-#define qtn_lcam_descr_location_ftu "Location notification: Captured photos and videos will be tagged with your location. If you share the photos and videos, the location data may also be visible to third parties who have access to that picture. Phone will use network to get the location data and data transfer charges may apply. If you want to disable the geotagging, you can do it in camera settings."
+#define qtn_lcam_descr_location_ftu "Location recording can be disabled in camera settings."
 
 //d:Set as default scene mode setting title
 //d:Shown in user scene setting list

@@ -134,7 +134,8 @@ TKeyResponse CCamCaptureSetupListBox::OfferKeyEventL( const TKeyEvent& aKeyEvent
 	    iView->SelectItemL( iView->CurrentItemIndex() );
         }
     //TInt oldCurrentItem = CurrentItemIndex();
-    TKeyResponse response = CEikListBox::OfferKeyEventL( aKeyEvent, aType );
+    //TKeyResponse response = CEikListBox::OfferKeyEventL( aKeyEvent, aType );
+    TKeyResponse response = EKeyWasConsumed;
     /*TInt newCurrentItem = CurrentItemIndex();
     if ( newCurrentItem != oldCurrentItem )
         {

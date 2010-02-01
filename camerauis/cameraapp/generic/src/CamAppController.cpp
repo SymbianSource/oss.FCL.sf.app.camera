@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -4969,10 +4969,10 @@ CCamAppController
     SetTargetMode     ( ECamControllerVideo  );
     SetTargetImageMode( ECamImageCaptureNone );
     // shutdown the orientation channel when going to videomode
-		if ( iConfigManager && iConfigManager->IsOrientationSensorSupported() )
-			{
+    if ( iConfigManager && iConfigManager->IsOrientationSensorSupported() )
+        {
 	    TRAP_IGNORE( UpdateSensorApiL( EFalse ) );
-			}
+		}
     }
   else if( ECamControllerImage == aMode )
     {
@@ -6194,7 +6194,6 @@ void CCamAppController::HandleSnapshotEvent( TInt aStatus,
 
     if( iInfo.iActiveCamera == ECamActiveCameraSecondary &&
         iCaptureOrientation == ECamOrientation90 &&
-        ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) &&
         ECamSettOn == IntegerSettingValue( ECamSettingItemShowCapturedPhoto ) )
         {
         PRINT( _L( "Camera <> Rotate portrait secondary camera snapshot image 180 degrees" ) )
@@ -6342,7 +6341,8 @@ CCamAppController::HandleImageCaptureEventL( TInt             aStatus,
           }
         PRINT1( _L("Camera <> CCamAppController::HandleImageCaptureEventL array count:%d"), BurstCaptureArray()->Count() );  
         // check if snapshot bitmap needs to be rotated before creating a thumbnail from it
-        TBool rotate( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) &&
+        TBool rotate( ( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) || 
+                      iInfo.iActiveCamera == ECamActiveCameraSecondary ) &&
                       ECamSettOn == IntegerSettingValue( ECamSettingItemShowCapturedPhoto ) &&
                       iCaptureOrientation != ECamOrientation0 );
 
@@ -7415,7 +7415,8 @@ void CCamAppController::DataReceived( CSensrvChannel& aChannel,
 
     if ( KSensrvChannelTypeIdOrientationData == aChannel.GetChannelInfo().iChannelType )
         {
-        TBool rotate( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) );
+        TBool rotate( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) 
+                      || iInfo.iActiveCamera == ECamActiveCameraSecondary );
 
         if( rotate )
             {
@@ -8479,7 +8480,8 @@ CCamAppController::CopySnapshotIfNeeded( const CFbsBitmap& aSnapshot, TInt aErro
   if ( ECamImageCaptureTimeLapse == iInfo.iImageMode 
     || ECamControllerVideo == iInfo.iMode   
     || ( iConfigManager && iConfigManager->IsOrientationSensorSupported() &&
-        iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) == ECamSettOn )
+        ( iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) == ECamSettOn 
+          || iInfo.iActiveCamera == ECamActiveCameraSecondary ) )
      )
     {
     StopIdleTimer();
@@ -8934,6 +8936,8 @@ CCamAppController
       if( iCaptureRequested && !EngineProcessingCapture() )
         {
         iCaptureRequested = EFalse;
+        OstTrace0( CAMERAAPP_PERFORMANCE, DUP7_CCAMAPPCONTROLLER_HANDLECAMERAEVENTL, "e_CAM_APP_AF 0" );
+        OstTrace0( CAMERAAPP_PERFORMANCE, DUP8_CCAMAPPCONTROLLER_HANDLECAMERAEVENTL, "e_CAM_PRI_AF_LOCK 0" );
         OstTrace0( CAMERAAPP_PERFORMANCE, CCAMAPPCONTROLLER_HANDLECAMERAEVENTL, "e_CAM_APP_SHOT_TO_SNAPSHOT 1" );
         OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMAPPCONTROLLER_HANDLECAMERAEVENTL, "e_CAM_PRI_SHOT_TO_SNAPSHOT 1" );
         OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMAPPCONTROLLER_HANDLECAMERAEVENTL, "e_CAM_PRI_SHOT_TO_SAVE 1" );

@@ -146,6 +146,7 @@ void CCamStillPreCaptureView::HandleCommandL( TInt aCommand )
                // if the Camera in the Portrait mode
           	   // MSK event is handled like a capture key
           		{
+          		OstTrace0( CAMERAAPP_PERFORMANCE, DUP8_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_SHUTTER_RELEASE_LAG 1" );
           		if ( iController.IsViewFinding() && appUi->CheckMemoryL() )
                 	{
                     OstTrace0( CAMERAAPP_PERFORMANCE, CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_APP_SHOT_TO_SNAPSHOT 1" );
@@ -163,6 +164,8 @@ void CCamStillPreCaptureView::HandleCommandL( TInt aCommand )
         	}
         case ECamCmdCaptureImage:
             {
+      	    OstTrace0( CAMERAAPP_PERFORMANCE, DUP9_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_AF_LOCK 1" );
+      	    OstTrace0( CAMERAAPP_PERFORMANCE, DUP10_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_SHUTTER_RELEASE_LAG 1" );
       	    if ( iController.IsViewFinding() && appUi->CheckMemoryL() &&
                 !iController.CaptureModeTransitionInProgress() &&
                 !iController.IsProcessingCapture() ) 
@@ -1807,6 +1810,7 @@ TBool CCamStillPreCaptureView::StartMskCaptureL()
 		     && iController.UiConfigManagerPtr() 
 		     && !iController.UiConfigManagerPtr()->IsOpticalJoyStickSupported() )
 		    {
+      	    OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMSTILLPRECAPTUREVIEW_STARTMSKCAPTUREL, "e_CAM_PRI_AF_LOCK 1" );
       	    if ( iController.IsViewFinding() && appUi->CheckMemoryL() &&
                 !iController.CaptureModeTransitionInProgress() ) 
             	{

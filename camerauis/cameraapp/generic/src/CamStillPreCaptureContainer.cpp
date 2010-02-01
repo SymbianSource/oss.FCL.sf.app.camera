@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -712,6 +712,7 @@ CCamStillPreCaptureContainer::HandleShutterKeyEventL( const TKeyEvent& aKeyEvent
     {
     if ( aType == EEventKeyDown )
       {
+      OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMSTILLPRECAPTURECONTAINER_HANDLESHUTTERKEYEVENTL, "e_CAM_PRI_AF_LOCK 1" );
       PRINT( _L("Camera => CCamStillPreCaptureContainer::HandleHalfKeyEventL DOWN"))
       PERF_MESSAGE_L2( EPerfMessageCaptureKeyHalfPressed );
       // If the shutter key has been half pressed
@@ -1006,7 +1007,7 @@ void CCamStillPreCaptureContainer::LayoutFlashIcon()
     parent.LayoutRect( rect, AknLayoutScalable_Apps::cam6_mode_pane( cba ) );
     TAknLayoutRect l;
     l.LayoutRect( parent.Rect(),
-                  AknLayoutScalable_Apps::cam6_mode_pane_g3( cba ) );
+                  AknLayoutScalable_Apps::main_camera4_pane_g3( 1 ) );
     iFlashIconRect = l.Rect();
     if( iFlashBitmap )
       {

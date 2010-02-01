@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -308,12 +308,10 @@ TRect CCamLocationIconController::Rect() const
                 {
                 if ( Layout_Meta_Data::IsLandscapeOrientation() )
                     {
-                    camIndicatorPane.LayoutRect(
-                        extent,
-                        AknLayoutScalable_Apps::vid4_indicators_pane( 1 ) );
-                    layoutRect.LayoutRect(
-                        camIndicatorPane.Rect(),
-                        AknLayoutScalable_Apps::vid4_indicators_pane_g5( 0 ) );
+                    camIndicatorPane.LayoutRect( extent,
+                             AknLayoutScalable_Apps::vid4_progress_pane( 1 ) ); // vid4_indicators_pane should be used
+                    layoutRect.LayoutRect( camIndicatorPane.Rect(),
+                        AknLayoutScalable_Apps::vid4_indicators_pane_g5( 0 ) );       
                     }
                 else  // portrait
                     {

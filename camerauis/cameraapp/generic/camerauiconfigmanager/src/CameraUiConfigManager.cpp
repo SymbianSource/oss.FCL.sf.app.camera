@@ -249,7 +249,7 @@ EXPORT_C TBool CCameraUiConfigManager::IsVideoLightSupported() const
 //
 EXPORT_C TBool CCameraUiConfigManager::IsAutoFocusSupported() const
     {
-#if defined(WINS) || defined(WINSCW)
+#if defined(__WINS__) || defined(__WINSCW__)
     return EFalse; // return
 #else
     return iConfigManagerImp->IsFeatureSupported( ECamDynamicSettingAutoFocus );
