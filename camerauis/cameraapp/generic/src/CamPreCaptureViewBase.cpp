@@ -413,8 +413,9 @@ void CCamPreCaptureViewBase::HandleForegroundEventL( TBool aForeground )
       {
       PRINT( _L( "Camera <> CCamPreCaptureViewBase::HandleForegroundEventL: to background" ) );    
       // Not behind an eikon/avkon server window
+	  // or keylock on when camera needs to be released.
       TBool totalBackground = ETrue;
-      if ( iController.IsAppUiAvailable() )
+      if ( iController.IsAppUiAvailable() && !iController.IsKeyLockOn() )
           {
           totalBackground    = appUi->AppInBackground( EFalse );
           }
@@ -1272,7 +1273,18 @@ void CCamPreCaptureViewBase::SwitchToStandbyModeL( TCamAppViewIds aViewId, TInt 
     // Hide the active palette
     static_cast<CCamAppUi*>( iEikonEnv->AppUi() )
         ->SetActivePaletteVisibility( EFalse );
-
+    
+    // Hide the toolbar in standby mode
+    if ( iController.IsTouchScreenSupported() )
+        {
+        CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+        CAknToolbar* fixedToolbar = appUi->CurrentFixedToolbar();
+        if ( fixedToolbar )
+            {
+            fixedToolbar->SetToolbarVisibility( EFalse );
+            }
+        }
+  
     // stop viewfinding
     StopViewFinder();
 

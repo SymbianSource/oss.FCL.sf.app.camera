@@ -23,7 +23,7 @@
 // INCLUDES
 #include <aknview.h>
 #include <eiklbo.h>
-#include <GSTabbedView.h>
+#include <gstabbedview.h>
 #include "GSCamcorderSettingsBaseView.h"
 
 // CONSTANTS

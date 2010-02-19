@@ -52,6 +52,7 @@
 #include <oommonitorsession.h>
 #include <driveinfo.h>
 #include <pathinfo.h>
+#include <accmonitor.h>
 
 #ifndef __WINSCW__
 //#include <SFIUtilsAppInterface.h>
@@ -3307,9 +3308,16 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                  {
                  CAknToolbar* toolbar = CurrentFixedToolbar();
                  if ( toolbar )
-                      {
-                      toolbar->SetToolbarVisibility( ETrue );
-                      }
+                     {
+                     if ( iPreCaptureMode == ECamPreCapViewfinder )
+                         {
+                         toolbar->SetToolbarVisibility( ETrue );
+                         }
+                     else
+                         {
+                         toolbar->SetToolbarVisibility( EFalse );
+                         }
+                     }
                  }
               }
           break;
@@ -3811,14 +3819,18 @@ CCamAppUi::TrySwitchViewL( TBool aDeactivateFirst )
       {
       SetViewFinderInTransit(ETrue);
       iController.StopViewFinder();
-      TUid viewId = iView->Id();
-      if(viewId == TUid::Uid( ECamViewIdStillPreCapture )
-          || viewId == TUid::Uid( ECamViewIdVideoPreCapture ))
-          {
-          CCamViewBase* view = static_cast<CCamViewBase*>(iView);
-          CCamContainerBase* container = view->Container(); 
-          container->DrawNow();
-          }
+      if ( iView )
+        {
+        TUid viewId = iView->Id();
+        if(viewId == TUid::Uid( ECamViewIdStillPreCapture )
+           || viewId == TUid::Uid( ECamViewIdVideoPreCapture ))
+           {
+           CCamViewBase* view = static_cast<CCamViewBase*>(iView);
+           CCamContainerBase* container = view->Container(); 
+           container->DrawNow();
+           }
+        }
+      
       
       }
     PRINT( _L("Camera TrySwitchViewL E") )
@@ -5657,6 +5669,44 @@ void CCamAppUi::HandleShutterKeyL( TBool aPressed )
         }
     }
 
+// ---------------------------------------------------------
+// CCamAppUi::IsHeadsetConnected
+// Return whether headset is connected
+// ---------------------------------------------------------
+// 
+TBool CCamAppUi::IsHeadsetConnected() const
+    {
+    TBool connected( EFalse );
+    
+    TRAP_IGNORE(
+        {
+        CAccMonitor* monitor = CAccMonitor::NewLC();
+        RConnectedAccessories accessories;
+        CleanupClosePushL( accessories );
+          
+        TAccMonCapability device = KAccMonNoDevice;
+            
+        monitor->GetConnectedAccessoriesL( accessories );
+        TInt count = accessories.Count();
+           
+        // loop through connected accessories
+        for ( TInt i = 0; i != count; i++ )
+            {
+            device = accessories[i]->AccDeviceType();
+            // headset device type
+            if ( device == KAccMonHeadset )
+                {
+                connected = ETrue;
+                break;
+                }
+            }
+           
+        CleanupStack::PopAndDestroy( &accessories );
+        CleanupStack::PopAndDestroy( monitor );     
+        });
+                
+    return connected;
+    }
 
 // ---------------------------------------------------------------------------
 // CCamAppUi::HandleVolumeKeyEvent
@@ -5668,7 +5718,7 @@ void CCamAppUi::HandleVolumeKeyEvent( TRemConCoreApiOperationId aOperationId,
     {
     PRINT2( _L("Camera => CCamAppUi::HandleVolumeKeyEvent op (%d) act (%d)"), aOperationId, aButtonAct )
     
-    if ( !iZoomUsingVolumeKeys )
+    if ( !iZoomUsingVolumeKeys || IsHeadsetConnected() )
         {
         PRINT( _L("Camera <= CCamAppUi::HandleVolumeKeyEvent NOT zooming with volume keys") )
         return;

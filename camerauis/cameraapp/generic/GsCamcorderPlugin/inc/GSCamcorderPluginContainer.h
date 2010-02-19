@@ -21,7 +21,7 @@
 
 // INCLUDES
 // System includes
-#include <GSBaseContainer.h>
+#include <gsbasecontainer.h>
 
 // CONSTANTS
 const TInt KGSCamSettingsListImageIndex = 0;

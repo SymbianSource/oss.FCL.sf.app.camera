@@ -1040,6 +1040,22 @@ RESOURCE AVKON_SETTING_PAGE_EXTENSION r_setting_page_extension
     flags = KAknSettingPageNoEmbeddedSoftKeys;
     }
 
+//----------------------------------------------------
+//
+//    r_cam_gssettings_quality_settings_page
+//	  setting page resource for the quality slider
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_cam_gssettings_quality_settings_page
+	{
+	// the type and editor resource are included so that the
+	// settings page can be constructed without crashing but are not used
+	// The custom quality control is used instead
+	type = EAknCtPopupSettingList;
+	editor_resource_id = r_cam_setting_listbox;
+	softkey_resource = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+	}
 
 //----------------------------------------------------
 //
@@ -1061,6 +1077,23 @@ RESOURCE AVKON_SETTING_PAGE r_cam_settings_quality_settings_page
 
 //----------------------------------------------------
 //
+//    r_cam_gssettings_location_settings_page 
+//   
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_cam_gssettings_location_settings_page
+    {
+    // the type and editor resource are included so that the
+    // settings page can be constructed without crashing but are not used
+    // The custom quality control is used instead
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_cam_setting_listbox;  
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;            
+    }
+
+//----------------------------------------------------
+//
 //    r_cam_settings_location_settings_page   
 //   
 //
@@ -1078,6 +1111,77 @@ RESOURCE AVKON_SETTING_PAGE r_cam_settings_location_settings_page
     }
 
 // VIDEO SETTINGS RESOURCES
+
+//----------------------------------------------------
+//
+//    r_cam_video_gssettings_item_list_camcorder   
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_ITEM_LIST r_cam_video_gssettings_item_list_camcorder
+	{
+	items =
+		{
+    AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemVideoQuality;
+			setting_page_resource = r_cam_gssettings_quality_settings_page;
+			associated_resource = r_cam_video_quality_texts;
+			name = qtn_lcam_sett_attr_vi_type;
+			},
+    AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemVideoStab;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			associated_resource = r_cam_on_off_texts_vid_stable;
+			name = qtn_lcam_sett_attr_vid_stable;
+			},
+    AVKON_SETTING_ITEM
+          {
+          identifier            = ECamSettingItemVideoAudioRec;
+          setting_page_resource = r_cam_settings_list_settings_page;
+          associated_resource   = r_cam_texts_vid_audiomute_land;
+          name                  = qtn_lcam_sett_attr_audio_rec;
+          },
+
+     AVKON_SETTING_ITEM
+		 {
+          identifier            = ECamSettingItemContinuousAutofocus;  
+          setting_page_resource = r_cam_settings_list_settings_page;
+          associated_resource   = r_cam_texts_vid_continuous_af;
+          name                  = qtn_lcam_sett_attr_cont_af;
+          },
+     AVKON_SETTING_ITEM
+			{
+			identifier            = ECamSettingItemVideoShowCapturedVideo;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			associated_resource   = r_cam_on_off_texts_vid_showcap_land;
+			name                  = qtn_lcam_sett_attr_post_vi;
+			},
+
+		AVKON_SETTING_ITEM
+	    {
+      identifier = ECamSettingItemVideoNameBaseType;
+      setting_page_resource = r_cam_settings_list_settings_page;
+      associated_resource = r_cam_date_or_text_texts;
+      name = qtn_lcam_sett_attr_video_name;
+      },
+		AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemVideoMediaStorage;
+			setting_page_resource = r_cam_image_memory_selection_dialog;
+			name = qtn_lcam_sett_attr_store;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemRestoreCameraSettings;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			name = qtn_lcam_sett_attr_reset;
+			}
+		};
+
+	}
+
 
 //----------------------------------------------------
 //
@@ -1148,6 +1252,86 @@ RESOURCE AVKON_SETTING_ITEM_LIST r_cam_video_settings_item_list_camcorder
 		};
 
 	}
+
+//----------------------------------------------------
+//
+//    r_cam_video_gssettings_with_location_item_list_camcorder 
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_ITEM_LIST r_cam_video_gssettings_with_location_item_list_camcorder
+    {
+    items =
+        {
+    AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemVideoQuality;
+            setting_page_resource = r_cam_gssettings_quality_settings_page;
+            associated_resource = r_cam_video_quality_texts;
+            name = qtn_lcam_sett_attr_vi_type;
+            },
+    AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemRecLocation;
+            // The quality page resource is used to prevent crashing in the construction phase
+            // The type and editor resource are included but are not used
+            // The custom quality control is used instead
+            setting_page_resource = r_cam_gssettings_location_settings_page;
+            associated_resource = r_cam_photo_location_texts;
+            name = qtn_lcam_sett_attr_rec_location;
+            },
+    AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemVideoStab;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            associated_resource = r_cam_on_off_texts_vid_stable;
+            name = qtn_lcam_sett_attr_vid_stable;
+            },
+    AVKON_SETTING_ITEM
+      {
+      identifier            = ECamSettingItemVideoAudioRec;
+      setting_page_resource = r_cam_settings_list_settings_page;
+      associated_resource   = r_cam_texts_vid_audiomute_land;
+      name                  = qtn_lcam_sett_attr_audio_rec;
+      },
+    AVKON_SETTING_ITEM   
+          {
+          identifier            = ECamSettingItemContinuousAutofocus;  
+          setting_page_resource = r_cam_settings_list_settings_page;
+          associated_resource   = r_cam_texts_vid_continuous_af;
+          name                  = qtn_lcam_sett_attr_cont_af;
+          },
+ 
+    AVKON_SETTING_ITEM
+            {
+            identifier            = ECamSettingItemVideoShowCapturedVideo;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            associated_resource   = r_cam_on_off_texts_vid_showcap_land;
+            name                  = qtn_lcam_sett_attr_post_vi;
+            },
+
+        AVKON_SETTING_ITEM
+        {
+      identifier = ECamSettingItemVideoNameBaseType;
+      setting_page_resource = r_cam_settings_list_settings_page;
+      associated_resource = r_cam_date_or_text_texts;
+      name = qtn_lcam_sett_attr_video_name;
+      },
+        AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemVideoMediaStorage;
+            setting_page_resource = r_cam_image_memory_selection_dialog;
+            name = qtn_lcam_sett_attr_store;
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemRestoreCameraSettings;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            name = qtn_lcam_sett_attr_reset;
+            }
+        };
+
+    }
 
 //----------------------------------------------------
 //
@@ -1437,6 +1621,81 @@ RESOURCE POPUP_SETTING_LIST r_cam_setting_listbox
 
 //----------------------------------------------------
 //
+//    r_cam_photo_gssettings_item_list_camcorder 
+//
+//----------------------------------------------------
+//
+
+RESOURCE AVKON_SETTING_ITEM_LIST
+r_cam_photo_gssettings_item_list_camcorder
+	{
+	items =
+		{
+		AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemPhotoQuality;
+			setting_page_resource = r_cam_gssettings_quality_settings_page;
+			associated_resource = r_cam_photo_quality_texts;
+			name = qtn_lcam_sett_attr_quality;
+			},
+
+    AVKON_SETTING_ITEM
+			{
+			identifier            = ECamSettingItemShowCapturedPhoto;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			associated_resource   = r_cam_on_off_texts_img_showcap_land;
+			name                  = qtn_lcam_sett_attr_post_ph;
+			},
+
+		AVKON_SETTING_ITEM
+			{
+      identifier = ECamSettingItemPhotoNameBaseType;
+      setting_page_resource = r_cam_settings_list_settings_page;
+      associated_resource = r_cam_date_or_text_texts;
+      name = qtn_lcam_sett_attr_name_base;
+      },
+
+      // If optical zoom is supported, could use setting for digital zoom only.
+      // If optical zoom not supported, this setting is needed for extended zoom only.
+
+	AVKON_SETTING_ITEM
+			{
+			identifier            = ECamSettingItemPhotoDigitalZoom;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			associated_resource   = r_cam_ext_zoom_texts;
+			name                  = qtn_lcam_sett_attr_zoom;         // "Extended digital zoom"
+			},
+    AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemPhotoCaptureTone;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			associated_resource = r_cam_capture_tone_list_texts;
+			name = qtn_lcam_sett_attr_tone;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier            = ECamSettingItemImageRotation;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			associated_resource   = r_cam_on_off_texts_img_rotate;
+			name                  = qtn_lcam_sett_attr_tsensor;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemPhotoMediaStorage;
+			setting_page_resource = r_cam_image_memory_selection_dialog;
+			name = qtn_lcam_sett_attr_store;
+			},
+		AVKON_SETTING_ITEM
+			{
+			identifier = ECamSettingItemRestoreCameraSettings;
+			setting_page_resource = r_cam_settings_list_settings_page;
+			name = qtn_lcam_sett_attr_reset;
+			}
+		};
+	} 
+
+//----------------------------------------------------
+//
 //    r_cam_photo_settings_item_list_camcorder
 //
 //----------------------------------------------------
@@ -1509,6 +1768,89 @@ r_cam_photo_settings_item_list_camcorder
 			}
 		};
 	}
+
+
+//----------------------------------------------------
+//
+//    r_cam_photo_gssettings_with_location_item_list_camcorder
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_ITEM_LIST
+r_cam_photo_gssettings_with_location_item_list_camcorder
+    {
+    items =
+        {
+        AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemPhotoQuality;
+            setting_page_resource = r_cam_gssettings_quality_settings_page;
+            associated_resource = r_cam_photo_quality_texts;
+            name = qtn_lcam_sett_attr_quality;
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemRecLocation;
+            // The quality page resource is used to prevent crashing in the construction phase
+            // The type and editor resource are included but are not used
+            // The custom quality control is used instead
+            setting_page_resource = r_cam_gssettings_location_settings_page;
+            associated_resource = r_cam_photo_location_texts;
+            name = qtn_lcam_sett_attr_rec_location;
+            },
+    AVKON_SETTING_ITEM
+            {
+            identifier            = ECamSettingItemShowCapturedPhoto;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            associated_resource   = r_cam_on_off_texts_img_showcap_land;
+            name                  = qtn_lcam_sett_attr_post_ph;
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemPhotoNameBaseType;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            associated_resource = r_cam_date_or_text_texts;
+            name = qtn_lcam_sett_attr_name_base;
+            },
+
+      // If optical zoom is supported, could use setting for digital zoom only.
+      // If optical zoom not supported, this setting is needed for extended zoom only.
+
+    AVKON_SETTING_ITEM
+            {
+            identifier            = ECamSettingItemPhotoDigitalZoom;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            associated_resource   = r_cam_ext_zoom_texts;
+            name                  = qtn_lcam_sett_attr_zoom;         // "Extended digital zoom"
+            },
+    AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemPhotoCaptureTone;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            associated_resource = r_cam_capture_tone_list_texts;
+            name = qtn_lcam_sett_attr_tone;
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier            = ECamSettingItemImageRotation;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            associated_resource   = r_cam_on_off_texts_img_rotate;
+            name                  = qtn_lcam_sett_attr_tsensor;
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemPhotoMediaStorage;
+            setting_page_resource = r_cam_image_memory_selection_dialog;
+            name = qtn_lcam_sett_attr_store;
+            },
+        AVKON_SETTING_ITEM
+            {
+            identifier = ECamSettingItemRestoreCameraSettings;
+            setting_page_resource = r_cam_settings_list_settings_page;
+            name = qtn_lcam_sett_attr_reset;
+            }
+        };
+    }
 
 
 //----------------------------------------------------

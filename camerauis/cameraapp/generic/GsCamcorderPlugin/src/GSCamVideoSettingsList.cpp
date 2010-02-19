@@ -96,11 +96,13 @@ void CGSCamVideoSettingsList::ConstructL( TBool aLaunchedFromGS,
     if ( iModel.UiConfigManagerPtr() &&
          iModel.UiConfigManagerPtr()->IsLocationSupported() )
         {
-        resId =  R_CAM_VIDEO_SETTINGS_WITH_LOCATION_ITEM_LIST_CAMCORDER;
+        resId =  iLaunchedFromGS?R_CAM_VIDEO_GSSETTINGS_WITH_LOCATION_ITEM_LIST_CAMCORDER:
+                                 R_CAM_VIDEO_SETTINGS_WITH_LOCATION_ITEM_LIST_CAMCORDER;
         }
     else
         {
-        resId =  R_CAM_VIDEO_SETTINGS_ITEM_LIST_CAMCORDER;
+        resId =  iLaunchedFromGS?R_CAM_VIDEO_GSSETTINGS_ITEM_LIST_CAMCORDER:
+                                 R_CAM_VIDEO_SETTINGS_ITEM_LIST_CAMCORDER;
         }
 
     if ( iSecondaryCameraSettings )

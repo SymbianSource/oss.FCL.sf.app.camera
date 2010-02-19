@@ -430,6 +430,11 @@ void CCamCaptureSetupContainer::HandlePointerEventL(  const TPointerEvent& aPoin
         PRINT ( _L("Camera <> CCamCaptureSetupContainer::HandlePointerEventL start viewfinder") );
         ReserveAndStartVF();
         }
+    else
+        {
+        PRINT ( _L("Camera <> CCamCaptureSetupContainer::HandlePointerEventL handle selected item") );
+        iCaptureSetupControl->HandlePointerEventL( aPointerEvent );
+        }
     
     /*if( iController.CurrentMode() == ECamControllerIdle || 
         iController.CurrentMode() == ECamControllerShutdown )
@@ -527,7 +532,7 @@ void CCamCaptureSetupContainer::HandlePointerEventL(  const TPointerEvent& aPoin
     	// container has some other control than listbox
     	CCoeControl::HandlePointerEventL( aPointerEvent );  
     	}*/
-	 iCaptureSetupControl->HandlePointerEventL( aPointerEvent );
+	 //iCaptureSetupControl->HandlePointerEventL( aPointerEvent );
     }
 
 // ---------------------------------------------------------

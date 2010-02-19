@@ -123,14 +123,10 @@ CCamSettingProvider::ProvideCameraParamL(
       CheckNonNullL( ptr, KErrNotFound );
       TCamParamsImage& params( (*ptr)() );
       CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( CEikonEnv::Static()->AppUi() );
-      if ( appUi->ActiveCamera() == ECamActiveCameraSecondary )
-      	{
-      	params.iFormat = CCamera::EFormatJpeg;
-      	}
-      else // primary camera
-      	{
-      	params.iFormat = CCamera::EFormatExif;
-      	}
+      
+      // Both primary and secondary camera use Exif format
+      params.iFormat = CCamera::EFormatExif;  
+
       TCamPhotoSizeId PhotoSizeIndex = iSettingsModel->CurrentPhotoResolution();
       TSize PhotoSize = iSettingsModel->ImageResolutionFromIndex( PhotoSizeIndex );
       params.iSize     = PhotoSize;
@@ -227,7 +223,10 @@ CCamSettingProvider::ProvideCameraParamL(
         CCamera::TFormat viewfinderFormat =
             CCamSettingConversion::Map2CameraFormat( displayMode );
 
-        const TCamCameraMode cameraMode = iController.CurrentMode();
+        const TCamCameraMode cameraMode =
+        ( appUi->TargetMode() != ECamControllerIdle)
+            ? appUi->TargetMode()
+            : iController.CurrentMode();
         const TInt           resolution = (cameraMode == ECamControllerVideo)
                                         ? iController.GetCurrentVideoResolution()
                                         : iController.GetCurrentImageResolution();

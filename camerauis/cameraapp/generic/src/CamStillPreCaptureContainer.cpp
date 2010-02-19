@@ -40,7 +40,7 @@
 
 #include "camvfgridinterface.h"
 #include "camlinevfgriddrawer.h"
-#include "campanic.h"
+#include "CamPanic.h"
 
 // Constants
 const TUid KGridDrawerUid = { KCamLineDrawVfGridUid };

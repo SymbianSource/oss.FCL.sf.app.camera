@@ -100,7 +100,6 @@ CCamImageSaveActive::~CCamImageSaveActive()
 
 #if defined(RD_MDS_2_5) && !defined(__WINSCW__) && !defined(__WINS__)
     DeRegisterHarverterClientEvents();
-    iHarvesterClient.Close();
 #endif // defined(RD_MDS_2_5) && !defined(__WINSCW__) && !defined(__WINS__)
 
     PRINT( _L("Camera <= ~CCamImageSaveActive") );
@@ -962,6 +961,8 @@ void CCamImageSaveActive::DeRegisterHarverterClientEvents()
         {
         iHarvesterClient.RemoveObserver( this );
         iRegisteredForHarvesterEvents = EFalse;
+        iHarvesterClient.Close();
+        iHarvesterClientConnected = EFalse;
         }
     else
         {

@@ -1221,7 +1221,15 @@ void CCamZoomModel::StartZoomTimer()
         
         case ECamZoomModeDigital:
             {
-            stepPeriod = iZoomLAF.iZoomSpeedDig * 1000;
+            if( iCameraState & ECamImageOn )
+                {    
+                stepPeriod = iZoomLAF.iZoomSpeedDig * 1000;
+                }
+            else
+                {
+                // use slower speed for videomode        
+                stepPeriod = iZoomLAF.iZoomSpeedDig * 2000;
+                }    
             break;        
             }
         

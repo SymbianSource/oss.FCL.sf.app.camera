@@ -1295,6 +1295,11 @@ class CCamAppUi : public CCamAppUiBase,
         * @param aHide whether to hide or make visible
         */
         void HideTaskL(TBool aHide);
+        
+        /**
+        * returns ETrue if headset is connected
+        */ 
+        TBool IsHeadsetConnected() const;
 
     public:
         /**

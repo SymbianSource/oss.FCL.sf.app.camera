@@ -258,6 +258,7 @@ CCamVideoPreCaptureView::HandleCommandL( TInt aCommand )
       {
       PRINT( _L("Camera <> CCamVideoPreCaptureView::HandleCommandL: case ECamCmdExitStandby") );
       ExitStandbyModeL();
+      UpdateToolbarIconsL();
       break;
       }
     // ---------------------------------------------------

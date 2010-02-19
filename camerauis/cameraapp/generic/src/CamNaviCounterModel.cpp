@@ -1920,6 +1920,7 @@ void CCamNaviCounterModel::TouchLayoutL()
         variant = 1; // landscape
         indicatorVariant = 0;
         }
+    TInt secCamera = ECamActiveCameraSecondary == iController.ActiveCamera();
 
     TAknLayoutRect camIndicatorPane;
     camIndicatorPane.LayoutRect( iExtent,
@@ -1929,7 +1930,7 @@ void CCamNaviCounterModel::TouchLayoutL()
             AknLayoutScalable_Apps::cam4_indicators_pane_g2( indicatorVariant ) );
    
     iPhotoTextItem->SetLayoutL( camIndicatorPane.Rect(),
-                AknLayoutScalable_Apps::cam4_indicators_pane_t1( indicatorVariant ) );
+                AknLayoutScalable_Apps::cam4_indicators_pane_t1( secCamera ) );
 
     TAknLayoutRect vidIndicatorPane;
     vidIndicatorPane.LayoutRect( iExtent,
