@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -52,7 +52,7 @@
 #include <oommonitorsession.h>
 #include <driveinfo.h>
 #include <pathinfo.h>
-#include <accmonitor.h>
+#include <AccMonitor.h>
 
 #ifndef __WINSCW__
 //#include <SFIUtilsAppInterface.h>
@@ -380,49 +380,51 @@ void CCamAppUi::ConstructL()
       CamUtility::GetPsiInt( ECamPsiPrimaryCameraOrientation, orientation );
       }
 
-  // Finish engine construction    
-  if( uiOrientationOverride )
-    {
-    iController.CompleteConstructionL();
-    }
-
   if ( orientation == ( TInt ) EAppUiOrientationLandscape )
     {
     PRINT( _L("Camera <> orientation is landscape ") )
     iCamOrientation = (ECamHandLeft == iSoftkeyPosition ) 
                     ? ECamOrientationCamcorderLeft 
                     : ECamOrientationCamcorder;
-    if( uiOrientationOverride )
-      {
-      //set orientation to CCamera	
-      iController.SetCameraOrientationModeL( iLandscapeScreenMode );
-      // and complete the cameracontroller construction
-      iController.CompleteCameraConstructionL();
-      }
+
     PRINT( _L("Camera <> Calling BaseConstructL") )
     OstTrace0( CAMERAAPP_PERFORMANCE, CCAMAPPUI_CONSTRUCTL, "e_CAM_APP_BASE_CONSTRUCT 1" ); //CCORAPP_APP_BASE_CONSTRUCT_START
     BaseConstructL( EAppOrientationLandscape | EAknEnableSkin | EAknEnableMSK | 
                     ENonStandardResourceFile | EAknSingleClickCompatible );
     OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMAPPUI_CONSTRUCTL, "e_CAM_APP_BASE_CONSTRUCT 0" );    //CCORAPP_APP_BASE_CONSTRUCT_END
     PRINT( _L("Camera <> BaseConstructL Complete") )
+                            
+    if( uiOrientationOverride )
+      {
+      // Finish engine construction
+      iController.CompleteConstructionL();  
+      //set orientation to CCamera	
+      iController.SetCameraOrientationModeL( iLandscapeScreenMode );
+      // and complete the cameracontroller construction
+      iController.CompleteCameraConstructionL();
+      }
     }
   else
     {
     PRINT( _L("Camera <> orientation is portrait") )
     iCamOrientation = ECamOrientationPortrait;
-    if( uiOrientationOverride )
-      {
-      //set orientation to CCamera	
-      iController.SetCameraOrientationModeL( iPortraitScreenMode );
-      // and complete the cameracontroller construction
-      iController.CompleteCameraConstructionL();
-      }     
+    
     PRINT( _L("Camera <> Calling BaseConstructL") )
     OstTrace0( CAMERAAPP_PERFORMANCE, DUP4_CCAMAPPUI_CONSTRUCTL, "e_CAM_APP_BASE_CONSTRUCT 1" );
     BaseConstructL( EAppOrientationPortrait | EAknEnableSkin | EAknEnableMSK | 
                     ENonStandardResourceFile );  
     OstTrace0( CAMERAAPP_PERFORMANCE, DUP5_CCAMAPPUI_CONSTRUCTL, "e_CAM_APP_BASE_CONSTRUCT 0" );
     PRINT( _L("Camera <> BaseConstructL Complete") )
+    
+    if( uiOrientationOverride )
+      {
+      // Finish engine construction
+      iController.CompleteConstructionL();  
+      //set orientation to CCamera	
+      iController.SetCameraOrientationModeL( iPortraitScreenMode );
+      // and complete the cameracontroller construction
+      iController.CompleteCameraConstructionL();
+      }     
     }
 
     PERF_EVENT_END_L2( EPerfEventAvkonUIConstruction );
@@ -2385,7 +2387,20 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
                 SetPreCaptureMode( ECamPreCapViewfinder ); 
                 }
             iFirstBoot = EFalse;
-            iView->HandleCommandL( ECamCmdPopUpMenuZoom );
+            // Do not show zoom pane when toolbar extension is visible
+            if ( iController.IsTouchScreenSupported() )
+                {
+                CAknToolbar* toolbar = CurrentFixedToolbar();
+                if ( toolbar )
+                    {
+                    CAknToolbarExtension* toolbarextension =
+                    toolbar->ToolbarExtension();
+                    if ( toolbarextension && !toolbarextension->IsShown() )
+                        {
+                        iView->HandleCommandL( ECamCmdPopUpMenuZoom );
+                        }
+                    }
+                }
             }
         //Remaining recording time counter update needed when recording has stopped and
         //show last captured video setting is off.
@@ -2539,21 +2554,6 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
                     }
                 }
             }
- 
-      if ( iController.UiConfigManagerPtr() && iController.UiConfigManagerPtr()->IsLocationSupported() )
-          {
-          // If record location setting is on, stop location trail
-          if ( ECamViewStatePreCapture != iViewState && ECamLocationOn == iController.IntegerSettingValue( ECamSettingItemRecLocation ) )
-          	  {
-          	  PRINT( _L("Camera: Gallery notified and non pre-capture view, stop location trail") )
-          	  iController.StopLocationTrail();
-          	  }
-          else
-          	  {
-              PRINT1( _L("Camera: location trail not in use or view state (%d) is precapture"), iViewState )
-          	  }
-          }
-
         break;
         }
     // -----------------------------------------------------
@@ -3351,17 +3351,6 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                && iController.UiConfigManagerPtr()->IsOrientationSensorSupported() )
           // Shut down the Sensor API object.
           iController.UpdateSensorApiL(EFalse);
-
-          if ( iController.UiConfigManagerPtr() && 
-               iController.UiConfigManagerPtr()->IsLocationSupported() )
-              {
-        	  // If record location setting is on, stop location trail when losing focus
-        	  if ( AppInBackground( EFalse ) )
-        	      {
-        	      PRINT( _L("Camera: CCamAppUi::HandleWsEventL focus lost, stop location trail") )
-        	      iController.StopLocationTrail();
-        	      }
-              }
 
     #if !defined (__WINSCW__)
           // relinquish capture keys
@@ -8145,7 +8134,10 @@ void CCamAppUi::SetToolbarVisibility()
             // view is active.
             if ( iMode == iTargetMode &&
                 ( ( iMode == ECamControllerVideo && iView == iVideoCaptureView ) ||
-                  ( iMode == ECamControllerImage && iView == iStillCaptureView ) ) )
+                  ( iMode == ECamControllerImage && iView == iStillCaptureView ) ) &&
+                ( iPreCaptureMode != ECamPreCapCaptureSetup ) && 
+                ( iPreCaptureMode != ECamPreCapGenericSetting ) && 
+                ( iPreCaptureMode != ECamPreCapSceneSetting ) )
                 {
                 fixedToolbar->SetToolbarVisibility( ETrue );
                 }

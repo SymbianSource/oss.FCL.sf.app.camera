@@ -19,6 +19,9 @@
 #define CAMPRECAPTUREVIEWBASE_H
 
 #include <akntoolbarobserver.h>
+#include <akntouchgesturefw.h>
+#include <akntouchgesturefwobserver.h>
+#include <akntouchgesturefwevents.h>
 
 #include "CamCaptureSetupViewBase.h"
 
@@ -32,6 +35,8 @@ class MAknsSkinInstance;
 class TAknsItemID;
 class CAknButton;
 
+
+using namespace AknTouchGestureFw;
 // CLASS DECLARATION
 
 /**
@@ -41,7 +46,8 @@ class CAknButton;
 */
 class CCamPreCaptureViewBase : 	public CCamCaptureSetupViewBase,
 								public MCamControllerObserver,
-								public MAknToolbarObserver
+								public MAknToolbarObserver,
+								public MAknTouchGestureFwObserver
     {
     public:  // Constructors and destructor
         
@@ -107,7 +113,18 @@ class CCamPreCaptureViewBase : 	public CCamCaptureSetupViewBase,
         * @since 2.8
         */
         virtual void ExitAllModesL();
-        
+
+        /**
+         * Gesture events are subscribed once the containers are constructed by 
+         * derived class. 
+         */
+        void CreateContainerL();
+
+        /**
+         * Gesture event notifications are received in this function. 
+         */
+        void HandleTouchGestureL( MAknTouchGestureFwEvent& aEvent );        
+
     public: // New functions
 
        /**
@@ -394,7 +411,10 @@ public:
         TBool iAssumePostCaptureView;
         
         TBool iLocationTrailConnecting;
-		
+        
+        //  Gesture related
+        CAknTouchGestureFw *iGestureFw;
+        TInt iLastMovement;
     };
 
 #endif      // CAMPRECAPTUREVIEWBASE_H 

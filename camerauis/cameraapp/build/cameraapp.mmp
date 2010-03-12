@@ -292,6 +292,7 @@ LIBRARY CFClient.lib
 LIBRARY CFServices.lib
 LIBRARY ActivePalette.lib
 LIBRARY aknlayout2.lib
+LIBRARY akntouchgesturefw.lib
 LIBRARY accmonitor.lib
 
 // Remote Controller framework

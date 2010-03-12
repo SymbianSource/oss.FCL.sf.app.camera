@@ -27,7 +27,7 @@
 #include <barsread.h>
 #include <gscamerapluginrsc.rsg>
 #include <camerasettingsplugin.mbg>
-#include <GSTabHelper.h>
+#include <gstabhelper.h>
 
 #include "CamAppUid.h"
 #include "GSCamcorderPlugin.h"

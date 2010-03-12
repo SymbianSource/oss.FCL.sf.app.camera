@@ -68,6 +68,10 @@ const TInt KZoomPanelTimeout = 4000000;     // 4s
 const TInt KReticuleFlashTimeout = 250000;  // Quarter of a second (in microseconds).
 const TInt KAFIconCorners = 4; // Hip to be square 
 
+const TInt KIndicatorBlinkDelay = 250 * 1000;
+const TInt KNumberOfBlinks = 3;
+const TInt KNumberOfBlinksVideo = 8;
+
 #include "camvfgridinterface.h"
 #include "camlinevfgriddrawer.h"
 
@@ -781,6 +785,60 @@ CCamPreCaptureContainerBase
                 }
             }
         }
+    // ---------------------------------------------------        
+    case ECamEventImageQualityChanged:
+    case ECamEventVideoQualityChanged:
+        if ( iBlinkResolutionIndicator ) 
+            {
+            // Force the first blink to occur right away 
+            iDrawIndicator = EFalse;
+            DrawResolutionIndicator();
+
+            // Update the resolution indicator icon to be used.
+            SetResolutionIndicator();
+
+            // Start the blinking timer
+            if ( !iIndBlinkTimer )
+                {
+                iIndBlinkTimer = CPeriodic::NewL( EPriorityLess );
+                }
+            else 
+                {
+                iIndBlinkTimer->Cancel();
+                }
+
+            iToggleCountdown = 2 * KNumberOfBlinks;
+            if ( ECamEventVideoQualityChanged == aEvent )
+                {
+                iToggleCountdown = 2 * KNumberOfBlinksVideo;
+                }
+            PRINT( _L("Camera <> start timer to blink indicator") );
+            iIndBlinkTimer->Start( KIndicatorBlinkDelay,
+                                   KIndicatorBlinkDelay,
+                                   TCallBack( IndicatorVisible, this) );
+
+            // Force the first blink to occur right away 
+            iDrawIndicator = ETrue;
+            DrawResolutionIndicator();
+
+            // Quality level has changed through pinch gesture
+            // Reinitialise the viewfinder grid 
+            if ( iVfGridDrawer )
+                {
+                delete iVfGridDrawer;
+                iVfGridDrawer = NULL;
+            
+                TRect rect = ViewFinderFrameRect();
+                InitVfGridL( rect );
+                }
+            }
+        else
+            {
+            if ( iIndBlinkTimer )
+                iIndBlinkTimer->Cancel();
+            }
+        break; 
+    // ---------------------------------------------------
     default:
       {
       // Other events => no action.
@@ -827,6 +885,11 @@ void CCamPreCaptureContainerBase::HandleForegroundEventL( TBool aForeground )
         }
     else    
         {
+        if ( iIndBlinkTimer )
+            {
+            iIndBlinkTimer->Cancel();
+            iDrawIndicator = ETrue;
+            }
         iReceivedVfFrame = EFalse;
 
         // Cancel timer if we're losing focus
@@ -887,6 +950,13 @@ CCamPreCaptureContainerBase::HandleAppEvent( const TCamAppEvent& aEvent )
       {
       if( iBatteryPaneController )
         iBatteryPaneController->Pause( ETrue );
+      
+	  if ( iIndBlinkTimer )
+          {
+          iIndBlinkTimer->Cancel();
+          iDrawIndicator = ETrue;
+          }
+		  
       break;
       }
     default:
@@ -2562,6 +2632,68 @@ TRect CCamPreCaptureContainerBase::ResolutionIndicatorRect() const
             }
         }
     return resolutionIconLayout.Rect();
+    }
+
+void CCamPreCaptureContainerBase::BlinkResolutionIndicatorOnChange( TBool aBlink )
+    {
+    iBlinkResolutionIndicator = aBlink;
+    }
+
+void CCamPreCaptureContainerBase::DrawResolutionIndicator()
+    {
+    PRINT( _L("Camera => CCamPreCaptureContainerBase::DrawResolutionIndicator") );
+    iToggleCountdown--;
+
+    // State changed, need to redraw
+    ActivateGc();
+
+    // Invalidate the flash icon area
+    TRect rect( iResolutionIndicators[iCurrentIndicator]->LayoutRect() );
+    RWindow window = Window();
+    window.Invalidate( rect  );
+    window.BeginRedraw( rect );
+
+    // Redraw the background in that area
+    Redraw( rect );
+
+    // Draw the flash icon itself
+    CWindowGc& gc = SystemGc();
+    if( iDrawIndicator )
+        {
+        iResolutionIndicators[iCurrentIndicator]->DisplayIcon();
+        }
+    else
+        {
+        iResolutionIndicators[iCurrentIndicator]->ClearIcon();
+        }
+    iResolutionIndicators[iCurrentIndicator]->Draw( gc );
+
+    // Tell the window redraw is finished and deactivate Gc
+    window.EndRedraw();
+    DeactivateGc();
+
+    // Stop the periodic timer when enough blinking has been done
+    if ( iDrawIndicator && iToggleCountdown <= 0 )
+        {
+        iBlinkResolutionIndicator = EFalse;
+        iIndBlinkTimer->Cancel();
+        }
+
+    PRINT( _L("Camera <= CCamPreCaptureContainerBase::DrawResolutionIndicator") );
+    }
+
+TInt CCamPreCaptureContainerBase::IndicatorVisible( TAny *aSelf )
+    {
+    PRINT( _L("Camera => CCamPreCaptureContainerBase::IndicatorVisible") );
+    CCamPreCaptureContainerBase* self = static_cast<CCamPreCaptureContainerBase*> (aSelf);
+
+    if ( self )
+        {
+        self->iDrawIndicator = !self->iDrawIndicator;
+        self->DrawResolutionIndicator();
+        }
+    PRINT( _L("Camera <= CCamPreCaptureContainerBase::IndicatorVisible") );
+    return KErrNone;
     }
 
 // End of File  

@@ -75,7 +75,8 @@ CCamPreCaptureViewBase::~CCamPreCaptureViewBase()
 void CCamPreCaptureViewBase::HandleCommandL( TInt aCommand )
     {
     PRINT( _L("Camera => CCamPreCaptureViewBase::HandleCommandL") );
-                  
+
+    iLastMovement = 0;
     switch ( aCommand )
         {              
         case ECamCmdShootSetup:
@@ -258,6 +259,7 @@ void CCamPreCaptureViewBase::HandleForegroundEventL( TBool aForeground )
   {
   PRINT1( _L( "Camera => CCamPreCaptureViewBase::HandleForegroundEventL %d" ), aForeground );    
 
+  iLastMovement = 0;
   CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );                
   __ASSERT_DEBUG(appUi, CamPanic(ECamPanicNullPointer));
 
@@ -589,6 +591,7 @@ void CCamPreCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId,
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, CCAMPRECAPTUREVIEWBASE_DOACTIVATEL, "e_CCamPreCaptureViewBase_DoActivateL 1" );
     PRINT( _L( "Camera => CCamPreCaptureViewBase::DoActivateL" ) );
     iAssumePostCaptureView = EFalse;
+    iLastMovement = 0;
 
     ShowToolbarOnViewActivation( EFalse );
     /*if ( iController.UiConfigManagerPtr() && 
@@ -1368,19 +1371,6 @@ void CCamPreCaptureViewBase::ExitStandbyModeL()
         {    
         appUi->RaisePreCaptureCourtesyUI(ETrue);
         }
-    
-    if ( iController.UiConfigManagerPtr() && 
-                iController.UiConfigManagerPtr()->IsLocationSupported() )
-	   {
-	   if( ECamLocationOn == iController.IntegerSettingValue( ECamSettingItemRecLocation ) )
-		   {
-		   if( ECamActiveCameraPrimary == iController.ActiveCamera() )
-			   {
-			   PRINT( _L("Camera: CCamPreCaptureViewBase::ExitStandbyModeL - primary camera, start location/gps") )
-			   iController.StartLocationTrailL();
-			   }
-		   }
-	   }
     PRINT( _L("Camera <= CCamPreCaptureViewBase::ExitStandbyModeL" ) )
     }
 
@@ -1596,6 +1586,8 @@ void
 CCamPreCaptureViewBase::HandleAppEvent( const TCamAppEvent& aEvent )
     {
     PRINT1( _L("Camera => CCamPreCaptureViewBase::HandleAppEvent, event:%d"), aEvent );
+    // Reset last pinch movement direction
+    iLastMovement = 0;
     CCamViewBase::HandleAppEvent( aEvent );
 
     if ( aEvent == ECamAppEventFocusGained && iController.InVideocallOrRinging() )
@@ -1757,4 +1749,67 @@ void CCamPreCaptureViewBase::RedrawToolBar()
 	{
 	CEikonEnv::Static()->WsSession().ClearAllRedrawStores();
 	}
+
+// ---------------------------------------------------------------------------
+// CCamPreCaptureViewBase::CreateContainerL
+//
+// ---------------------------------------------------------------------------
+//
+void CCamPreCaptureViewBase::CreateContainerL()
+    {
+    PRINT( _L("Camera => CCamPreCaptureViewBase::CreateContainerL") );
+
+    // Create gesture fw object, set observer and gesture interest
+    iGestureFw = CAknTouchGestureFw::NewL( *this, *iContainer );
+    iGestureFw->SetGestureInterestL( EAknTouchGestureFwGroupPinch );
+
+    PRINT( _L("Camera <= CCamPreCaptureViewBase::CreateContainerL") );            
+    }
+
+// ---------------------------------------------------------------------------
+// CCamPreCaptureViewBase::HandleTouchGestureL
+//
+// ---------------------------------------------------------------------------
+//
+void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEvent )
+    {
+    PRINT( _L("Camera => CCamPreCaptureViewBase::HandleTouchGestureL") );
+    
+    // Skipped modes here
+    if ( iController.ActiveCamera() == ECamActiveCameraSecondary )
+        {
+        PRINT( _L("Camera <= CCamPreCaptureViewBase::HandleTouchGestureL") );
+        return;
+        }
+
+    MAknTouchGestureFwPinchEvent *pinch = AknTouchGestureFwEventPinch( aEvent );
+    if ( pinch )
+        {
+        // Determine the direction of pinch: +ve -> pinch outward / zoom / widen VF
+        TInt currMove = pinch->Movement();
+        TBool wide = (currMove > 0) ? ETrue : EFalse;  
+        PRINT1( _L("Camera <> CCamPreCaptureViewBase::HandleTouchGestureL - pinch, movement:%d"), currMove );
+
+        if ( ( iLastMovement >= 0 && currMove < 0 ) || 
+             ( iLastMovement <= 0 && currMove > 0 ) )
+            {
+            // Enable the blinking for resolution indicators and toggle image/video quality
+            // level between top widescreen and vga levels
+            CCamPreCaptureContainerBase* container = static_cast<CCamPreCaptureContainerBase*>( iContainer );
+            container->BlinkResolutionIndicatorOnChange( ETrue );
+            if ( iController.ToggleWideScreenQuality( wide ) )
+                {
+                iLastMovement = currMove;
+                }
+            else
+                {
+                // if the quality level wasn't changed, then disable the blinking
+                container->BlinkResolutionIndicatorOnChange( EFalse );
+                }
+            }
+        }
+
+    PRINT( _L("Camera <= CCamPreCaptureViewBase::HandleTouchGestureL") );
+    }
+
 //  End of File  

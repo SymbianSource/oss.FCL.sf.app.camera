@@ -4201,8 +4201,8 @@ CHARACTER_SET UTF8
 //d:Popup info note for camera first-time-use
 //d:This is shown as a warning to the user 
 //d:for the default value of location setting.
-//l:popup_info_list_pane_t1
-#define qtn_lcam_descr_location_ftu "Location recording can be disabled in camera settings."
+//l:none
+#define qtn_lcam_location_ftu "Location recording can be disabled in camera settings."
 
 //d:Set as default scene mode setting title
 //d:Shown in user scene setting list
@@ -4219,5 +4219,27 @@ CHARACTER_SET UTF8
 //l: list_single_pane_t1
 #define qtn_lcam_set_user_default_no "No"
 
+//d: Tooltip text for Image editor button
+//d: in touch toolbar in camera post-capture view
+//l: main_cam5_pane_t11
+#define qtn_lcam_tt_image_editor "Image editor"
+
+
+//d: Tooltip text for Video editor button
+//d: in touch toolbar in camcorder post-capture view
+//l: main_cam5_pane_t11
+#define qtn_lcam_tt_video_editor "Video editor"
+
+//d: If Geotagging is enabled by default in the Camera application, 
+//d: a location tagging dialog is shown to the user. 
+//d: It is displayed only when Camera is initiated for the first time.
+//l: none
+#define qtn_lcam_location_ftu_text "Captured photos and videos will be tagged with your location. If photos or videos are shared, the location data may also be visible to third parties. Phone will use network to get the location data. Data transfer charges may apply."
+
+//d: When a device has no mass memory and memory card is not 
+//d: inserted when opening the camera, the user will get a note
+//l: popup_note_window
+#define qtn_lcam_insert_mmc_note "Please insert memory card in order to capture photos and videos"
 
 // end of file
+

@@ -2195,7 +2195,11 @@ public:
          * Stores the UserScene settings
          */
         void StoreUserSceneSettingsL();
-        
+ 
+        /**
+         * Toggles between highest 16:9 and 4:3 quality levels.
+         */
+        TBool ToggleWideScreenQuality( TBool aWide );             
   private:
 
     // -----------------------------------------------------
@@ -2302,6 +2306,14 @@ public:
     * Notify observers about quality change.
     */
     void HandleImageQualitySettingChangeL();
+    
+    /**
+    * Handle change in video quality setting.
+    * Handle stopping viewfinder, re-preparing quality and
+    * restarting viewfinder if viewfinder is running.
+    * Notify observers about quality change.
+     */
+    void HandleVideoQualitySettingChangeL();
 
   // =======================================================
   private:    // Data

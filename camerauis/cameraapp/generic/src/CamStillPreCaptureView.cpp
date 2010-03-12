@@ -909,6 +909,8 @@ void CCamStillPreCaptureView::CreateContainerL()
         *this,
         screen );
     iContainer->SetMopParent( this );
+    
+    CCamPreCaptureViewBase::CreateContainerL();
     PRINT( _L("Camera <= CCamStillPreCaptureView::CreateContainerL" ) )
     }
 

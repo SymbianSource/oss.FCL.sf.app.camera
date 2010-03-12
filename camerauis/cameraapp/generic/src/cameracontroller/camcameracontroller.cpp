@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -856,6 +856,15 @@ CCamCameraController::McaeoVideoPrepareComplete( TInt aError )
   HandleVideoEvent( ECamCameraEventVideoInit, aError );
   // DelayCallback( ECamCameraEventVideoInit, aError, 500000 );
 #else 
+  if( aError &&
+      ( iIveCancel || ( !iIveSequenceActive && iIveRecoveryOngoing ) ) )
+      // Return if error and recovering process has been started, 
+      // but this video prepare complete is not part of recovery 
+      // i.e. iIveSequenceActive is not active yet. 
+    {
+    PRINT1( _L("Camera => CCamCameraController::McaeoVideoPrepareComplete - Ignore err %d"), aError );
+    return; 
+    }
   HandleVideoEvent( ECamCameraEventVideoInit, aError );  
 #endif // CAMERAAPP_CAE_ERR_SIMULATION
 
@@ -3896,6 +3905,7 @@ CCamCameraController::EndSequence( TInt aStatus )
   PRINT1( _L("Camera => CCamCameraController::EndSequence, status:%d"), aStatus );
 
   iIveRecoveryOngoing = EFalse;
+  iIveSequenceActive = EFalse;
 #ifdef CAMERAAPP_CAE_FIX
   if( ECamModeChangeInactive != iModeChange )
     {
@@ -4098,6 +4108,11 @@ CCamCameraController::HandleReserveGainEvent( TInt aStatus )
     {
     PRINT( _L("Camera => CCamCameraController::HandleReserveGainEvent - return, recovery in progress"));
     return;
+    }
+  if( iIveRecoveryOngoing && !iIveSequenceActive )
+    {
+    PRINT( _L("Camera => CCamCameraController::HandleReserveGainEvent - first recovering sequence command executed"));
+    iIveSequenceActive = ETrue;
     }
   // We should be blocking new request at the moment.
   __ASSERT_DEBUG( iInfo.iBusy, Panic( ECamCameraControllerCorrupt ) );
@@ -6606,6 +6621,7 @@ void CCamCameraController::DoIveRecovery()
         else
             {
             PRINT( _L("Camera <> CCamCameraController::DoIveRecovery - Start recovering from beginning") )  
+            iIveSequenceActive = EFalse;
             if( IsFlagOn( iInfo.iBusy, ECamBusySequence|ECamBusySetting ) )
                 {
                 if( iActive &&
@@ -6613,13 +6629,15 @@ void CCamCameraController::DoIveRecovery()
                     {
                     iActive->Cancel();
                     }
-                EndSequence( KErrNone );  
+                iIveCancel = ETrue;
+                EndSequence( KErrNone ); // Clears iIveRecoveryOngoing and iIveSequenceActive
                 }  
             NotifyObservers( KErrNone, ECamCameraEventIveRecover, 
                              ECamCameraEventClassBasicControl );
             }
         iIveRecoveryCount--;
         iIveRecoveryOngoing = ETrue;
+        iIveCancel = EFalse;
         }
     PRINT1( _L("Camera <= CCamCameraController::DoIveRecovery iIveRecoveryCount%d"),iIveRecoveryCount )  
     }
@@ -6630,7 +6648,10 @@ void CCamCameraController::DoIveRecovery()
 //
 TBool CCamCameraController::IsWaitingIveResources()
     {
-    return iIdle && iIdle->IsActive();
+    // ETrue if recovery is started, but not completed.
+    // iIveRecoveryOngoing is set to false when last recovery command is executed
+    return (iIdle && iIdle->IsActive()) || 
+            iIveCancel || iIveRecoveryOngoing || iIveSequenceActive;
     }
 
 

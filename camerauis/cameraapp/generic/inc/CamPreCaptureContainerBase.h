@@ -262,6 +262,14 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     * Registers the view for Active Palette.
     */
     virtual void SetupActivePaletteL( CCamViewBase* aView );
+    
+    /**
+     * Tells the container to blink the resolution indicator 
+     * when the resolution changes. The flag is reset after 
+     * doing one blinking rountine or can be reset manually by 
+     * calling the function with EFalse. 
+     */
+    void BlinkResolutionIndicatorOnChange( TBool aBlink=ETrue );
 
   protected: 
 
@@ -577,6 +585,15 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     */
     void TouchLayout();
 
+    /**
+     * Callback to blink resolution indicator 
+     */
+    static TInt IndicatorVisible( TAny *aSelf );
+    
+    /**
+     * Draw resolution indicator (for blinking).
+     */
+    void DrawResolutionIndicator();
 
   // =========================================================================
   // Data
@@ -708,6 +725,12 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     CCamBatteryPaneController* iBatteryPaneController;
 
     CFbsBitmap* iViewFinderBackup;
+    
+    // For blinking of resolution indicator
+    TBool iBlinkResolutionIndicator;
+    CPeriodic* iIndBlinkTimer;
+    TBool iDrawIndicator;
+    TInt iToggleCountdown;
   // =========================================================================
   };
     

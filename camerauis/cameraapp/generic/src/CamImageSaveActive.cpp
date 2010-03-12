@@ -449,16 +449,8 @@ void CCamImageSaveActive::AddToAlbum( const TDesC& aFilename,
 #ifdef RD_MDS_2_5   
         if ( iController.UiConfigManagerPtr() && iController.UiConfigManagerPtr()->IsLocationSupported() )
             {
-            TBool location ;
+            TBool location = iController.IntegerSettingValue( ECamSettingItemRecLocation );
 			//Never save location information in second camera
-			if(iController.ActiveCamera() == ECamActiveCameraSecondary)
-				  {
-				  location = EFalse;
-				  }
-			else
-				  {
-				  location = iController.IntegerSettingValue( ECamSettingItemRecLocation );
-				  }
             iHarvesterClient.HarvestFile( aFilename,
                                           harvestAlbumIds,
                                           location );

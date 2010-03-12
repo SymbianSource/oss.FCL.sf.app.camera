@@ -3322,6 +3322,7 @@ void
 CCamAppController::IntSettingChangedL( TCamSettingItemIds aSettingItem, 
                                        TInt               aSettingValue )
   {
+  PRINT( _L("Camera => CCamAppController::IntSettingChangedL") );  
   switch( aSettingItem )
     {
     case ECamSettingItemDynamicSelfTimer:
@@ -3382,6 +3383,7 @@ CCamAppController::IntSettingChangedL( TCamSettingItemIds aSettingItem,
       break;
       }
     }
+  PRINT( _L("Camera <= CCamAppController::IntSettingChangedL") );
   }
 
 // ---------------------------------------------------------------------------
@@ -4777,7 +4779,9 @@ void CCamAppController::ConstructL()
       {
       iKeyLockStatusWatcher  = CCamPropertyWatcher::NewL( *this,
                                                           KPSUidAvkonDomain,
-                                                          KAknKeyguardStatus );      
+                                                          KAknKeyguardStatus );
+      // request notifications about key lock status
+      iKeyLockStatusWatcher->Subscribe();     
       }
   // read central repository value indicating whether camera shutter sound
   // should be played always or depending on the current profile setting
@@ -5196,27 +5200,11 @@ TBool CCamAppController::DoCaptureL()
   TBool continueWithCapture = ETrue;
   CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );  
   
-  // Capture needed as fast as possible.
-  // Use direct stopping of viewfinder
-  // unless there are settings pending,
-  // otherwise cancel capture
-  if ( !IsFlagOn( iBusyFlags, EBusySetting ) )
-      {
-      // Stop VF for burst mode or for secondary or
-      // embedded camera before capturing.
-      // VF stopping will increase capture lag.
-      if ( iInfo.iImageMode == ECamImageCaptureBurst ||
-           iInfo.iActiveCamera == ECamActiveCameraSecondary ||
-           appUi->IsEmbedded() )
-          {
-          StopViewFinder();
-          }
-      }
-  else
+  // Cancel capture if there are settings pending
+  if ( IsFlagOn( iBusyFlags, EBusySetting ) )
       {
       continueWithCapture = EFalse;
       }
-  
 
   switch( iInfo.iImageMode )
     {
@@ -7795,8 +7783,30 @@ void CCamAppController::HandlePropertyChangedL( const TUid& aCategory, const TUi
           (void)aCategory;
           (void)aKey;
           }
-
       }
+      
+      // if its key lock state changed
+      if ( aCategory == KPSUidAvkonDomain && aKey == KAknKeyguardStatus )
+          {
+          PRINT( _L("Camera <> aCategory == KPSUidAvkonDomain && aKey == KAknKeyguardStatus") );
+          if ( !IsKeyLockOn() )
+              {
+              PRINT( _L("Camera <> !IsKeyLockOn()") );
+              // if in standby view and the slide is opened then exit standby view
+              CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+              TVwsViewId activeView;
+              appUi->GetActiveViewId( activeView );
+              CCamPreCaptureViewBase* view = static_cast<CCamPreCaptureViewBase*>( appUi->View( activeView.iViewUid ) );
+              if ( iInfo.iOperation == ECamStandby ||
+                   ( view && view->IsInStandbyMode() ) )
+                  {
+                   PRINT( _L("Camera HandleSlideOpenedL => Exit Standby view") );
+                   view->HandleCommandL( ECamCmdExitStandby );
+                  }
+              }
+          }
+
+
 #endif // !( defined(__WINS__) || defined(__WINSCW__        
 
   PRINT( _L("Camera <= CCamAppController::HandlePropertyChangedL"))
@@ -8674,6 +8684,14 @@ void CCamAppController::StopLocationTrail( TBool aCloseSession )
 	    	iLocationTrailTimer->StartTimer();
 			}
 		}
+      else if ( aCloseSession ) 
+        {
+		PRINT( _L("Camera => CCamAppController::StartLocationTrailL - iLocationUtility.Close()") );
+        // location trail already stopped, but we are exiting app, so close the utility
+		iLocationUtility.Close();
+		iLocationUtilityConnected = EFalse;
+		}
+
 	#endif
 	  PRINT( _L("Camera <= CCamAppController::StopLocationTrail") );
 	  }
@@ -8851,23 +8869,23 @@ CCamAppController
               NotifyControllerObservers( ECamEventInitReady );
               }
           }
-      
-      if ( UiConfigManagerPtr()->IsLocationSupported() &&
-                   !appUi->IsEmbedded())
-              {
-              if( ECamLocationOn == IntegerSettingValue( ECamSettingItemRecLocation ) )
-                  {
-                  if( ECamActiveCameraPrimary == ActiveCamera() && ECamStandby != CurrentOperation() )
-                      {
-                      StartLocationTrailL();
-                      }
-                  else // Secondary camera 
-                      {
-                      PRINT( _L("Camera: CCamAppController::HandleCameraEventL - secondary camera, stop location trail") )
-                      StopLocationTrail();
-                      }
-                  }
-              }
+
+      if ( UiConfigManagerPtr()->IsLocationSupported() )
+        {
+        if( ECamLocationOn == IntegerSettingValue( ECamSettingItemRecLocation ) )
+            {
+            if( ECamActiveCameraPrimary == ActiveCamera())
+                {
+                StartLocationTrailL();
+                }
+            else // Secondary camera 
+                {
+                PRINT( _L("Camera: CCamAppController::HandleCameraEventL - secondary camera, stop location trail") )
+                StopLocationTrail();
+                }
+            }
+        }
+
       break;
       }
     case ECamCameraEventVfFrameReady:
@@ -8987,8 +9005,20 @@ CCamAppController
         {
         PRINT( _L( "Camera => CCamAppController::HandleCameraEventL - Issue new recovery sequence" ) );
         SetStateFromEvent( ECamCameraEventReserveLose );  
-        SetTargetMode( ECamControllerImage );
-        SetTargetImageMode( CurrentImageModeSetup() );
+        CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+        // Find target mode from appUi and set this controller target mode 
+        if( appUi->TargetMode() ==  ECamControllerVideo )
+            {
+            PRINT( _L( "Camera => CCamAppController::HandleCameraEventL - recover to video mode" ) );
+            SetTargetMode( ECamControllerVideo  );
+            SetTargetImageMode( ECamImageCaptureNone );
+            }
+        else
+            {
+            PRINT( _L( "Camera => CCamAppController::HandleCameraEventL - recover to still mode" ) );
+            SetTargetMode( ECamControllerImage );
+            SetTargetImageMode( CurrentImageModeSetup() );
+            }
         IssueModeChangeSequenceL();
         }
       else
@@ -9535,6 +9565,8 @@ CCamAppController::SetStateFromEvent( TCamCameraEventId aEventId )
       // SetMode( ECamControllerShutdown );
       SetMode( ECamControllerIdle );
       SetOperation( ECamNoOperation );
+      // we dont need location trail anymore.
+      StopLocationTrail();
       break;
     // ---------------------------------
     case ECamCameraEventPowerOn:
@@ -10932,4 +10964,128 @@ void CCamAppController::StoreUserSceneSettingsL()
     {
     iSettingsModel->StoreUserSceneSettingsL();	    
     }      
+
+// ---------------------------------------------------------------------------
+// HandleVideoQualitySettingChangeL
+// ---------------------------------------------------------------------------
+//
+void 
+CCamAppController::HandleVideoQualitySettingChangeL() 
+  {
+  PRINT( _L("Camera => CCamAppController::HandleVideoQualitySettingChangeL") );
+  if( IsViewFinding() && !Busy() ) 
+    {
+    PRINT( _L("Camera <> CCamAppController - viewfinder on, stop vf / re-prepare / start vf..") );
+    TRAPD( status, 
+      {
+      // Synchronous items
+      // IssueDirectRequestL( ECamRequestVfStop    );
+      // IssueDirectRequestL( ECamRequestSsRelease );
+      // IssueRequestL( ECamRequestVideoInit );
+      // IssueDirectRequestL( ECamRequestSsStart   );
+      // IssueDirectRequestL( ECamRequestVfStart   );
+
+      // Generate the request sequence and issue to Camera Controller.
+      RCamRequestArray sequence;
+      CleanupClosePushL( sequence );
+
+      // Asynchronously init video. No need to reconstruct video names etc.
+      sequence.Append( ECamRequestVfStop );
+      sequence.Append( ECamRequestSsRelease );
+      
+      SetVideoInitNeeded( ETrue );
+
+      sequence.Append( ECamRequestVideoRelease );
+      sequence.Append( ECamRequestVideoInit );
+
+      sequence.Append( ECamRequestSsStart );
+      sequence.Append( ECamRequestVfStart );
+
+      // Set busy flags to indicate sequence in progress and execute the seq 
+      SetFlags( iBusyFlags, EBusySequence );
+      TCleanupItem clearBusy( ClearSequenceBusyFlag, &iBusyFlags );
+      CleanupStack::PushL( clearBusy );
+      iCameraController->RequestSequenceL( sequence );
+      CleanupStack::Pop();
+   
+      iCaptureModeTransitionInProgress = ETrue;
+      CleanupStack::PopAndDestroy(); // sequence.Close()
+      });
+
+    if( KErrNone != status )
+      {
+      PRINT1( _L("Camera <> CCamAppController::HandleVideoQualitySettingChangeL, error:%d"), status );
+      SetOperation( ECamStandby, status );
+      }
+    }
+
+  PRINT( _L("Camera <= CCamAppController::HandleVideoQualitySettingChangeL") );
+  }
+
+// ---------------------------------------------------------------------------
+// CCamAppController::ToggleWideScreenQuality
+// Toggles between wide-screen (16:9) and VGA (4:3) screen resolutions.
+// Applicable only for highest quality settings for 16:9 & 4:3.
+// ---------------------------------------------------------------------------
+//
+TBool CCamAppController::ToggleWideScreenQuality( TBool aWide )
+    {
+    TBool qualityChanged = EFalse;
+    
+    if ( ECamControllerImage == iInfo.iMode && ECamActiveCameraPrimary == iInfo.iActiveCamera )
+        {
+        PRINT( _L("Camera => CCamAppController::ToggleWideScreenQuality - image mode") );
+        TInt qualityIndex = IntegerSettingValue( ECamSettingItemPhotoQuality );
+        if ( qualityIndex <= ECamImageQualityPrintW9m )
+            {
+            TCamPhotoQualitySetting imageQuality = iConfiguration->ImageQuality( qualityIndex );
+            if ( ( imageQuality.iPhotoResolution == EImageResolution12MP &&  aWide ) || 
+                 ( imageQuality.iPhotoResolution == EImageResolutionW9MP && !aWide ) )
+                {
+                qualityIndex = (ECamImageQualityPrintW9m==qualityIndex) ? ECamImageQualityPrint12m 
+                                                                        : ECamImageQualityPrintW9m;
+
+                // Ensure that the setting value is enabled/usable.
+                if ( iSettingsModel->SettingValueEnabled( ECamSettingItemPhotoQuality, qualityIndex ) )
+                    {
+                    SetIntegerSettingValueL( ECamSettingItemPhotoQuality, qualityIndex );
+                    qualityChanged = ETrue;
+                    }
+                }
+            else
+                ; // skip
+            }
+        PRINT( _L("Camera <= CCamAppController::ToggleWideScreenQuality") );
+        }
+    else if ( ECamControllerVideo == iInfo.iMode && ECamActiveCameraPrimary == iInfo.iActiveCamera ) 
+        {
+        PRINT( _L("Camera => CCamAppController::ToggleWideScreenQuality - video mode") );        
+        TInt qualityIndex = IntegerSettingValue( ECamSettingItemVideoQuality );
+        if ( qualityIndex <= ECamVideoQualityNormalHigh )
+            {
+            TVideoQualitySettings videoQuality = iConfiguration->VideoQuality( qualityIndex );
+            qualityIndex = (ECamVideoQualityNormalHigh==qualityIndex) ? ECamVideoQualityHigh
+                                                                      : ECamVideoQualityNormalHigh;
+
+            if ( ( videoQuality.iVideoResolution == ECamVideoResolutionVGA &&  aWide ) || 
+                 ( videoQuality.iVideoResolution == ECamVideoResolutionHD  && !aWide ) )
+                {
+                // Ensure that the setting value is enabled/usable.
+                if ( iSettingsModel->SettingValueEnabled( ECamSettingItemVideoQuality, qualityIndex ) )
+                    {
+                    SetIntegerSettingValueL( ECamSettingItemVideoQuality, qualityIndex );
+                    HandleVideoQualitySettingChangeL();
+                    qualityChanged = ETrue;
+                    }
+                }
+            }
+        PRINT( _L("Camera <= CCamAppController::ToggleWideScreenQuality") );
+        }
+    else // avoids LINT warning.
+        PRINT( _L("Camera =><= CCamAppController::ToggleWideScreenQuality - current quality level NOT high") );
+
+    return qualityChanged;
+    }
+
 //  End of File  
+

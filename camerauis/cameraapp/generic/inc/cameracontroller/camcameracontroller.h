@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -679,6 +679,11 @@ class CCamCameraController : public CBase,
     // (KIveRecoveryCountMax).
     TInt iIveRecoveryCount;  
     TBool iIveRecoveryOngoing;
+    // ETrue if cancelling command sequence is in progress,
+    // due to lost resources, before recovering.
+    TBool iIveCancel;
+    // ETrue when first recovery command has got callback.  
+    TBool iIveSequenceActive;
     
     CCamAppController& iAppController;
     TInt iCurrentCameraIndex;  

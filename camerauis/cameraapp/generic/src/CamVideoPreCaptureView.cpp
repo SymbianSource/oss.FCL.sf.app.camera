@@ -860,6 +860,8 @@ void CCamVideoPreCaptureView::StopViewFinder()
 //
 void CCamVideoPreCaptureView::CreateContainerL()
     {
+    PRINT( _L("Camera => CCamVideoPreCaptureView::CreateContainerL" ) )
+
     TRect screen;
     AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, screen );
 
@@ -869,6 +871,9 @@ void CCamVideoPreCaptureView::CreateContainerL()
         screen );
 
     iContainer->SetMopParent( this );
+
+    CCamPreCaptureViewBase::CreateContainerL();
+    PRINT( _L("Camera <= CCamVideoPreCaptureView::CreateContainerL" ) )
     }
 
 // ---------------------------------------------------------------------------
