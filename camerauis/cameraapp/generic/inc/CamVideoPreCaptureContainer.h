@@ -22,6 +22,8 @@
 // INCLUDES
 #include "CamPreCaptureContainerBase.h"
 
+class MTouchFeedback;
+
 // CLASS DECLARATION
 
 /**
@@ -264,6 +266,8 @@ class CCamVideoPreCaptureContainer : public CCamPreCaptureContainerBase
     
     // Position to move the resolution icon to during video capture
     TRect iResolutionIndicatorVidcapPosition;
+    
+    MTouchFeedback *iFeedback;
 
   // =======================================================
   };

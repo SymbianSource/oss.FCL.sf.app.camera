@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -74,7 +74,7 @@ TUid CCamStillUserSceneSetupView::Id() const
 void CCamStillUserSceneSetupView::CreateContainerL()
     {
     iContainer = 
-        CCamUserSceneSetupContainer::NewL( AppUi()->ClientRect(),
+        CCamUserSceneSetupContainer::NewL( ClientRect(),
             R_CAM_PHOTO_USER_SCENE_SETUP_TITLE_NAME , iController, 
             *this );
     }

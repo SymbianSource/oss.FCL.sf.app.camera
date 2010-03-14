@@ -40,6 +40,7 @@
 #include <vgacamsettings.rsg>
 #include <aknlayoutscalable_apps.cdl.h>
 #include <layoutmetadata.cdl.h>
+#include <touchfeedback.h>
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "CamVideoPreCaptureContainerTraces.h"
@@ -72,6 +73,10 @@ CCamVideoPreCaptureContainer* CCamVideoPreCaptureContainer::NewL(
 CCamVideoPreCaptureContainer::~CCamVideoPreCaptureContainer()
   {
   PRINT( _L("Camera => ~CCamVideoPreCaptureContainer") );
+  if ( iFeedback )
+      {
+      iFeedback->RemoveFeedbackForControl( this );
+      }
   delete iFileTypeIndicator;
   PRINT( _L("Camera <= ~CCamVideoPreCaptureContainer") );
   }
@@ -136,6 +141,14 @@ void CCamVideoPreCaptureContainer::ConstructL( const TRect& aRect )
         static_cast<CCamPreCaptureContainerBase*>( this )
             ->SetupActivePaletteL( static_cast<CCamViewBase*>(&iView) );
         }
+    
+    if ( iController.IsTouchScreenSupported() )
+        {
+        // Get pointer of touch feedback instance 
+        iFeedback = MTouchFeedback::Instance();
+        if ( !iFeedback )
+            iFeedback = MTouchFeedback::CreateInstanceL();
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -171,6 +184,10 @@ CCamVideoPreCaptureContainer
           {
           case ECamCapturing:
             {
+            if ( iController.IsTouchScreenSupported() && iFeedback )
+                {
+                iFeedback->EnableFeedbackForControl( this, EFalse );
+                }
             iRecordState = ECamRecording;
             iResolutionIndicators[iCurrentIndicator]->SetRect(iResolutionIndicatorVidcapPosition);
             break;
@@ -219,6 +236,10 @@ CCamVideoPreCaptureContainer
         {
         iResolutionIndicators[iCurrentIndicator]->SetRect( ResolutionIndicatorRect() );
         iFileTypeIndicator->SetRect( iFileTypeIndicatorPosition );
+        if ( iController.IsTouchScreenSupported() && iFeedback )
+            {
+            iFeedback->EnableFeedbackForControl( this, ETrue );
+            }
         break;
         }
     // ---------------------------------------------------

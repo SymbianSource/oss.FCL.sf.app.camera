@@ -31,9 +31,9 @@
 #include <bldvariant.hrh>
 #include <gscamerapluginrsc.rsg>
 #include <StringLoader.h>     //for stringloader
-#include <GSPrivatePluginProviderIds.h>
+#include <gsprivatepluginproviderids.h>
 #include <bautils.h>
-#include <GSFWViewUIDs.h>     //for kgsmainviewuid
+#include <gsfwviewuids.h>     //for kgsmainviewuid
 #include <aknnotewrappers.h>
 #include <hlplch.h>             // for hlplauncher
 

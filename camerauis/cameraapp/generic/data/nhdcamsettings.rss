@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -1088,7 +1088,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar_portrait
 RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar_landscape
     {
     lines = 3;
-    flags = KAknToolbarFixed | KAknToolbarDsaMode;
+    flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
         TBAR_CTRL
@@ -1240,7 +1240,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_portrait
 RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_landscape
     {
     lines = 3;
-    flags = KAknToolbarFixed | KAknToolbarDsaMode;
+    flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
         TBAR_CTRL
@@ -1848,7 +1848,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_postcapture_toolbar_portrait
 RESOURCE AVKON_TOOLBAR r_cam_still_postcapture_toolbar_landscape
     {
     lines = 3;
-    flags = KAknToolbarFixed | KAknToolbarDsaMode;
+    flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
         TBAR_CTRL
@@ -1998,7 +1998,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_postcapture_toolbar_portrait_upload
 RESOURCE AVKON_TOOLBAR r_cam_still_postcapture_toolbar_landscape_upload
     {
     lines = 3;
-    flags = KAknToolbarFixed | KAknToolbarDsaMode;
+    flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
         TBAR_CTRL
@@ -2635,7 +2635,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_postcapture_toolbar_portrait
 RESOURCE AVKON_TOOLBAR r_cam_video_postcapture_toolbar_landscape
     {
     lines = 3;
-    flags = KAknToolbarFixed | KAknToolbarDsaMode;
+    flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
         TBAR_CTRL
@@ -2784,7 +2784,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_postcapture_toolbar_portrait_upload
 RESOURCE AVKON_TOOLBAR r_cam_video_postcapture_toolbar_landscape_upload
     {
     lines = 3;
-    flags = KAknToolbarFixed | KAknToolbarDsaMode;
+    flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
         TBAR_CTRL

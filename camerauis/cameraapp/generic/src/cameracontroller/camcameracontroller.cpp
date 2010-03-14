@@ -95,8 +95,8 @@
 
 #include "CamAppUi.h"
 #include "CameraUiConfigManager.h"
-#include "CamViewBase.h"   
-#include "campanic.h"
+#include "CamViewBase.h"
+#include "CamPanic.h"
 // ===========================================================================
 // Local constants
 const TInt KIveRecoveryCountMax = 2;  

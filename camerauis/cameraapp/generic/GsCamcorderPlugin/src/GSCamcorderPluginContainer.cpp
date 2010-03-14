@@ -20,7 +20,7 @@
 #include <aknlists.h>               //for CAknSettingStyleListBox
 #include <gscamerapluginrsc.rsg>
 #include <camerasettingsplugin.mbg>
-#include <GSListbox.h>              //for listbox clases
+#include <gslistbox.h>              //for listbox clases
 #include <AknIconArray.h>   // CAknIconArray
 #include <eikclbd.h>        // CColumnListBoxData
 

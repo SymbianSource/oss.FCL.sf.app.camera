@@ -32,6 +32,7 @@
 #include <barsread.h>
 #include <AknUtils.h>
 #include <akntoolbar.h>
+#include <akntoolbarextension.h>
 #include <centralrepository.h>
 
 #include <ctsydomainpskeys.h>
@@ -9658,6 +9659,12 @@ CCamAppController::SetStateFromEvent( TCamCameraEventId aEventId )
             CAknToolbar* fixedToolbar = appUi->CurrentFixedToolbar();
             if ( fixedToolbar )
                 {
+                CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
+                if ( extension )
+                    {
+                    // Keep toolbar extension hidden after the half press key is released 
+                    extension->SetShown( EFalse );
+                    }
                 fixedToolbar->SetToolbarVisibility( EFalse );
                 } 
             }
@@ -10449,10 +10456,9 @@ TBool CCamAppController::IsKeyLockOn()
     {
     if ( iKeyLockStatusWatcher && iConfigManager && iConfigManager->IsKeyLockWatcherSupported() )
         {
-        CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() ); 
         TInt iKeyLockStatus = 0;
         iKeyLockStatusWatcher->Get( iKeyLockStatus );
-        if ( iKeyLockStatus == EKeyguardLocked && appUi )
+        if ( iKeyLockStatus == EKeyguardLocked )
             {
             return ETrue;
             }
