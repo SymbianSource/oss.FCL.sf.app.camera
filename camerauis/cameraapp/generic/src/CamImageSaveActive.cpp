@@ -1017,7 +1017,6 @@ void CCamImageSaveActive::CreateThumbnailsL( const CCamBurstCaptureArray& aArray
         // the thumbnail is created using the imagefile    
         if ( !err )
             {
-            snapshot->SetDisplayMode( EColor64K );    
             TRAP( err, iSnapArray.AppendL( snapshot ) );            
             if ( !err ) 
                 {

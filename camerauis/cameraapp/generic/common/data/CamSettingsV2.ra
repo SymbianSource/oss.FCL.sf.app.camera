@@ -157,6 +157,33 @@ RESOURCE CBA R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE
         };
     }
 
+
+//ME:START
+RESOURCE CBA R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT
+    {
+    flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons =
+        {
+        CBA_BUTTON
+            {            
+            id=EAknSoftkeySelect;
+            txt = text_softkey_ok;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyCancel;
+            txt = text_softkey_cancel;
+            },
+        CBA_BUTTON
+            {
+            id = ECamMSKCmdAppChange;
+            txt = qtn_msk_change;
+            }
+        };
+    }
+//ME:END
+
+
 //----------------------------------------------------
 //
 //    R_CAM_SOFTKEYS_OPTIONS_BACK__CAPTURE

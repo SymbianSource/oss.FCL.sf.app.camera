@@ -16,13 +16,12 @@
 */
 
 
-
-
 #include <imageconversion.h>
 #include <ExifRead.h>
 #include <ecam.h> // MCameraBuffer
 
 #include <eikenv.h>
+#include <SvgCodecImageConstants.hrh>
 
 #include "camlogging.h"
 #include "camfilesaveutility.h"
@@ -79,11 +78,17 @@ CCamImageDecoder::~CCamImageDecoder()
   delete iDecoder;
 
   SetImageData( NULL );
- if(iDecodedBitmap)
+  if(iDecodedBitmap)
   	{
   	delete iDecodedBitmap;
   	iDecodedBitmap = NULL;
   	}
+  if ( iDecodedMask )
+     {
+     delete iDecodedMask;
+     iDecodedMask = NULL;
+     }
+ 
   iFs.Close();
   PRINT( _L("Camera <= ~CCamImageDecoder") );
   }
@@ -149,6 +154,67 @@ CCamImageDecoder::StartConversionL( CCamBufferShare* aBuffer )
   PRINT( _L("Camera <= CCamImageDecoder::StartConversionL") );
   }
 
+
+void CCamImageDecoder::StartIconConversionL( TDesC* aFilePath )
+  {
+  PRINT( _L("Camera => CCamImageDecoder::StartConversionL 2") );
+
+  // Data for CImageDecoder must be available throughout the conversion.
+  // Need to stop any outstanding operation before deleting the descriptor.
+  Cancel();
+
+  PRINT( _L("Camera <> CCamImageDecoder: Creating decoder..") );
+
+  delete iDecoder;
+  iDecoder = NULL;
+  
+  CImageDecoder::TOptions options = (CImageDecoder::TOptions) (CImageDecoder::EOptionNoDither );
+  iDecoder = CImageDecoder::FileNewL( iFs, *aFilePath , options, KImageTypeSVGUid );
+
+  if( iDecoder->FrameCount() > 0 )
+    {
+    const TFrameInfo& info( iDecoder->FrameInfo() );
+
+#ifdef _DEBUG   
+    TSize size = info.iOverallSizeInPixels;
+    PRINT2( _L("Camera <> CCamImageDecoder: Bmp size(%d,%d)"), size.iWidth, size.iHeight );
+    PRINT1( _L("Camera <> CCamImageDecoder: Bmp dispmode(%d)"), info.iFrameDisplayMode );
+#endif
+
+    PRINT( _L("Camera <> CCamImageDecoder: Create bitmap for snapshot..") );
+    if( !iDecodedBitmap ) iDecodedBitmap = new (ELeave) CFbsBitmap;
+    else                  iDecodedBitmap->Reset();
+    
+    if( !iDecodedMask ) iDecodedMask = new (ELeave) CFbsBitmap;
+    else                iDecodedMask->Reset();
+
+    TRAPD ( createError, 
+            {
+            iDecodedBitmap->Create( info.iOverallSizeInPixels, info.iFrameDisplayMode );
+            iDecodedMask->Create( info.iOverallSizeInPixels, EGray256 );
+            } );
+    if( KErrNone != createError )
+      {
+      delete iDecodedBitmap;
+      iDecodedBitmap = NULL;
+      delete iDecodedMask;
+      iDecodedMask = NULL;
+      User::Leave( createError );
+      }
+
+    PRINT( _L("Camera <> CCamImageDecoder: start conversion..") );
+    iRetryCounter = 0;
+    iDecoder->Convert( &iStatus, *iDecodedBitmap, *iDecodedMask, 0 );
+    SetActive();
+    }
+  else
+    {
+    PRINT( _L("Camera <> CCamImageDecoder: No frame provided, leave..") );
+    User::Leave( KErrNotFound );    
+    }
+
+  PRINT( _L("Camera <= CCamImageDecoder::StartConversionL 2") );
+  }
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -253,7 +319,7 @@ CCamImageDecoder::RunL()
       // CImageDecoder has finished using the data,
       // so we are able to free it.
       SetImageData( NULL );
-      iObserver.ImageDecoded( iStatus.Int(), iDecodedBitmap );
+      iObserver.ImageDecoded( iStatus.Int(), iDecodedBitmap, iDecodedMask );
       break;
       }
     case KErrUnderflow :
@@ -298,7 +364,7 @@ CCamImageDecoder::RunError( TInt aError )
   SetImageData( NULL );
   // Leave has occurred in RunL.
   // Notify observer with error.
-  iObserver.ImageDecoded( aError, NULL );
+  iObserver.ImageDecoded( aError, NULL, NULL );
 
   PRINT( _L("Camera <= CCamImageDecoder::RunError") );
   return KErrNone;

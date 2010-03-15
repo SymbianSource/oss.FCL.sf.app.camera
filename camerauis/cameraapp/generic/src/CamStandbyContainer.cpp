@@ -316,7 +316,7 @@ void CCamStandbyContainer::HandleForegroundEventL( TBool aForeground )
     else
         {
         // set text label as blank
-        TRAP_IGNORE( iText->SetTextL( KNullDesC ) );
+        //TRAP_IGNORE( iText->SetTextL( KNullDesC ) );
         
         // cancel timer if active
         if ( iForegroundTimer->IsActive() )

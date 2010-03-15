@@ -43,7 +43,8 @@ class CCamSceneListBox : public CCamCaptureSetupListBox
         * C++ default constructor.
         */
         CCamSceneListBox( TCamCameraMode aMode, MCamSettingValueObserver* aObserver,
-        					CCamAppController& aController);
+        					CCamAppController& aController,
+        					TBool aFullySkinned=ETrue );
 
         /**
         * By default Symbian 2nd phase constructor is private.

@@ -72,7 +72,11 @@ class CCamInfoListBoxContainer : public CCamContainerBase,
                                                  TInt aListBoxResource,
                                                  TInt aSummaryResource,
                                                  TInt aSettingValue, 
-                                                 TInt aTitleResource );
+                                                 TInt aTitleResource,
+                                                 TBool aSkinnedBackGround = ETrue );
+        
+        //ME:END
+
 
         /**
         * Destructor.
@@ -100,7 +104,7 @@ class CCamInfoListBoxContainer : public CCamContainerBase,
         */
         CCamInfoListBoxContainer(   CCamAppController& aController,
                                     CAknView& aView,
-                                    TInt aSettingValue );
+                                    TInt aSettingValue, TBool aSkinnedBackGround = EFalse );
 
     public: 
         
@@ -241,6 +245,8 @@ class CCamInfoListBoxContainer : public CCamContainerBase,
         TBool iActivateOnTouchRelease;
 
         MTouchFeedback* iFeedback; // not own 
+
+        TBool iSkinnedBackGround;        
         
     };
     

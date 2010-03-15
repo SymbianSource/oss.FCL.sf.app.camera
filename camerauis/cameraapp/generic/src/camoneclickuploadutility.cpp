@@ -16,21 +16,34 @@
 */
 
 
+#include <gulicon.h>
+#include <akntoolbar.h>
+#include <aknbutton.h> 
+
 #include <AiwServiceHandler.h>
 #include <cameraapp.rsg>
 #include <vgacamsettings.rsg>
 #include <centralrepository.h>
 
+
 #include "camoneclickuploadutility.h"
 #include "camlogging.h"
 #include "CamPanic.h"
+#include "Cam.hrh"
 
-const TUid KShareOnlineCrUid = { 0x2000BB53 };
+#include <cameraapp.mbg>
+#include "camutility.h"
+
+const TUid KShareOnlineCrUid = { 0x2002CC1F };
 const TUint32 KShareCrApplicationVersion = 0x01010020;
 const TInt KCamShareOnlineVersionBufLen = 12;
-const TVersion KShareOnlineMinimumVersion( 4, 3, 0 );
+const TVersion KShareOnlineMinimumVersion( 5, 0, 0 );
 const TUid KOpenModeOneClick = { 2 };
 const TUid KCmdGetOneClickToolTip = { 15 };
+
+const TUint32 KShareImageServiceIconFileName = 0x00000002;
+const TUint32 KShareVideoServiceIconFileName = 0x00000003;
+const TUint32 KShareCommonServiceIconFileName = 0x00000004;
 
 
 // ======== MEMBER FUNCTIONS ========
@@ -92,6 +105,9 @@ CCamOneClickUploadUtility::~CCamOneClickUploadUtility()
     {
     delete iAiwServiceHandler;
     delete iTooltip;
+    
+    if ( iDecoder )
+        delete iDecoder;
     }
 
 
@@ -273,4 +289,138 @@ void CCamOneClickUploadUtility::InitializeAiwL()
 
     iAiwServiceHandler = CAiwServiceHandler::NewL();
     iAiwServiceHandler->AttachL( R_CAM_ONE_CLICK_UPLOAD_INTEREST );
+    }
+
+// ---------------------------------------------------------------------------
+// Get the icon for Share AP item
+// ---------------------------------------------------------------------------
+//
+void CCamOneClickUploadUtility::CurrentIconPathL( TCamCameraMode aMode, TDes& aPath )
+    {
+    PRINT( _L("Camera => CCamOneClickUploadUtility::CurrentIconPathL") );
+    TUint32 serviceIconId = KShareCommonServiceIconFileName;
+
+    if ( ECamControllerVideo == aMode )
+        {
+        serviceIconId = KShareVideoServiceIconFileName;
+        }
+    else // image
+        {
+        serviceIconId = KShareImageServiceIconFileName;
+        }
+
+    CRepository* rep = CRepository::NewLC( KShareOnlineCrUid );
+    User::LeaveIfError( rep->Get( serviceIconId, aPath ) );
+    CleanupStack::PopAndDestroy( rep );
+    PRINT1( _L("Camera <= CCamOneClickUploadUtility::CurrentIconPathL: %S"), &aPath );
+    }
+
+// -----------------------------------------------------------------------------
+// CCamOneClickUploadUtility::UpdateUploadIcon
+// -----------------------------------------------------------------------------
+//
+void CCamOneClickUploadUtility::UpdateUploadIcon( CAknToolbar *aToolbar, 
+                                                  TCamCameraMode aMode )
+    {
+    PRINT( _L("Camera => CCamOneClickUploadUtility::UpdateUploadIcon") );
+
+    TFileName currIcon;
+    CurrentIconPathL( aMode, currIcon );
+
+    // If the icons are different then load the icon
+    PRINT1( _L("Camera <> current icon: %S"), &iIconFileName );
+    if ( currIcon.Compare(iIconFileName) != 0 )
+        {
+        PRINT( _L("Camera <> Decoding icon") );
+        iToolbar = aToolbar;
+        TRAPD( err, DecodeIconL( &currIcon ) );
+        if (err)
+            {
+            PRINT1( _L("Camera <> CamOneClickUploadUtility - Icon decoding failed: %d"), err );
+            }
+        }
+    else
+        {
+        if ( aToolbar && iIconImage )
+            {
+            PRINT( _L("Camera <> Copying icon") );
+            CAknButton* button = dynamic_cast<CAknButton*>(
+                aToolbar->ControlOrNull( ECamCmdOneClickUpload ) );
+            CAknButtonState* state = button->State();
+
+            CGulIcon *icon = CGulIcon::NewL( iIconImage, iIconMask );
+            state->SetIcon( icon );
+            icon->SetBitmapsOwnedExternally( ETrue );
+
+            button->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
+            aToolbar->DrawNow();
+            }
+        }
+    PRINT( _L("Camera <= CCamOneClickUploadUtility::UpdateUploadIcon") );
+    }
+
+// -----------------------------------------------------------------------------
+// CCamOneClickUploadUtility::DecodeIconL()
+// -----------------------------------------------------------------------------
+//
+void CCamOneClickUploadUtility::DecodeIconL( TDesC* aPath )
+    {
+    PRINT1( _L("Camera => CCamOneClickUploadUtility::DecodeIconL: %S"), aPath );
+
+    if ( !iDecoder )
+        {
+        iDecoder = CCamImageDecoder::NewL( *this );
+        }
+    iDecoder->StartIconConversionL( aPath );
+
+    // Mark the given file as the icon in use when decoding has started
+    iIconFileName.Copy( *aPath );
+
+    PRINT( _L("Camera <= CCamOneClickUploadUtility::DecodeIconL") );
+    }
+
+// ---------------------------------------------------------------------------
+// Image decoding complete notification
+// ---------------------------------------------------------------------------
+//
+void CCamOneClickUploadUtility::ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* aMask )
+    {
+    PRINT( _L("Camera => CCamOneClickUploadUtility::ImageDecoded") );
+
+    if ( aStatus == KErrNone )
+        {
+        delete iIconImage;
+        delete iIconMask;
+        
+        iIconImage = new (ELeave) CFbsBitmap;
+        iIconImage->Duplicate( aBitmap->Handle() );
+
+        if ( aMask )
+            {
+            iIconMask = new (ELeave) CFbsBitmap;
+            iIconMask->Duplicate( aMask->Handle() );
+            }
+    
+        if ( iToolbar )
+            {
+            PRINT( _L("Displaying icon") );
+            
+            CAknButton* uploadButton =
+                        static_cast<CAknButton*> (iToolbar->ControlOrNull(ECamCmdOneClickUpload));
+            CAknButtonState* currentState = uploadButton->State();
+
+            CGulIcon *icon =  CGulIcon::NewL( iIconImage, iIconMask );
+            icon->SetBitmapsOwnedExternally( ETrue );
+            currentState->SetIcon( icon );
+
+            uploadButton->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
+            iToolbar->DrawNow();
+            }
+        }
+    else
+        {
+        PRINT1( _L("Camera <> CCamOneClickUploadUtility::ImageDecoded - err:%d"), aStatus );
+        }
+
+    PRINT( _L("Camera <= CCamOneClickUploadUtility::ImageDecoded") );
     }

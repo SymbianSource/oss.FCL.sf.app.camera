@@ -114,7 +114,7 @@ class CCamCaptureSetupViewBase : public CCamViewBase
           * Sets the iInfoListBoxActive flag
           * @param aActive What to set iInfoListBoxActive to
           */
-        void SetInfoListBoxMode(TBool aActive);        
+        void SetInfoListBoxMode(TBool aActive, TBool aFullySkinned=EFalse);        
         
          /**
           * Sets the iCaptureSetupModeActive flag
@@ -152,7 +152,7 @@ class CCamCaptureSetupViewBase : public CCamViewBase
         * @param aSetupCommand The command that initiated capture setup mode, used to 
         *                        determine the required control type
         */
-        virtual void SwitchToCaptureSetupModeL(  TInt aSetupCommand );
+        virtual void SwitchToCaptureSetupModeL( TInt aSetupCommand, TBool aFullScreenVF=ETrue );
 
         /**
         * Exit capture setup mode.
@@ -190,7 +190,7 @@ class CCamCaptureSetupViewBase : public CCamViewBase
         * @param aMode
         * @since 3.0
         */
-        virtual void SwitchToInfoListBoxL( TCamInfoListBoxMode aMode );        
+        virtual void SwitchToInfoListBoxL( TCamInfoListBoxMode aMode, TBool aFullySkinned=EFalse );        
 
         /**
         * Handle InfoListBox item selection
@@ -221,6 +221,7 @@ class CCamCaptureSetupViewBase : public CCamViewBase
         */
         void DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane );
 
+        void CaptureSetupModeSelection();
     private:
 
         /**
@@ -280,6 +281,7 @@ class CCamCaptureSetupViewBase : public CCamViewBase
         // Purpose of current instance of iInfoListBoxContainer
         TCamInfoListBoxMode iInfoListBoxMode;                
         
+        TBool iForceAvkonCBA;
     private:   // data
 
         // Handler for the capture setup control

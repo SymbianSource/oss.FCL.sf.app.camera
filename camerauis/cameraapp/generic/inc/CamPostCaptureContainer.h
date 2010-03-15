@@ -135,7 +135,13 @@ class CCamPostCaptureContainer : public CCamContainerBase,
         * Called when battery pane has changed and redraw is needed
         * @since 3.1
         */		
-		void BatteryPaneUpdated();	        
+		void BatteryPaneUpdated();
+		
+	    /**
+	    * From CoeControl
+    	* @param aPointerEvent the pointer event to handle
+	    */
+		void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 
     protected: // Functions from base classes
         /**
@@ -177,6 +183,20 @@ class CCamPostCaptureContainer : public CCamContainerBase,
 	TBool iCheckForFileNameChange;
     
 	TBool iUpdatingBatteryPane; //Needed for drawing black background behind battery pane in Video mode
+	
+	// Play icon bitmaps
+	CFbsBitmap* iPlayIcon;
+	CFbsBitmap* iPlayIconMask;
+	
+	CFbsBitmap* iPlayIconBg;
+	CFbsBitmap* iPlayIconBgMask;
+	
+	CFbsBitmap* iPlayIconBgPressed;
+	CFbsBitmap* iPlayIconBgPressedMask;
+	
+	//Bools to control play button feedback
+	TBool iPlayIconPressed;
+	TBool iDraggedInAlready;
     };
 
 #endif

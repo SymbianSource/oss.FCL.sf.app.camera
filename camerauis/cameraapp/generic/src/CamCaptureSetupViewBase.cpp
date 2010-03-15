@@ -97,14 +97,9 @@ void CCamCaptureSetupViewBase::HandleCommandL( TInt aCommand )
         case ECamCmdCaptureSetupBrightnessVideo:
         case ECamCmdCaptureSetupContrastVideo:
         case ECamCmdCaptureSetupImageSharpnessStill:
-            {
-            SwitchToCaptureSetupModeL( aCommand );
-            }
-            break;
         case ECamCmdCaptureSetupFlashStill:
         case ECamCmdCaptureSetupSelfTimer:
             {
-            iController.ExitViewfinderMode( ECamControllerImage );
             SwitchToCaptureSetupModeL( aCommand );
             }
             break;
@@ -183,31 +178,19 @@ void CCamCaptureSetupViewBase::HandleCommandL( TInt aCommand )
             //lint -fallthrough
         case EAknSoftkeyOk:
             {
-            if ( iCaptureSetupModeActive && iCaptureSetupControlHandler )
-                {
-                TCamSettingItemIds iSettingItemId = iCaptureSetupControlHandler->SettingType();
-                if ( iSettingItemId == ECamSettingItemDynamicSelfTimer )
-                    {
-                    iController.SetSlideInSelfTimerPreview(EFalse);
-                    }
-
-                iController.CommitPreviewChanges();
-                // fallthrough to exit CaptureSetup mode
-                }
-            if( appUi && appUi->APHandler()->AccessedViaAP() )
-               {
-               if( !userSceneActive)
-                	{
-                	appUi->APHandler()->APOperationComplete();
-                	}
-               ExitAllModesL();
-               }
+            CaptureSetupModeSelection();
+                
             }
             break;
         case ECamMSKCmdAppChange:
         case EAknSoftkeySelect:
             {
-            if ( iSceneSettingContainer )
+            if ( iCaptureSetupModeActive && iCaptureSetupControlHandler )
+                {
+                CaptureSetupModeSelection();
+                // fallthrough to exit CaptureSetup mode
+                }
+            else if ( iSceneSettingContainer )
                 {
                 
                 if ( iSceneSettingContainer->UserSceneHighlighted() )
@@ -357,7 +340,7 @@ void CCamCaptureSetupViewBase::DoDeactivate()
 // ---------------------------------------------------------------------------
 //
 CCamCaptureSetupViewBase::CCamCaptureSetupViewBase( CCamAppController& aController )
-    : CCamViewBase( aController )
+    : CCamViewBase( aController ),iForceAvkonCBA(EFalse)
     {
     }
 
@@ -512,6 +495,12 @@ void CCamCaptureSetupViewBase::CreateCaptureSetupControlHandlerL( TInt aSetupCom
             iSettingModeTitleResourceId = R_CAM_USER_SCENE_SETUP_TITLE;
             }
             break;
+        case ECamCmdSetUserDefault:
+            { 
+            settingItemId = ECamSettingItemUserSceneDefault;
+            iSettingModeTitleResourceId = R_CAM_USER_SCENE_SETUP_TITLE;
+            }
+            break;
         default:
             {
             User::Leave( KErrNotSupported );
@@ -552,7 +541,7 @@ void CCamCaptureSetupViewBase::CleanupCaptureSetupContainer( TAny* aAny )
 // Enter capture setup mode
 // ---------------------------------------------------------------------------
 //
-void CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand )
+void CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand, TBool aFullScreenVF )
     {
     __ASSERT_DEBUG( !iCaptureSetupControlHandler && !iCaptureSetupContainer, CamPanic( ECamPanicResourceLeak ) );
 
@@ -568,7 +557,7 @@ void CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand )
         AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect );
         }
     iCaptureSetupContainer = CCamCaptureSetupContainer::NewL( iController, 
-                                   *this, *iCaptureSetupControlHandler, rect );
+                                   *this, *iCaptureSetupControlHandler, rect, aFullScreenVF );
     iCaptureSetupContainer->SetMopParent( this ); 
     appUi->AddToStackL( *this, iCaptureSetupContainer );
     iCaptureSetupContainer->ActivateL();
@@ -719,7 +708,7 @@ void CCamCaptureSetupViewBase::SwitchToSceneSettingModeL()
 // Show InfoListBox
 // ---------------------------------------------------------------------------
 //
-void CCamCaptureSetupViewBase::SwitchToInfoListBoxL( TCamInfoListBoxMode /* aMode */ )
+void CCamCaptureSetupViewBase::SwitchToInfoListBoxL( TCamInfoListBoxMode aMode, TBool aFullySkinned )
     {
     // Cleanup the view correctly if a leave occurs
     CleanupStack::PushL( TCleanupItem( CleanupInfoListBox, this ) );
@@ -729,7 +718,7 @@ void CCamCaptureSetupViewBase::SwitchToInfoListBoxL( TCamInfoListBoxMode /* aMod
     iInfoListBoxContainer->ActivateL();
     // UpdateCbaL need this boolean to be set in
     // order to return the correct CBA
-    SetInfoListBoxMode(ETrue);
+    SetInfoListBoxMode(ETrue, aFullySkinned);
     UpdateCbaL();
     SetTitlePaneTextL();
     appUi->PushDefaultNaviPaneL();
@@ -971,6 +960,37 @@ TInt CCamCaptureSetupViewBase::SetupModeTitlePaneResourceId()
     }
 
 
+void CCamCaptureSetupViewBase::CaptureSetupModeSelection()
+    {
+    
+    TUid view = Id();
+    
+    TBool userSceneActive = ( view.iUid == ECamViewIdPhotoUserSceneSetup );
+    
+    CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( AppUi() );
+    
+    if ( iCaptureSetupModeActive && iCaptureSetupControlHandler )
+        {
+        TCamSettingItemIds iSettingItemId = iCaptureSetupControlHandler->SettingType();
+        if ( iSettingItemId == ECamSettingItemDynamicSelfTimer )
+            {
+            iController.SetSlideInSelfTimerPreview(EFalse);
+            }
+    
+        iController.CommitPreviewChanges();    
+        // fallthrough to exit CaptureSetup mode
+        }
+    if( appUi && appUi->APHandler()->AccessedViaAP() )
+       {
+       if( !userSceneActive)
+            {
+            appUi->APHandler()->APOperationComplete();
+            }
+       ExitAllModesL();
+       }
+    
+    }
+
 // ---------------------------------------------------------------------------
 // CCamCaptureSetupViewBase::DynInitMenuPaneL
 // Dynamically initialise the options menu
@@ -1047,7 +1067,7 @@ void CCamCaptureSetupViewBase::SetSceneSettingMode(TBool aActive)
 // Sets the iInfoListBoxActive flag
 // ---------------------------------------------------------------------------
 //
-void CCamCaptureSetupViewBase::SetInfoListBoxMode( TBool aActive )
+void CCamCaptureSetupViewBase::SetInfoListBoxMode( TBool aActive, TBool aFullySkinned )
     {
     // We need to inform the AppUi
     iInfoListBoxActive = aActive;

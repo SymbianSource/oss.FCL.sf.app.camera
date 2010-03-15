@@ -617,7 +617,19 @@ class CCamAppUi : public CCamAppUiBase,
         * @return ETrue if the application has pretended to exit, else EFalse 
         */
         TBool IsInPretendExit() const;
-
+        
+        /**
+        * Indicates whether or not the application was in a simulated exit situation
+        * @return ETrue if the application had pretended to exit, else EFalse 
+        */
+        TBool ReturningFromPretendExit() const; 
+        
+        /**
+        * Indicates whether or not the application started the first time
+        * @return ETrue if the application booted first time, else EFalse 
+        */
+        TBool IsFirstBoot() const; 
+                
         /**
         * Returns whether an MMC removed note is pending
         * @since 3.0
@@ -989,6 +1001,20 @@ class CCamAppUi : public CCamAppUiBase,
         * @return ETrue if all memories are full or unavailable
         **/
         TBool AllMemoriesFullOrUnavailable() const;
+        
+        /**
+        * Checks the availability of memory on the currently selected 
+        * mediastorage for capturing images or video, result saved
+        * in iMemoryAvailableForCapturing
+        **/
+        void CheckMemoryAvailableForCapturing();
+        
+        /**
+        * Returns the previously saved availability of memory
+        * @return ETrue if memory available for capturing
+        **/
+        TBool IsMemoryAvailableForCapturing() const;
+        
 
             
     private: // New functions
@@ -1656,6 +1682,7 @@ class CCamAppUi : public CCamAppUiBase,
         // running in the background. The app should behave slightly differently when we 
         // are next brought to the foreground.
         TBool iPretendExit;
+        TBool iReturningFromPretendExit; 
 
         // flag to indicate whether we are currently embedding another application
         TBool iEmbedding;
@@ -1776,6 +1803,8 @@ class CCamAppUi : public CCamAppUiBase,
 
 		TInt iLandscapeScreenMode;
         TInt iPortraitScreenMode;
+        
+        TBool iMemoryAvailableForCapturing;
         };
 
 // ===========================================================================

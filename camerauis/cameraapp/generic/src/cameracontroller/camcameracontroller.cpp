@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -55,7 +55,7 @@
 #include <ECamUIOrientationOverrideCustomAPI.h>
 
 #include <ecamfacetrackingcustomapi.h>
-#include <akntoolbar.h> 
+#include <akntoolbar.h>
 // -------------------------------------
 // Own
 #include "camcameracontroller.pan"
@@ -63,7 +63,7 @@
 #include "cambuffershare.h"
 #include "cambuffersharecleanup.h"
 #include "cambuffercleanup.h"
-#include "cambuffer.h"  
+#include "cambuffer.h"
 
 #include "camsnapshotprovider.h"
 #include "camimageencoder.h"
@@ -99,7 +99,7 @@
 #include "CamPanic.h"
 // ===========================================================================
 // Local constants
-const TInt KIveRecoveryCountMax = 2;  
+const TInt KIveRecoveryCountMax = 2;
 typedef CCamera::CCameraAdvancedSettings CAS;
 typedef CCamera::CCameraImageProcessing  CIP;
 
@@ -108,25 +108,25 @@ namespace NCamCameraController
   static const TInt               KPrimaryCameraIndex         =  0;
   //static const TInt               KSecondaryCameraIndex       =  1;
   static const TInt               KInvalidCameraIndex         = -1;
-  
+
   #ifdef CAMERAAPP_CAE_FOR_VIDEO
   //  static const TInt             KCameraDisplayIndex         = 0;
   #endif
   #ifdef CAMERAAPP_CAPI_V2
     static const TInt             KCameraClientPriority       = 100; // -100...100
   #endif
-  
+
   static const TInt               KCamCallBackPriority        = EPriorityHigh;
-  
+
   static const TInt               KCamSequenceGranularity     =  2;
   static const TInt               KResolutionArrayGranularity =  8;
   #ifdef CAMERAAPP_CAPI_V2_ADV
     static const TInt             KAdvArrayGranularity        =  5;
-  #endif  
-  
+  #endif
+
   static const CCamera::TFormat   KCamJpegAlternativeFormat1  = CCamera::EFormatFbsBitmapColor16M;
   static const CCamera::TFormat   KCamJpegAlternativeFormat2  = CCamera::EFormatFbsBitmapColor64K;
-  
+
   static const TInt             KCamReserveTryAgainMaxCount     = 50;
   static const TInt             KCamReserveTryAgainWaitInterval = 50000; // 50 milliseconds
   #ifdef _DEBUG
@@ -153,7 +153,7 @@ namespace NCamCameraController
   #define CAMERAAPP_PERF_CONTROLLER_STOP_ONCE( AAA, BBB )
 #endif // CAMERAAPP_PERFORMANCE_CONTROLLER
 
-// Helper methods 
+// Helper methods
 #include "camflagutility.inl"
 #include "campointerutility.inl"
 
@@ -164,20 +164,20 @@ namespace NCamCameraController
   inline void SetFalse( TAny* aTBool )
     {
     TBool* boolean = static_cast<TBool*>( aTBool );
-  
+
     if( boolean )
       *boolean = EFalse;
     }
   */
-  
+
   inline void SetNotBusy( TAny* aTUint )
     {
     TUint* flags = static_cast<TUint*>( aTUint );
-  
+
     if( flags )
       *flags = ECamBusyOff;
     };
-  
+
   inline void ReleaseAndNull( MCameraBuffer*& aBuffer )
     {
     if( aBuffer )
@@ -189,13 +189,13 @@ namespace NCamCameraController
 #ifdef CAMERAAPP_CAPI_V2_ADV
   inline void ResetInfo( TAny* aInfo )
     {
-    TCamAdvancedSettingInfo* info = 
+    TCamAdvancedSettingInfo* info =
       static_cast<TCamAdvancedSettingInfo*>( aInfo );
 
     if( info )
       {
       info->Reset();
-      }      
+      }
     };
 
 
@@ -252,7 +252,7 @@ TCamControllerInfo::Reset( TBool aPreserveBusyFlag    /*= EFalse*/,
 
   if( !aPreserveBusyFlag )
     {
-    iBusy = ECamBusyOff;  
+    iBusy = ECamBusyOff;
     }
   }
 
@@ -260,7 +260,7 @@ TCamControllerInfo::Reset( TBool aPreserveBusyFlag    /*= EFalse*/,
 // PrintInfo
 // ---------------------------------------------------------------------------
 //
-void 
+void
 TCamControllerInfo::PrintInfo() const
   {
   PRINT ( _L("Camera <> --------------------------------------------------") );
@@ -305,7 +305,7 @@ TCamCameraResolutionSupport::~TCamCameraResolutionSupport()
   iResolutions.Close();
   }
 
-void 
+void
 TCamCameraResolutionSupport::Reset()
   {
   iForCameraIndex  = KInvalidCameraIndex;
@@ -330,7 +330,7 @@ TCamAdvancedSettingInfo::~TCamAdvancedSettingInfo()
   iIsoRatesSupport.Close();
   }
 
-void 
+void
 TCamAdvancedSettingInfo::Reset()
   {
   iForCameraIndex = KInvalidCameraIndex;
@@ -361,7 +361,7 @@ TCamAdvancedSettingInfo::Reset()
 // PrintInfo
 // ---------------------------------------------------------------------------
 //
-void 
+void
 TCamAdvancedSettingInfo::PrintInfo() const
   {
 #ifdef _DEBUG
@@ -398,7 +398,7 @@ TCamAdvancedSettingInfo::PrintInfo() const
     PRINT2( _L("Camera <> step[%3d]: %4d"), i, iEvStepsSupport[i] );
     }
 
-  PRINT ( _L("Camera <> --------------------------------------------------") );    
+  PRINT ( _L("Camera <> --------------------------------------------------") );
   PRINT1( _L("Camera <> Advanced EV modes support : %016b"), iEvModesSupport                    );
   PRINT1( _L("Camera <> EExposureAuto             : %016b"), CCamera::EExposureAuto             );
   PRINT1( _L("Camera <> EExposureNight            : %016b"), CCamera::EExposureNight            );
@@ -440,7 +440,7 @@ TCamAdvancedSettingInfo::PrintInfo() const
   PRINT ( _L("Camera <> --------------------------------------------------") );
 #endif // CAMERAAPP_CAPI_V2_IP
 
-  PRINT ( _L("Camera <> --------------------------------------------------") );    
+  PRINT ( _L("Camera <> --------------------------------------------------") );
   PRINT1( _L("Camera <> Stabilization modes support      : %016b"), iStabilizationModeSupport           );
   PRINT1( _L("Camera <>   EStabilizationModeOff          : %016b"), CAS::EStabilizationModeOff          );
   PRINT1( _L("Camera <>   EStabilizationModeHorizontal   : %016b"), CAS::EStabilizationModeHorizontal   );
@@ -459,7 +459,7 @@ TCamAdvancedSettingInfo::PrintInfo() const
   PRINT1( _L("Camera <>   EStabilizationComplexityLow    : %016b"), CAS::EStabilizationComplexityLow    );
   PRINT1( _L("Camera <>   EStabilizationComplexityMedium : %016b"), CAS::EStabilizationComplexityMedium );
   PRINT1( _L("Camera <>   EStabilizationComplexityHigh   : %016b"), CAS::EStabilizationComplexityHigh   );
-  PRINT ( _L("Camera <> --------------------------------------------------") );    
+  PRINT ( _L("Camera <> --------------------------------------------------") );
 #endif // _DEBUG
   }
 
@@ -474,12 +474,12 @@ TCamAdvancedSettingInfo::PrintInfo() const
 // ---------------------------------------------------------------------------
 //
 CCamCameraController*
-CCamCameraController::NewL( MCamSettingProvider& aProvider, 
-                            CCamAppController& aAppController, 
-                            TInt aCameraIndex /*= 0*/ )  
+CCamCameraController::NewL( MCamSettingProvider& aProvider,
+                            CCamAppController& aAppController,
+                            TInt aCameraIndex /*= 0*/ )
   {
-  CCamCameraController* self 
-      = new (ELeave) CCamCameraController( aProvider, aAppController );  
+  CCamCameraController* self
+      = new (ELeave) CCamCameraController( aProvider, aAppController );
 
   CleanupStack::PushL( self );
   self->ConstructL( aCameraIndex );
@@ -487,7 +487,7 @@ CCamCameraController::NewL( MCamSettingProvider& aProvider,
 
   return self;
   }
-    
+
 
 
 // ---------------------------------------------------------------------------
@@ -500,13 +500,13 @@ CCamCameraController::~CCamCameraController()
 
 #ifdef CAMERAAPP_FLASH_SIMULATOR
   delete iFlashSimulator;
-#endif 
+#endif
 
 #ifdef CAMERAAPP_PERFORMANCE_CONTROLLER
   delete iPerformanceLogger;
 #endif // CAMERAAPP_PERFORMANCE_CONTROLLER
-  
-  delete iIdle; 
+
+  delete iIdle;
   iSettingArray.Close();
 
   // Remove all observers.
@@ -518,10 +518,10 @@ CCamCameraController::~CCamCameraController()
   ClearSettingQueue();
 
 
-  PRINT( _L("Camera <> CCamCameraController: release current camera..") );  
+  PRINT( _L("Camera <> CCamCameraController: release current camera..") );
   // Release and null CCamera related objects.
   ReleaseCurrentCamera();
-  PRINT( _L("Camera <> CCamCameraController: ..done") );  
+  PRINT( _L("Camera <> CCamCameraController: ..done") );
 
   delete iActive;
 
@@ -547,19 +547,19 @@ CCamCameraController::~CCamCameraController()
 // HandleEvent
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::HandleEvent( const TECAMEvent& aEvent )
   {
   // TUid iEventType;
   // TInt iErrorCode;
-  PRINT2( _L("Camera => CCamCameraController::HandleEvent, event uid(0x%08x) error(%d)"), 
-          aEvent.iEventType.iUid, 
+  PRINT2( _L("Camera => CCamCameraController::HandleEvent, event uid(0x%08x) error(%d)"),
+          aEvent.iEventType.iUid,
           aEvent.iErrorCode );
 
   // If we are getting zoom event while saving video,
-  // we must not handle the event 
+  // we must not handle the event
   TInt uidValue( aEvent.iEventType.iUid );
-  if ( uidValue == KUidECamEventCameraSettingDigitalZoomUidValue 
+  if ( uidValue == KUidECamEventCameraSettingDigitalZoomUidValue
     && IsFlagOn( iInfo.iBusy, ECamBusySingle ) )
       {
        return;
@@ -584,22 +584,22 @@ CCamCameraController::HandleEvent( const TECAMEvent& aEvent )
     }
   // -------------------------------------------------------
   else if( !(IsFlagOn( iInfo.iState , ECamPowerOn )))
-    {    
+    {
     //If camera is in background then all the rest events will be ignored. Should return without leaving
-    return;   	
-    }   
+    return;
+    }
   // -------------------------------------------------------
   else if( aEvent.iEventType == KUidECamEventCameraSnapshot )
     {
     HandleSnapshotEvent( aEvent.iErrorCode );
     }
   // -------------------------------------------------------
-  else if( aEvent.iEventType == KUidECamEventCameraSettingsOptimalFocus 
+  else if( aEvent.iEventType == KUidECamEventCameraSettingsOptimalFocus
         || aEvent.iEventType == KUidECamEventCameraSettingAutoFocusType2 )
     {
     HandleAutoFocusEvent( aEvent.iErrorCode, aEvent.iEventType );
-    }  
-  // -------------------------------------------------------   
+    }
+  // -------------------------------------------------------
   else
     {
 #ifdef CAMERAAPP_CAPI_V2_ADV
@@ -622,12 +622,12 @@ CCamCameraController::HandleEvent( const TECAMEvent& aEvent )
       case KUidECamEventImageProcessingEffectUidValue:
       case KUidECamEventSettingsStabilizationAlgorithmComplexityUidValue:
         {
-        TCamCameraSettingId id = 
+        TCamCameraSettingId id =
             CCamSettingConversion::Map2CameraSetting( uidValue );
 
-        HandleCallbackEvent( aEvent.iErrorCode, 
-                             ECamCameraEventSettingsSingle, 
-                             ECamCameraEventClassSettings, 
+        HandleCallbackEvent( aEvent.iErrorCode,
+                             ECamCameraEventSettingsSingle,
+                             ECamCameraEventClassSettings,
                              &id );
         break;
         }
@@ -640,7 +640,7 @@ CCamCameraController::HandleEvent( const TECAMEvent& aEvent )
         HandleFlashStatusEvent( aEvent.iErrorCode, ECamCameraEventFlashNotReady );
         break;
       // -------------------------------
-      default: 
+      default:
         break;
       // -------------------------------
       }
@@ -671,7 +671,7 @@ CCamCameraController::HandleEvent( const TECAMEvent& aEvent )
 // ViewFinderReady
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::ViewFinderReady( MCameraBuffer& aCameraBuffer, TInt aError )
   {
   HandleViewfinderEvent( &aCameraBuffer, aError );
@@ -682,7 +682,7 @@ CCamCameraController::ViewFinderReady( MCameraBuffer& aCameraBuffer, TInt aError
 // ImageBufferReady
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::ImageBufferReady( MCameraBuffer& aCameraBuffer, TInt aError )
   {
   HandleImageCaptureEvent( &aCameraBuffer, aError );
@@ -693,7 +693,7 @@ CCamCameraController::ImageBufferReady( MCameraBuffer& aCameraBuffer, TInt aErro
 // VideoBufferReady
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::VideoBufferReady( MCameraBuffer& aCameraBuffer, TInt aError )
   {
   if( KErrNone == aError )
@@ -713,8 +713,8 @@ CCamCameraController::VideoBufferReady( MCameraBuffer& aCameraBuffer, TInt aErro
 // ReserveComplete
 // ---------------------------------------------------------------------------
 //
-void 
-CCamCameraController::ReserveComplete( TInt aError ) 
+void
+CCamCameraController::ReserveComplete( TInt aError )
   {
   HandleReserveGainEvent( aError );
   }
@@ -724,7 +724,7 @@ CCamCameraController::ReserveComplete( TInt aError )
 // PowerOnComplete
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::PowerOnComplete( TInt aError )
   {
   HandlePowerOnEvent( aError );
@@ -735,18 +735,18 @@ CCamCameraController::PowerOnComplete( TInt aError )
 // ViewFinderFrameReady
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::ViewFinderFrameReady( CFbsBitmap& aFrame )
   {
   PRINT( _L("CamTest => CCamCameraController::ViewFinderFrameReady") );
 
   CCamBuffer* buffer = NULL;
-  
+
   TRAPD( error, buffer = CCamBuffer::NewL( aFrame, NULL ) );
 
   // Releases buffer
   HandleViewfinderEvent( buffer, error );
- 
+
   PRINT( _L("CamTest <= CCamCameraController::ViewFinderFrameReady") );
   }
 
@@ -755,15 +755,15 @@ CCamCameraController::ViewFinderFrameReady( CFbsBitmap& aFrame )
 // ImageReady
 // ---------------------------------------------------------------------------
 //
-void 
-CCamCameraController::ImageReady( CFbsBitmap* aBitmap, 
+void
+CCamCameraController::ImageReady( CFbsBitmap* aBitmap,
                                   HBufC8*    aData,
                                   TInt       aError )
   {
   PRINT( _L("Camera => CCamCameraController::ImageReady") );
 
   CCamBuffer* buffer = NULL;
- 
+
   // If no error so far, wrap the data to MCameraBuffer compatible wrapper.
   // New API provides these buffers already from CCamera callbacks.
   if( KErrNone == aError )
@@ -794,8 +794,8 @@ CCamCameraController::ImageReady( CFbsBitmap* aBitmap,
 // FrameBufferReady
 // ---------------------------------------------------------------------------
 //
-void 
-CCamCameraController::FrameBufferReady( MFrameBuffer* aFrameBuffer, 
+void
+CCamCameraController::FrameBufferReady( MFrameBuffer* aFrameBuffer,
                                         TInt          /*aError*/ )
   {
   // Release the buffer if one is provided to make sure
@@ -816,7 +816,7 @@ CCamCameraController::FrameBufferReady( MFrameBuffer* aFrameBuffer,
 // McaeoInitComplete
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::McaeoInitComplete( TInt aError )
   {
   PRINT( _L("Camera => CCamCameraController::McaeoInitComplete") );
@@ -833,7 +833,7 @@ CCamCameraController::McaeoInitComplete( TInt aError )
 // McaeoStillPrepareComplete
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::McaeoStillPrepareComplete( TInt /*aError*/ )
   {
   PRINT( _L("Camera =><= CCamCameraController::McaeoStillPrepareComplete, PANIC!") );
@@ -843,29 +843,29 @@ CCamCameraController::McaeoStillPrepareComplete( TInt /*aError*/ )
 
 // ---------------------------------------------------------------------------
 // McaeoVideoPrepareComplete
-// 
+//
 // This method is called asynchronously after a call has been made to
 // CCaeEngine::PrepareVideoRecordingL.
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::McaeoVideoPrepareComplete( TInt aError )
   {
   PRINT( _L("Camera => CCamCameraController::McaeoVideoPrepareComplete") );
-#ifdef CAMERAAPP_CAE_ERR_SIMULATION  
+#ifdef CAMERAAPP_CAE_ERR_SIMULATION
   HandleVideoEvent( ECamCameraEventVideoInit, aError );
   // DelayCallback( ECamCameraEventVideoInit, aError, 500000 );
-#else 
+#else
   if( aError &&
       ( iIveCancel || ( !iIveSequenceActive && iIveRecoveryOngoing ) ) )
-      // Return if error and recovering process has been started, 
-      // but this video prepare complete is not part of recovery 
-      // i.e. iIveSequenceActive is not active yet. 
+      // Return if error and recovering process has been started,
+      // but this video prepare complete is not part of recovery
+      // i.e. iIveSequenceActive is not active yet.
     {
     PRINT1( _L("Camera => CCamCameraController::McaeoVideoPrepareComplete - Ignore err %d"), aError );
-    return; 
+    return;
     }
-  HandleVideoEvent( ECamCameraEventVideoInit, aError );  
+  HandleVideoEvent( ECamCameraEventVideoInit, aError );
 #endif // CAMERAAPP_CAE_ERR_SIMULATION
 
   PRINT( _L("Camera <= CCamCameraController::McaeoVideoPrepareComplete") );
@@ -875,8 +875,8 @@ CCamCameraController::McaeoVideoPrepareComplete( TInt aError )
 // McaeoViewFinderFrameReady
 // ---------------------------------------------------------------------------
 //
-void 
-CCamCameraController::McaeoViewFinderFrameReady( CFbsBitmap& aFrame, 
+void
+CCamCameraController::McaeoViewFinderFrameReady( CFbsBitmap& aFrame,
                                                  TInt        aError )
   {
   PRINT( _L("Camera => CCamCameraController::McaeoViewFinderFrameReady") );
@@ -896,17 +896,17 @@ CCamCameraController::McaeoViewFinderFrameReady( CFbsBitmap& aFrame,
 // McaeoSnapImageReady
 // ---------------------------------------------------------------------------
 //
-void 
-CCamCameraController::McaeoSnapImageReady( const CFbsBitmap& aBitmap, 
+void
+CCamCameraController::McaeoSnapImageReady( const CFbsBitmap& aBitmap,
                                                  TInt        aError  )
   {
   PRINT1( _L("Camera => CCamCameraController::McaeoSnapImageReady, status: %d"), aError );
   //__ASSERT_DEBUG( EFalse, Panic( ECamCameraControllerCaeUnsupported ) );
-  if( 
+  if(
 #ifdef CAMERAAPP_CAE_FIX
       ECamModeChangeInactive == iModeChange &&
 #endif
-      IsFlagOn( iInfo.iState, ECamVideoOn ) 
+      IsFlagOn( iInfo.iState, ECamVideoOn )
     )
     {
     CAMERAAPP_PERF_CONTROLLER_STOP( ECamRequestSsStart );
@@ -924,7 +924,7 @@ CCamCameraController::McaeoSnapImageReady( const CFbsBitmap& aBitmap,
     NotifyObservers( aError,
                      ECamCameraEventSsReady,
                      ECamCameraEventClassSsData,
-                     copy );    
+                     copy );
     delete copy;
     copy = NULL;
     }
@@ -935,9 +935,9 @@ CCamCameraController::McaeoSnapImageReady( const CFbsBitmap& aBitmap,
 // McaeoStillImageReady
 // ---------------------------------------------------------------------------
 //
-void 
-CCamCameraController::McaeoStillImageReady( CFbsBitmap* /*aBitmap*/, 
-                                            HBufC8*     /*aData  */, 
+void
+CCamCameraController::McaeoStillImageReady( CFbsBitmap* /*aBitmap*/,
+                                            HBufC8*     /*aData  */,
                                             TInt        /*aError */ )
   {
   // Still images are not captured through CCaeEngine.
@@ -948,7 +948,7 @@ CCamCameraController::McaeoStillImageReady( CFbsBitmap* /*aBitmap*/,
 // McaeoVideoRecordingOn
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::McaeoVideoRecordingOn( TInt aError )
   {
   PRINT( _L("Camera => CCamCameraController::McaeoVideoRecordingOn") );
@@ -956,9 +956,9 @@ CCamCameraController::McaeoVideoRecordingOn( TInt aError )
 #ifdef CAMERAAPP_CAE_ERR_SIMULATION
   HandleVideoEvent( ECamCameraEventVideoStart, aError );
 #else
-  HandleVideoEvent( ECamCameraEventVideoStart, aError );  
+  HandleVideoEvent( ECamCameraEventVideoStart, aError );
 #endif // CAMERAAPP_CAE_ERR_SIMULATION
-  
+
   PRINT( _L("Camera <= CCamCameraController::McaeoVideoRecordingOn") );
 
   }
@@ -967,7 +967,7 @@ CCamCameraController::McaeoVideoRecordingOn( TInt aError )
 // McaeoVideoRecordingPaused
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::McaeoVideoRecordingPaused( TInt aError )
   {
   PRINT( _L("Camera => CCamCameraController::McaeoVideoRecordingPaused") );
@@ -977,7 +977,7 @@ CCamCameraController::McaeoVideoRecordingPaused( TInt aError )
 #else
   HandleVideoEvent( ECamCameraEventVideoPause, aError );
 #endif // CAMERAAPP_CAE_ERR_SIMULATION
-  
+
   PRINT( _L("Camera <= CCamCameraController::McaeoVideoRecordingPaused") );
 
   }
@@ -986,7 +986,7 @@ CCamCameraController::McaeoVideoRecordingPaused( TInt aError )
 // McaeoVideoRecordingComplete
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::McaeoVideoRecordingComplete( TInt aError )
   {
   PRINT( _L("Camera => CCamCameraController::McaeoVideoRecordingComplete") );
@@ -1005,8 +1005,8 @@ CCamCameraController::McaeoVideoRecordingComplete( TInt aError )
         }
     iAsyncVideoStopModeSupported = EFalse;
     }
-  
-  PRINT( _L("Camera <= CCamCameraController::McaeoVideoRecordingComplete") );  
+
+  PRINT( _L("Camera <= CCamCameraController::McaeoVideoRecordingComplete") );
 
   }
 
@@ -1014,10 +1014,10 @@ CCamCameraController::McaeoVideoRecordingComplete( TInt aError )
 // McaeoVideoRecordingTimes
 // ---------------------------------------------------------------------------
 //
-void 
-CCamCameraController::McaeoVideoRecordingTimes( 
-    TTimeIntervalMicroSeconds aTimeElapsed, 
-    TTimeIntervalMicroSeconds aTimeRemaining, 
+void
+CCamCameraController::McaeoVideoRecordingTimes(
+    TTimeIntervalMicroSeconds aTimeElapsed,
+    TTimeIntervalMicroSeconds aTimeRemaining,
     TInt aError )
   {
   HandleVideoTimeEvent( aError, aTimeElapsed, aTimeRemaining );
@@ -1027,7 +1027,7 @@ CCamCameraController::McaeoVideoRecordingTimes(
 // McaeoVideoRecordingStopped
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::McaeoVideoRecordingStopped()
   {
   PRINT( _L("Camera => CCamCameraController::McaeoVideoRecordingStopped") );
@@ -1049,7 +1049,7 @@ CCamCameraController::McaeoVideoRecordingStopped()
 // ImageEncoded
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::ImageEncoded( TInt aStatus, HBufC8* aData )
   {
   PRINT( _L("Camera => CCamCameraController::ImageEncoded") );
@@ -1069,8 +1069,8 @@ CCamCameraController::ImageEncoded( TInt aStatus, HBufC8* aData )
       }
     else
       {
-      aStatus = KErrNotFound;      
-      }    
+      aStatus = KErrNotFound;
+      }
     }
   else
     {
@@ -1092,7 +1092,7 @@ CCamCameraController::ImageEncoded( TInt aStatus, HBufC8* aData )
 // AttachObserverL
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::AttachObserverL( const MCamCameraObserver* aObserver,
                                        const TUint&              aInterest )
   {
@@ -1101,7 +1101,7 @@ CCamCameraController::AttachObserverL( const MCamCameraObserver* aObserver,
   // event interest being ECamCameraEventClassNone.
   if( aObserver
    && ECamCameraEventClassNone != aInterest
-   && KErrNotFound             == iObservers.Find( aObserver ) 
+   && KErrNotFound             == iObservers.Find( aObserver )
     )
     {
     // Try to add the observer to our list.
@@ -1112,7 +1112,7 @@ CCamCameraController::AttachObserverL( const MCamCameraObserver* aObserver,
       {
       error = iObserverInterests.Append( aInterest );
       // If we are unable to add the interest info,
-      // remove also the observer. 
+      // remove also the observer.
       if( KErrNone != error )
         {
         iObservers.Remove( iObservers.Count() - 1 );
@@ -1122,12 +1122,12 @@ CCamCameraController::AttachObserverL( const MCamCameraObserver* aObserver,
     User::LeaveIfError( error );
     }
   }
-    
+
 // ---------------------------------------------------------------------------
 // DetachObserver
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::DetachObserver( const MCamCameraObserver* aObserver )
   {
   if( aObserver )
@@ -1149,7 +1149,7 @@ CCamCameraController::DetachObserver( const MCamCameraObserver* aObserver )
 // Issue request for one operation.
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::RequestL( const TCamCameraRequestId& aRequestId )
   {
   PRINT1( _L("Camera => CCamCameraController::RequestL, request:[%s]"), KCamRequestNames[aRequestId] );
@@ -1163,7 +1163,7 @@ CCamCameraController::RequestL( const TCamCameraRequestId& aRequestId )
   PRINT( _L("Camera <> process request..") );
   proceed = ProcessOneRequestL( aRequestId );
   CleanupStack::Pop();
-  
+
   // If this request will be responded through MCameraObserver(2) callback,
   // new requests cannot be accepted until that call arrives and
   // notification to our observers will be sent there.
@@ -1176,7 +1176,7 @@ CCamCameraController::RequestL( const TCamCameraRequestId& aRequestId )
     // as observer might want to issue a new request during
     // the notification callback.
     ClearFlags( iInfo.iBusy, ECamBusySingle );
-    
+
     if( ECamRequestVideoStop == aRequestId
      || ECamRequestSetAsyncVideoStopMode == aRequestId
      || ECamRequestImageCancel == aRequestId )
@@ -1185,8 +1185,8 @@ CCamCameraController::RequestL( const TCamCameraRequestId& aRequestId )
       // has been given. No need to do anything here.
       }
     else
-      {  
-      // Give notification to observers  
+      {
+      // Give notification to observers
       TCamCameraEventId event( Request2Event( aRequestId ) );
       NotifyObservers( KErrNone, event, EventClass( event ) );
       }
@@ -1201,11 +1201,11 @@ CCamCameraController::RequestL( const TCamCameraRequestId& aRequestId )
 
 // ---------------------------------------------------------------------------
 // DirectRequestL
-// 
+//
 // Issue request even when busy.
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::DirectRequestL( const TCamCameraRequestId& aRequestId )
   {
   PRINT( _L("Camera => CCamCameraController::DirectRequestL") );
@@ -1269,7 +1269,7 @@ CCamCameraController::DirectRequestL( const TCamCameraRequestId& aRequestId )
     // -----------------------------------------------------
     default:
       Panic( ECamCameraControllerUnsupported );
-      break;      
+      break;
     }
 
   if( notify )
@@ -1290,11 +1290,11 @@ CCamCameraController::DirectRequestL( const TCamCameraRequestId& aRequestId )
 // associated event codes to observers. If any errors happen during the
 // sequence, the notification will reflect this with the status code.
 // When sequence ends, observers will be notified with event
-// ECamCameraEventSequenceEnd. No new requests are accepted before 
+// ECamCameraEventSequenceEnd. No new requests are accepted before
 // ECamCameraEventSequenceEnd notification is sent.
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController
 ::RequestSequenceL( const RCamRequestArray& aSequence )
   {
@@ -1322,7 +1322,7 @@ CCamCameraController
 // RequestSettingsChangeL
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::RequestSettingsChangeL()
   {
   PRINT ( _L("Camera => CCamCameraController::RequestSettingsChangeL") );
@@ -1358,7 +1358,7 @@ CCamCameraController
   if( !callback )
     {
     TCamCameraSettingId setting = aSettingId;
-    NotifyObservers( KErrNone, 
+    NotifyObservers( KErrNone,
                      ECamCameraEventSettingsSingle,
                      ECamCameraEventClassSettings,
                      &setting );
@@ -1372,7 +1372,7 @@ CCamCameraController
 // CancelSequence
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::CancelSequence()
   {
   PRINT( _L("Camera => CCamCameraController::CancelSequence") );
@@ -1393,9 +1393,9 @@ CCamCameraController::CancelSequence()
     // Clears busy flag, if we were processing a sequence of requests / settings.
     // If iBusy is set because one request is on the way,
     // we must not clear it here - when that request is processed,
-    // the flag will be cleared. 
+    // the flag will be cleared.
     EndSequence( KErrCancel );
-    }    
+    }
   PRINT( _L("Camera <= CCamCameraController::CancelSequence") );
   }
 
@@ -1408,12 +1408,12 @@ CCamCameraController::SwitchCameraL( TInt aCameraIndex )
   {
   PRINT1( _L("Camera => CCamCameraController::SwitchCameraL%d"),aCameraIndex );
   #ifdef _DEBUG
-  if( aCameraIndex == iInfo.iCurrentCamera ) 
+  if( aCameraIndex == iInfo.iCurrentCamera )
     {
     PRINT( _L("Camera <> CCamCameraController::SwitchCameraL - Changing Secondary camera orientation") );
     }
   #endif // _DEBUG
-  
+
   if( aCameraIndex < 0 || aCameraIndex >= CamerasAvailable() )
     {
     User::Leave( KErrNotSupported );
@@ -1426,17 +1426,17 @@ CCamCameraController::SwitchCameraL( TInt aCameraIndex )
       {
       ReleaseCurrentCamera();
       }
-     
-    // used in CompleteSwitchCamera  
+
+    // used in CompleteSwitchCamera
     iCurrentCameraIndex = aCameraIndex;
-    
+
     // -----------------------------------------------------
     // Then create new camera:
     PRINT ( _L("############################################################") );
 #ifdef CAMERAAPP_CAE_FOR_VIDEO
 
     PRINT1( _L("Camera <> Creating CCaeEngine, camera index: %d .."), aCameraIndex );
-    iCaeEngine = NewCaeEngineL( aCameraIndex ); 
+    iCaeEngine = NewCaeEngineL( aCameraIndex );
 
 #else
 
@@ -1467,7 +1467,7 @@ CCamCameraController::CompleteSwitchCameraL()
     return;
     }
 
-#ifdef CAMERAAPP_CAE_FOR_VIDEO    
+#ifdef CAMERAAPP_CAE_FOR_VIDEO
   #ifdef CAMERAAPP_CAE_FIX
     PRINT ( _L("Camera <> Creating new CCamera..") );
     iCamera    = NewCameraL( iCurrentCameraIndex );
@@ -1488,7 +1488,7 @@ CCamCameraController::CompleteSwitchCameraL()
     if( KPrimaryCameraIndex == iInfo.iCurrentCamera )
       {
       // Support only for primary camera.
-      // Ignore error in instantiation: If NewL leaves, there's no 
+      // Ignore error in instantiation: If NewL leaves, there's no
       // support for Image Processing available. Report error to client
       // if settings requiring it are used.
       PRINT ( _L("Camera <> Create CCameraImageProcessing..") );
@@ -1503,8 +1503,8 @@ CCamCameraController::CompleteSwitchCameraL()
     GetAdvancedSettingsInfoL();
 
     PRINT ( _L("Camera <> Get i/f MCameraOrientation..") )
-    iCustomInterfaceOrientation = 
-      static_cast <MCameraOrientation*>( 
+    iCustomInterfaceOrientation =
+      static_cast <MCameraOrientation*>(
   	    iCamera->CustomInterface( KCameraOrientationUid ) );
     PRINT1( _L("Camera <> Orientation custom i/f pointer:%d"), iCustomInterfaceOrientation );
 
@@ -1532,42 +1532,42 @@ CCamCameraController::SetOrientationModeL( TInt aOrientation )
   PRINT1( _L("Camera => CCamCameraController::SetOrientationModeL %d"), aOrientation );
 #ifdef CAMERAAPP_CAE_FOR_VIDEO
     PRINT( _L("Camera <> CCameraController: Get i/f MUIOrientationOverride from iCaeEngine..") )
-    iCustomInterfaceUIOrientationOverride = 
-      static_cast <MCameraUIOrientationOverride*>( 
+    iCustomInterfaceUIOrientationOverride =
+      static_cast <MCameraUIOrientationOverride*>(
   	    iCaeEngine->CustomInterface( KCameraUIOrientationOverrideUid ) );
 #else
     PRINT( _L("Camera <> CCameraController: Get i/f MUIOrientationOverride from iCamera..") )
-    iCustomInterfaceUIOrientationOverride = 
-      static_cast <MCameraUIOrientationOverride*>( 
+    iCustomInterfaceUIOrientationOverride =
+      static_cast <MCameraUIOrientationOverride*>(
   	    iCamera->CustomInterface( KCameraUIOrientationOverrideUid ) );
 #endif // CAMERAAPP_CAE_FOR_VIDEO
 
     PRINT1( _L("Camera <> OrientationOverride custom i/f pointer:%d"), iCustomInterfaceUIOrientationOverride );
     TRAP_IGNORE(iCustomInterfaceUIOrientationOverride->SetOrientationModeL( aOrientation ));
-    
+
   PRINT( _L("Camera <= CCamCameraController::SetOrientationModeL") );
   }
 
 // ---------------------------------------------------------------------------
-// CamerasAvailable <<static>> 
+// CamerasAvailable <<static>>
 // ---------------------------------------------------------------------------
 //
-TInt 
-CCamCameraController::CamerasAvailable() 
-  { 
-#ifndef CAMERAAPP_CAPI_EMULATOR    
+TInt
+CCamCameraController::CamerasAvailable()
+  {
+#ifndef CAMERAAPP_CAPI_EMULATOR
   return CCamera::CamerasAvailable();
 #else
   // Temporary
   return 2;
-#endif  
+#endif
   }
 
 // ---------------------------------------------------------------------------
 // CameraHandle
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController::CameraHandle()
   {
   if( iCamera )
@@ -1581,7 +1581,7 @@ CCamCameraController::CameraHandle()
 // CameraInfo
 // ---------------------------------------------------------------------------
 //
-const TCameraInfo& 
+const TCameraInfo&
 CCamCameraController::CameraInfo() const
   {
   return iCameraInfo;
@@ -1591,7 +1591,7 @@ CCamCameraController::CameraInfo() const
 // ControllerInfo
 // ---------------------------------------------------------------------------
 //
-const TCamControllerInfo& 
+const TCamControllerInfo&
 CCamCameraController::ControllerInfo() const
   {
   return iInfo;
@@ -1601,7 +1601,7 @@ CCamCameraController::ControllerInfo() const
 //
 // ---------------------------------------------------------------------------
 //
-TUint 
+TUint
 CCamCameraController::State() const
   {
   return iInfo.iState;
@@ -1611,7 +1611,7 @@ CCamCameraController::State() const
 //
 // ---------------------------------------------------------------------------
 //
-TCamViewfinderMode 
+TCamViewfinderMode
 CCamCameraController::ViewfinderMode()  const
   {
   return iInfo.iVfMode;
@@ -1627,7 +1627,7 @@ CCamCameraController::ViewfinderState() const
   return iInfo.iVfState;
   }
 
-  
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -1635,7 +1635,7 @@ CCamCameraController::ViewfinderState() const
 TCamCameraTriState
 CCamCameraController::SnapshotState() const
   {
-  return iInfo.iSsState;  
+  return iInfo.iSsState;
   }
 
 
@@ -1643,11 +1643,11 @@ CCamCameraController::SnapshotState() const
 //
 // ---------------------------------------------------------------------------
 //
-TCamCameraReadyState 
+TCamCameraReadyState
 CCamCameraController::FlashState() const
   {
   TCamCameraReadyState state = ECamUnknown;
-  
+
 #ifdef CAMERAAPP_CAPI_V2_ADV
   if( iAdvancedSettings )
     {
@@ -1698,7 +1698,7 @@ CCamCameraController
     case ECameraSettingExposure:
     case ECameraUserSceneSettingExposure:
       {
-      TPckgBuf<TCamSettingDataExposure>* exposure = 
+      TPckgBuf<TCamSettingDataExposure>* exposure =
           static_cast<TPckgBuf<TCamSettingDataExposure>*>( aSettingData );
 #ifdef CAMERAAPP_CAE_FIX
       if( iCaeInUse )
@@ -1724,11 +1724,11 @@ CCamCameraController
       *iso = iAdvancedSettings->IsoRate();
       break;
       }
-    case ECameraSettingContAF:   
+    case ECameraSettingContAF:
       {
       TInt* contAF = static_cast<TInt*>( aSettingData );
       *contAF = iAdvancedSettings->AutoFocusType() &  //bitwise
-                CAS::EAutoFocusTypeContinuous; 
+                CAS::EAutoFocusTypeContinuous;
       break;
       }
 #endif
@@ -1736,7 +1736,7 @@ CCamCameraController
     case ECameraSettingWhiteBalance:
     case ECameraUserSceneSettingWhiteBalance:
       {
-      TPckgBuf<TCamSettingDataWhiteBalance>* wb = 
+      TPckgBuf<TCamSettingDataWhiteBalance>* wb =
           static_cast<TPckgBuf<TCamSettingDataWhiteBalance>*>( aSettingData );
 
 #ifdef CAMERAAPP_CAE_FIX
@@ -1757,7 +1757,7 @@ CCamCameraController
       CheckNonNullL( iImageProcessor, KErrNotSupported );
 
       CIP::TEffect* effect = static_cast<CIP::TEffect*>( aSettingData );
-      *effect = 
+      *effect =
         (CIP::TEffect)
           iImageProcessor->TransformationValue( KUidECamEventImageProcessingEffect );
       break;
@@ -1852,7 +1852,7 @@ CCamCameraController
     case ECameraSettingBrightness:
     case ECameraUserSceneSettingBrightness:
       {
-      CCamera::TBrightness* brightness = 
+      CCamera::TBrightness* brightness =
           static_cast<CCamera::TBrightness*>( aSettingData );
 #ifdef CAMERAAPP_CAE_FIX
       if( iCaeInUse )
@@ -1866,7 +1866,7 @@ CCamCameraController
     case ECameraSettingContrast:
     case ECameraUserSceneSettingContrast:
       {
-      CCamera::TContrast* contrast = 
+      CCamera::TContrast* contrast =
           static_cast<CCamera::TContrast*>( aSettingData );
 #ifdef CAMERAAPP_CAE_FIX
       if( iCaeInUse )
@@ -1880,7 +1880,7 @@ CCamCameraController
     // -----------------------------------------------------
     case ECameraSettingStabilization:
       {
-      TPckgBuf<TCamSettingDataStabilization>* pckg = 
+      TPckgBuf<TCamSettingDataStabilization>* pckg =
           static_cast<TPckgBuf<TCamSettingDataStabilization>*>( aSettingData );
       TCamSettingDataStabilization& stabilization = (*pckg)();
 
@@ -1895,7 +1895,7 @@ CCamCameraController
     case ECameraSettingOrientation:
       {
       CheckNonNullL( iCustomInterfaceOrientation, KErrNotSupported );
-      
+
       MCameraOrientation::TOrientation* orientation =
           static_cast<MCameraOrientation::TOrientation*>( aSettingData );
 
@@ -1927,7 +1927,7 @@ CCamCameraController
 // Leave here will cause iActive to call EndSequence with the error code.
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController::ProcessNextRequestL()
   {
   PRINT( _L("Camera => CCamCameraController::ProcessNextRequestL") );
@@ -1970,7 +1970,7 @@ CCamCameraController::ProcessNextRequestL()
     if( iSequenceIndex < iSequenceArray.Count() )
       {
       const TCamCameraRequestId& requestId( iSequenceArray[iSequenceIndex] );
-  
+
       PRINT( _L("Camera <> process request..") );
       // If this request will be responded through MCameraObserver(2) callback,
       // iActive will be requested a new callback there and also
@@ -1979,7 +1979,7 @@ CCamCameraController::ProcessNextRequestL()
       readyForNextStep = ProcessOneRequestL( requestId );
 
       if( readyForNextStep )
-        {        
+        {
         if( ECamRequestVideoStop == requestId
          || ECamRequestImageCancel == requestId )
           {
@@ -1988,8 +1988,8 @@ CCamCameraController::ProcessNextRequestL()
           PRINT( _L("Camera <> CCamCameraController::RequestL .. Skipping commmon notification, is done already.") );
           }
         else
-          {  
-          TCamCameraEventId event( Request2Event( requestId ) );  
+          {
+          TCamCameraEventId event( Request2Event( requestId ) );
           NotifyObservers( KErrNone, event, EventClass( event ) );
           }
         }
@@ -2018,10 +2018,10 @@ CCamCameraController::ProcessNextRequestL()
 // ProcessSettingL
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
   {
-  PRINT1( _L("Camera => CCamCameraController::ProcessSettingL [%s]"), 
+  PRINT1( _L("Camera => CCamCameraController::ProcessSettingL [%s]"),
           KCameraSettingNames[aSettingId] );
 
   TInt callback( EFalse );
@@ -2037,30 +2037,30 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
     case ECameraSettingFlash:
     case ECameraUserSceneSettingFlash:
       {
-      if ( IsFlagOn( iInfo.iState, ECamVideoOn ) ) 
+      if ( IsFlagOn( iInfo.iState, ECamVideoOn ) )
         {
         CCamera::TFlash flash( CCamera::EFlashNone );
-        TCamFlashId currentFlashSetting( ECamFlashOff ); 
+        TCamFlashId currentFlashSetting( ECamFlashOff );
         // Video light setting has values ECamFlashOff/ECamFlashForced
-        iSettingProvider.ProvideCameraSettingL( aSettingId, 
-                                                &currentFlashSetting ); 
-        PRINT2( _L("Camera => Video Flash now = %d, new = %d"), 
+        iSettingProvider.ProvideCameraSettingL( aSettingId,
+                                                &currentFlashSetting );
+        PRINT2( _L("Camera => Video Flash now = %d, new = %d"),
                                        iCamera->Flash(), currentFlashSetting );
         // Camera uses values EFlashNone/EFlashVideoLight
-        flash = (currentFlashSetting == ECamFlashOff)?  
+        flash = (currentFlashSetting == ECamFlashOff)?
                 CCamera::EFlashNone:CCamera::EFlashVideoLight;
-        PRINT1( _L("Camera => iCamera->SetFlashL( %d )"), flash );      
+        PRINT1( _L("Camera => iCamera->SetFlashL( %d )"), flash );
         iCamera->SetFlashL( flash );
         }
       else
         {
-        // Still image flash 
+        // Still image flash
         CCamera::TFlash flash( CCamera::EFlashAuto );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &flash );
 #ifdef CAMERAAPP_CAE_FIX
       if( iCaeInUse )
             {
-            iCaeEngine->SetFlashModeL( flash );  
+            iCaeEngine->SetFlashModeL( flash );
             }
       else
 #endif
@@ -2097,7 +2097,7 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
         {
         iAdvancedSettings->SetExposureMode( mode );
         // iCamera->SetExposureL( mode );
-  
+
         TInt step = ResolveEvStep( params().iExposureStep );
         // Value needs to be multiplied by KECamFineResolutionFactor.
         // Setting provider does this for us.
@@ -2129,25 +2129,25 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
       iSettingProvider.ProvideCameraSettingL( aSettingId, &iso );
       callback = ETrue;
       CleanupStack::PopAndDestroy( &ISOarray );
-      
+
       PRINT1( _L("Camera <> Setting ISO rate to: %d"), iso );
       if( !iso )
         {
         // ISO Auto
-        iAdvancedSettings->SetISORateL( 
-                CCamera::CCameraAdvancedSettings::EISOAutoUnPrioritised, iso );  
+        iAdvancedSettings->SetISORateL(
+                CCamera::CCameraAdvancedSettings::EISOAutoUnPrioritised, iso );
         }
-      else if( IsSupportedValue( iso, 
+      else if( IsSupportedValue( iso,
                                  iAdvancedSettingInfo.iIsoRatesSupport,
-                                 EDiscreteSteps ) ) 
+                                 EDiscreteSteps ) )
         {
-        // Selected ISO rate  
-        iAdvancedSettings->SetISORateL( 
+        // Selected ISO rate
+        iAdvancedSettings->SetISORateL(
                 CCamera::CCameraAdvancedSettings::EISOManual, iso );
         }
       else
         {
-        User::Leave( KErrNotSupported );  
+        User::Leave( KErrNotSupported );
         }
       break;
       }
@@ -2167,7 +2167,7 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
         iCamera->SetWhiteBalanceL( params().iWhiteBalanceMode );
 #ifdef CAMERAAPP_CAPI_V2
         callback = ETrue;
-#endif      
+#endif
         }
       break;
       }
@@ -2180,8 +2180,8 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
       CIP::TEffect effect( CIP::EEffectNone );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &effect );
 
-      if( IsSupportedValue( effect, 
-                            iAdvancedSettingInfo.iColourEffectSupport, 
+      if( IsSupportedValue( effect,
+                            iAdvancedSettingInfo.iColourEffectSupport,
                             iAdvancedSettingInfo.iColourEffectValueInfo ) )
         {
         iImageProcessor->SetTransformationValue( KUidECamEventImageProcessingEffect, effect );
@@ -2199,8 +2199,8 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
       TInt sharpness( 0 );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &sharpness );
 
-      if( IsSupportedValue( sharpness, 
-                            iAdvancedSettingInfo.iSharpnessSupport, 
+      if( IsSupportedValue( sharpness,
+                            iAdvancedSettingInfo.iSharpnessSupport,
                             iAdvancedSettingInfo.iSharpnessValueInfo ) )
         {
         iImageProcessor->SetTransformationValue( KUidECamEventImageProcessingAdjustSharpness, sharpness );
@@ -2244,17 +2244,17 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
 #ifdef CAMERAAPP_CAPI_V2_ADV
         if( iAdvancedSettingInfo.iDigitalZoomSupport.Count() > zoom )
             iAdvancedSettings->SetDigitalZoom( iAdvancedSettingInfo.iDigitalZoomSupport[zoom] );
-          else 
+          else
             User::Leave( KErrNotSupported );
         callback = ETrue;
-        
+
 #else
         // Note: Even if the method is misleadingly named
         //       CCamera::SetDigitalZoomFactorL, the values are
         //       zoom steps, not zoom factors.
         iCamera->SetDigitalZoomFactorL( zoom );
 #endif
-      
+
         }
       break;
       }
@@ -2275,13 +2275,13 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
       PRINT( _L("Camera <> CCamCameraController::ProcessSettingL ECameraSettingStabilization") );
       TPckgBuf<TCamSettingDataStabilization> stabilization;
       iSettingProvider.ProvideCameraSettingL( aSettingId, &stabilization );
-      
+
       // Check that the values are supported..
       TBool modeOk    = ( CAS::EStabilizationModeOff == stabilization().iMode
                        || iAdvancedSettingInfo.iStabilizationModeSupport & stabilization().iMode );
       TBool effectOk  = ( CAS::EStabilizationOff     == stabilization().iEffect
                        || iAdvancedSettingInfo.iStabilizationEffectSupport & stabilization().iEffect );
-      TBool complexOk = ( CAS::EStabilizationComplexityAuto == stabilization().iComplexity 
+      TBool complexOk = ( CAS::EStabilizationComplexityAuto == stabilization().iComplexity
                        || iAdvancedSettingInfo.iStabilizationComplexitySupport & stabilization().iComplexity );
 
       if( modeOk && effectOk && complexOk )
@@ -2291,9 +2291,9 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
         iAdvancedSettings->SetStabilizationEffect    ( stabilization().iEffect     );
         iAdvancedSettings->SetStabilizationComplexity( stabilization().iComplexity );
         // Events:
-        //   KUidECamEventCameraSettingStabilizationMode 
-        //   KUidECamEventCameraSettingsStabilizationEffect 
-        //   KUidECamEventSettingsStabilizationAlgorithmComplexity 
+        //   KUidECamEventCameraSettingStabilizationMode
+        //   KUidECamEventCameraSettingsStabilizationEffect
+        //   KUidECamEventSettingsStabilizationAlgorithmComplexity
         // We use the latest one to determine when we can continue.
         // Do not change above order unless CCamSettingConversion::Map2EventUidValue
         // is edited..
@@ -2307,12 +2307,12 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
       break;
       }
     // -------------------------------
-    case ECameraSettingContAF:  
+    case ECameraSettingContAF:
       {
       CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
       if ( appUi->AppController().UiConfigManagerPtr()->IsContinuosAutofocusSupported() )
          {
-         TBool isContAFon( iAdvancedSettings->AutoFocusType() & 
+         TBool isContAFon( iAdvancedSettings->AutoFocusType() &
                            CAS::EAutoFocusTypeContinuous );
          if( IsFlagOn( iInfo.iState, ECamVideoOn ) )
             {
@@ -2349,8 +2349,8 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
         }
       else
         {
-        // 
-        PRINT( _L("Camera <> Video file size too early, NOT SET!!") );        
+        //
+        PRINT( _L("Camera <> Video file size too early, NOT SET!!") );
         }
       break;
       }
@@ -2376,7 +2376,7 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
         }
       else
         {
-        PRINT( _L("Camera <> Video name too early, NOT SET!!") );        
+        PRINT( _L("Camera <> Video name too early, NOT SET!!") );
         }
       break;
       }
@@ -2398,8 +2398,8 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
         }
       else
         {
-        PRINT( _L("Camera <> Video mute too early, NOT SET!!") );        
-        }        
+        PRINT( _L("Camera <> Video mute too early, NOT SET!!") );
+        }
       break;
       }
     // -------------------------------
@@ -2421,11 +2421,11 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
     case ECameraSettingOrientation:
       {
       CheckNonNullL( iCustomInterfaceOrientation, KErrNotSupported );
-      MCameraOrientation::TOrientation 
+      MCameraOrientation::TOrientation
         orientation( MCameraOrientation::EOrientation0 );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &orientation );
 
-      if ( iInfo.iCurrentCamera != KPrimaryCameraIndex && 
+      if ( iInfo.iCurrentCamera != KPrimaryCameraIndex &&
            orientation == MCameraOrientation::EOrientation90 )
         {
         PRINT( _L("Camera <> Rotate portrait secondary camera image 270 degrees") );
@@ -2458,18 +2458,18 @@ CCamCameraController::ProcessSettingL( const TCamCameraSettingId& aSettingId )
 //
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessOneRequestL( const TCamCameraRequestId& aRequestId )
   {
   PRINT( _L("Camera => CCamCameraController::ProcessOneRequestL") );
-  PRINT2( _L("Camera <> processing request [%s] id:%d "), 
-          KCamRequestNames[aRequestId], 
+  PRINT2( _L("Camera <> processing request [%s] id:%d "),
+          KCamRequestNames[aRequestId],
           aRequestId );
 
   TInt readyForNext( ETrue );
-  
-  // Order from most time critical / frequent 
+
+  // Order from most time critical / frequent
   // to less time critical / seldom.
   // Handled in submethods to preserve readability.
   // -----------------------------------------------------
@@ -2530,7 +2530,7 @@ CCamCameraController
 // ProcessControlStartupRequestL
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessControlStartupRequestL( const TCamCameraRequestId& aRequestId )
   {
@@ -2547,9 +2547,9 @@ CCamCameraController
     // If UIOrientationOverrideAPI is used, ui construction is completed while
     // waiting for Reserve to complete, event sent here to continue ui construction
     CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
-    if ( appUi->AppController().UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )    
+    if ( appUi->AppController().UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )
       {
-      NotifyObservers( KErrNone, 
+      NotifyObservers( KErrNone,
                        ECamCameraEventReserveRequested,
                        ECamCameraEventClassBasicControl );
       }
@@ -2563,7 +2563,7 @@ CCamCameraController
 
     CAMERAAPP_PERF_CONTROLLER_START( ECamRequestPowerOn );
 
-    iCamera->PowerOn(); 
+    iCamera->PowerOn();
     }
   // -------------------------------------------------------
   // Unknown
@@ -2572,7 +2572,7 @@ CCamCameraController
     Panic( ECamCameraControllerCorrupt );
     }
   // -------------------------------------------------------
-  iReleasedByUi = EFalse;  
+  iReleasedByUi = EFalse;
   PRINT( _L("Camera <= CCamCameraController::ProcessControlStartupRequestL") );
   // Callback needs to be received before we can continue.
   return EFalse;
@@ -2582,16 +2582,16 @@ CCamCameraController
 // ProcessControlShutdownRequest
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessControlShutdownRequest( const TCamCameraRequestId& aRequestId )
   {
-  PRINT( _L("Camera => CCamCameraController::ProcessControlShutdownRequest") );  
+  PRINT( _L("Camera => CCamCameraController::ProcessControlShutdownRequest") );
   // -------------------------------------------------------
   // Power off
   if( ECamRequestPowerOff == aRequestId )
     {
-    if( IsFlagOn( iInfo.iState, ECamPowerOn ) ) 
+    if( IsFlagOn( iInfo.iState, ECamPowerOn ) )
       {
       // -------------------------------
       // Release image or video capture
@@ -2599,14 +2599,14 @@ CCamCameraController
         {
         // Leaves only if state is wrong (already checked here).
         ProcessImageShutdownRequest( ECamRequestImageRelease );
-        NotifyObservers( KErrNone, 
+        NotifyObservers( KErrNone,
                          ECamCameraEventImageRelease,
                          ECamCameraEventClassImage );
         }
       else if( IsFlagOn( iInfo.iState, ECamVideoOn ) )
         {
         TRAP_IGNORE( ProcessVideoRequestL( ECamRequestVideoRelease ) );
-        NotifyObservers( KErrNone, 
+        NotifyObservers( KErrNone,
                          ECamCameraEventVideoRelease,
                          ECamCameraEventClassVideo );
         }
@@ -2639,10 +2639,10 @@ CCamCameraController
         {
         iCaeEngine->PowerOff();
         }
-      else      
+      else
 #endif // CAMERAAPP_CAE_FIX
         {
-        iCamera->PowerOff(); 
+        iCamera->PowerOff();
         }
       // -------------------------------
       }
@@ -2674,18 +2674,18 @@ CCamCameraController
 #endif // CAMERAAPP_CAE_FIX
         {
         iCamera->Release();
-        iReleasedByUi = ETrue;  
+        iReleasedByUi = ETrue;
         if( iIveRecoveryCount > 0 )
             {
             HandleReserveLostEvent( KErrNone );
             }
         }
       }
-    PRINT( _L("Camera <> released, reset info") );  
+    PRINT( _L("Camera <> released, reset info") );
 
     // Reset our info, but preserve busy flag and camera index.
     // Sets iInfo.iState to ECamIdle.
-    iInfo.Reset( ETrue, ETrue ); 
+    iInfo.Reset( ETrue, ETrue );
     }
   // -------------------------------------------------------
   // Unknown
@@ -2694,8 +2694,8 @@ CCamCameraController
     Panic( ECamCameraControllerCorrupt );
     }
   // -------------------------------------------------------
-  PRINT( _L("Camera <= CCamCameraController::ProcessControlShutdownRequest") );  
-  
+  PRINT( _L("Camera <= CCamCameraController::ProcessControlShutdownRequest") );
+
   // No callback needs to be waited.
   return ETrue;
   }
@@ -2704,7 +2704,7 @@ CCamCameraController
 // ProcessViewfinderRequestL
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessVfRequestL( const TCamCameraRequestId& aRequestId )
   {
@@ -2752,7 +2752,7 @@ CCamCameraController
 void
 CCamCameraController::InitViewfinderL( const TCamViewfinderMode& aMode )
   {
-  PRINT( _L("Camera => CCamCameraController::InitViewfinderL") );  
+  PRINT( _L("Camera => CCamCameraController::InitViewfinderL") );
 
   // Check the old viewfinder is released now.
   // No further checks made here.
@@ -2765,10 +2765,10 @@ CCamCameraController::InitViewfinderL( const TCamViewfinderMode& aMode )
     case ECamViewfinderDirect:
       {
       // Don't proceed if not supported by camera.
-      CheckFlagOnL( iCameraInfo.iOptionsSupported, 
+      CheckFlagOnL( iCameraInfo.iOptionsSupported,
                     TCameraInfo::EViewFinderDirectSupported,
                     KErrNotSupported );
-      
+
   #ifdef CAMERAAPP_CAPI_V2_DVF
       PRINT( _L("Camera <> Creating CCameraDirectViewFinder instance") );
       if( iDirectViewfinder )
@@ -2778,8 +2778,8 @@ CCamCameraController::InitViewfinderL( const TCamViewfinderMode& aMode )
         }
       iDirectViewfinder = CCamera::CCameraDirectViewFinder::NewL( *iCamera );
   #else
-      // not implemented 
-      Panic( ECamCameraControllerUnsupported );      
+      // not implemented
+      Panic( ECamCameraControllerUnsupported );
   #endif
       iInfo.iVfState  = ECamTriInactive;
       iInfo.iVfMode   = ECamViewfinderDirect;
@@ -2789,10 +2789,10 @@ CCamCameraController::InitViewfinderL( const TCamViewfinderMode& aMode )
     case ECamViewfinderBitmap:
       {
       // Don't proceed if not supported by camera.
-      CheckFlagOnL( iCameraInfo.iOptionsSupported, 
+      CheckFlagOnL( iCameraInfo.iOptionsSupported,
                     TCameraInfo::EViewFinderBitmapsSupported,
                     KErrNotSupported );
-  
+
       iInfo.iVfState  = ECamTriInactive;
       iInfo.iVfMode   = ECamViewfinderBitmap;
       break;
@@ -2804,11 +2804,11 @@ CCamCameraController::InitViewfinderL( const TCamViewfinderMode& aMode )
     // ---------------------------------
     default:
       // Unknown mode
-      Panic( ECamCameraControllerUnsupported );     
-      break;      
+      Panic( ECamCameraControllerUnsupported );
+      break;
     // ---------------------------------
     }
-  PRINT( _L("Camera <= CCamCameraController::InitViewfinderL") );  
+  PRINT( _L("Camera <= CCamCameraController::InitViewfinderL") );
   }
 
 // ---------------------------------------------------------------------------
@@ -2821,11 +2821,11 @@ CCamCameraController
 
 #ifdef __WINSCW__
   const TCamViewfinderMode KTargetMode( ECamViewfinderBitmap );
-#else    
-    
+#else
+
   TPckgBuf<TCamViewfinderMode> mode;
   iSettingProvider.ProvideCameraParamL( ECameraParamVfMode, &mode );
-  
+
   // If the viewfinder mode needs to be changed,
   // first stop and release resources related to the old viewfinder type.
   const TCamViewfinderMode KTargetMode( mode() );
@@ -2837,25 +2837,29 @@ CCamCameraController
     ProcessVfRelaseRequest();
     }
 
-  // Check that application is still in foreground, if not then return
+  // Check that application is still in foreground, if not, then vf not started.
   CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
-
-  if ( !appUi->AppInBackground( ETrue ) )
+  if ( appUi && appUi->AppInBackground( ETrue ) )
+    {
+    // Notify appUi that we did not start viewfinder although asked to do so.
+    appUi->SetViewFinderStoppedStatus( iInfo.iVfState != ECamTriActive );
+    }
+  else
     {
     switch( iInfo.iVfState )
       {
       // -----------------------------------------------------
       case ECamTriIdle:
        PRINT( _L("Camera <> case ECamTriIdle") );
-  
+
         InitViewfinderL( KTargetMode );
         // << fall through >>
-  
+
       case ECamTriInactive:
         {
         // -------------------------------
         PRINT( _L("Camera <> case ECamTriInactive") );
-  
+
         if( ECamViewfinderDirect == iInfo.iVfMode )
 #ifdef CAMERAAPP_CAPI_V2_DVF
           {
@@ -2868,16 +2872,16 @@ CCamCameraController
                   PRINT( _L("Camera <> CCamCameraController::iViewfinderWindow is NULL - cannot start VF!") );
                   User::Leave( KErrNotReady );
                   }
-  
+
               // Use the same viewfinder position and size as for bitmap viewfinder
               TPckgBuf<TCamParamsVfBitmap> params;
               iSettingProvider.ProvideCameraParamL( ECameraParamVfBitmap, &params );
-  
+
               CEikonEnv* env = CEikonEnv::Static();
-  
+
               OstTrace0( CAMERAAPP_PERFORMANCE, CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" ); //CCORAPP_APP_VF_INIT_END
               OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_OVERLAY_INIT 0" ); //CCORAPP_APP_OVERLAY_INIT_END
-  
+
               TInt orgPos = SetVfWindowOrdinal(); // Set visible
               iCamera->StartViewFinderDirectL(
                   env->WsSession(),
@@ -2885,16 +2889,15 @@ CCamCameraController
                   *iViewfinderWindow,
                   params().iRect );
               (void) SetVfWindowOrdinal( orgPos ); // back to original
-  
-              CCamAppUi* appUi = static_cast<CCamAppUi*>( env->AppUi() );
-              if ( ECamActiveCameraSecondary == appUi->ActiveCamera() ) 
+
+              if ( ECamActiveCameraSecondary == appUi->ActiveCamera() )
                   {
-                  iCamera->SetViewFinderMirrorL(ETrue); 
+                  iCamera->SetViewFinderMirrorL(ETrue);
                   }
               // VF started succesfully, reset recovery counter
-              delete iIdle;  
+              delete iIdle;
               iIdle = NULL;
-              iIveRecoveryCount = KIveRecoveryCountMax;  
+              iIveRecoveryCount = KIveRecoveryCountMax;
               break;
               }
             case CCamera::CCameraDirectViewFinder::EViewFinderPause:
@@ -2906,7 +2909,7 @@ CCamCameraController
               {
               // Already running. Not considered as error.
               break;
-              }          
+              }
             default:
               {
               Panic( ECamCameraControllerUnsupported );
@@ -2917,14 +2920,14 @@ CCamCameraController
 #else // CAMERAAPP_CAPI_V2_DVF
           {
           // No controller support for direct vf.
-          Panic( ECamCameraControllerUnsupported );     
+          Panic( ECamCameraControllerUnsupported );
           }
 #endif // CAMERAAPP_CAPI_V2_DVF
         // -------------------------------
         else
           {
           PRINT( _L("Camera <> Get bitmap vf details..") );
-            
+
           TPckgBuf<TCamParamsVfBitmap> params;
           iSettingProvider.ProvideCameraParamL( ECameraParamVfBitmap, &params );
           iInfo.iViewfinderFormat = params().iFormat;
@@ -2933,7 +2936,7 @@ CCamCameraController
           if( iCaeInUse )
             {
             PRINT( _L("Camera <> Call CCaeEngine::StartViewFinderBitmapsL..") );
-  
+
             OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" ); //CCORAPP_APP_VF_INIT_END
             OstTrace0( CAMERAAPP_PERFORMANCE, DUP3_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_OVERLAY_INIT 0" ); //CCORAPP_APP_OVERLAY_INIT_END
             iCaeEngine->StartViewFinderBitmapsL( iInfo.iViewfinderSize );
@@ -2944,16 +2947,16 @@ CCamCameraController
             PRINT( _L("Camera <> Call CCamera::StartViewFinderBitmapsL..") );
             OstTrace0( CAMERAAPP_PERFORMANCE, DUP4_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" );  //CCORAPP_APP_VF_INIT_END
             OstTrace0( CAMERAAPP_PERFORMANCE, DUP5_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_OVERLAY_INIT 0" ); //CCORAPP_APP_OVERLAY_INIT_END
-            iCamera->StartViewFinderBitmapsL( iInfo.iViewfinderSize );      
-  		  
+            iCamera->StartViewFinderBitmapsL( iInfo.iViewfinderSize );
+
   		  if ( params().iMirrorImage )
   		  	{
-  		   	iCamera->SetViewFinderMirrorL( params().iMirrorImage );	
+  		   	iCamera->SetViewFinderMirrorL( params().iMirrorImage );
   		   	}
             }
           }
         // -------------------------------
-  
+
         iInfo.iVfState = ECamTriActive;
         //view finder started now(set stop status as false)
         appUi->SetViewFinderStoppedStatus( EFalse );
@@ -2972,8 +2975,8 @@ CCamCameraController
         Panic( ECamCameraControllerCorrupt );
         break;
       // -----------------------------------------------------
-      } 
-    }   
+      }
+    }
   PRINT( _L("Camera <= CCamCameraController::ProcessVfStartRequestL") );
   }
 
@@ -3078,9 +3081,9 @@ CCamCameraController
       // Do the stopping first and continue then with release.
       // Leaves only if iVfState is ECamVfIdle, which is not the case here.
       TRAP_IGNORE( ProcessVfStopRequestL() );
-      
+
       // Need to notify here, because done as a part of other request.
-      NotifyObservers( KErrNone, 
+      NotifyObservers( KErrNone,
                        ECamCameraEventVfStop,
                        ECamCameraEventClassVfControl );
       // << fall through >>
@@ -3101,7 +3104,7 @@ CCamCameraController
         }
       // These may very well remain as they are.
       // Atleast for the format there is no "zero" value available.
-      //    iInfo.iViewfinderSize  
+      //    iInfo.iViewfinderSize
       //    iInfo.iViewfinderFormat
       iInfo.iVfState          = ECamTriIdle;
       iInfo.iVfMode           = ECamViewfinderNone;
@@ -3124,7 +3127,7 @@ CCamCameraController
 // ProcessImageRequestL
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessImageRequestL( const TCamCameraRequestId& aRequestId )
   {
@@ -3138,7 +3141,7 @@ CCamCameraController
     case ECamRequestImageInit:
       {
       // When camera engine still capture don't Init a new capture
-      
+
       if ( ECamCaptureOn == iInfo.iCaptureState )
       	{
       	return EFalse;
@@ -3152,9 +3155,9 @@ CCamCameraController
         iModeChange       = ECamModeChangeVideo2Image;
         iModeChangePhase  = ECamModeChangePhaseIdle;   // incremented before first step
         iModeChangeStatus = KErrNone;
-        iActive->IssueRequest();        
+        iActive->IssueRequest();
         }
-      else 
+      else
   #else
       if( IsFlagOn( iInfo.iState, ECamVideoOn ) )
         {
@@ -3169,8 +3172,8 @@ CCamCameraController
       CheckEqualsL( iInfo.iCaptureState, ECamCaptureOff, KErrInUse    );
 
       PRINT( _L("Camera <> Checking that image capture supported..") );
-      CheckFlagOnL( iCameraInfo.iOptionsSupported, 
-                    TCameraInfo::EImageCaptureSupported, 
+      CheckFlagOnL( iCameraInfo.iOptionsSupported,
+                    TCameraInfo::EImageCaptureSupported,
                     KErrNotSupported );
 
       PRINT( _L("Camera <> Ask image parameters..") );
@@ -3187,25 +3190,25 @@ CCamCameraController
       User::LeaveIfError( index );
 
       PRINT( _L("Camera <> Call CCamera::PrepareImageCaptureL..") );
-      PRINT2( _L("Camera <> Image size: (%d, %d)"), 
+      PRINT2( _L("Camera <> Image size: (%d, %d)"),
                   params().iSize.iWidth,
                   params().iSize.iHeight );
-      
+
       OstTrace0( CAMERAAPP_PERFORMANCE, CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_CONFIGURATIONS 0" );  //CCORAPP_APP_CONFIGS_END
       iCamera->PrepareImageCaptureL( format, index );
       OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_STILL_INIT 0" ); //CCORAPP_APP_STILL_INIT_END
       OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_OVERLAY_INIT 1" );   //CCORAPP_APP_OVERLAY_INIT_START
-      
+
       iCamera->SetJpegQuality( params().iQualityFactor );
 
       SetFlags( iInfo.iState, ECamImageOn );
-      
-#ifdef CAMERAAPP_CAPI_V2_ADV      
+
+#ifdef CAMERAAPP_CAPI_V2_ADV
       // Set current autofocus range to invalid value to force focusing
-      iInfo.iCurrentFocusRange = static_cast<CAS::TFocusRange>( -1 );    
+      iInfo.iCurrentFocusRange = static_cast<CAS::TFocusRange>( -1 );
       GetAdvancedSettingsInfoL();
 #endif // CAMERAAPP_CAPI_V2_ADV
-      
+
       iInfo.iCaptureCount  = 0;
       iInfo.iSnapshotCount = 0;
       callback = EFalse; // No callback to wait for.
@@ -3227,12 +3230,12 @@ CCamCameraController
 
       PRINT1( _L("Camera <> CCamCameraController .. About to start capture, total shared buffers in use: %d"), CCamBufferShare::TotalBufferShareCount() );
       iCamera->CaptureImage();
-      
+
       // When image data is received from CCamera,
       // an event is generated for that. We need to notify
-      // here as other places check if the request has associated 
+      // here as other places check if the request has associated
       // callback, and send no notification yet if callback exist.
-      NotifyObservers( KErrNone, 
+      NotifyObservers( KErrNone,
                        ECamCameraEventImageStart,
                        ECamCameraEventClassImage );
       break;
@@ -3247,14 +3250,14 @@ CCamCameraController
     }
   PRINT1( _L("Camera <= CCamCameraController::ProcessImageRequestL, continue now:%d"), !callback );
   return !callback;
-  }    
+  }
 
 
 // ---------------------------------------------------------------------------
 // ProcessImageShutdownRequest
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessImageShutdownRequest( const TCamCameraRequestId& aRequestId )
   {
@@ -3266,19 +3269,19 @@ CCamCameraController
     case ECamRequestImageCancel:
       {
       if( IsFlagOn( iInfo.iState, ECamImageOn )
-//      && ECamCaptureOn == iInfo.iCaptureState  
+//      && ECamCaptureOn == iInfo.iCaptureState
         )
         {
         const TCamCameraCaptureState previousState( iInfo.iCaptureState );
 
-        if( iEncoder ) 
+        if( iEncoder )
           {
           iEncoder->Cancel();
 
           delete iEncoder;
           iEncoder = NULL;
           }
-      
+
         PRINT( _L("Camera <> Calling iCamera->CancelCaptureImage()") );
         iCamera->CancelCaptureImage();
 
@@ -3293,8 +3296,8 @@ CCamCameraController
           ClearFlags( iInfo.iBusy, ECamBusySingle );
 
           TInt fullCaptures( Min( iInfo.iCaptureCount, iInfo.iSnapshotCount ) );
-          NotifyObservers( KErrNone, 
-                           ECamCameraEventImageStop, 
+          NotifyObservers( KErrNone,
+                           ECamCameraEventImageStop,
                            ECamCameraEventClassImage,
                            &fullCaptures );
           }
@@ -3308,7 +3311,7 @@ CCamCameraController
       ProcessImageShutdownRequest( ECamRequestImageCancel );
 
       // Nothing else really needed for image, just set flags.
-      ClearFlags( iInfo.iState, ECamImageOn ); 
+      ClearFlags( iInfo.iState, ECamImageOn );
       iInfo.iCaptureCount  = 0;
       iInfo.iSnapshotCount = 0;
       iInfo.iCaptureState  = ECamCaptureOff;
@@ -3325,7 +3328,7 @@ CCamCameraController
     }
   PRINT( _L("Camera <= CCamCameraController::ProcessImageShutdownRequest") );
   return ETrue; // can continue sequence, if needed
-  }    
+  }
 
 
 
@@ -3333,7 +3336,7 @@ CCamCameraController
 // ProcessVideoRequestL
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessVideoRequestL( const TCamCameraRequestId& aRequestId )
   {
@@ -3383,17 +3386,17 @@ CCamCameraController
         // _LIT( KTempFilename, "C:\\video.3gp" );
         // TPtrC ptr;
         // ptr.Set( KTempFilename() );
-        PRINT1( _L("Camera <> Set filename [%S]"), &ptr );        
+        PRINT1( _L("Camera <> Set filename [%S]"), &ptr );
         iCaeEngine->SetVideoRecordingFileNameL( ptr );
         CleanupStack::PopAndDestroy( filename );
-        
+
         // Set max video clip size
-        ProcessSettingL( ECameraSettingFileMaxSize );          
+        ProcessSettingL( ECameraSettingFileMaxSize );
 
         TPckgBuf<TCamParamsVideoCae> params;
         PRINT( _L("Camera <> Getting params from setting provider..") );
         iSettingProvider.ProvideCameraParamL( ECameraParamVideoCae, &params );
-        // The audioOn value is defined On==0 and Off==1, but the engine expects 
+        // The audioOn value is defined On==0 and Off==1, but the engine expects
         // ETrue if audio recording is On
         params().iAudioOn = ( ECamSettOn == params().iAudioOn )
         											? ETrue
@@ -3414,12 +3417,12 @@ CCamCameraController
                     params().iVideoType,
                     params().iAudioType );
             }
-                                          
-#ifdef CAMERAAPP_CAPI_V2_ADV                                          
+
+#ifdef CAMERAAPP_CAPI_V2_ADV
       // Set current autofocus range to invalid value to force focusing
-      iInfo.iCurrentFocusRange = static_cast<CAS::TFocusRange>( -1 );                                          
+      iInfo.iCurrentFocusRange = static_cast<CAS::TFocusRange>( -1 );
 #endif // CAMERAAPP_CAPI_V2_ADV
-                                          
+
         iAppController.SetVideoInitNeeded( EFalse );
         // iState is updated in the callback.
         PRINT( _L("Camera <> ..waiting for callback") );
@@ -3437,7 +3440,7 @@ CCamCameraController
         case ECamCaptureOff:    iCaeEngine->StartVideoRecording();  break;
         //case ECamCaptureOff:    iCaeEngine->ResumeVideoRecording();  break;
         case ECamCapturePaused: iCaeEngine->ResumeVideoRecording(); break;
-        default:                
+        default:
           Panic( ECamCameraControllerCorrupt );
           break;
         }
@@ -3460,18 +3463,18 @@ CCamCameraController
       switch( iInfo.iCaptureState )
         {
         case ECamCaptureOn:     // << fall through >>
-        case ECamCapturePaused: 
+        case ECamCapturePaused:
           PRINT( _L("Camera <> call CCaeEngine::StopVideoRecording..") );
-          iCaeEngine->StopVideoRecording(); 
+          iCaeEngine->StopVideoRecording();
           // If we got the callback during above call,
           // we should not wait for it anymore.
           // Check the capture state to be sure.
           callback = (ECamCaptureOff != iInfo.iCaptureState);
           break;
-        case ECamCaptureOff:    
+        case ECamCaptureOff:
           // no action, already stopped
           break;
-        default:                
+        default:
           Panic( ECamCameraControllerCorrupt );
           break;
         }
@@ -3483,10 +3486,10 @@ CCamCameraController
       {
       // Need to be stopped.
       CheckEqualsL( iInfo.iCaptureState, ECamCaptureOff, KErrInUse );
-  
+
       if( IsFlagOn( iInfo.iState, ECamVideoOn ) )
         iCaeEngine->CloseVideoRecording();
-        
+
       ClearFlags( iInfo.iState, ECamVideoOn );
       callback = EFalse;
 #ifdef CAMERAAPP_CAPI_V2_ADV
@@ -3504,8 +3507,8 @@ CCamCameraController
       break;
       }
     // -----------------------------------------------------
-    default: 
-      Panic( ECamCameraControllerCorrupt ); 
+    default:
+      Panic( ECamCameraControllerCorrupt );
       break;
     // -----------------------------------------------------
     }
@@ -3525,7 +3528,7 @@ CCamCameraController
 // ProcessSnapshotRequestL
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController
 ::ProcessSnapshotRequestL( const TCamCameraRequestId& aRequestId )
   {
@@ -3547,15 +3550,15 @@ CCamCameraController
           // << fall through >>
         case ECamTriInactive:
           {
-          PRINT( _L("Camera <> ECamTriInactive") );  
+          PRINT( _L("Camera <> ECamTriInactive") );
           iSnapshotProvider->StartSnapshot();
           break;
           }
-        case ECamTriActive: // Already active, no action  
-          PRINT( _L("Camera <> ECamTriActive") ); 
+        case ECamTriActive: // Already active, no action
+          PRINT( _L("Camera <> ECamTriActive") );
           break;
         default:
-          Panic( ECamCameraControllerCorrupt ); 
+          Panic( ECamCameraControllerCorrupt );
           break;
         }
       iInfo.iSsState = ECamTriActive;
@@ -3603,12 +3606,12 @@ CCamCameraController::ProcessSsStopRequest()
     case ECamTriInactive: // Already inactive, no action.
       PRINT( _L("Camera <> Snapshot idle/inactive, no need to stop") );
       break;
-    case ECamTriActive:   
+    case ECamTriActive:
       PRINT( _L("Camera <> Snapshot ECamTriActive -> need to stop") );
       iSnapshotProvider->StopSnapshot();
       break;
     default:
-      Panic( ECamCameraControllerCorrupt ); 
+      Panic( ECamCameraControllerCorrupt );
       break;
     }
   iInfo.iSsState = ECamTriInactive;
@@ -3629,28 +3632,28 @@ CCamCameraController::ProcessSsReleaseRequest()
       break;
     case ECamTriActive:
       iSnapshotProvider->StopSnapshot();
-      NotifyObservers( KErrNone, 
-                       ECamCameraEventSsStop, 
+      NotifyObservers( KErrNone,
+                       ECamCameraEventSsStop,
                        ECamCameraEventClassSsControl );
       // << fall through >>
     case ECamTriInactive:
       delete iSnapshotProvider;
       iSnapshotProvider = NULL;
       break;
-    default:              
-      Panic( ECamCameraControllerCorrupt ); 
+    default:
+      Panic( ECamCameraControllerCorrupt );
       break;
     }
 
   iInfo.iSsState = ECamTriIdle;
   PRINT( _L("Camera <= CCamCameraController::ProcessSsReleaseRequest") );
-  } 
+  }
 
 // ---------------------------------------------------------------------------
 // InitSnapshotL
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::InitSnapshotL()
   {
   PRINT( _L("Camera => CCamCameraController::InitSnapshotL") );
@@ -3671,11 +3674,11 @@ CCamCameraController::InitSnapshotL()
 
 
   // -------------------------------------------------------
-  // Initialize the snapshot parameters      
+  // Initialize the snapshot parameters
   TPckgBuf<TCamParamsSnapshot> params;
   iSettingProvider.ProvideCameraParamL( ECameraParamSnapshot, &params );
 
-  // Try to get the best, still supported, snapshot format.       
+  // Try to get the best, still supported, snapshot format.
   iInfo.iSnapshotFormat         = ResolveSnapshotFormatL( params().iFormat );
   iInfo.iSnapshotSize           = params().iSize;
   iInfo.iSnapshotAspectMaintain = params().iMaintainAspect;
@@ -3697,65 +3700,65 @@ CCamCameraController::InitSnapshotL()
 //
 void CCamCameraController::ProcessAutofocusRequestL( const TCamCameraRequestId& aRequestId )
   {
-  PRINT( _L("Camera => CCamCameraController::ProcessAutofocusRequestL") );  
+  PRINT( _L("Camera => CCamCameraController::ProcessAutofocusRequestL") );
 #ifdef CAMERAAPP_CAPI_V2_ADV
  CheckNonNullL( iAdvancedSettings, KErrNotReady );
   if( ECamRequestStartAutofocus == aRequestId )
     {
-    PRINT( _L("Camera <> SetAutoFocusType( EAutoFocusTypeSingle )") );    
-    iAdvancedSettings->SetAutoFocusType( CAS::EAutoFocusTypeSingle );  
-    iAfInProgress = ETrue; 
+    PRINT( _L("Camera <> SetAutoFocusType( EAutoFocusTypeSingle )") );
+    iAdvancedSettings->SetAutoFocusType( CAS::EAutoFocusTypeSingle );
+    iAfInProgress = ETrue;
     iFirstAfEventReceived = EFalse;
     }
   else if( ECamRequestCancelAutofocus == aRequestId )
     {
-    if( iAfInProgress ) 
+    if( iAfInProgress )
       {
       // Autofocus in progress, need to cancel it before setting range to hyperfocal
       PRINT( _L("Camera <> Cancel ongoing autofocus request") );
       iAdvancedSettings->SetAutoFocusType( CAS::EAutoFocusTypeOff );
       iAfHyperfocalPending = ETrue;
       }
-    else 
-      { 
+    else
+      {
       // If focustype is set to continuous, need to change it to off
 	  // before continuing
 
-      PRINT( _L("Camera <> SetAutoFocusType( EAutoFocusTypeOff )") ); 
+      PRINT( _L("Camera <> SetAutoFocusType( EAutoFocusTypeOff )") );
       if ( iAdvancedSettings->AutoFocusType() & CAS::EAutoFocusTypeContinuous )
         {
-        iAdvancedSettings->SetAutoFocusType( CAS::EAutoFocusTypeOff );     
+        iAdvancedSettings->SetAutoFocusType( CAS::EAutoFocusTypeOff );
         }
-                            
-      PRINT( _L("Camera <> Cancel autofocus - set focus range to hyperfocal") );    
-      iInfo.iCurrentFocusRange = CAS::EFocusRangeHyperfocal;   
-      iAdvancedSettings->SetFocusRange( CAS::EFocusRangeHyperfocal );  
-      
-      // Then start the focus. The callback of this cancel request sets 
+
+      PRINT( _L("Camera <> Cancel autofocus - set focus range to hyperfocal") );
+      iInfo.iCurrentFocusRange = CAS::EFocusRangeHyperfocal;
+      iAdvancedSettings->SetFocusRange( CAS::EFocusRangeHyperfocal );
+
+      // Then start the focus. The callback of this cancel request sets
       // a boolean in CamAppController, so the resulting optimal
       // focus event does not change reticule/focus state.
-      iAdvancedSettings->SetAutoFocusType( CAS::EAutoFocusTypeSingle );   
-      iAfInProgress = ETrue; 
+      iAdvancedSettings->SetAutoFocusType( CAS::EAutoFocusTypeSingle );
+      iAfInProgress = ETrue;
       }
     }
   else if( ECamRequestSetAfRange == aRequestId )
     {
     PRINT( _L("Camera <> Set autofocus range") );
     // Get autofocus mode from settings provider
-    
+
     CAS::TFocusRange afRange;
     iSettingProvider.ProvideCameraSettingL( ECameraSettingFocusRange, &afRange );
-    
+
     if( iInfo.iCurrentFocusRange != afRange )
-      {      
+      {
       iAdvancedSettings->SetFocusRange( afRange );
-      
+
       // Should this be done in the callback?:
       iInfo.iCurrentFocusRange = afRange;
       }
     else
       {
-      // Correct range already set. No need to do anything.  
+      // Correct range already set. No need to do anything.
       }
     }
   else
@@ -3763,8 +3766,8 @@ void CCamCameraController::ProcessAutofocusRequestL( const TCamCameraRequestId& 
     // Other request must not end up here
     __ASSERT_DEBUG( EFalse, Panic( ECamCameraControllerCorrupt ) );
     }
-#endif // CAMERAAPP_CAPI_V2_ADV   
-  
+#endif // CAMERAAPP_CAPI_V2_ADV
+
   (void)aRequestId; // removes compiler warning
   PRINT( _L("Camera <= CCamCameraController::ProcessAutofocusRequestL") );
   }
@@ -3782,10 +3785,10 @@ CCamCameraController::ProcessCaptureLimitSettingL()
 #ifdef CAMERAAPP_CAPI_V2_ADV
   // Check that we are prepared for image mode.
   CheckFlagOnL( iInfo.iState, ECamImageOn, KErrNotReady );
-    
+
   // Get requested capture count and determine current and target drive modes.
   TInt requestedLimit( 1 );
-  iSettingProvider.ProvideCameraSettingL( ECameraSettingCaptureLimit, &requestedLimit );  
+  iSettingProvider.ProvideCameraSettingL( ECameraSettingCaptureLimit, &requestedLimit );
   if( requestedLimit < 1 ) User::Leave( KErrArgument );
 
   const CAS::TDriveMode& currentMode( iAdvancedSettings->DriveMode() );
@@ -3806,7 +3809,7 @@ CCamCameraController::ProcessCaptureLimitSettingL()
 
   // -------------------------------------------------------
   // Determine needed changes and when to issue them
-  // 
+  //
   // During burst capture, we may receive snapshots and
   // image data on mixed order, e.g:
   //
@@ -3814,9 +3817,9 @@ CCamCameraController::ProcessCaptureLimitSettingL()
   //   --------------^^--------------------------^^
   //
   // C-API starts new burst capture when we adjust the
-  // capture limit. To avoid problems and to get equal 
-  // amount of snapshots and images, capture count is 
-  // only changed when we image data is received, 
+  // capture limit. To avoid problems and to get equal
+  // amount of snapshots and images, capture count is
+  // only changed when we image data is received,
   // and as many images as snapshots have arrived.
   // In the chart above ^ marks a place where capture limit
   // can be updated.
@@ -3833,7 +3836,7 @@ CCamCameraController::ProcessCaptureLimitSettingL()
       PRINT( _L("Camera <> CCamCameraController .. Drive mode update not possible now, LEAVE!") );
       User::Leave( KErrInUse );
       }
-    else if ( CAS::EDriveModeBurst == currentMode )    
+    else if ( CAS::EDriveModeBurst == currentMode )
       {
       if( cameraLimit != requestedLimit )
         {
@@ -3851,17 +3854,17 @@ CCamCameraController::ProcessCaptureLimitSettingL()
       {
       // No action needed. Capture limit of 1 image kept.
       PRINT( _L("Camera <> CCamCameraController .. Single shot mode kept, no action") );
-      }    
+      }
     }
   // -----------------------------------
-  // Not capturing 
-  //   
+  // Not capturing
+  //
   else
     {
     PRINT( _L("Camera <> CCamCameraController .. No capture ongoing..") );
 
     iInfo.iCaptureLimit = requestedLimit;
-    // Capture limit has changed, 
+    // Capture limit has changed,
     // check if drive mode also needs to be changed..
     if( targetMode != currentMode )
       {
@@ -3876,13 +3879,13 @@ CCamCameraController::ProcessCaptureLimitSettingL()
     }
 
   // -------------------------------------------------------
-  // Notify user that the change is done  
+  // Notify user that the change is done
   // or wait for camera callbacks to finish.
   PRINT1( _L("Camera <> CCamCameraController .. Should wait callback = %d"), callback );
   if( !callback )
     {
     TInt setting( ECameraSettingCaptureLimit );
-    NotifyObservers( KErrNone, 
+    NotifyObservers( KErrNone,
                      ECamCameraEventSettingsSingle,
                      ECamCameraEventClassSettings,
                      &setting );
@@ -3899,7 +3902,7 @@ CCamCameraController::ProcessCaptureLimitSettingL()
 // EndSequence
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::EndSequence( TInt aStatus )
   {
   PRINT1( _L("Camera => CCamCameraController::EndSequence, status:%d"), aStatus );
@@ -3922,14 +3925,14 @@ CCamCameraController::EndSequence( TInt aStatus )
     ClearRequestQueue();
     iReserveTryAgainCount = KCamReserveTryAgainMaxCount;
 
-    
+
     // Need to first clear busy flag as observer might issue
     // new requests in notification callback.
     ClearFlags( iInfo.iBusy, ECamBusySequence );
 
     PRINT( _L("Camera <> send notification..") );
-    NotifyObservers( aStatus, 
-                     ECamCameraEventSequenceEnd, 
+    NotifyObservers( aStatus,
+                     ECamCameraEventSequenceEnd,
                      ECamCameraEventClassBasicControl );
     }
   // -------------------------------------------------------
@@ -3949,8 +3952,8 @@ CCamCameraController::EndSequence( TInt aStatus )
     ClearSettingQueue();
 
     ClearFlags( iInfo.iBusy, ECamBusySetting );
-    
-    NotifyObservers( aStatus, 
+
+    NotifyObservers( aStatus,
                      ECamCameraEventSettingsDone,
                      ECamCameraEventClassSettings,
                      &last );
@@ -3973,7 +3976,7 @@ CCamCameraController::EndSequence( TInt aStatus )
 void
 CCamCameraController::ClearRequestQueue()
   {
-  iSequenceArray.Reset(); 
+  iSequenceArray.Reset();
   iSequenceIndex = -1;
   }
 
@@ -3984,7 +3987,7 @@ CCamCameraController::ClearRequestQueue()
 void
 CCamCameraController::ClearSettingQueue()
   {
-  iSettingArray.Reset(); 
+  iSettingArray.Reset();
   iSettingIndex = -1;
   }
 
@@ -4008,25 +4011,25 @@ CCamCameraController::HandlePowerOnEvent( TInt aStatus )
   OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMCAMERACONTROLLER_HANDLEPOWERONEVENT, "e_CAM_APP_VF_INIT 1" );  //CCORAPP_APP_VF_INIT_START
   OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_HANDLEPOWERONEVENT, "e_CAM_APP_CONFIGURATIONS 1" );   //CCORAPP_APP_CONFIGS_START
   OstTrace0( CAMERAAPP_PERFORMANCE, DUP3_CCAMCAMERACONTROLLER_HANDLEPOWERONEVENT, "e_CAM_APP_STILL_INIT 1" );   //CCORAPP_APP_STILL_INIT_START
-  
+
   CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
-  
+
   if ( appUi->AppController().UiConfigManagerPtr()->IsFaceTrackingSupported() )
       {
       PRINT( _L("Camera <> CCamAppController: Get i/f MCameraFaceTracking..") )
-      iCustomInterfaceFaceTracking = 
-          static_cast <MCameraFaceTracking*>( 
+      iCustomInterfaceFaceTracking =
+          static_cast <MCameraFaceTracking*>(
             iCamera->CustomInterface( KCameraFaceTrackingUid ) );
       PRINT1( _L("Camera <> Face Tracking custom i/f pointer:%d"), iCustomInterfaceFaceTracking );
       }
-  
+
   if( KErrNone == aStatus )
     {
     SetFlags( iInfo.iState, ECamPowerOn|ECamReserved );
-    
+
     TRAP_IGNORE( SetFaceTrackingL() );
 #if defined( CAMERAAPP_CAE_FOR_VIDEO ) && !defined( CAMERAAPP_CAE_FIX )
-    // We need to tell to CCaeEngine that the CCamera has been reserved 
+    // We need to tell to CCaeEngine that the CCamera has been reserved
     // and powered on "behind its back".
     if( iCaeEngine )
       {
@@ -4068,31 +4071,31 @@ CCamCameraController::HandlePowerOnEvent( TInt aStatus )
     {
     PRINT( _L("Camera <> no mode change ongoing") );
     HandleCallbackEvent( aStatus,
-                         ECamCameraEventPowerOn, 
+                         ECamCameraEventPowerOn,
                          ECamCameraEventClassBasicControl );
     }
 #else
 
   HandleCallbackEvent( aStatus,
-                       ECamCameraEventPowerOn, 
+                       ECamCameraEventPowerOn,
                        ECamCameraEventClassBasicControl );
 
 #endif // CAMERAAPP_CAE_FIX
-  
+
   if ( appUi->AppController().UiConfigManagerPtr()->IsOrientationSensorSupported() )
       {
       PRINT( _L("Camera <> CCamCameraController: Get i/f MCameraOrientation..") )
-      
+
       if(!iCustomInterfaceOrientation )
           {
-          iCustomInterfaceOrientation = 
-          static_cast <MCameraOrientation*>( 
+          iCustomInterfaceOrientation =
+          static_cast <MCameraOrientation*>(
           iCamera->CustomInterface( KCameraOrientationUid ) );
           }
-        
-      PRINT1( _L("Camera <> Orientation custom i/f pointer:%d"), iCustomInterfaceOrientation );      
-      }  
-  
+
+      PRINT1( _L("Camera <> Orientation custom i/f pointer:%d"), iCustomInterfaceOrientation );
+      }
+
   PRINT( _L("Camera <= CCamCameraController::HandlePowerOnEvent") );
   }
 
@@ -4143,12 +4146,12 @@ CCamCameraController::HandleReserveGainEvent( TInt aStatus )
     {
     PRINT( _L("Camera <> no mode change ongoing") );
     HandleCallbackEvent( aStatus,
-                         ECamCameraEventReserveGain, 
+                         ECamCameraEventReserveGain,
                          ECamCameraEventClassBasicControl );
     }
 #else
   HandleCallbackEvent( aStatus,
-                       ECamCameraEventReserveGain, 
+                       ECamCameraEventReserveGain,
                        ECamCameraEventClassBasicControl );
 #endif // CAMERAAPP_CAE_FIX
   PRINT( _L("Camera <= CCamCameraController::HandleReserveGainEvent") );
@@ -4167,7 +4170,7 @@ CCamCameraController::HandleReserveLostEvent( TInt aStatus )
   iInfo.iState   = ECamIdle;
   iInfo.iVfState = ECamTriIdle;
   iInfo.iSsState = ECamTriIdle;
-  
+
 #pragma message("CCamCameraController: Reserve lost event does not stop sequence")
 
   // These are not valid anymore.
@@ -4189,25 +4192,25 @@ CCamCameraController::HandleReserveLostEvent( TInt aStatus )
 #endif // CAMERAAPP_CAPI_V2
     {
     PRINT( _L("Camera <> no mode change ongoing") );
-    NotifyObservers( aStatus, 
+    NotifyObservers( aStatus,
                      ECamCameraEventReserveLose,
                      ECamCameraEventClassBasicControl );
     }
 
 #else // CAMERAAPP_CAE_FIX
 /*
-  // We need to tell to CCaeEngine that the CCamera 
+  // We need to tell to CCaeEngine that the CCamera
   // has been released "behind its back".
   if( iCaeEngine )
     {
     iCaeEngine->DisableVideoRecording();
     }
-*/    
+*/
 #endif // CAMERAAPP_CAE_FIX
   // -------------------------------------------------------
 #else
 
-  NotifyObservers( aStatus, 
+  NotifyObservers( aStatus,
                    ECamCameraEventReserveLose,
                    ECamCameraEventClassBasicControl );
   // -------------------------------------------------------
@@ -4226,16 +4229,16 @@ CCamCameraController::HandleReserveLostEvent( TInt aStatus )
        iIveRecoveryCount &&                   // Give up eventually
        !appUi->AppInBackground( EFalse ) &&   // Only if on the foreground
        ( !iReleasedByUi ||             // Try recover if unknown reason
-         appUi->StandbyStatus() ) &&    // or known error 
+         appUi->StandbyStatus() ) &&    // or known error
          !iAppController.InVideocallOrRinging() && // Video telephony parallel use case
          !iIveRecoveryOngoing        //  processing recovery sequence
          )
     {
     PRINT( _L("Camera <> CCamCameraController::HandleReserveLostEvent - Start recovery") );
-    NotifyObservers( aStatus, 
+    NotifyObservers( aStatus,
                      ECamCameraEventReserveLose,
                      ECamCameraEventClassBasicControl );
-    iIdle->Start( TCallBack( IdleCallback, this ) );  
+    iIdle->Start( TCallBack( IdleCallback, this ) );
     }
   PRINT( _L("Camera <= CCamCameraController::HandleReserveLostEvent") );
   }
@@ -4245,7 +4248,7 @@ CCamCameraController::HandleReserveLostEvent( TInt aStatus )
 // ---------------------------------------------------------------------------
 //
 void
-CCamCameraController::HandleViewfinderEvent( MCameraBuffer* aCameraBuffer, 
+CCamCameraController::HandleViewfinderEvent( MCameraBuffer* aCameraBuffer,
                                              TInt           aStatus )
   {
   PRINT_FRQ1( _L("Camera => CCamCameraController::HandleViewfinderEvent, status in:%d"), aStatus );
@@ -4265,10 +4268,10 @@ CCamCameraController::HandleViewfinderEvent( MCameraBuffer* aCameraBuffer,
       });
     PRINT_FRQ1( _L("Camera <> ..status after getting bitmap data: %d"), aStatus );
     }
-     
-  NotifyObservers( aStatus, 
-                   ECamCameraEventVfFrameReady, 
-                   ECamCameraEventClassVfData, 
+
+  NotifyObservers( aStatus,
+                   ECamCameraEventVfFrameReady,
+                   ECamCameraEventClassVfData,
                    vfFrame );
 
   ReleaseAndNull( aCameraBuffer );
@@ -4282,7 +4285,7 @@ CCamCameraController::HandleViewfinderEvent( MCameraBuffer* aCameraBuffer,
 // ---------------------------------------------------------------------------
 //
 void
-CCamCameraController::HandleImageCaptureEvent( MCameraBuffer* aCameraBuffer, 
+CCamCameraController::HandleImageCaptureEvent( MCameraBuffer* aCameraBuffer,
                                                TInt           aStatus )
   {
   PRINT1( _L("Camera => CCamCameraController::HandleImageCaptureEvent, status in: %d"), aStatus );
@@ -4292,8 +4295,8 @@ CCamCameraController::HandleImageCaptureEvent( MCameraBuffer* aCameraBuffer,
   if( ECamCaptureOn == iInfo.iCaptureState )
     {
     // Store flags
-    TUint busyFlags( iInfo.iBusy ); 
-      
+    TUint busyFlags( iInfo.iBusy );
+
     // -----------------------------------------------------
     // Try to get the image data.
     if( KErrNone == aStatus )
@@ -4301,8 +4304,8 @@ CCamCameraController::HandleImageCaptureEvent( MCameraBuffer* aCameraBuffer,
       // Takes ownership of aCameraBuffer and NULLs the pointer.
       TRAP( aStatus, HandleImageCaptureEventL( aCameraBuffer ) );
       PRINT1( _L("Camera <> status after handling data: %d"), aStatus );
-      }    
-    
+      }
+
     // Release if not NULLed in HandleImageCaptureEventL.
     ReleaseAndNull( aCameraBuffer );
 
@@ -4318,8 +4321,8 @@ CCamCameraController::HandleImageCaptureEvent( MCameraBuffer* aCameraBuffer,
       // See HandleCallbackEvent for comments.
       // ClearFlags( iInfo.iBusy, ECamBusySingle );
 
-      NotifyObservers( aStatus, 
-                       ECamCameraEventImageData, 
+      NotifyObservers( aStatus,
+                       ECamCameraEventImageData,
                        ECamCameraEventClassImage );
       }
     // -----------------------------------------------------
@@ -4332,8 +4335,8 @@ CCamCameraController::HandleImageCaptureEvent( MCameraBuffer* aCameraBuffer,
       ClearFlags( iInfo.iBusy, ECamBusySingle );
 
       TInt fullCaptures( Min( iInfo.iCaptureCount, iInfo.iSnapshotCount ) );
-      NotifyObservers( aStatus, 
-                       ECamCameraEventImageStop, 
+      NotifyObservers( aStatus,
+                       ECamCameraEventImageStop,
                        ECamCameraEventClassImage,
                        &fullCaptures );
 
@@ -4349,7 +4352,7 @@ CCamCameraController::HandleImageCaptureEvent( MCameraBuffer* aCameraBuffer,
     {
     PRINT( _L("Camera <> CCamCameraController ... [WARNING] Unexpected image data event!") );
     iInfo.PrintInfo();
-    
+
     // Stop capture to be safe.
     PRINT( _L("Camera <> CCamCameraController ... Calling CancelCaptureImage..") );
     iCamera->CancelCaptureImage();
@@ -4384,10 +4387,10 @@ CCamCameraController::HandleImageCaptureEventL( MCameraBuffer*& aCameraBuffer )
   CleanupStack::PushL( TCleanupItem( CamBufferShareCleanup, share ) );
 
   PRINT( _L("Camera <> CCamCameraController .. Checking encoded data availability..") );
-  TRAPD( dataStatus, 
+  TRAPD( dataStatus,
     {
     TDesC8* data = share->SharedBuffer()->DataL( 0 );
-    if( !data ) 
+    if( !data )
       User::Leave( KErrNotFound );
     });
 
@@ -4402,7 +4405,7 @@ CCamCameraController::HandleImageCaptureEventL( MCameraBuffer*& aCameraBuffer )
     PRINT1( _L("Camera <> CCamCameraController ... Incremented capture counter to: %d"), iInfo.iCaptureCount );
 
     // If we have needed amount of snapshots and images, end capture.
-    if( iInfo.iCaptureCount  >= iInfo.iCaptureLimit 
+    if( iInfo.iCaptureCount  >= iInfo.iCaptureLimit
      && ( (iInfo.iSnapshotCount >= iInfo.iCaptureLimit) || iInfo.iSsState != ECamTriActive ) )
       {
       PRINT( _L("Camera <> CCamCameraController ... Capture limit met, calling CancelCaptureImage..") );
@@ -4415,7 +4418,7 @@ CCamCameraController::HandleImageCaptureEventL( MCameraBuffer*& aCameraBuffer )
     // If we are in burst mode and need to increase capture limit,
     // do it now. If we have just decreased the capture limit,
     // we just cancel once the limit is met.
-    else if( iAdvancedSettings 
+    else if( iAdvancedSettings
           && iAdvancedSettings->DriveMode() == CAS::EDriveModeBurst )
       {
       const TInt cameraLimit( iAdvancedSettings->BurstImages() );
@@ -4441,9 +4444,9 @@ CCamCameraController::HandleImageCaptureEventL( MCameraBuffer*& aCameraBuffer )
     // See HandleCallbackEvent for comments.
     // ClearFlags( iInfo.iBusy, ECamBusySingle );
 
-    NotifyObservers( KErrNone, 
+    NotifyObservers( KErrNone,
                      ECamCameraEventImageData,
-                     ECamCameraEventClassImage, 
+                     ECamCameraEventClassImage,
                      share );
     }
   // -------------------------------------------------------
@@ -4486,11 +4489,11 @@ CCamCameraController::HandleSnapshotEvent( TInt aStatus )
   // CCameraSnapshot sends atleast event with KErrCancel status
   // when releasing the camera.
   TBool videoSsExpected( IsFlagOn( iInfo.iState, ECamVideoOn ) );
-  TBool imageSsExpected( IsFlagOn( iInfo.iState, ECamImageOn ) 
+  TBool imageSsExpected( IsFlagOn( iInfo.iState, ECamImageOn )
                       && ECamCaptureOn        == iInfo.iCaptureState
                       && iInfo.iSnapshotCount <  iInfo.iCaptureLimit );
 
-  if( 
+  if(
 #ifdef CAMERAAPP_CAE_FIX
       ECamModeChangeInactive == iModeChange &&
 #endif
@@ -4506,14 +4509,14 @@ CCamCameraController::HandleSnapshotEvent( TInt aStatus )
       TRAP( aStatus, HandleSnapshotEventL() );
       PRINT1( _L("Camera <> CCamCameraController ... status after handling snapshot data: %d"), aStatus );
       }
-  
+
     // -----------------------------------------------------
     // If snapshot was received and notified ok,
     // check if capture ended.
     if( KErrNone == aStatus )
       {
       // If we have needed amount of snapshots and images, end capture.
-      if( iInfo.iCaptureCount  >= iInfo.iCaptureLimit 
+      if( iInfo.iCaptureCount  >= iInfo.iCaptureLimit
        && iInfo.iSnapshotCount >= iInfo.iCaptureLimit )
         {
         PRINT( _L("Camera <> CCamCameraController ... Setting capture state to OFF..") );
@@ -4525,8 +4528,8 @@ CCamCameraController::HandleSnapshotEvent( TInt aStatus )
     else
       {
       PRINT( _L("Camera <> CCamCameraController ... error encountered, notify and set capture state off..") );
-      NotifyObservers( aStatus, 
-                       ECamCameraEventSsReady, 
+      NotifyObservers( aStatus,
+                       ECamCameraEventSsReady,
                        ECamCameraEventClassSsData );
       iInfo.iCaptureState = ECamCaptureOff;
       }
@@ -4541,8 +4544,8 @@ CCamCameraController::HandleSnapshotEvent( TInt aStatus )
       ClearFlags( iInfo.iBusy, ECamBusySingle );
 
       TInt fullCaptures( Min( iInfo.iCaptureCount, iInfo.iSnapshotCount ) );
-      NotifyObservers( aStatus, 
-                       ECamCameraEventImageStop, 
+      NotifyObservers( aStatus,
+                       ECamCameraEventImageStop,
                        ECamCameraEventClassImage,
                        &fullCaptures );
       }
@@ -4557,11 +4560,11 @@ CCamCameraController::HandleSnapshotEvent( TInt aStatus )
       {
       // For burst stopping:
       //   We have more snapshots already than requested..
-      //   All needed captures have to have started, 
+      //   All needed captures have to have started,
       //   so we can call cancel here.
-      // Note: 
+      // Note:
       //   Cannot use ">=" as last image might not be provided then.
-      //   
+      //
       PRINT( _L("Camera <> CCamCameraController ... Snapshot limit passed, calling CancelCaptureImage..") );
       iCamera->CancelCaptureImage();
       }
@@ -4580,7 +4583,7 @@ CCamCameraController::HandleSnapshotEvent( TInt aStatus )
 // Helper method for leaving part of HandleSnapshotEvent.
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::HandleSnapshotEventL( TBool aIgnore )
   {
    PRINT1( _L("Camera => CCamCameraController::HandleSnapshotEventL ignore %d"),aIgnore);
@@ -4595,11 +4598,11 @@ CCamCameraController::HandleSnapshotEventL( TBool aIgnore )
   CleanupStack::PopAndDestroy(); // temp.Close()
 
   if( !aIgnore )
-      { 
+      {
 
       CleanupStack::PushL( TCleanupItem( CameraBufferCleanup, buffer ) );
       CFbsBitmap& snapshot = buffer->BitmapL( firstImageIndex );
-      PRINT2( _L("Camera <> CCamCameraController ... snapshot size: (%dx%d)"), 
+      PRINT2( _L("Camera <> CCamCameraController ... snapshot size: (%dx%d)"),
               snapshot.SizeInPixels().iWidth, snapshot.SizeInPixels().iHeight );
 
       // Increase received snapshots count.
@@ -4616,7 +4619,7 @@ CCamCameraController::HandleSnapshotEventL( TBool aIgnore )
 
       CleanupStack::PopAndDestroy(); // buffer->Release()
       }
-  else 
+  else
       {
       ReleaseAndNull(buffer);
       }
@@ -4630,14 +4633,14 @@ CCamCameraController::HandleSnapshotEventL( TBool aIgnore )
 // HandleVideoInitEvent
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::HandleVideoEvent( const TCamCameraEventId& aEventId,
                                               TInt               aStatus   )
   {
-  PRINT2( _L("Camera => CCamCameraController::HandleVideoEvent, status:%d, event[%s]"), 
-          aStatus, 
+  PRINT2( _L("Camera => CCamCameraController::HandleVideoEvent, status:%d, event[%s]"),
+          aStatus,
           KCamCameraEventNames[aEventId] );
-  
+
   // Only video stop of these events may come without our explicit request.
 /*
   if( ECamCameraEventVideoStop != aEventId )
@@ -4659,7 +4662,7 @@ CCamCameraController::HandleVideoEvent( const TCamCameraEventId& aEventId,
         else                      ClearFlags( iInfo.iState, ECamVideoOn );
         }
 #ifdef CAMERAAPP_CAPI_V2_ADV
-        TRAP_IGNORE( GetAdvancedSettingsInfoL() );  
+        TRAP_IGNORE( GetAdvancedSettingsInfoL() );
 #endif
 #ifdef CAMERAAPP_CAE_FIX
       if( ECamModeChangeImage2Video == iModeChange )
@@ -4672,14 +4675,14 @@ CCamCameraController::HandleVideoEvent( const TCamCameraEventId& aEventId,
       break;
     // -----------------------------------------------------
     case ECamCameraEventVideoStart:
-      if( KErrNone == aStatus ) 
+      if( KErrNone == aStatus )
         {
         iInfo.iCaptureState = ECamCaptureOn;
         }
       break;
     // -----------------------------------------------------
     case ECamCameraEventVideoPause:
-      if( KErrNone == aStatus ) 
+      if( KErrNone == aStatus )
         {
         iInfo.iCaptureState = ECamCapturePaused;
         }
@@ -4696,11 +4699,11 @@ CCamCameraController::HandleVideoEvent( const TCamCameraEventId& aEventId,
       iInfo.iCaptureState = ECamCaptureOff;
       // We may receive this event from CCaeEngine, even though we have not
       // issued a request to stop the video recording. If e.g. there is not
-      // enough space in the disk to continue recording, this event is 
+      // enough space in the disk to continue recording, this event is
       // generated without explicit request.
       //
-      // We must not continue any pending operations if this event is not 
-      // a response to our stop request. 
+      // We must not continue any pending operations if this event is not
+      // a response to our stop request.
       // HandleCallbackEvent takes care of that.
       break;
     // -----------------------------------------------------
@@ -4717,8 +4720,8 @@ CCamCameraController::HandleVideoEvent( const TCamCameraEventId& aEventId,
     // -----------------------------------------------------
     }
 
-  HandleCallbackEvent( aStatus, 
-                       aEventId, 
+  HandleCallbackEvent( aStatus,
+                       aEventId,
                        ECamCameraEventClassVideo );
   PRINT( _L("Camera <= CCamCameraController::HandleVideoEvent") );
   }
@@ -4729,10 +4732,10 @@ CCamCameraController::HandleVideoEvent( const TCamCameraEventId& aEventId,
 // HandleVideoTimeEvent
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController
-::HandleVideoTimeEvent( TInt aStatus, 
-                        TTimeIntervalMicroSeconds aTimeElapsed, 
+::HandleVideoTimeEvent( TInt aStatus,
+                        TTimeIntervalMicroSeconds aTimeElapsed,
                         TTimeIntervalMicroSeconds aTimeRemaining )
   {
   // If capture has already stopped, we don't echo this to our observers.
@@ -4740,9 +4743,9 @@ CCamCameraController
     {
     iVideoTimes.iTimeElapsed   = aTimeElapsed.Int64();
     iVideoTimes.iTimeRemaining = aTimeRemaining.Int64();
-    
-    NotifyObservers( aStatus, 
-                     ECamCameraEventVideoTimes, 
+
+    NotifyObservers( aStatus,
+                     ECamCameraEventVideoTimes,
                      ECamCameraEventClassVideoTimes,
                      &iVideoTimes );
     }
@@ -4754,14 +4757,14 @@ CCamCameraController
 //
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::HandleAutoFocusEvent( TInt aStatus, const TUid& aEventUid )
   {
-  PRINT1( _L("Camera => CCamCameraController::HandleAutoFocusEvent, status: %d"), aStatus ); 
+  PRINT1( _L("Camera => CCamCameraController::HandleAutoFocusEvent, status: %d"), aStatus );
   TBool proceed = EFalse;
 
   // -------------------------------------------------------
-  // Check the event 
+  // Check the event
   if( KUidECamEventCameraSettingsOptimalFocus == aEventUid )
     {
     PRINT( _L("Camera <> CCamCameraController: event KUidECamEventCameraSettingsOptimalFocus") );
@@ -4774,24 +4777,24 @@ CCamCameraController::HandleAutoFocusEvent( TInt aStatus, const TUid& aEventUid 
     }
   else if( KUidECamEventCameraSettingAutoFocusType2 == aEventUid )
     {
-    PRINT( _L("Camera <> CCamCameraController: event KUidECamEventCameraSettingsAutoFocusType2") );      
+    PRINT( _L("Camera <> CCamCameraController: event KUidECamEventCameraSettingsAutoFocusType2") );
     // If AF started and canceled before finishing
     if( iAfInProgress && iAfHyperfocalPending && iFirstAfEventReceived )
       {
-      // continue to set focus to hyperfocal    
-      proceed = ETrue;    
+      // continue to set focus to hyperfocal
+      proceed = ETrue;
       }
-    if( !iFirstAfEventReceived )  
+    if( !iFirstAfEventReceived )
       {
       // For the first time, this event means that the autofocusing has been started
-      iFirstAfEventReceived = ETrue;  
+      iFirstAfEventReceived = ETrue;
       PRINT( _L("Camera <> CCamCameraController: event KUidECamEventCameraSettingAutoFocusType2 - first time, set iFirstAfEventReceived ") );
       }
     else
       {
-      iFirstAfEventReceived = EFalse;      
-      PRINT( _L("Camera <> CCamCameraController: event KUidECamEventCameraSettingAutoFocusType2 - second time") );    
-      }        
+      iFirstAfEventReceived = EFalse;
+      PRINT( _L("Camera <> CCamCameraController: event KUidECamEventCameraSettingAutoFocusType2 - second time") );
+      }
     }
   else
     {
@@ -4806,20 +4809,20 @@ CCamCameraController::HandleAutoFocusEvent( TInt aStatus, const TUid& aEventUid 
                              ? ECamCameraEventAutofocusSuccessful
                              : ECamCameraEventAutofocusFailed;
     if( iAfHyperfocalPending )
-      {                         
+      {
       PRINT( _L("Camera <> Cancelled active autofocus request.") );
-      PRINT( _L("Camera <> Setting focus range to hyperfocal, no event to observers yet") );       
-      iAfHyperfocalPending = EFalse; 
+      PRINT( _L("Camera <> Setting focus range to hyperfocal, no event to observers yet") );
+      iAfHyperfocalPending = EFalse;
       iAfInProgress = EFalse;
       TRAP_IGNORE( ProcessAutofocusRequestL( ECamRequestCancelAutofocus ) );
-      }       
-    else 
+      }
+    else
       {
       HandleCallbackEvent( KErrNone,
-                           event, 
+                           event,
                            ECamCameraEventClassAutofocus );
-      }                  
-               
+      }
+
     }
   else if(iFirstAfEventReceived && (aStatus != KErrNone) )
     {
@@ -4827,23 +4830,23 @@ CCamCameraController::HandleAutoFocusEvent( TInt aStatus, const TUid& aEventUid 
     //and no further autofocus events would occur.
     iFirstAfEventReceived = EFalse;
     iAfInProgress = EFalse;
-    
+
     if( iAfHyperfocalPending )
-      {                         
+      {
       PRINT( _L("Camera <> Cancelled active autofocus request.") );
-      PRINT( _L("Camera <> Set focus range to hyperfocal, no event to observers yet") );       
-      iAfHyperfocalPending = EFalse; 
+      PRINT( _L("Camera <> Set focus range to hyperfocal, no event to observers yet") );
+      iAfHyperfocalPending = EFalse;
       TRAP_IGNORE( ProcessAutofocusRequestL( ECamRequestCancelAutofocus ) );
-      }       
+      }
     else
       {
       HandleCallbackEvent( KErrNone,
-                           ECamCameraEventAutofocusFailed, 
-                           ECamCameraEventClassAutofocus );           
-      }                                      
+                           ECamCameraEventAutofocusFailed,
+                           ECamCameraEventClassAutofocus );
+      }
     }
   // -------------------------------------------------------
-  PRINT( _L("Camera <= CCamCameraController::HandleAutoFocusEvent") ); 
+  PRINT( _L("Camera <= CCamCameraController::HandleAutoFocusEvent") );
   }
 
 
@@ -4853,17 +4856,17 @@ CCamCameraController::HandleAutoFocusEvent( TInt aStatus, const TUid& aEventUid 
 // HandleFlashStatusEvent
 //
 // Helper method to handle flash status updates.
-// 
+//
 // ---------------------------------------------------------------------------
 void
 CCamCameraController::HandleFlashStatusEvent( TInt                     aStatus,
                                               const TCamCameraEventId& aEventId )
   {
-  PRINT2( _L("Camera => CCamCameraController::HandleFlashStatusEvent, event[%s] status:%d"), KCamCameraEventNames[aEventId], aStatus ); 
-  NotifyObservers( aStatus, 
+  PRINT2( _L("Camera => CCamCameraController::HandleFlashStatusEvent, event[%s] status:%d"), KCamCameraEventNames[aEventId], aStatus );
+  NotifyObservers( aStatus,
                    aEventId,
                    EventClass( aEventId ) );
-  PRINT ( _L("Camera <= CCamCameraController::HandleFlashStatusEvent" ) ); 
+  PRINT ( _L("Camera <= CCamCameraController::HandleFlashStatusEvent" ) );
   }
 
 
@@ -4877,12 +4880,12 @@ CCamCameraController::HandleFlashStatusEvent( TInt                     aStatus,
 //
 void
 CCamCameraController
-::HandleCallbackEvent(       TInt                    aStatus, 
-                       const TCamCameraEventId&      aEventId, 
+::HandleCallbackEvent(       TInt                    aStatus,
+                       const TCamCameraEventId&      aEventId,
                        const TCamCameraEventClassId& aEventClass,
                              TAny*                   aEventData /*= NULL*/ )
   {
-  PRINT1( _L("Camera => CCamCameraController::HandleCallbackEvent, event[%s]"), 
+  PRINT1( _L("Camera => CCamCameraController::HandleCallbackEvent, event[%s]"),
           KCamCameraEventNames[aEventId] );
   // -------------------------------------------------------
   // Clear single request busy flag before notification to observers,
@@ -4891,7 +4894,7 @@ CCamCameraController
   ClearFlags( iInfo.iBusy, ECamBusySingle );
 
   // Observers might issue a new sequence during notification.
-  // We need to decide if sequence needs to continue here 
+  // We need to decide if sequence needs to continue here
   // based on the status *before* notification.
   TBool proceedSequence = EFalse;
   TBool notify          = ETrue;
@@ -4903,44 +4906,44 @@ CCamCameraController
   //    There are events like "video stopped" or "reserve lost"
   //    that may be received without our associated request.
   //    In that case we must not proceed sequence processing now.
-  // 3) In case that aStatus is KErrInUse and the current event is 
-  //    Reserve, it means reserve failed for some reason 
+  // 3) In case that aStatus is KErrInUse and the current event is
+  //    Reserve, it means reserve failed for some reason
   if( IsFlagOn( iInfo.iBusy, ECamBusySequence ) ) // 1
     {
     PRINT( _L("Camera <> Sequence is active") );
     PRINT2( _L("Camera <> seq index: %d, seq array len: %d"), iSequenceIndex, iSequenceArray.Count() );
     if( KErrNone != aStatus )
         {
-      
+
         if ( KErrInUse == aStatus               // 3
-            && aEventId == ECamCameraEventReserveGain 
+            && aEventId == ECamCameraEventReserveGain
             && iSequenceIndex >= 0
-            && Request2Event( iSequenceArray[iSequenceIndex] ) == ECamCameraEventReserveGain 
+            && Request2Event( iSequenceArray[iSequenceIndex] ) == ECamCameraEventReserveGain
             && iReserveTryAgainCount > 0 )
             {
             // Handle here only if reserve gain with error is part of a sequence and try again count is not zero
-            
+
             iReserveTryAgainCount--;
             User::After( KCamReserveTryAgainWaitInterval );
-            
+
             // decrease index, to get the same request handled again
             iSequenceIndex--;
             notify          = EFalse;
             proceedSequence = ETrue;
             PRINT1( _L( "Camera <> CCamCameraController::HandleCallbackEvent - %d reserve try again left" ), iReserveTryAgainCount );
-            
-            } 
-        else 
+
+            }
+        else
             {
 
             notify          = EFalse;
             proceedSequence = EFalse;
-            EndSequence( aStatus );      
+            EndSequence( aStatus );
 
             }
-   
+
         }
-    else if( iSequenceIndex >= 0 &&  // Sequence has started 
+    else if( iSequenceIndex >= 0 &&  // Sequence has started
              Request2Event( iSequenceArray[iSequenceIndex] ) == aEventId ) // 2
         {
         notify          = ETrue;
@@ -4950,11 +4953,11 @@ CCamCameraController
         {
          // Not the event we need yet.
         }
-        
+
     }
   // -------------------------------------------------------
   // Setting sequence ongoing
-  else if( IsFlagOn( iInfo.iBusy, ECamBusySetting ) 
+  else if( IsFlagOn( iInfo.iBusy, ECamBusySetting )
            && iSettingIndex >= 0 )
     {
     PRINT( _L("Camera <> Settings change ongoing..") );
@@ -4970,12 +4973,12 @@ CCamCameraController
       proceedSequence = EFalse;
       EndSequence( aStatus ); // does one notification
       }
-    else if( ECamCameraEventSettingsSingle == aEventId 
-          && aEventData 
+    else if( ECamCameraEventSettingsSingle == aEventId
+          && aEventData
           && iSettingArray[iSettingIndex] == *( static_cast<TInt*>( aEventData ) )
            )
       {
-      // We have checked already in HandleEvent that this is 
+      // We have checked already in HandleEvent that this is
       // the right event for the setting we wait to finish.
       // Notification can be sent with the given data.
       PRINT( _L("Camera <> One setting finished, continue sequence") );
@@ -4984,8 +4987,8 @@ CCamCameraController
     // Video init event repeated when filename or max file size set
     // after init already done
     else if( IsFlagOn( iInfo.iState, ECamVideoOn )
-          && ECamCameraEventVideoInit == aEventId 
-          && ( ECameraSettingFileName    == iSettingArray[iSettingIndex] 
+          && ECamCameraEventVideoInit == aEventId
+          && ( ECameraSettingFileName    == iSettingArray[iSettingIndex]
             || ECameraSettingFileMaxSize == iSettingArray[iSettingIndex]
             || ECameraSettingAudioMute   == iSettingArray[iSettingIndex] ) )
       {
@@ -5015,7 +5018,7 @@ CCamCameraController
   // Notify the observers with data from the event.
   if( notify )
     {
-    NotifyObservers( aStatus, aEventId, aEventClass, aEventData ); 
+    NotifyObservers( aStatus, aEventId, aEventClass, aEventData );
     }
 
   // -------------------------------------------------------
@@ -5037,9 +5040,9 @@ CCamCameraController
 // Notify all our observers of an event.
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController
-::NotifyObservers( TInt                   aStatus, 
+::NotifyObservers( TInt                   aStatus,
                    TCamCameraEventId      aEventId,
                    TCamCameraEventClassId aEventClass,
                    TAny*                  aEventData /*=NULL*/ )
@@ -5048,7 +5051,7 @@ CCamCameraController
 //  PRINT3( _L("Camera <> status:% 3d event:% 3d class:%032b"), aStatus, aEventId, aEventClass );
 
   // NOTE:
-  //   We might skip an observer, if during the notification some observer 
+  //   We might skip an observer, if during the notification some observer
   //   is removed from the array (from smaller index than current one).
   //   This is a commmon problem for all observable classes in this application.
   for( TInt i = 0; i < iObservers.Count(); i++ )
@@ -5073,7 +5076,7 @@ CCamCameraController
 void
 CCamCameraController::ReleaseCurrentCamera()
   {
-  PRINT( _L("Camera => CCamCameraController::ReleaseCurrentCamera") );  
+  PRINT( _L("Camera => CCamCameraController::ReleaseCurrentCamera") );
   // Cancel any outstanding sequence.
   if( IsFlagOn( iInfo.iBusy, ECamBusySequence )
 #ifdef CAMERAAPP_CAE_FIX
@@ -5088,7 +5091,7 @@ CCamCameraController::ReleaseCurrentCamera()
 
   if( IsFlagOn( iInfo.iState, ECamReserved ) )
     {
-    // Releases viewfinder and snapshot, cancels capture, 
+    // Releases viewfinder and snapshot, cancels capture,
     // powers off and releases CCamera if needed.
     ProcessControlShutdownRequest( ECamRequestRelease );
     }
@@ -5132,7 +5135,7 @@ CCamCameraController::ReleaseCurrentCamera()
   iResolutionSupport.Reset();
   iInfo.iState = ECamIdle;
 
-  PRINT( _L("Camera <= CCamCameraController::ReleaseCurrentCamera") );  
+  PRINT( _L("Camera <= CCamCameraController::ReleaseCurrentCamera") );
   }
 
 
@@ -5161,7 +5164,7 @@ TBool CCamCameraController::CompareSize( const TSize& aA, const TSize& aB )
 // GetResolutionIndexL
 //
 // Get quality index for prepare with given format and size.
-// If current info is not for the given format, update the 
+// If current info is not for the given format, update the
 // supported resolutions info. After the support info is up to date,
 // find the index. Return KErrNotFound if not supported size.
 //
@@ -5189,13 +5192,13 @@ CCamCameraController
     iResolutionSupport.Reset();
 
     // Get the resolution info for current camera with given format.
-    const TInt KResolutionCount( iCameraInfo.iNumImageSizesSupported );  
+    const TInt KResolutionCount( iCameraInfo.iNumImageSizesSupported );
     RArray<TSize>& resolutions( iResolutionSupport.iResolutions );
 
     resolutions.ReserveL( KResolutionCount );
     for( TInt i = 0; i < KResolutionCount; i++ )
       {
-      // Reserve called, so should not leave.      
+      // Reserve called, so should not leave.
       resolutions.AppendL( TSize() );
       iCamera->EnumerateCaptureSizes( resolutions[i], i, aFormat );
       }
@@ -5219,7 +5222,7 @@ CCamCameraController
   for( TInt i = 0; i < iResolutionSupport.iResolutions.Count(); i++ )
     {
     const TSize& size( iResolutionSupport.iResolutions[i] );
-    PRINT3( _L("Camera <> Size (%d): (%d,%d)"), i, size.iWidth, size.iHeight ); 
+    PRINT3( _L("Camera <> Size (%d): (%d,%d)"), i, size.iWidth, size.iHeight );
     }
   PRINT ( _L("Camera <> ==================================================") );
 #endif
@@ -5231,9 +5234,9 @@ CCamCameraController
   //   If JPEG format is not supported, but bitmap format is,
   //   pretend to support the format anyway.
   //   When capturing, we encode the JPEG from the bitmap.
-  if( CCamera::EFormatJpeg == aFormat 
+  if( CCamera::EFormatJpeg == aFormat
    && KErrNotFound         == index )
-    {    
+    {
     PRINT ( _L("Camera <> Jpeg not supported, trying bitmap format 1..") );
     aFormat = KCamJpegAlternativeFormat1;
     index   = GetResolutionIndexL( aFormat, aSize );
@@ -5272,8 +5275,8 @@ void
 CCamCameraController::GetAdvancedSettingsInfoL()
   {
   PRINT ( _L("Camera => CCamCameraController::GetAdvancedSettingsInfoL") );
-  PRINT2( _L("Camera <> current camera:%d, latest info for:%d"), 
-          iInfo.iCurrentCamera, 
+  PRINT2( _L("Camera <> current camera:%d, latest info for:%d"),
+          iInfo.iCurrentCamera,
           iAdvancedSettingInfo.iForCameraIndex );
 
 
@@ -5298,20 +5301,20 @@ CCamCameraController::GetAdvancedSettingsInfoL()
       TBool isInfluencePossible; // Not used
 
       PRINT( _L("Camera <> Get zoom steps for image") );
-      TRAP( error, iAdvancedSettings->GetDigitalZoomStepsForStillL ( 
-                      iAdvancedSettingInfo.iDigitalZoomSupport, 
-                      iAdvancedSettingInfo.iDigitalZoomValueInfo, 
-                      index, 
-                      format, 
+      TRAP( error, iAdvancedSettings->GetDigitalZoomStepsForStillL (
+                      iAdvancedSettingInfo.iDigitalZoomSupport,
+                      iAdvancedSettingInfo.iDigitalZoomValueInfo,
+                      index,
+                      format,
                       isInfluencePossible  ) );
-      
+
       if( KErrNotSupported != error ) User::LeaveIfError( error );
       }
-    else if( IsFlagOn( iInfo.iState, ECamVideoOn ) ) 
+    else if( IsFlagOn( iInfo.iState, ECamVideoOn ) )
       {
       PRINT( _L("Camera <> Get zoom steps for video") );
-      TRAP( error, iAdvancedSettings->GetDigitalZoomStepsL( 
-                      iAdvancedSettingInfo.iDigitalZoomSupport, 
+      TRAP( error, iAdvancedSettings->GetDigitalZoomStepsL(
+                      iAdvancedSettingInfo.iDigitalZoomSupport,
                       iAdvancedSettingInfo.iDigitalZoomValueInfo ) );
       if( KErrNotSupported != error ) User::LeaveIfError( error );
       }
@@ -5319,11 +5322,11 @@ CCamCameraController::GetAdvancedSettingsInfoL()
     // -----------------------------------------------------
     // EV steps multiplied by KECamFineResolutionFactor.
     PRINT( _L("Camera <> Get EV support..") );
-    iAdvancedSettingInfo.iEvModesSupport = 
+    iAdvancedSettingInfo.iEvModesSupport =
         iAdvancedSettings->SupportedExposureModes();
 
-    TRAP( error, iAdvancedSettings->GetExposureCompensationStepsL( 
-                    iAdvancedSettingInfo.iEvStepsSupport, 
+    TRAP( error, iAdvancedSettings->GetExposureCompensationStepsL(
+                    iAdvancedSettingInfo.iEvStepsSupport,
                     iAdvancedSettingInfo.iEvStepsValueInfo ) );
     // Ignore error if just not supported.
     // We check the support when setting is requested.
@@ -5332,20 +5335,20 @@ CCamCameraController::GetAdvancedSettingsInfoL()
     // -----------------------------------------------------
     // ISO rates (.. 50, 100, 200, ..)
     PRINT( _L("Camera <> Get ISO rates..") );
-    TRAP( error, iAdvancedSettings->GetSupportedIsoRatesL( 
+    TRAP( error, iAdvancedSettings->GetSupportedIsoRatesL(
                     iAdvancedSettingInfo.iIsoRatesSupport ) );
     if( KErrNotSupported != error ) User::LeaveIfError( error );
 
     // -----------------------------------------------------
     // Stabilization
     PRINT( _L("Camera <> Get Stabilization info..") );
-    iAdvancedSettingInfo.iStabilizationModeSupport = 
+    iAdvancedSettingInfo.iStabilizationModeSupport =
         iAdvancedSettings->SupportedStabilizationModes();
 
-    iAdvancedSettingInfo.iStabilizationEffectSupport = 
+    iAdvancedSettingInfo.iStabilizationEffectSupport =
         iAdvancedSettings->SupportedStabilizationEffects();
 
-    iAdvancedSettingInfo.iStabilizationComplexitySupport = 
+    iAdvancedSettingInfo.iStabilizationComplexitySupport =
         iAdvancedSettings->SupportedStabilizationComplexityValues();
     // -----------------------------------------------------
 
@@ -5354,28 +5357,28 @@ CCamCameraController::GetAdvancedSettingsInfoL()
     if( KPrimaryCameraIndex == iInfo.iCurrentCamera )
       {
       PRINT( _L("Camera <> Get image processing info..") );
-   
+
       if( iImageProcessor != NULL )
         {
         // -----------------------------------------------------
         PRINT( _L("Camera <> Get sharpness support..") );
-        TRAP( error, iImageProcessor->GetTransformationSupportedValuesL( 
+        TRAP( error, iImageProcessor->GetTransformationSupportedValuesL(
                         KUidECamEventImageProcessingAdjustSharpness,
                         iAdvancedSettingInfo.iSharpnessSupport,
                         iAdvancedSettingInfo.iSharpnessValueInfo ) );
         if( KErrNotSupported != error ) User::LeaveIfError( error );
-    
+
         // -----------------------------------------------------
         PRINT( _L("Camera <> Get colour effect support..") );
-        TRAP( error, iImageProcessor->GetTransformationSupportedValuesL( 
+        TRAP( error, iImageProcessor->GetTransformationSupportedValuesL(
                           KUidECamEventImageProcessingEffect,
                           iAdvancedSettingInfo.iColourEffectSupport,
                           iAdvancedSettingInfo.iColourEffectValueInfo ) );
         if( KErrNotSupported != error ) User::LeaveIfError( error );
         }
-      else 
+      else
         {
-        PRINT( _L("Camera <> [WARNING] Image processing not supported") );          
+        PRINT( _L("Camera <> [WARNING] Image processing not supported") );
         }
       }
 #endif // CAMERAAPP_CAPI_V2_IP
@@ -5389,7 +5392,7 @@ CCamCameraController::GetAdvancedSettingsInfoL()
 #ifdef _DEBUG
     iAdvancedSettingInfo.PrintInfo();
 #endif
-    
+
   PRINT ( _L("Camera <= CCamCameraController::GetAdvancedSettingsInfoL") );
   }
 
@@ -5400,7 +5403,7 @@ CCamCameraController::GetAdvancedSettingsInfoL()
 //
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController::ResolveEvStep( TInt aEvProposedStep ) const
   {
   PRINT1( _L("Camera => CCamCameraController::ResolveEvStep( %d )"), aEvProposedStep );
@@ -5431,8 +5434,8 @@ CCamCameraController::ResolveEvStep( TInt aEvProposedStep ) const
 // ---------------------------------------------------------------------------
 //
 TBool
-CCamCameraController::IsSupportedValue( const TInt&         aValue, 
-                                        const RArray<TInt>& aValueList, 
+CCamCameraController::IsSupportedValue( const TInt&         aValue,
+                                        const RArray<TInt>& aValueList,
                                         const TValueInfo&   aValueInfo )
   {
   TBool support( EFalse );
@@ -5448,7 +5451,7 @@ CCamCameraController::IsSupportedValue( const TInt&         aValue,
       // that is always supported.
       // Array: [0] bitfield of supported bits
       support = ( 1 <= aValueList.Count()
-               && ( !aValue 
+               && ( !aValue
                  || (aValue & aValueList[0]) // 0 always supported
                   )
                 );
@@ -5485,7 +5488,7 @@ CCamCameraController::IsSupportedValue( const TInt&         aValue,
       // continuous range of values within those two is supported.
       // Array: [0] min supported value
       //        [1] max supported value
-      support = 
+      support =
         ( 2      <= aValueList.Count() // We need 2 items.
        && aValue >= aValueList[0]      // aValue >= min
        && aValue <= aValueList[1]      // aValue <= max
@@ -5518,10 +5521,10 @@ CCamCameraController
   PRINT ( _L("Camera => CCamCameraController::ResolveSnapshotFormatL") );
 
   CheckNonNullL( iSnapshotProvider, KErrNotReady );
-  
+
   const TUint32    support = iSnapshotProvider->SupportedFormats();
   CCamera::TFormat final   = aPreferredFormat;
-  
+
   // Return the preferred format if it is supported.
   // Otherwise return the "best" supported format.
   if      ( support & aPreferredFormat                   ) final = aPreferredFormat;
@@ -5535,7 +5538,7 @@ CCamCameraController
     PRINT( _L("Camera <> CCamCameraController: No acceptable format available, LEAVE!") );
     User::Leave( KErrNotSupported );
     }
-  
+
   PRINT1( _L("Camera <> Preferred format : %032b"), aPreferredFormat  );
   PRINT1( _L("Camera <> Supported formats: %032b"), support           );
   PRINT1( _L("Camera <> Selected  format : %032b"), final             );
@@ -5588,18 +5591,18 @@ CCamCameraController::Request2Event( const TCamCameraRequestId& aType )
     // -----------------------------------------------------
     // Autofocus
     case ECamRequestStartAutofocus:   return ECamCameraEventStartAutofocus;
-    case ECamRequestCancelAutofocus:  return ECamCameraEventCancelAutofocus; 
+    case ECamRequestCancelAutofocus:  return ECamCameraEventCancelAutofocus;
     case ECamRequestSetAfRange:       return ECamCameraEventSetAfRange;
     // -----------------------------------------------------
-    
-    // Unrecognised      
+
+    // Unrecognised
     default:
       {
       Panic( ECamCameraControllerUnknownRequest );
       return ECamCameraEventNone;
       }
     // -----------------------------------------------------
-    }        
+    }
   }
 
 
@@ -5627,7 +5630,7 @@ CCamCameraController::EventClass( const TCamCameraEventId& aEventId )
     case ECamCameraEventVfRelease:
       return ECamCameraEventClassVfControl;
     // -------------------------------------------------------
-    case ECamCameraEventVfFrameReady: 
+    case ECamCameraEventVfFrameReady:
       return ECamCameraEventClassVfData;
     // -------------------------------------------------------
     case ECamCameraEventSsStart:
@@ -5635,7 +5638,7 @@ CCamCameraController::EventClass( const TCamCameraEventId& aEventId )
     case ECamCameraEventSsRelease:
       return ECamCameraEventClassSsControl;
     // -------------------------------------------------------
-    case ECamCameraEventSsReady:      
+    case ECamCameraEventSsReady:
       return ECamCameraEventClassSsData;
     // -------------------------------------------------------
     case ECamCameraEventImageInit:
@@ -5653,7 +5656,7 @@ CCamCameraController::EventClass( const TCamCameraEventId& aEventId )
       return ECamCameraEventClassVideo;
     // -------------------------------------------------------
     case ECamCameraEventVideoTimes:
-      return ECamCameraEventClassVideoTimes;  
+      return ECamCameraEventClassVideoTimes;
     // -------------------------------------------------------
     case ECamCameraEventSettingsSingle:
     case ECamCameraEventSettingsDone:
@@ -5672,7 +5675,7 @@ CCamCameraController::EventClass( const TCamCameraEventId& aEventId )
     // -------------------------------------------------------
     default:
       {
-    #ifdef _DEBUG      
+    #ifdef _DEBUG
       Panic( ECamCameraControllerCorrupt );
     #endif
       return ECamCameraEventClassAll;
@@ -5719,7 +5722,7 @@ CCamCameraController::HasCallback( const TCamCameraRequestId& aType )
 // CurrentSettingHasCallback
 // ---------------------------------------------------------------------------
 //
-TBool 
+TBool
 CCamCameraController::CurrentSettingHasCallback()
   {
   TBool callback( EFalse );
@@ -5749,18 +5752,18 @@ CCamCameraController::CurrentSettingHasCallback()
 // NewCaeEngineL
 // ---------------------------------------------------------------------------
 //
-CCaeEngine* 
+CCaeEngine*
 CCamCameraController::NewCaeEngineL( TInt aCameraIndex )
   {
   PRINT( _L("Camera => CCamCameraController::NewCaeEngineL") );
-  
-#ifndef FORCE_DUMMY_ENGINE  
-  CCaeEngine* engine = CCaeEngine::NewL( aCameraIndex ); 
+
+#ifndef FORCE_DUMMY_ENGINE
+  CCaeEngine* engine = CCaeEngine::NewL( aCameraIndex );
 #else
   (void)aCameraIndex; // remove compiler warning
   CCaeEngine* engine = CCameraappDummyEngine::NewL();
 #endif
-  
+
   engine->SetCamAppEngineObserver( *this );
 
   PRINT( _L("Camera <= CCamCameraController::NewCaeEngineL") );
@@ -5772,7 +5775,7 @@ CCamCameraController::NewCaeEngineL( TInt aCameraIndex )
 // NewCameraL
 // ---------------------------------------------------------------------------
 //
-CAMERA* 
+CAMERA*
 CCamCameraController::NewCameraL( TInt aCameraIndex )
   {
   PRINT( _L("Camera => CCamCameraController::NewCameraL") );
@@ -5783,11 +5786,11 @@ CCamCameraController::NewCameraL( TInt aCameraIndex )
 
   // Both v1 and v2 observer interface implemented
   // Need to cast to avoid ambiguous call.
-  MCameraObserver* self( this );  
+  MCameraObserver* self( this );
   PRINT1( _L("Camera <> Give observer pointer: %d"), self );
-  
+
   camera = CAMERA::NewL ( *self, aCameraIndex );
-  
+
 #endif // CAMERAAPP_CAPI_V2
 
   PRINT( _L("Camera <= CCamCameraController::NewCameraL") );
@@ -5798,7 +5801,7 @@ CCamCameraController::NewCameraL( TInt aCameraIndex )
 // NewDuplicateCameraL
 // ---------------------------------------------------------------------------
 //
-CAMERA* 
+CAMERA*
 CCamCameraController::NewDuplicateCameraL( TInt aCameraHandle )
   {
   PRINT1( _L("Camera => CCamCameraController::NewDuplicateCameraL( %d )"), aCameraHandle );
@@ -5853,13 +5856,13 @@ CCamCameraController::ConstructL( TInt aCameraIndex )
 // ---------------------------------------------------------------------------
 //
 CCamCameraController
-::CCamCameraController( MCamSettingProvider& aSettingProvider, 
+::CCamCameraController( MCamSettingProvider& aSettingProvider,
                         CCamAppController& aAppController )
   : iSequenceArray       ( KCamSequenceGranularity     ),
     iReserveTryAgainCount( KCamReserveTryAgainMaxCount ),
     iSettingProvider     ( aSettingProvider            ),
-    iAppController       ( aAppController              )    
-  { 
+    iAppController       ( aAppController              )
+  {
   }
 
 
@@ -5875,11 +5878,11 @@ CCamCameraController::ProceedModeSwitch()
   {
   PRINT1( _L("Camera => CCamCameraController::ProceedModeSwitch, status in:%d"), iModeChangeStatus );
   TInt proceed( EFalse );
-  
+
   // Update only after here, so any events arriving
   // in the middle get ignored if wanted.
   ++iModeChangePhase;
-  
+
   if( KErrNone == iModeChangeStatus )
     {
     TRAP( iModeChangeStatus, proceed = DoProceedModeSwitchL() );
@@ -5968,22 +5971,22 @@ CCamCameraController::DoProceedModeSwitchL()
         TPtrC ptr;
         ptr.Set( KTempFilename() );
 #pragma message( "Camera Controller: video filename hardcoded" )
-        PRINT1( _L("Camera <> Set filename [%S]"), &ptr );        
+        PRINT1( _L("Camera <> Set filename [%S]"), &ptr );
         iCaeEngine->SetVideoRecordingFileNameL( ptr );
 //        CleanupStack::PopAndDestroy( filename );
 
 
         // Set max video clip size
-        ProcessSettingL( ECameraSettingFileMaxSize );        
+        ProcessSettingL( ECameraSettingFileMaxSize );
 
 
         TPckgBuf<TCamParamsVideoCae> params;
         iSettingProvider.ProvideCameraParamL( ECameraParamVideoCae, &params );
-        // The audioOn value is defined On==0 and Off==1, but the engine expects 
+        // The audioOn value is defined On==0 and Off==1, but the engine expects
         // ETrue if audio recording is On
         params().iAudioOn = ( ECamSettOn == params().iAudioOn )
         											? ETrue
-        											: EFalse;  
+        											: EFalse;
         PRINT( _L("Camera <> Call prepare..") );
         // McaeoVideoPrepareComplete will be called when prepare is ready.
         // The callback is allowed to come also *during* this call.
@@ -6009,8 +6012,8 @@ CCamCameraController::DoProceedModeSwitchL()
         iModeChangePhase = ECamModeChangePhaseIdle;
         callback         = EFalse;
 
-        NotifyObservers( iModeChangeStatus, 
-                         ECamCameraEventVideoInit, 
+        NotifyObservers( iModeChangeStatus,
+                         ECamCameraEventVideoInit,
                          ECamCameraEventClassVideo );
         break;
         }
@@ -6033,7 +6036,7 @@ CCamCameraController::DoProceedModeSwitchL()
       case ECamModeChangePhase0:
         {
         PRINT( _L("Camera <> Phase0: Release camera..") );
-        TInt cameraIndex = iInfo.iCurrentCamera; 
+        TInt cameraIndex = iInfo.iCurrentCamera;
         ReleaseCurrentCamera();
         SwitchCameraL( cameraIndex );
         CompleteSwitchCameraL();
@@ -6061,17 +6064,17 @@ CCamCameraController::DoProceedModeSwitchL()
         PRINT( _L("Camera <> Phase3: Prepare image..") );
         TPckgBuf<TCamParamsImage> params;
         iSettingProvider.ProvideCameraParamL( ECameraParamImage, &params );
-  
+
         // Query the supported resolutions for the selected format.
         TInt index = GetResolutionIndexL( params().iFormat, params().iSize );
         User::LeaveIfError( index );
 
-        PRINT2( _L("Camera <> Image size: (%d, %d)"), 
+        PRINT2( _L("Camera <> Image size: (%d, %d)"),
                   params().iSize.iWidth,
                   params().iSize.iHeight );
         iCamera->PrepareImageCaptureL( params().iFormat, index );
         iCamera->SetJpegQuality( params().iQualityFactor );
-  
+
         SetFlags( iInfo.iState, ECamImageOn );
 
         callback  = EFalse;
@@ -6085,10 +6088,10 @@ CCamCameraController::DoProceedModeSwitchL()
         iModeChangePhase = ECamModeChangePhaseIdle;
         callback         = EFalse;
 
-        NotifyObservers( iModeChangeStatus, 
+        NotifyObservers( iModeChangeStatus,
                          ECamCameraEventImageInit,
                          ECamCameraEventClassImage );
-                         
+
         break;
         }
       // -------------------------------
@@ -6118,7 +6121,7 @@ CCamCameraController::DoProceedModeSwitchL()
 * Method to retrieve Remaining Recording time from CCaeEngine
 * which is used in AppController and AppUi during Video Rec Operation
 */
-TTimeIntervalMicroSeconds 
+TTimeIntervalMicroSeconds
 CCamCameraController::RemainingVideoRecordingTime()
 	{
 	if( iCaeEngine )
@@ -6130,7 +6133,7 @@ CCamCameraController::RemainingVideoRecordingTime()
 
 // ===========================================================================
 // Performance measurement related
-   
+
 #ifdef CAMERAAPP_PERFORMANCE_CONTROLLER
 
 // ---------------------------------------------------------------------------
@@ -6140,7 +6143,7 @@ CCamCameraController::RemainingVideoRecordingTime()
 // Used to record performance measurement data.
 // ---------------------------------------------------------------------------
 //
-const CCamPerformanceLogger* 
+const CCamPerformanceLogger*
 CCamCameraController::PerformanceLogger() const
   {
   return iPerformanceLogger;
@@ -6158,25 +6161,25 @@ CCamCameraController::PerformanceLogger() const
 // PrintCameraInfo
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::PrintCameraInfo() const
   {
   PRINT ( _L("Camera <> ==================================================") );
-  PRINT ( _L("Camera <> Camera info:") ); 
-  PRINT3( _L("Camera <> Camera hw version[%d.%d.%d]"), 
+  PRINT ( _L("Camera <> Camera info:") );
+  PRINT3( _L("Camera <> Camera hw version[%d.%d.%d]"),
           iCameraInfo.iHardwareVersion.iMajor,
           iCameraInfo.iHardwareVersion.iMinor,
           iCameraInfo.iHardwareVersion.iBuild );
-  PRINT3( _L("Camera <> Camera sw version[%d.%d.%d]"), 
+  PRINT3( _L("Camera <> Camera sw version[%d.%d.%d]"),
           iCameraInfo.iSoftwareVersion.iMajor,
           iCameraInfo.iSoftwareVersion.iMinor,
-          iCameraInfo.iSoftwareVersion.iBuild );  
+          iCameraInfo.iSoftwareVersion.iBuild );
   PRINT1( _L("Camera <> TCameraInfo.iMinZoom             : %d"), iCameraInfo.iMinZoom );
-  PRINT1( _L("Camera <> TCameraInfo.iMaxZoom             : %d"), iCameraInfo.iMaxZoom ); 
-  PRINT1( _L("Camera <> TCameraInfo.iMaxDigitalZoom      : %d"), iCameraInfo.iMaxDigitalZoom ); 
+  PRINT1( _L("Camera <> TCameraInfo.iMaxZoom             : %d"), iCameraInfo.iMaxZoom );
+  PRINT1( _L("Camera <> TCameraInfo.iMaxDigitalZoom      : %d"), iCameraInfo.iMaxDigitalZoom );
   PRINT1( _L("Camera <> TCameraInfo.iMinZoomFactor       : %f"), iCameraInfo.iMinZoomFactor );
-  PRINT1( _L("Camera <> TCameraInfo.iMaxZoomFactor       : %f"), iCameraInfo.iMaxZoomFactor ); 
-  PRINT1( _L("Camera <> TCameraInfo.iMaxDigitalZoomFactor: %f"), iCameraInfo.iMaxDigitalZoomFactor ); 
+  PRINT1( _L("Camera <> TCameraInfo.iMaxZoomFactor       : %f"), iCameraInfo.iMaxZoomFactor );
+  PRINT1( _L("Camera <> TCameraInfo.iMaxDigitalZoomFactor: %f"), iCameraInfo.iMaxDigitalZoomFactor );
   PRINT ( _L("Camera <> ==================================================") );
   }
 
@@ -6205,54 +6208,54 @@ CCamCameraController::PrintSnapshotInfo() const
 // CCamCameraController::SettingValueUpToDateL
 // ---------------------------------------------------------------------------
 //
-TBool 
+TBool
 CCamCameraController::SettingValueUpToDateL( const NCamCameraController::TCamCameraSettingId& aSettingId )
   {
   PRINT( _L("Camera => CCamCameraController::SettingValueUpToDate") );
   TBool upToDate = ETrue;
-    
+
   switch( aSettingId )
-    {      
+    {
     case ECameraSettingFlash:
     case ECameraUserSceneSettingFlash:
       {
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingFlash") );        
-      
-      // Supposed setting value from settings provider      
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingFlash") );
+
+      // Supposed setting value from settings provider
       CCamera::TFlash flashSetting( CCamera::EFlashNone );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &flashSetting );
-      
-      // Real settings value from camera  
+
+      // Real settings value from camera
       CCamera::TFlash flashValue( CCamera::EFlashNone );
-      GetCameraSettingValueL( aSettingId, &flashValue );   
-      
+      GetCameraSettingValueL( aSettingId, &flashValue );
+
       PRINT2( _L("Camera <> flashValue = %d, flashSetting = %d"), flashValue, flashSetting );
-      upToDate = ( flashValue == flashSetting );           
-      break;  
-      }    
+      upToDate = ( flashValue == flashSetting );
+      break;
+      }
     case ECameraSettingExposure:
     case ECameraUserSceneSettingExposure:
       {
       PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingExposure") );
       TPckgBuf<TCamSettingDataExposure> exposureSetting;
       iSettingProvider.ProvideCameraSettingL( aSettingId, &exposureSetting );
-      
+
       TPckgBuf<TCamSettingDataExposure> exposureValue;
-      GetCameraSettingValueL( aSettingId, &exposureValue ); 
-      
+      GetCameraSettingValueL( aSettingId, &exposureValue );
+
       if ( exposureSetting().iExposureMode != exposureValue().iExposureMode ||
            exposureSetting().iExposureStep != exposureValue().iExposureStep )
         {
-        upToDate = EFalse;  
+        upToDate = EFalse;
         }
-      
+
       break;
-      }    
+      }
     case ECameraSettingLightSensitivity:
     case ECameraUserSceneSettingLightSensitivity:
-      {        
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingLightSensitivity") );  
-      
+      {
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingLightSensitivity") );
+
       RArray<TInt> ISOarray;
       CleanupClosePushL( ISOarray );
 #ifdef CAMERAAPP_CAPI_V2
@@ -6264,114 +6267,114 @@ CCamCameraController::SettingValueUpToDateL( const NCamCameraController::TCamCam
       iSettingProvider.ProvideCameraSettingL( aSettingId, &isoSetting );
       CleanupStack::PopAndDestroy( &ISOarray );
 
-      
+
       TInt* isoValue = 0;
       GetCameraSettingValueL( aSettingId, &isoValue );
-      
-      upToDate = ( isoSetting == isoValue );      
-      break;  
-      }    
+
+      upToDate = ( isoSetting == isoValue );
+      break;
+      }
     case ECameraSettingWhiteBalance:
     case ECameraUserSceneSettingWhiteBalance:
       {
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingWhiteBalance") );  
-      
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingWhiteBalance") );
+
       TPckgBuf<TCamSettingDataWhiteBalance> wbSetting;
       iSettingProvider.ProvideCameraSettingL( aSettingId, &wbSetting );
-      
+
       TPckgBuf<TCamSettingDataWhiteBalance> wbValue;
-      GetCameraSettingValueL( aSettingId, &wbValue );      
-      
+      GetCameraSettingValueL( aSettingId, &wbValue );
+
       upToDate = ( wbSetting().iWhiteBalanceMode == wbValue().iWhiteBalanceMode );
-      break;  
-      }    
+      break;
+      }
     case ECameraSettingColourEffect:
-    case ECameraUserSceneSettingColourEffect:	
+    case ECameraUserSceneSettingColourEffect:
       {
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingColourEffect") );  
-      
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingColourEffect") );
+
       CIP::TEffect effectSetting( CIP::EEffectNone );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &effectSetting );
-      
+
       CIP::TEffect effectValue( CIP::EEffectNone );
-      // Can't leave here or other settings won't be restored  
-      TRAP_IGNORE( GetCameraSettingValueL( aSettingId, &effectValue ) ); 
-      
-      upToDate = ( effectSetting == effectValue );      
-      break;  
-      }    
+      // Can't leave here or other settings won't be restored
+      TRAP_IGNORE( GetCameraSettingValueL( aSettingId, &effectValue ) );
+
+      upToDate = ( effectSetting == effectValue );
+      break;
+      }
     case ECameraSettingBrightness:
     case ECameraUserSceneSettingBrightness:
-      {                 
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingBrightness") );        
+      {
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingBrightness") );
       CCamera::TBrightness brightnessSetting;
       iSettingProvider.ProvideCameraSettingL( aSettingId, &brightnessSetting );
-            
-      CCamera::TBrightness brightnessValue;  
-      GetCameraSettingValueL( aSettingId, &brightnessValue ); 
-      
-      upToDate = ( brightnessSetting == brightnessValue );  
+
+      CCamera::TBrightness brightnessValue;
+      GetCameraSettingValueL( aSettingId, &brightnessValue );
+
+      upToDate = ( brightnessSetting == brightnessValue );
       break;
-      }      
+      }
     case ECameraSettingContrast:
     case ECameraUserSceneSettingContrast:
       {
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingContrast") ); 
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingContrast") );
       CCamera::TContrast contrastSetting( CCamera::EContrastAuto );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &contrastSetting );
-      
+
       CCamera::TContrast contrastValue( CCamera::EContrastAuto );
-      GetCameraSettingValueL( aSettingId, &contrastValue ); 
-      
-      upToDate = ( contrastSetting == contrastValue );  
-      break;  
-      }    
+      GetCameraSettingValueL( aSettingId, &contrastValue );
+
+      upToDate = ( contrastSetting == contrastValue );
+      break;
+      }
     case ECameraSettingSharpness:
     case ECameraUserSceneSettingSharpness:
       {
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingSharpness") ); 
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingSharpness") );
       TInt sharpnessSetting( 0 );
       iSettingProvider.ProvideCameraSettingL( aSettingId, &sharpnessSetting );
-      
+
       TInt sharpnessValue( 0 );
-      // Can't leave here or other settings won't be restored  
-      TRAP_IGNORE( GetCameraSettingValueL( aSettingId, &sharpnessValue ) ); 
-      
-      upToDate = ( sharpnessSetting == sharpnessValue );  
+      // Can't leave here or other settings won't be restored
+      TRAP_IGNORE( GetCameraSettingValueL( aSettingId, &sharpnessValue ) );
+
+      upToDate = ( sharpnessSetting == sharpnessValue );
       break;
       }
     case ECameraSettingDigitalZoom:
       {
       TInt zoomSetting( 0 );
-      iSettingProvider.ProvideCameraSettingL( aSettingId, &zoomSetting );      
-      
+      iSettingProvider.ProvideCameraSettingL( aSettingId, &zoomSetting );
+
       TInt zoomValue( 0 );
-      GetCameraSettingValueL( aSettingId, &zoomValue );            
-      
+      GetCameraSettingValueL( aSettingId, &zoomValue );
+
       upToDate = ( zoomSetting == zoomValue );
       break;
-      } 
+      }
 #ifdef CAMERAAPP_CAPI_V2
     case ECameraSettingStabilization:
       {
-      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingStabilization") ); 
-      
+      PRINT( _L("Camera <> CCamCameraController::SettingValueUpToDate ECameraSettingStabilization") );
+
       TPckgBuf<TCamSettingDataStabilization> stabilizationSetting;
       iSettingProvider.ProvideCameraSettingL( aSettingId, &stabilizationSetting );
-      
+
       TPckgBuf<TCamSettingDataStabilization> stabilizationValue;
       GetCameraSettingValueL( aSettingId, &stabilizationValue );
       if ( stabilizationSetting().iMode != stabilizationValue().iMode ||
               stabilizationSetting().iEffect != stabilizationValue().iEffect ||
               stabilizationSetting().iComplexity != stabilizationValue().iComplexity )
         {
-        upToDate = EFalse;  
+        upToDate = EFalse;
         }
       break;
       }
-    case ECameraSettingContAF: 
+    case ECameraSettingContAF:
       {
-      TBool isContAFon( iAdvancedSettings->AutoFocusType() & 
+      TBool isContAFon( iAdvancedSettings->AutoFocusType() &
                         CAS::EAutoFocusTypeContinuous );
       if( IsFlagOn( iInfo.iState, ECamVideoOn ) )
         {
@@ -6379,24 +6382,24 @@ CCamCameraController::SettingValueUpToDateL( const NCamCameraController::TCamCam
         iSettingProvider.ProvideCameraSettingL( aSettingId, &contAF );
         if( contAF != isContAFon )
           {
-          upToDate = EFalse; 
+          upToDate = EFalse;
           }
         }
       else
         {
         //Do nothing
-        
-        }     
+
+        }
       break;
       }
-#endif      
+#endif
     default:
       {
       PRINT1( _L("CCamCameraController::SettingValueUpToDate - unknown setting id: %d"), aSettingId );
       }
-    
-    }  
-    
+
+    }
+
   PRINT1( _L("Camera <= CCamCameraController::SettingValueUpToDate returning %d"), upToDate );
   return upToDate;
   }
@@ -6422,7 +6425,7 @@ void CCamCameraController::SetViewfinderWindowHandle( RWindowBase* aWindow )
         iInfo.iVfState = ECamTriInactive;
 
         // restart viewfinder
-        //TRAP_IGNORE( ProcessVfStartRequestL() );  
+        //TRAP_IGNORE( ProcessVfStartRequestL() );
 		iAppController.EnterViewfinderMode(iAppController.CurrentMode());
         }
     iViewfinderWindow = aWindow;
@@ -6459,10 +6462,10 @@ void CCamCameraController::ViewfinderWindowDeleted( RWindowBase* aWindow )
 // CCamCameraController::SetVfWindowOrdinal
 // ---------------------------------------------------------------------------
 //
-TInt CCamCameraController::SetVfWindowOrdinal( TInt aOrdinalPosition )  
+TInt CCamCameraController::SetVfWindowOrdinal( TInt aOrdinalPosition )
     {
-    TInt orgPos( KErrUnknown ); 
-    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() ); 
+    TInt orgPos( KErrUnknown );
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
     if ( iViewfinderWindow )
         {
         TInt cbaPos(0);
@@ -6479,7 +6482,7 @@ TInt CCamCameraController::SetVfWindowOrdinal( TInt aOrdinalPosition )
             // Find out other windows ordinal positions
             if ( cba )
                 {
-                cbaPos =  cba->DrawableWindow()->OrdinalPosition(); 
+                cbaPos =  cba->DrawableWindow()->OrdinalPosition();
                 }
             CAknToolbar* toolbar = appUi->CurrentFixedToolbar();
             if ( toolbar )
@@ -6489,7 +6492,7 @@ TInt CCamCameraController::SetVfWindowOrdinal( TInt aOrdinalPosition )
                     {
                     toolbarPos = toolbarwindow->OrdinalPosition();
                     }
-                } 
+                }
             // Calculate new viewfinder position,
             // just under fixed toolbar and CBA buttons
             TInt newPos = Max( toolbarPos, cbaPos ) + 1;
@@ -6507,12 +6510,12 @@ TInt CCamCameraController::SetVfWindowOrdinal( TInt aOrdinalPosition )
 // Static function called when the timer expires
 // ---------------------------------------------------------------------------
 //
-TInt 
+TInt
 CCamCameraController::DelayedCaeCallback( TAny* aController )
     {
     CCamCameraController* self = static_cast<CCamCameraController*>( aController );
     self->CallAppropriateCallback();
-    
+
     return KErrNone;
     }
 
@@ -6521,12 +6524,12 @@ CCamCameraController::DelayedCaeCallback( TAny* aController )
 // Helper function to call the appropriate callback handler.
 // ---------------------------------------------------------------------------
 //
-void 
+void
 CCamCameraController::CallAppropriateCallback( const TCamCameraEventId aEventId,
                                                      TInt              aStatus )
     {
-    PRINT2( _L("Camera => CCamCameraController::CallAppropriateCallback, event:%d, status:%d"), aEventId, aStatus ) 
-    
+    PRINT2( _L("Camera => CCamCameraController::CallAppropriateCallback, event:%d, status:%d"), aEventId, aStatus )
+
     switch ( iSimEventId )
         {
         case ECamCameraEventVideoInit:
@@ -6538,25 +6541,25 @@ CCamCameraController::CallAppropriateCallback( const TCamCameraEventId aEventId,
                 PRINT( _L("Camera <> CCamCameraController::CallAppropriateCallback - calling handler after delay") )
                 HandleVideoEvent( iSimEventId, iSimStatus );
                 }
-            else 
+            else
                 {
                 PRINT( _L("Camera <> CCamCameraController::CallAppropriateCallback - calling handler without delay") )
                 HandleVideoEvent( aEventId, aStatus );
-                }           
+                }
             break;
         default:
             break;
         }
-    
-    // In case of being called by timer, stop and destro the timer 
+
+    // In case of being called by timer, stop and destro the timer
     if( aEventId == ECamCameraEventNone && iCallbackTimer )
         {
         iCallbackTimer->Cancel();
         delete iCallbackTimer;
         iCallbackTimer = NULL;
         }
-    
-    PRINT( _L("Camera <= CCamCameraController::CallAppropriateCallback") )  
+
+    PRINT( _L("Camera <= CCamCameraController::CallAppropriateCallback") )
     }
 
 #endif // CAMERAAPP_CAE_ERR_SIMULATION
@@ -6565,7 +6568,7 @@ CCamCameraController::CallAppropriateCallback( const TCamCameraEventId aEventId,
 // CCamCameraController::AsyncVideoStopModeSupported
 // ---------------------------------------------------------------------------
 //
-TBool 
+TBool
 CCamCameraController::AsyncVideoStopModeSupported()
   {
   PRINT1( _L("Camera <> CCamCameraController::AsyncVideoStopModeSupported = %d "), iAsyncVideoStopModeSupported );
@@ -6576,7 +6579,7 @@ CCamCameraController::AsyncVideoStopModeSupported()
 // IdleCallback <<static>>
 // ---------------------------------------------------------------------------
 //
-// static 
+// static
 TInt CCamCameraController::IdleCallback( TAny* aSelf )
     {
     CCamCameraController* self( static_cast<CCamCameraController*>( aSelf ) );
@@ -6592,7 +6595,7 @@ TInt CCamCameraController::IdleCallback( TAny* aSelf )
 void CCamCameraController::DoIveRecovery()
     {
     PRINT( _L("Camera => CCamCameraController::DoIveRecovery") )
-    if( iAppController.IsAppUiAvailable() 
+    if( iAppController.IsAppUiAvailable()
             && !( iAppController.IsInShutdownMode() || iAppController.CheckExitStatus() ) )
         {
         CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
@@ -6608,19 +6611,19 @@ void CCamCameraController::DoIveRecovery()
             {
             //There was an error when getting active view ID. Propably camera
             //application went to background. In that case just return because
-            //camera resource should be released when going to background.             
+            //camera resource should be released when going to background.
             return;
             }
 		__ASSERT_DEBUG(view, CamPanic(ECamPanicNullPointer));
-        if ( appUi->StandbyStatus() && view->IsInStandbyMode() ) 
+        if ( appUi->StandbyStatus() && view->IsInStandbyMode() )
             {
-            PRINT( _L("Camera <> CCamCameraController::DoIveRecovery - Standby mode active, try to exit") )  
-            TRAP_IGNORE( appUi->HandleControllerEventL(  ECamEventCameraChanged, 
+            PRINT( _L("Camera <> CCamCameraController::DoIveRecovery - Standby mode active, try to exit") )
+            TRAP_IGNORE( appUi->HandleControllerEventL(  ECamEventCameraChanged,
                                                          KErrNone ) );
             }
         else
             {
-            PRINT( _L("Camera <> CCamCameraController::DoIveRecovery - Start recovering from beginning") )  
+            PRINT( _L("Camera <> CCamCameraController::DoIveRecovery - Start recovering from beginning") )
             iIveSequenceActive = EFalse;
             if( IsFlagOn( iInfo.iBusy, ECamBusySequence|ECamBusySetting ) )
                 {
@@ -6631,15 +6634,15 @@ void CCamCameraController::DoIveRecovery()
                     }
                 iIveCancel = ETrue;
                 EndSequence( KErrNone ); // Clears iIveRecoveryOngoing and iIveSequenceActive
-                }  
-            NotifyObservers( KErrNone, ECamCameraEventIveRecover, 
+                }
+            NotifyObservers( KErrNone, ECamCameraEventIveRecover,
                              ECamCameraEventClassBasicControl );
             }
         iIveRecoveryCount--;
         iIveRecoveryOngoing = ETrue;
         iIveCancel = EFalse;
         }
-    PRINT1( _L("Camera <= CCamCameraController::DoIveRecovery iIveRecoveryCount%d"),iIveRecoveryCount )  
+    PRINT1( _L("Camera <= CCamCameraController::DoIveRecovery iIveRecoveryCount%d"),iIveRecoveryCount )
     }
 
 // ---------------------------------------------------------------------------
@@ -6650,7 +6653,7 @@ TBool CCamCameraController::IsWaitingIveResources()
     {
     // ETrue if recovery is started, but not completed.
     // iIveRecoveryOngoing is set to false when last recovery command is executed
-    return (iIdle && iIdle->IsActive()) || 
+    return (iIdle && iIdle->IsActive()) ||
             iIveCancel || iIveRecoveryOngoing || iIveSequenceActive;
     }
 
@@ -6661,7 +6664,7 @@ TBool CCamCameraController::IsWaitingIveResources()
 //
 void CCamCameraController::SetFaceTrackingL()
     {
-    if( iCustomInterfaceFaceTracking && 
+    if( iCustomInterfaceFaceTracking &&
         KPrimaryCameraIndex == iInfo.iCurrentCamera )
       {
       TBool ftOn( EFalse );

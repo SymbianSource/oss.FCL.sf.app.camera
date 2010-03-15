@@ -22,15 +22,25 @@
 
 #include <e32std.h>
 
-class CAiwServiceHandler;
+#include "CamSettingsInternal.hrh"
+#include "camimagedecoder.h"
 
+
+class CAiwServiceHandler;
+class AknToolbar;
+class CGulIcon;
+
+class CFbsBitmap;
+class CCamImageDecoder;
+class MCamImageDecoderObserver;
 
 /**
  *  Helper class for implementing one-click upload support
  *
  *  @since S60 v5.0
  */
-class CCamOneClickUploadUtility : public CBase
+class CCamOneClickUploadUtility : public CBase,
+                                  public MCamImageDecoderObserver
     {
 public:
     /**
@@ -72,12 +82,36 @@ public:
     * @return Tooltip text
     */
     const TDesC& ButtonTooltipL();
-
+    
+    /**
+     * Get the current one click icon
+     */
+    void UpdateUploadIcon( CAknToolbar *aToolbar, TCamCameraMode aMode );
+    
+    /**
+     * From MCamImageDecoderObserver
+     */
+    virtual void ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, 
+                               const CFbsBitmap* aMask );    
+    
 private:
     void ConstructL();
     void CheckVersionL();
     void InitializeAiwL();
     CCamOneClickUploadUtility();
+    
+    /**
+    * Obtains the path for icon to be used. 
+    * @param aMode the current camera mode
+    * @param aPath descriptor containing the path of icon to be used 
+    */
+    void CurrentIconPathL( TCamCameraMode aMode, TDes& aPath ); 
+
+    /**
+    * Decodes / starts decoding of icon to be used.
+    * @param aPath descriptor containing the path of icon to be used 
+    */
+    void DecodeIconL( TDesC* aPath );
 
 private: // Data
 
@@ -85,11 +119,18 @@ private: // Data
 
     // Own
     CAiwServiceHandler* iAiwServiceHandler;
+    
+    CFbsBitmap*    iDecodedBitmap;
+    CCamImageDecoder* iDecoder;    
+
+    TFileName iIconFileName;
+    CFbsBitmap* iIconImage;
+    CFbsBitmap* iIconMask;
+    
+    CAknToolbar* iToolbar;
 
     // Own
     HBufC* iTooltip;
     };
 
-
 #endif // CAMONECLICKUPLOADUTILITY_H
-

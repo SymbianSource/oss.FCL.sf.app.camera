@@ -84,7 +84,7 @@ class CCamSnapshot : public CBase,
     /**
     * @see MCamImageDecoderObserver
     */
-    virtual void ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap );
+    virtual void ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* aMask );
 
   // -------------------------------------------------------
   // from MCamBitmapScalerObserver

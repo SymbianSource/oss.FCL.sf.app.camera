@@ -39,8 +39,9 @@ CCamCaptureSetupListBox::CCamCaptureSetupListBox( MCamSettingValueObserver* aObs
 #else
                                                   ,MCamAppController& aController
 #endif //CAMERAAPP_PLUGIN_BUILD
+                                                  ,TBool aSkinnedBackGround
                                                  )
-: iSettingObserver( aObserver ), iController( aController )
+: iSettingObserver( aObserver ), iController( aController ), iSkinnedBackGround( aSkinnedBackGround )
     {
     iBorder = TGulBorder::ENone;
     }
@@ -69,7 +70,8 @@ void CCamCaptureSetupListBox::ConstructL( const CCoeControl* aParent,
                                                   Rect()
              								      );
     CCamCaptureSetupListItemDrawer* itemDrawer = 
-                                CCamCaptureSetupListItemDrawer::NewL( *model );
+                                CCamCaptureSetupListItemDrawer::NewL( *model, iSkinnedBackGround );
+    //ME:END
 
                                 
     itemDrawer->SetParentControl( aParent );

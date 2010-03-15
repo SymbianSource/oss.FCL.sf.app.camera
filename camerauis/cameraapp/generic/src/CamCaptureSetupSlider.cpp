@@ -63,6 +63,8 @@ const TInt KEVMinus05Ind = 5;
 const TInt KEVMinus10Ind = 6;
 const TInt KEVMinus15Ind = 7;
 const TInt KEVMinus20Ind = 8;
+const TUint32 KToolbarExtensionBgColor = 0x00000000;
+const TInt KToolBarExtensionBgAlpha = 0x7F;
 
 
 
@@ -83,6 +85,11 @@ CCamSliderLegend::~CCamSliderLegend()
   PRINT( _L("Camera <= ~CCamSliderLegend") );
   }
 
+CCamSliderLegend::CCamSliderLegend( TBool aFullySkinned )
+: iFullySkinned( aFullySkinned )
+    {    
+    }
+
 // ---------------------------------------------------------
 // CCamSliderLegend::Draw
 // Draws the legend 
@@ -93,10 +100,16 @@ void CCamSliderLegend::Draw( CWindowGc& aGc ) const
     if ( iItem == ECamSliderLegendItemText )
         {
         TRgb color;
+        if( iFullySkinned )
+            {
         MAknsSkinInstance* skin = AknsUtils::SkinInstance();
         AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors,
                                                 EAknsCIQsnTextColorsCG6 );
-
+            }
+        else
+            {            
+            color=KRgbWhite;
+            }
         iPosition.DrawText( aGc, iText->Des(), ETrue, color );
         }
     else
@@ -179,8 +192,9 @@ void CCamSliderLegend::ConstructIconL(
 //
 CCamCaptureSetupSlider::CCamCaptureSetupSlider( MCamSettingValueObserver* aObserver,
                                                 TCamSettingItemIds aSettingType,
-                                                TInt aSteps ) 
-: iSettingObserver( aObserver ), iSettingType( aSettingType ), iSteps( aSteps )
+                                                TInt aSteps,
+                                                TBool aFullySkinned ) 
+: iSettingObserver( aObserver ), iSettingType( aSettingType ), iSteps( aSteps ), iFullySkinned( aFullySkinned )
     {
     }
 
@@ -305,10 +319,13 @@ void CCamCaptureSetupSlider::ConstructL( const CCoeControl* aParent )
 CCamCaptureSetupSlider* CCamCaptureSetupSlider::NewL( const CCoeControl* aParent, 
                                                       MCamSettingValueObserver* aObserver,
                                                       TCamSettingItemIds aSettingItem,
-                                                      TInt aSteps )
+                                                      TInt aSteps,
+                                                      TBool aFullySkinned )
     {
     CCamCaptureSetupSlider* self = 
-        new( ELeave ) CCamCaptureSetupSlider( aObserver, aSettingItem, aSteps );
+        new( ELeave ) CCamCaptureSetupSlider( aObserver, aSettingItem, aSteps,
+                aFullySkinned );
+    //ME:END    
     CleanupStack::PushL( self );
     self->ConstructL( aParent );
     CleanupStack::Pop( self );
@@ -397,9 +414,28 @@ void CCamCaptureSetupSlider::Draw( const TRect& /*aRect*/ ) const
     {
     CWindowGc& gc = SystemGc();
 
-    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    MAknsControlContext *cc = AknsDrawUtils::ControlContext( iParentControl ); 
-    AknsDrawUtils::Background( skin, cc, iParentControl, gc, Rect() );
+    if( iFullySkinned )
+        {
+        MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+        MAknsControlContext *cc = AknsDrawUtils::ControlContext( iParentControl ); 
+        AknsDrawUtils::Background( skin, cc, iParentControl, gc, Rect() );
+        }
+    else
+        {
+        gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
+        gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+        gc.DrawRect( Rect() );            
+        // Reset the brush after use (otherwise anything drawn
+        // after the viewfinder will also show viewfinder frames)    
+        gc.SetDrawMode( CGraphicsContext::EDrawModePEN );
+        TSize penSize( 1, 1 );
+        gc.SetPenSize( penSize );
+        gc.SetPenStyle( CGraphicsContext::EDottedPen );
+        gc.SetPenColor( KRgbWhite );
+        gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+        gc.DrawRect( Rect() );                            
+        }
     
     // STEP 1: Draw the legend text
     TInt count = iLegendArray.Count();
@@ -671,7 +707,7 @@ void CCamCaptureSetupSlider::TouchContrastLayoutL( const TRect& aParentRect )
     // Read all EV entries from the resource file and construct them with layout
     for ( TInt i = 0; i < count; i++ )
         {
-        CCamSliderLegend* legend = new ( ELeave ) CCamSliderLegend;
+        CCamSliderLegend* legend = new ( ELeave ) CCamSliderLegend( iFullySkinned );
         CleanupStack::PushL( legend );
         switch ( i )
             {
@@ -784,7 +820,7 @@ void CCamCaptureSetupSlider::TouchEVLayoutL( const TRect& aParentRect )
     // and construct them with layout
     for ( TInt i = 0; i < count; i++ )
         {
-        CCamSliderLegend* legend = new ( ELeave ) CCamSliderLegend;
+        CCamSliderLegend* legend = new ( ELeave ) CCamSliderLegend( iFullySkinned );
         CleanupStack::PushL( legend );
         switch ( i )
             {

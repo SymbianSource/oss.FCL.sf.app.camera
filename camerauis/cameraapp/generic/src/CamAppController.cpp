@@ -5642,6 +5642,10 @@ void CCamAppController::StoreNextFileNameL( const TDesC& aFullPath )
 void CCamAppController::GenerateNextVideoFilePathL( TBool aForcePhoneMem )
   {
   PRINT1( _L( "Camera => CCamAppController::GenerateNextVideoFilePathL, force phone mem:%d" ), aForcePhoneMem )    
+  if( aForcePhoneMem )
+    {
+    ForceUsePhoneMemoryL( ETrue );
+    }
   TInt store = IntegerSettingValue( ECamSettingItemVideoMediaStorage ); 
   
   TBuf<KMaxExtension> extension;        
@@ -5937,9 +5941,9 @@ CCamAppController::HandleSaveEvent( TCamSaveEvent aEvent )
          OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMAPPCONTROLLER_HANDLESAVEEVENT, "e_CAM_APP_PREP_FOR_NEXT_SHOT 1" ); //CCORAPP_PREP_FOR_NEXT_SHOT_START      
          HandleCaptureCompletion();
          NotifyControllerObservers( ECamEventCaptureComplete, KErrNone );
+         iSaveStarted = ETrue;
          NotifyControllerObservers( ECamEventSaveComplete );
          iCaptureRequested = EFalse;
-         iSaveStarted = ETrue;
          OstTrace0( CAMERAAPP_PERFORMANCE, DUP4_CCAMAPPCONTROLLER_HANDLESAVEEVENT, "e_CAM_APP_PREP_FOR_NEXT_SHOT 0" ); //CCORAPP_PREP_FOR_NEXT_SHOT_END
          OstTrace0( CAMERAAPP_PERFORMANCE, DUP5_CCAMAPPCONTROLLER_HANDLESAVEEVENT, "e_CAM_PRI_SHOT_TO_SHOT 0" ); //CCORAPP_PRI_SHOT_TO_SHOT_END   
          }
@@ -6180,9 +6184,15 @@ void CCamAppController::HandleSnapshotEvent( TInt aStatus,
     {
     PRINT( _L("Camera <> CCamAppController: status in KErrNone..") );
     __ASSERT_ALWAYS( aBitmap, CamPanic( ECamPanicNullPointer ) );
-
+    
+    // The secondary camera postcapture snapshot is rotated here. 
+    // Due to the viewfinder mirroring along the landscape axis the 
+    // portrait (or upside down portrait) postcapture snapshot would 
+    // otherwise be upside down.
+    // This affects the snapshot seen in postcapture view.
+   
     if( iInfo.iActiveCamera == ECamActiveCameraSecondary &&
-        iCaptureOrientation == ECamOrientation90 &&
+        iCaptureOrientation == ECamOrientation180 &&
         ECamSettOn == IntegerSettingValue( ECamSettingItemShowCapturedPhoto ) )
         {
         PRINT( _L( "Camera <> Rotate portrait secondary camera snapshot image 180 degrees" ) )
@@ -6329,6 +6339,11 @@ CCamAppController::HandleImageCaptureEventL( TInt             aStatus,
           NotifyControllerObservers( ECamEventImageData );  
           }
         PRINT1( _L("Camera <> CCamAppController::HandleImageCaptureEventL array count:%d"), BurstCaptureArray()->Count() );  
+
+        // Snapshots are rotated here if necessary, so that the thumbnails created by 
+        // ThumbNailManager accurately represent the actual images.
+        // This affects the thumbnails seen in Photos.
+        
         // check if snapshot bitmap needs to be rotated before creating a thumbnail from it
         TBool rotate( ( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) || 
                       iInfo.iActiveCamera == ECamActiveCameraSecondary ) &&
@@ -7404,6 +7419,10 @@ void CCamAppController::DataReceived( CSensrvChannel& aChannel,
 
     if ( KSensrvChannelTypeIdOrientationData == aChannel.GetChannelInfo().iChannelType )
         {
+        // Rotation is used in primary camera whenever the feature is enabled by user.
+        // A rotation is always set for secondary camera in portrait and upside down
+        // portrait orientations due to the the viewfinder mirroring along the landscape axis.
+        // This affects the final JPEG file.
         TBool rotate( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) 
                       || iInfo.iActiveCamera == ECamActiveCameraSecondary );
 
@@ -7414,7 +7433,9 @@ void CCamAppController::DataReceived( CSensrvChannel& aChannel,
             aChannel.GetData( orientationPackage );
 
             iImageOrientation =
-                MapSensorOrientatio2CamOrientation( orientationData.iDeviceOrientation, iLastImageOrientation );
+                MapSensorOrientatio2CamOrientation( orientationData.iDeviceOrientation, 
+                                                    iLastImageOrientation, 
+                                                    iInfo.iActiveCamera );
             }
         else
             {
@@ -7529,13 +7550,17 @@ void CCamAppController::SetImageOrientationL()
 //
 TCamImageOrientation 
 CCamAppController::MapSensorOrientatio2CamOrientation( 
-    const TSensrvOrientationData::TSensrvDeviceOrientation& aSensorOrientation, TCamImageOrientation aLastImageOrientation )
+    const TSensrvOrientationData::TSensrvDeviceOrientation& aSensorOrientation, TCamImageOrientation aLastImageOrientation,
+    TCamActiveCamera aActiveCamera )
     {
     PRINT1 ( _L("Camera => CCamAppController::MapSensorOrientatio2CamOrientation aSensorOrientation: %d"), aSensorOrientation );   
 
     TCamImageOrientation cameraOrientation( ECamOrientation0 );
 
-    switch( aSensorOrientation )
+    // Primary camera rotation
+    if ( aActiveCamera == ECamActiveCameraPrimary ) 
+      {
+      switch( aSensorOrientation )
         {        
         case TSensrvOrientationData::EOrientationDisplayUpwards:
             // If coming from upside down portrait...
@@ -7594,6 +7619,24 @@ CCamAppController::MapSensorOrientatio2CamOrientation(
             PRINT( _L("Camera <> Unexpected orientation value") );
             break;
         }
+      }
+    // Secondary camera rotations
+    else if ( aActiveCamera == ECamActiveCameraSecondary )
+      {
+      if ( aSensorOrientation == TSensrvOrientationData::EOrientationDisplayUp ) // Portrait
+        {
+        cameraOrientation = ECamOrientation180; 
+        }
+      else if ( aSensorOrientation == TSensrvOrientationData::EOrientationDisplayDown )  // Upside down portrait
+        {
+        cameraOrientation = ECamOrientation180;
+        }
+      else
+        {
+        cameraOrientation = ECamOrientation0;
+        }
+      }
+      
     PRINT1( _L("Camera <= CCamAppController::MapSensorOrientatio2CamOrientation, return [%s]"), 
             KCamOrientationNames[cameraOrientation] );
 
@@ -7601,7 +7644,7 @@ CCamAppController::MapSensorOrientatio2CamOrientation(
     }
 
 // ---------------------------------------------------------------------------
-// MapSensorOrientatio2CamOrientation
+// MapCamOrientation2RotationAngle
 // ---------------------------------------------------------------------------
 //
 CBitmapRotator::TRotationAngle 
@@ -10170,10 +10213,18 @@ TBool CCamAppController::EngineRequestsPending() const
 // ---------------------------------------------------------------------------
 //
 TTimeIntervalMicroSeconds
-CCamAppController::CalculateVideoTimeRemainingL(const TCamMediaStorage aStorage)
+CCamAppController::CalculateVideoTimeRemainingL( TCamMediaStorage aStorage )
   {
   RFs& fs = CEikonEnv::Static()->FsSession();
   TInt drive = 0;
+  // Check if setting the new video path is pending. The path may not have been 
+  // set if camera controller was busy or video mode not initialized. This 
+  // happens e.g. while in Settings menu.
+  // If yes, use the storage media that is going to be used next.
+  if( iSetNewPathnamesPending != ECamMediaStorageNone )
+    {
+    aStorage = iSetNewPathnamesPending;
+    }
   if(aStorage == ECamMediaStorageCurrent)
 	{
   const TDesC& filename = CurrentVideoFileName();
@@ -11087,5 +11138,14 @@ TBool CCamAppController::ToggleWideScreenQuality( TBool aWide )
     return qualityChanged;
     }
 
+// ---------------------------------------------------------------------------
+// CCamAppController::IsSaveStarted
+// 
+// ---------------------------------------------------------------------------
+//
+TBool CCamAppController::IsSaveStarted()
+    {
+    return iSaveStarted;    
+    }
 //  End of File  
 

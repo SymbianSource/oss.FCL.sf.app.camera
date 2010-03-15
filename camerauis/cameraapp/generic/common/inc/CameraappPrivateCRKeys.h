@@ -62,6 +62,7 @@ const TUint32 KCamCrUserSceneContrast       = 0x26;
 const TUint32 KCamCrUserSceneImageSharpness = 0x27;
 const TUint32 KCamCrUserSceneColourSaturation = 0x28;
 const TUint32 KCamCrUserSceneLightSensitivity = 0x29;
+const TUint32 KCamCrUserSceneDefault        = 0x2A; 
 
 const TUint32 KCamCrPhotoRotation 			= 0x30;
 const TUint32 KCamCrVideoStabilisation		= 0x31;
@@ -87,7 +88,9 @@ const TUint32 KCamCrDefaultAlbumTitle       = 0x57;
 const TUint32 KCamCrImageToolbarItems        = 0x58;
 const TUint32 KCamCrImageToolbarDefaultItems = 0x59;
 
-
+//Support for Photo and Video editor
+const TUint32 KCamCrPhotoEditorSupport = 0x5A;
+const TUint32 KCamCrVideoEditorSupport = 0x5B;
 
 // =========================================================
 // Cameraapp variant settings file

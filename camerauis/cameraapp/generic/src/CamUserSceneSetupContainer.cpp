@@ -391,6 +391,11 @@ TInt CCamUserSceneSetupContainer::CommandIdForActivatingCurrentItemControl()
             commandId = ECamCmdCaptureSetupLightSensitivityUser;
             }
             break;
+        case ECamSettingItemUserSceneDefault: 
+            {
+            commandId = ECamCmdSetUserDefault;
+            }
+            break;
         default:
             {
             CamPanic( ECamPanicCaptureSetupMenuUnknownItem );

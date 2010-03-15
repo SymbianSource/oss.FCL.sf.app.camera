@@ -126,7 +126,36 @@ CCamFolderUtility::GetBasePathL( TInt*                 aMonthCounters,
       {
       aPath.Append( PathInfo::ImagesPath() );  
       }             
-     
+    // Copied from below
+    TBuf<KMaxNameBaseLength> cameraFolder; // "Camera"
+    StringLoader::Load( cameraFolder, R_CAM_CAMERA_SUBFOLDER );
+    
+    RFs rfs;
+    User::LeaveIfError( rfs.Connect() );
+    CleanupClosePushL( rfs );     
+ 
+    TFileName fn( aPath );
+    fn.Append( cameraFolder );
+    TEntry entry;
+    TInt err2 = rfs.Entry(fn, entry );
+
+    if( KErrNone == err2 )
+      {
+       if (!entry.IsDir( ))
+          {
+           RBuf newName;
+           CleanupClosePushL( newName);  
+           newName.CreateL( fn.Length() + 4 );
+           newName.Copy( fn );
+           newName.Append(_L(".bak"));
+           TInt error = rfs.Rename( fn, newName );
+           if ( error != KErrNone )
+               {
+                User::LeaveIfError( rfs.Delete( fn ) );
+               }
+           CleanupStack::PopAndDestroy( &newName );
+          }
+       }
   // Add a folder for the current month
   // Use the specified time to determine the year and month.
   // If this is 0 then use the current time.
@@ -154,8 +183,8 @@ CCamFolderUtility::GetBasePathL( TInt*                 aMonthCounters,
       cr->Set( KCamCrLastUsedMonthFolder, monthFolder );
       }  
   CleanupStack::PopAndDestroy( cr );    
-  TBuf<KMaxNameBaseLength> cameraFolder;
-  StringLoader::Load( cameraFolder, R_CAM_CAMERA_SUBFOLDER );
+//  TBuf<KMaxNameBaseLength> cameraFolder;
+//  StringLoader::Load( cameraFolder, R_CAM_CAMERA_SUBFOLDER );
   aPath.Append( cameraFolder );   
   aPath.Append( KBackslash );          
   aPath.Append( monthFolder );  
@@ -165,11 +194,7 @@ CCamFolderUtility::GetBasePathL( TInt*                 aMonthCounters,
   // This may be returned e.g.if the month counter destination folder  (YYYYMMXX) is
   // not created
   TInt monthFolderLength = aPath.Length();
-  
-  RFs rfs;
-  User::LeaveIfError( rfs.Connect() );
-  CleanupClosePushL( rfs );     
- 
+
   // ensure the path exists
   TInt err = rfs.MkDirAll( aPath );
  
@@ -207,7 +232,8 @@ CCamFolderUtility::GetBasePathL( TInt*                 aMonthCounters,
       aPath.Append( KDigitOffset()[0] + monthCounter%KBase10 );
       aPath.Append( KBackslash );
       // If the folder does not exist then remove the final folder name from the path
-      TEntry entry;
+      //TEntry entry;
+      
       if ( rfs.Entry( aPath, entry ) == KErrNotFound )
           {
           aPath.SetLength( monthFolderLength );

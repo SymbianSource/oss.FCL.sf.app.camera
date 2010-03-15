@@ -87,7 +87,15 @@ TBool CGSCamDefaultNameSettingPage::OkToExitL( TBool aAccept )
             // Show the editor dialog                
             TBool editorRet = EFalse;  
             // Trap this to make sure the orientation is reverted back to normal   
+            if ( Cba() )
+              {
+              Cba()->MakeVisible( EFalse );
+              }
             TRAPD( leaveErr, editorRet = ShowEditorDialogL() )
+            if ( Cba() )
+              {              
+              Cba()->MakeVisible( ETrue );                          
+              }
             if ( !editorRet )
                 {
                 // redraw listbox to update radio button when cancel is pressed 

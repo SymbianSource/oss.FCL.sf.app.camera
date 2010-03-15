@@ -27,7 +27,10 @@
 #include <cameraapp.rsg>
 #include <vgacamsettings.rsg>
 #include <aknlayoutscalable_apps.cdl.h>
-#include <layoutmetadata.cdl.h>            
+#include <layoutmetadata.cdl.h>
+#include <cameraapp.mbg>
+
+#include <touchfeedback.h> 
 
 #include "CamPanic.h"
 #include "CamAppUi.h"
@@ -74,6 +77,36 @@ CCamPostCaptureContainer::~CCamPostCaptureContainer()
 
   iController.RemoveControllerObserver( this );
   delete iBatteryPaneController;
+  if(iPlayIcon)
+      {
+      delete iPlayIcon;
+      iPlayIcon = NULL;
+      }
+  if(iPlayIconMask)
+        {
+        delete iPlayIconMask;
+        iPlayIconMask = NULL;
+        }
+  if(iPlayIconBg)
+        {
+        delete iPlayIconBg;
+        iPlayIconBg = NULL;
+        }
+  if(iPlayIconBgMask)
+        {
+        delete iPlayIconBgMask;
+        iPlayIconBgMask = NULL;
+        }
+  if(iPlayIconBgPressed)
+        {
+        delete iPlayIconBgPressed;
+        iPlayIconBgPressed = NULL;
+        }
+  if(iPlayIconBgPressedMask)
+        {
+        delete iPlayIconBgPressedMask;
+        iPlayIconBgPressedMask = NULL;
+        }
   PRINT( _L("Camera <= ~CCamPostCaptureContainer" ))
   }
   
@@ -101,7 +134,49 @@ void CCamPostCaptureContainer::ConstructL( const TRect& aRect )
       // Still mode - processing text needed  
       PrepareProcessingTextL( ETrue );
       } 
-
+    if ( iView.Id().iUid == ECamViewIdVideoPostCapture )
+        {
+        _LIT(KResName, "z:\\resource\\apps\\cameraapp.mif");
+        TSize playIconSize( 140, 92);
+        AknIconUtils::CreateIconL(
+                 iPlayIcon,
+                 iPlayIconMask,
+                 KResName(),
+                 EMbmCameraappQgn_indi_media_fullscreen_play,
+                 EMbmCameraappQgn_indi_media_fullscreen_play_mask);
+        AknIconUtils::SetSize(iPlayIcon,playIconSize,EAspectRatioPreserved);
+        AknIconUtils::SetSize(iPlayIconMask,playIconSize,EAspectRatioPreserved);
+        
+        //!!Please don't remove this commented section
+        /*TSize playIconSize(40,40);
+        AknIconUtils::CreateIconL(
+                 iPlayIcon,
+                 iPlayIconMask,
+                 KResName(),
+                 EMbmCameraappQgn_indi_cam4_tb_play,
+                 EMbmCameraappQgn_indi_cam4_tb_play_mask);
+        AknIconUtils::SetSize(iPlayIcon,playIconSize,EAspectRatioPreserved);
+        AknIconUtils::SetSize(iPlayIconMask,playIconSize,EAspectRatioPreserved);
+        
+        TSize playIconBgSize(140,92);
+        AknIconUtils::CreateIconL(
+                 iPlayIconBg,
+                 iPlayIconBgMask,
+                 KResName(),
+                 EMbmCameraappQgn_bg_lcam_vid_postcap_play,
+                 EMbmCameraappQgn_bg_lcam_vid_postcap_play_mask);
+        AknIconUtils::SetSize(iPlayIconBg,playIconBgSize,EAspectRatioPreserved);
+        AknIconUtils::SetSize(iPlayIconBgMask,playIconBgSize,EAspectRatioPreserved);
+        AknIconUtils::CreateIconL(
+                 iPlayIconBgPressed,
+                 iPlayIconBgPressedMask,
+                 KResName(),
+                 EMbmCameraappQgn_bg_lcam_vid_postcap_play_pressed,
+                 EMbmCameraappQgn_bg_lcam_vid_postcap_play_pressed_mask);
+        AknIconUtils::SetSize(iPlayIconBgPressed,playIconBgSize,EAspectRatioPreserved);
+        AknIconUtils::SetSize(iPlayIconBgPressedMask,playIconBgSize,EAspectRatioPreserved);*/
+        }
+    
     // Make sure fixed toolbar is on top of this window
     DrawableWindow()->SetOrdinalPosition( KCamPostCaptureWindowOrdinalPos );
     }
@@ -301,6 +376,34 @@ void CCamPostCaptureContainer::Draw( const TRect& /*aRect*/ ) const
 	        iNaviCounterControl->DrawNaviCtr( gc );
 	        }
 	     }
+	 
+	 if ( iView.Id().iUid == ECamViewIdVideoPostCapture )
+	     {
+         TSize playIconSize(140,92);
+	     TRect playIconRect(containerRect.Center() - TPoint(70,46),playIconSize);
+	     TRect playIconSourceRect(0,0,140,92);
+         
+	     //!!Please don't remove this commented section
+	     /*TSize playIconSize(40,40);
+         TRect playIconRect(containerRect.Center() - TPoint(20,20),playIconSize);
+         TRect playIconSourceRect(0,0,40,40);
+         
+         TSize playIconBgSize(140,92);
+	     TRect playIconBgRect(containerRect.Center() - TPoint(70,46),playIconBgSize);
+	     TRect playIconBgSourceRect(0,0,140,92);
+         
+	     if(iPlayIconPressed)
+	         {
+             gc.BitBltMasked(playIconBgRect.iTl,iPlayIconBgPressed,playIconBgSourceRect,iPlayIconBgPressedMask,EFalse);
+	         }
+	     else
+	         {
+             gc.BitBltMasked(playIconBgRect.iTl,iPlayIconBg,playIconBgSourceRect,iPlayIconBgMask,EFalse);
+	         }*/
+	     
+	     gc.BitBltMasked(playIconRect.iTl,iPlayIcon,playIconSourceRect,iPlayIconMask,EFalse);
+                 
+         }
      }
 
 // ----------------------------------------------------
@@ -637,4 +740,49 @@ CCamPostCaptureContainer::HandleAppEvent( const TCamAppEvent& aEvent )
   PRINT( _L("Camera <= CCamPostCaptureContainer::HandleAppEvent") );
   }
 
+// -----------------------------------------------------------------------------
+// CCamPostCaptureContainer::HandlePointerEventL
+//
+// Handles pointer events; From CCoeControl
+// -----------------------------------------------------------------------------    
+//  
+void CCamPostCaptureContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent)
+    {
+    if ( iView.Id().iUid == ECamViewIdVideoPostCapture )
+        {
+        TRect containerRect = Rect();
+        TRect playIconRect(containerRect.Center() - TPoint(35,23), TSize(70,46));
+        if( playIconRect.Contains(aPointerEvent.iPosition) )
+            {
+            if ( aPointerEvent.iType == TPointerEvent::EButton1Down || aPointerEvent.iType == TPointerEvent::EDrag)  
+                {
+                if(!iDraggedInAlready)
+                    {
+                    MTouchFeedback* feedback = MTouchFeedback::Instance(); 
+                    if ( feedback )
+                        {
+                        feedback->InstantFeedback( ETouchFeedbackBasicButton );        
+                        }
+                    iDraggedInAlready = ETrue;
+                    iPlayIconPressed = ETrue;
+                    DrawNow();
+                    }
+                }
+            else if(aPointerEvent.iType == TPointerEvent::EButton1Up )
+                {
+                iPlayIconPressed = EFalse;
+                iDraggedInAlready = ETrue;
+                //feedback->InstantFeedback( ETouchFeedbackBasicButton );
+                iView.HandleCommandL(ECamCmdPlay);
+                }
+            }
+        else
+            {
+            iDraggedInAlready = EFalse;
+            iPlayIconPressed = EFalse;
+            DrawNow();
+            }
+        }
+    }
+	
 // End of File  

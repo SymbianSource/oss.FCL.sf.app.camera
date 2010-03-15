@@ -53,6 +53,7 @@ class CCamCaptureSetupListBox : public CEikListBox
 #else
                                  ,MCamAppController& aController
 #endif //CAMERAAPP_PLUGIN_BUILD
+                                 ,TBool aSkinnedBackGround = EFalse
                                 );
 
         /**
@@ -104,7 +105,7 @@ class CCamCaptureSetupListBox : public CEikListBox
         */
         void HandlePointerEventL(const TPointerEvent& aPointerEvent);
 
-
+        
 	private:    // Data
 
         // observer that handles the control's update events
@@ -117,6 +118,9 @@ class CCamCaptureSetupListBox : public CEikListBox
 #else
         MCamAppController& iController;
 #endif //CAMERAAPP_PLUGIN_BUILD		
+
+    protected:    // Data
+        TBool iSkinnedBackGround;
 	};
 
 #endif // CAMCAPTURESETUPLISTBOX_H

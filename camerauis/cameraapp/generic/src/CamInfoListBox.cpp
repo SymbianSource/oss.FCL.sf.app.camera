@@ -49,7 +49,8 @@ void CCamInfoListBox::ConstructL( CCamAppController& aController,
 								   const CCoeControl* aParent,
         						RPointerArray<HBufC>& aSummaryTitleTextArray,
         				 		RPointerArray<HBufC>& aSummaryDescriptionTextArray,
-        				 		TInt aResourceId )
+        				 		TInt aResourceId,
+        				 		TBool aSkinnedBackGround )
 	{
 	iBorder = TGulBorder::ENone;
 
@@ -59,7 +60,7 @@ void CCamInfoListBox::ConstructL( CCamAppController& aController,
              									aSummaryDescriptionTextArray, aResourceId, Rect() );
 
     CCamCaptureSetupListItemDrawer* itemDrawer = 
-                                CCamCaptureSetupListItemDrawer::NewL( *model );
+                                CCamCaptureSetupListItemDrawer::NewL( *model, aSkinnedBackGround );
 
                                 
     itemDrawer->SetParentControl( aParent );

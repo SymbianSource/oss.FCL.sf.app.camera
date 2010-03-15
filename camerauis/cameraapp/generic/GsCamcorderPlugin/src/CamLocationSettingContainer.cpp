@@ -613,7 +613,7 @@ void CCamLocationSettingContainer::DrawSummaryText( CWindowGc& aGc ) const
     TInt layoutCount = iDescLayoutArray.Count();
     TRgb color; 
     MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG10 );    
+    AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6 );
 
     if ( layoutCount < count )
         {

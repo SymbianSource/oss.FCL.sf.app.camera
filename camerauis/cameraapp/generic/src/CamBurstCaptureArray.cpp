@@ -386,6 +386,12 @@ TInt CCamBurstCaptureArray::SetDeleted( TInt aItemIndex, TBool aDeleted )
         ret = iImageSaveActive.DeleteFile( iBurstItems[aItemIndex]->FileName(), saveRequested );
 
         PRINT1( _L("Camera <> CCamBurstCaptureArray::SetDeleted iImageSaveActive.DeleteFile() returned %d" ), ret );
+        if ( ret == KErrInUse ) 
+          {
+          User::After( 700000 );
+          ret = iImageSaveActive.DeleteFile( iBurstItems[aItemIndex]->FileName(), saveRequested );
+          PRINT1( _L("Camera <> CCamBurstCaptureArray::SetDeleted iImageSaveActive.DeleteFile() Retry Delete returned %d" ), ret );
+          }
         // file might have already been deleted and that's ok so ignore -NotFound errors
         if( ret == KErrNone || ret == KErrNotFound || ret == KErrPathNotFound )
             {

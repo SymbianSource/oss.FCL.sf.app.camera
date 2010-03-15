@@ -53,7 +53,8 @@ class CCamInfoListBox : public CCamCaptureSetupListBox
         				 const CCoeControl* aParent,
         				 RPointerArray<HBufC>& aSummaryTitleTextArray,
         				 RPointerArray<HBufC>& aSummaryDescriptionTextArray,
-        				 TInt aResourceId );
+        				 TInt aResourceId,
+        				 TBool aSkinnedBackGround = EFalse );
     
     private:
         

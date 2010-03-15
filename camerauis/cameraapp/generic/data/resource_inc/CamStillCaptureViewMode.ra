@@ -237,6 +237,13 @@ RESOURCE MENU_PANE r_cam_still_post_capture_menu_viewmode
             // AIW provider fills the menu item title.
             // No submenu, only 1 provider acccepted.
             txt     = "";
+            },
+        MENU_ITEM // SHARE_AIW
+            {
+            command = KAiwCmdView;
+            // AIW provider fills the menu item title.
+            // No submenu, only 1 provider acccepted.
+            txt     = "";
             },       
         MENU_ITEM
             {

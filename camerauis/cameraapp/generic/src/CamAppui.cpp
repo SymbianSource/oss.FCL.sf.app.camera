@@ -1941,6 +1941,8 @@ CCamAppUi::HandleCameraEventL( TInt              /*aStatus*/,
         }
       iFirstVFStart = EFalse;
       
+      PRINT( _L( "Camera <> CCamAppUi::HandleCameraEventL updating CBA") );
+      UpdateCba();
       break;              
       }
       // -----------------------------------------------------
@@ -1952,6 +1954,12 @@ CCamAppUi::HandleCameraEventL( TInt              /*aStatus*/,
           {
           iController.StopViewFinderEcam();
           }
+        // Check if currently selected storagemedia has available memory for next capturing
+        // unless incoming call has stopped recording
+        if ( !iController.InCallOrRinging() && !iController.InVideocallOrRinging() )
+            {
+            CheckMemoryAvailableForCapturing();
+            }
         break;              
         }
     // -----------------------------------------------------        
@@ -1976,6 +1984,7 @@ CCamAppUi::HandleCameraEventL( TInt              /*aStatus*/,
           {
           //load settings in case they were changed via GS	
           iController.LoadStaticSettingsL( IsEmbedded() );
+          iStillCaptureView->UpdateToolbarIconsL(); 
           // and check the availability of the memory to be used
           iController.CheckMemoryToUseL();
           }    
@@ -2513,6 +2522,12 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
     case ECamEventSaveComplete:
         {
         PRINT( _L( "Camera <> case ECamEventSaveComplete" ) )
+        // Check if currently selected storagemedia has available memory for next capturing
+        // unless saving just started
+        if( !iController.IsSaveStarted() )
+            {
+            CheckMemoryAvailableForCapturing();
+            }
         if ( ECamImageCaptureSingle == iImageMode )
             {
             if( iController.CaptureKeyPressedWhileImageSaving() && 
@@ -2637,7 +2652,9 @@ CCamAppUi::HandleStandbyEventL( TInt aStatus )
          
         if ( aStatus != KErrInUse &&
              iPreCaptureMode == ECamPreCapCaptureSetup ||
-             iPreCaptureMode == ECamPreCapSceneSetting )
+             iPreCaptureMode == ECamPreCapSceneSetting
+             || iPreCaptureMode == ECamPreCapGenericSetting
+            )
             {
             // VF settings does not go to standby state, VF is stopped instead
             // Screen saver releases resources
@@ -2676,7 +2693,8 @@ CCamAppUi::HandleStandbyEventL( TInt aStatus )
       
       // VF settings does not go to standby state, VF is stopped instead
       if ( aStatus == KErrInUse || iPreCaptureMode != ECamPreCapCaptureSetup &&
-           iPreCaptureMode != ECamPreCapSceneSetting )  
+           iPreCaptureMode != ECamPreCapSceneSetting   
+           && iPreCaptureMode != ECamPreCapGenericSetting )
            {
            PRINT( _L( "Camera <> CCamAppUi::HandleStandbyEventL: Set standby status..") );
            SetStandbyStatus( aStatus );
@@ -2968,6 +2986,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
         case EEventFocusGained:
           {            
           PRINT( _L("Camera <> CCamAppUi::HandleWsEventL: case EEventFocusGained") );
+          iReturningFromPretendExit = iPretendExit; 
+          
           TBool uiOverride = iController.UiConfigManagerPtr() && iController.UiConfigManagerPtr()->IsUIOrientationOverrideSupported();
           
           if ( !iSendAsInProgress )
@@ -3075,7 +3095,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                   // by the user.
                   iController.LoadStaticSettingsL( IsEmbedded() );
                   }
-                    
+              PRINT( _L("Camera <> CCamAppUi::HandleWsEvent ECamEventFocusGained calling UpdateToolbarIconsL") );      
+              if ( iPretendExit ) 
               iStillCaptureView->UpdateToolbarIconsL();
               if( !uiOverride )
                   {
@@ -3257,22 +3278,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
           // force side pane and active palette to update if simulating app 
           // launch this has to be done after the call to TrySwitchViewL() to 
           // ensure that IsBurstEnabled() returns the correct value.
-          if ( returningFromPretendExit )
-              {
-            /*if ( iController.UiConfigManagerPtr() && 
-                 iController.UiConfigManagerPtr()->IsLocationSupported() )
-                {
-                // If record location setting is on, start location trail,
-                // provided, primary camera and pre-capture view
-                if ( ECamLocationOn == iController.IntegerSettingValue( ECamSettingItemRecLocation ) 
-                     && ECamActiveCameraPrimary == ActiveCamera() 
-            	     && ECamViewStatePreCapture == iViewState 
-            	   )
-                    {
-                  	iController.StartLocationTrailL();
-                    }
-                }*/ 
-          
+          if ( iReturningFromPretendExit ) 
+              {            
             iCamSidePane->SetCaptureMode( iMode );
             // The active palette is always switched on when simulating 
             // app launch
@@ -3285,7 +3292,7 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                 }
             }
 
-          if ( uiOverride && ( returningFromPretendExit || iFirstBoot ) )
+          if ( uiOverride && ( iReturningFromPretendExit || iFirstBoot ) ) 
               {
               SetActivePaletteVisibility( EFalse );               	
               }
@@ -4304,106 +4311,117 @@ CCamAppUi::CheckMemoryL()
     PRINT( _L("Camera => CCamAppUi::CheckMemoryL") );
     TBool capture = ETrue;
 
-   TCamMediaStorage  storeToCheck = ECamMediaStorageCurrent;
+    if ( IsMemoryAvailableForCapturing() )
+        {
+        capture = ETrue; 
+        }
+    else 
+        {   
+        TCamMediaStorage  storeToCheck = ECamMediaStorageCurrent;
 
-   if ( ECamControllerVideo == iController.CurrentMode() &&
-        ECamMediaStorageCard == iController.IntegerSettingValue( ECamSettingItemVideoMediaStorage ) &&
-        IsMemoryFullOrUnavailable( ECamMediaStorageCard ) )
-    	{
-    	storeToCheck =  ECamMediaStorageCard; 
-    	}
-    if(AllMemoriesFullOrUnavailable())
-    	{
-    	HBufC* text = StringLoader::LoadLC(R_NOTE_TEXT_ALLMEMORY_FULL);
-    	TInt ret = ShowOOMNoteL( *text, EFalse);
-    	capture = EFalse;
-    	CleanupStack::PopAndDestroy(text);
-    	}
-    else if(IsMemoryFullOrUnavailable( storeToCheck ))
-		{
-		HBufC* text = StringLoader::LoadLC(R_NOTE_TEXT_MEMORY_FULL);
-		CAknStaticNoteDialog* note = new( ELeave ) CAknStaticNoteDialog;
-		note->PrepareLC( R_CAM_OOM_NOTE_OK_CANCEL);
-		note->SetTextL( *text );
-		iController.StopIdleTimer();
-		TInt ret = note->RunDlgLD();
-		CleanupStack::PopAndDestroy( text );
-		if(EAknSoftkeyOk == ret)
-			{
-			//when memoryDialog showed, redraw background
-			if ( IsDirectViewfinderActive() )
-			  {
-			  TRAP_IGNORE( HandleCommandL( ECamCmdRedrawScreen ) );
-			  }
+        if ( ECamControllerVideo == iController.CurrentMode() &&
+            ECamMediaStorageCard == iController.
+                IntegerSettingValue( ECamSettingItemVideoMediaStorage ) &&
+            IsMemoryFullOrUnavailable( ECamMediaStorageCard ) )
+            {
+            storeToCheck =  ECamMediaStorageCard; 
+            }
+        if(AllMemoriesFullOrUnavailable())
+            {
+            HBufC* text = StringLoader::LoadLC(R_NOTE_TEXT_ALLMEMORY_FULL);
+            TInt ret = ShowOOMNoteL( *text, EFalse);
+            capture = EFalse;
+            CleanupStack::PopAndDestroy(text);
+            }
+        else if(IsMemoryFullOrUnavailable( storeToCheck ))
+            {
+            HBufC* text = StringLoader::LoadLC(R_NOTE_TEXT_MEMORY_FULL);
+            CAknStaticNoteDialog* note = new( ELeave ) CAknStaticNoteDialog;
+            note->PrepareLC( R_CAM_OOM_NOTE_OK_CANCEL);
+            note->SetTextL( *text );
+            iController.StopIdleTimer();
+            TInt ret = note->RunDlgLD();
+            CleanupStack::PopAndDestroy( text );
+            if(EAknSoftkeyOk == ret)
+                {
+                //when memoryDialog showed, redraw background
+                if ( IsDirectViewfinderActive() )
+                    {
+                    TRAP_IGNORE( HandleCommandL( ECamCmdRedrawScreen ) );
+                    }
       
-			TInt supportedMemTypes = 0;
-			TCamMediaStorage currentLocation;
-			TInt key = ( ECamControllerVideo == iMode )
-			? ECamSettingItemVideoMediaStorage
-					: ECamSettingItemPhotoMediaStorage;
+                TInt supportedMemTypes = 0;
+                TCamMediaStorage currentLocation;
+                TInt key = ( ECamControllerVideo == iMode )
+                        ? ECamSettingItemVideoMediaStorage
+                        : ECamSettingItemPhotoMediaStorage;
 
-			if ( iMMCRemoveNoteRequiredOnCapture )
-				{
-				iMMCRemoveNoteRequiredOnCapture = EFalse;
-				currentLocation = static_cast<TCamMediaStorage>( 
-									iController.
-										IntegerSettingValueUnfiltered( key ) );
-				}
-			else
-				{
-				currentLocation = static_cast<TCamMediaStorage>( 
-									iController.IntegerSettingValue( key ) );
-				}
-			if(currentLocation != ECamMediaStoragePhone && 
-				!IsMemoryFullOrUnavailable(ECamMediaStoragePhone))
-				{
-				supportedMemTypes |= AknCommonDialogsDynMem::EMemoryTypePhone;
-				}
-			if(currentLocation != ECamMediaStorageCard && 
-				!IsMemoryFullOrUnavailable(ECamMediaStorageCard))
-				{
-				supportedMemTypes |= AknCommonDialogsDynMem::EMemoryTypeMMCExternal;
-				}
-			if(currentLocation != ECamMediaStorageMassStorage && 
-				!IsMemoryFullOrUnavailable(ECamMediaStorageMassStorage))
-				{
-				supportedMemTypes |= 
-						AknCommonDialogsDynMem::EMemoryTypeInternalMassStorage;
-				}
-			
-			CAknMemorySelectionDialogMultiDrive* memoryDialog = 
-							CAknMemorySelectionDialogMultiDrive::NewL(
-											   ECFDDialogTypeSelect,
-											   R_CAM_MEMORY_SELECT_DIALOG,
-											   EFalse,
-											   supportedMemTypes );
-			TDriveNumber driveNumber = static_cast<TDriveNumber>(KErrNotFound);    
-			CAknCommonDialogsBase::TReturnKey result = 
-								memoryDialog->ExecuteL( driveNumber );
-			 		 
-			if ( result != CAknCommonDialogsBase::TReturnKey(
-								CAknCommonDialogsBase::ERightSoftkey) )
-				 {
-				 DriveInfo::TDefaultDrives memVal = 
-				 	static_cast<DriveInfo::TDefaultDrives>(
-				 		CamUtility::GetDriveTypeFromDriveNumber(driveNumber));
-				 TInt settingValue = 
-				 	CamUtility::MapFromSettingsListMemory( memVal );
-				 iController.SetIntegerSettingValueL(key,settingValue);
-				 }
-			else
-				{
-				//No impl.
-				}
-			capture = EFalse;
-			}
-    	else
-    		{
-    		capture = EFalse;
-    		}
-		iController.StartIdleTimer();
-		}
-    
+                if ( iMMCRemoveNoteRequiredOnCapture )
+                    {
+                    iMMCRemoveNoteRequiredOnCapture = EFalse;
+                    currentLocation = static_cast<TCamMediaStorage>( 
+                                        iController.
+                                        IntegerSettingValueUnfiltered( key ) );
+                    }
+                else
+                    {
+                    currentLocation = static_cast<TCamMediaStorage>( 
+                                iController.IntegerSettingValue( key ) );
+                    }
+                if(currentLocation != ECamMediaStoragePhone && 
+                    !IsMemoryFullOrUnavailable(ECamMediaStoragePhone))
+                    {
+                    supportedMemTypes |= 
+                        AknCommonDialogsDynMem::EMemoryTypePhone;
+                    }
+                if(currentLocation != ECamMediaStorageCard && 
+                    !IsMemoryFullOrUnavailable(ECamMediaStorageCard))
+                    {
+                    supportedMemTypes |= 
+                        AknCommonDialogsDynMem::EMemoryTypeMMCExternal;
+                    }
+                if(currentLocation != ECamMediaStorageMassStorage && 
+                    !IsMemoryFullOrUnavailable(ECamMediaStorageMassStorage))
+                    {
+                    supportedMemTypes |= 
+                        AknCommonDialogsDynMem::EMemoryTypeInternalMassStorage;
+                    }
+
+                CAknMemorySelectionDialogMultiDrive* memoryDialog = 
+                        CAknMemorySelectionDialogMultiDrive::NewL(
+                                                ECFDDialogTypeSelect,
+                                                R_CAM_MEMORY_SELECT_DIALOG,
+                                                EFalse,
+                                                supportedMemTypes );
+                TDriveNumber driveNumber = static_cast<TDriveNumber>(KErrNotFound);    
+                CAknCommonDialogsBase::TReturnKey result = 
+                                memoryDialog->ExecuteL( driveNumber );
+
+                if ( result != CAknCommonDialogsBase::TReturnKey(
+                                CAknCommonDialogsBase::ERightSoftkey) )
+                    {
+                    DriveInfo::TDefaultDrives memVal = 
+                        static_cast<DriveInfo::TDefaultDrives>(
+                        CamUtility::GetDriveTypeFromDriveNumber(driveNumber));
+                    TInt settingValue = 
+                        CamUtility::MapFromSettingsListMemory( memVal );
+                    iController.SetIntegerSettingValueL(key,settingValue);
+                    }
+                else
+                    {
+                    //No impl.
+                    }
+                capture = EFalse;
+                }
+            else
+                {
+                capture = EFalse;
+                }
+                iController.StartIdleTimer();
+
+            UpdateCba(); // Make sure that softkeys are visible.
+            }
+        }
     PRINT1( _L("Camera <= CCamAppUi::CheckMemoryL, capture ok: %d"), capture );
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP1_CCAMAPPUI_CHECKMEMORYL, 
     			"e_CCamAppUi_CheckMemoryL 0" );
@@ -5984,6 +6002,26 @@ TBool CCamAppUi::IsInPretendExit() const
     return iPretendExit;
     }  
 
+// ---------------------------------------------------------
+// CCamAppUi::ReturningFromPretendExit
+// Indicates whether or not the application was in a simulated exit situation
+// ---------------------------------------------------------
+// 
+TBool CCamAppUi::ReturningFromPretendExit() const
+    {
+    return iReturningFromPretendExit;
+    }
+
+// ---------------------------------------------------------
+// CCamAppUi::IsFirstBoot
+// Indicates whether or not the application started the first time
+// ---------------------------------------------------------
+// 
+TBool CCamAppUi::IsFirstBoot() const
+    {
+    return iFirstBoot;
+    }
+	
 // ---------------------------------------------------------------------------
 // CCamAppUi::SendCameraAppToBackgroundL
 // Sends the camera application to the background, to pretend we're closing
@@ -8137,7 +8175,8 @@ void CCamAppUi::SetToolbarVisibility()
                   ( iMode == ECamControllerImage && iView == iStillCaptureView ) ) &&
                 ( iPreCaptureMode != ECamPreCapCaptureSetup ) && 
                 ( iPreCaptureMode != ECamPreCapGenericSetting ) && 
-                ( iPreCaptureMode != ECamPreCapSceneSetting ) )
+                ( iPreCaptureMode != ECamPreCapSceneSetting ) && 
+                ( iPreCaptureMode != ECamPreCapStandby ) )
                 {
                 fixedToolbar->SetToolbarVisibility( ETrue );
                 }
@@ -8150,7 +8189,8 @@ void CCamAppUi::SetToolbarVisibility()
             {
             if( (iPreCaptureMode != ECamPreCapCaptureSetup) && 
                 (iPreCaptureMode != ECamPreCapGenericSetting) && 
-                (iPreCaptureMode != ECamPreCapSceneSetting ) )
+                (iPreCaptureMode != ECamPreCapSceneSetting) && 
+                (iPreCaptureMode != ECamPreCapStandby) )
                 {
                 fixedToolbar->SetToolbarVisibility( ETrue );
                 }
@@ -8455,4 +8495,39 @@ void CCamAppUi::SetViewFinderInTransit(TBool aInTransit)
     {
     iViewFinderInTransit = aInTransit;
     }
+    
+// -----------------------------------------------------------------------------
+// CCamAppUi::CheckMemoryAvailableForCapturing
+// -----------------------------------------------------------------------------
+//
+void 
+CCamAppUi::CheckMemoryAvailableForCapturing()
+	{
+    PRINT( _L("Camera => CCamAppUi::CheckMemoryAvailableForCapturing") )
+    OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, CCAMAPPUI_CHECKMEMORYAVAILABLEFORCAPTURING, "e_CCamAppUi_CheckMemoryAvailableForCapturing 1" );
+    if ( ( ECamControllerVideo == iController.CurrentMode() ||
+           ECamControllerVideo == iController.TargetMode() ) &&
+           ECamMediaStorageCard == iController.
+                IntegerSettingValue( ECamSettingItemVideoMediaStorage ) )
+        {
+        iMemoryAvailableForCapturing = !IsMemoryFullOrUnavailable( ECamMediaStorageCard );
+        }
+    else
+        {
+        iMemoryAvailableForCapturing = !IsMemoryFullOrUnavailable( ECamMediaStorageCurrent );
+        }
+    OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP1_CCAMAPPUI_CHECKMEMORYAVAILABLEFORCAPTURING, "e_CCamAppUi_CheckMemoryAvailableForCapturing 0" );
+    PRINT1( _L("Camera <= CCamAppUi::CheckMemoryAvailableForCapturing iMemoryAvailableForCapturing:%d"), iMemoryAvailableForCapturing )
+    }    
+
+// -----------------------------------------------------------------------------
+// CCamAppUi::IsMemoryAvailableForCapturing
+// -----------------------------------------------------------------------------
+//    
+TBool 
+CCamAppUi::IsMemoryAvailableForCapturing() const
+    {
+    return iMemoryAvailableForCapturing;
+    }
+        
 //  End of File

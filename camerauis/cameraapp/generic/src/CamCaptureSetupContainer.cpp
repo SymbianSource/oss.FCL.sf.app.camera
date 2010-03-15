@@ -47,6 +47,8 @@
 // CONSTANTS
 
 const TUint KCameraEventInterest = ECamCameraEventClassVfData;
+const TUint32 KToolbarExtensionBgColor = 0x00000000;
+const TInt KToolBarExtensionBgAlpha = 0x7F;
 
 // ===========================================================================
 // MEMBER FUNCTIONS 
@@ -60,12 +62,13 @@ CCamCaptureSetupContainer* CCamCaptureSetupContainer::NewL(
                               CCamAppController& aController, 
                               CAknView& aView,
                               CCamCaptureSetupControlHandler& aControlHandler,
-                              const TRect& aRect )
+                              const TRect& aRect, TBool aFullScreenVF )
     {
     CCamCaptureSetupContainer* self = new( ELeave ) CCamCaptureSetupContainer( 
                                                              aController, 
                                                              aView,
-                                                             aControlHandler );
+                                                             aControlHandler,
+                                                             aFullScreenVF );
     CleanupStack::PushL( self );
     self->ConstructL( aRect );
     CleanupStack::Pop( self );
@@ -116,10 +119,17 @@ void CCamCaptureSetupContainer::ConstructL( const TRect& aRect )
             fixedToolbar->SetToolbarVisibility( EFalse );
             }
         }
-    
-    iCaptureSetupControl = iControlHandler.CreateCaptureSetupControlL( this );
-    iCaptureSetupControl->SetContainerWindowL( *this );
     iViewFinding = iControlHandler.ControlUsesViewFinder();
+    
+    if( iViewFinding )
+        {
+        iCaptureSetupControl = iControlHandler.CreateCaptureSetupControlL( this, !iFullScreenVF );
+        }
+    else
+        {
+        iCaptureSetupControl = iControlHandler.CreateCaptureSetupControlL( this, ETrue );        
+        }
+    iCaptureSetupControl->SetContainerWindowL( *this );
 
     // If the control requires a viewfinder then add it
     if ( iViewFinding )
@@ -251,10 +261,12 @@ TPoint CCamCaptureSetupContainer::ControlPositionL() const
 CCamCaptureSetupContainer::CCamCaptureSetupContainer( 
                              CCamAppController& aController, 
                              CAknView& aView,
-                             CCamCaptureSetupControlHandler& aControlHandler )
+                             CCamCaptureSetupControlHandler& aControlHandler,
+                             TBool aFullScreenVF )
 : CCamContainerBase( aController, aView ), 
 iControlHandler( aControlHandler ),
-iActivateOnTouchRelease(EFalse)
+iActivateOnTouchRelease(EFalse),
+iFullScreenVF(aFullScreenVF)
     {
     }
 
@@ -303,7 +315,14 @@ void CCamCaptureSetupContainer::Draw( const TRect& aRect ) const
         gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
         gc.SetBrushColor( TRgb::Color16MA( 0 ) );
         gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+        if( iFullScreenVF )
+            {
+            gc.DrawRect( aRect );
+            }
+        else
+            {
         gc.DrawRect( iViewFinderRectLayout.Rect() );
+            }
         
         // Reset the brush after use (otherwise anything drawn
         // after the viewfinder will also show viewfinder frames)
@@ -316,7 +335,25 @@ void CCamCaptureSetupContainer::Draw( const TRect& aRect ) const
                                             EAknsCIQsnTextColorsCG6 );
     if ( CamUtility::IsNhdDevice() )
         {
-        iTitleTextRectLayout.DrawText( gc, *iTitleText, ETrue, color );
+        if( appUi->IsDirectViewfinderActive() &&
+            iViewFinding && iFullScreenVF )
+            {
+            gc.SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );            
+            gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+            gc.DrawRect( TRect( iLayoutAreaRect.iTl.iX,
+                                iLayoutAreaRect.iTl.iY,
+                                iLayoutAreaRect.iBr.iX,
+                                iTitleTextRectLayout.TextRect().iBr.iY ) );
+            
+            gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+            
+            color=TRgb( KRgbWhite );
+            iTitleTextRectLayout.DrawText( gc, *iTitleText, ETrue, color );
+            }
+        else
+            {
+            iTitleTextRectLayout.DrawText( gc, *iTitleText, ETrue, color );
+            }
         }
     else
         { 
@@ -732,51 +769,6 @@ void CCamCaptureSetupContainer::ShowViewFinderFrame( const CFbsBitmap* aFrame, T
     }
 */
 
-// ---------------------------------------------------------
-// CCamCaptureSetupContainer::ReserveAndStartVF
-// ---------------------------------------------------------
-//
-void CCamCaptureSetupContainer::ReserveAndStartVF()
-    {
-    PRINT ( _L("Camera => CCamCaptureSetupContainer::ReserveAndStartVF") );
-    TCamCameraMode mode = iController.CurrentMode();
-    if(iController.IsAppUiAvailable())
-        {
-        TVwsViewId currentViewId;
-        CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
-        appUi->GetActiveViewId( currentViewId );
-        switch ( currentViewId.iViewUid.iUid )
-            {
-            case ECamViewIdPhotoUserSceneSetup:
-            case ECamViewIdStillPreCapture:
-                {
-                mode = ECamControllerImage;
-                }
-                break;
-            case ECamViewIdVideoPreCapture:
-                {
-                mode = ECamControllerVideo;
-                }
-                break;
-            default:
-                {
-                //Assume imagemode if view cannot be determined.
-                if(mode==ECamControllerIdle)
-                    {
-                    mode = ECamControllerImage;                
-                    }
-                }
-                break;
-            }
-        }
-    //Don't reserve camera and start viewfinder if shutting down.
-    if(mode!=ECamControllerShutdown)
-        {
-        iController.EnterViewfinderMode( mode );
-        iController.StartIdleTimer();
-        }
-    PRINT ( _L("Camera <= CCamCaptureSetupContainer::ReserveAndStartVF") );        
-    }
 // </CAMERAAPP_CAPI_V2_MIGRATION>
 
 // End of File  

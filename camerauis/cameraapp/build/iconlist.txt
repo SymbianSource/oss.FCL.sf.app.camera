@@ -156,3 +156,9 @@
 -c8,1 qgn_indi_cam4_quality_hd.svg
 -c8,1 qgn_indi_cam4_quality_9mp_high.svg
 -c8,1 qgn_indi_cam4_quality_6mp_high.svg
+-c8,1 qgn_indi_cam4_tb_oneclick_active.svg
+-c8,1 qgn_indi_cam4_tb_oneclick_dimmed.svg
+-c8,1 qgn_indi_media_fullscreen_play.svg
+-c8,8 qgn_bg_lcam_vid_postcap_play.svg
+-c8,8 qgn_bg_lcam_vid_postcap_play_pressed.svg
+-c8,1 qgn_indi_mg_tb_edit.svg

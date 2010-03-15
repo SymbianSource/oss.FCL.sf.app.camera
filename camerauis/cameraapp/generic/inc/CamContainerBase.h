@@ -289,6 +289,12 @@ class CCamContainerBase : public CCoeControl
     * @since 9.1 ( checking for scan codes )
     */               
     TBool IsSecondaryCameraCaptureKey( const TKeyEvent& aKeyEvent ) const ;    
+    /**
+    * Enters viewfinder mode either in image or videomode
+    * depending current visible view. Also starts idle timer.
+    */
+    void ReserveAndStartVF();
+    
   // -------------------------------------------------------
   // Constructors
   protected: 

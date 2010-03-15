@@ -37,8 +37,9 @@ CCamSceneListBox::~CCamSceneListBox()
 */
 CCamSceneListBox::CCamSceneListBox( TCamCameraMode            aMode,
                                     MCamSettingValueObserver* aObserver,
-                                    CCamAppController&        aController )
-  : CCamCaptureSetupListBox( aObserver, aController ), 
+                                    CCamAppController&        aController,
+                                    TBool aFullySkinned )
+  : CCamCaptureSetupListBox( aObserver, aController, aFullySkinned ), 
     iMode( aMode )
   {
   }
@@ -65,7 +66,7 @@ void CCamSceneListBox::ConstructL(
                                     Rect() );
 
   CCamCaptureSetupListItemDrawer* itemDrawer = 
-      CCamCaptureSetupListItemDrawer::NewL( *model );
+      CCamCaptureSetupListItemDrawer::NewL( *model, iSkinnedBackGround );
 
 
   itemDrawer->SetParentControl( aParent );

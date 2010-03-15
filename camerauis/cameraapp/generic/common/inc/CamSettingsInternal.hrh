@@ -83,6 +83,9 @@ enum TCamSettingItemIds
   ECamSettingItemDefaultAlbumId,
   ECamSettingItemDefaultAlbumName,
   ECamSettingItemRecLocation,
+  //Photo and video editor support
+  ECamSettingItemPhotoEditorSupport,    // Support for photo editor
+  ECamSettingItemVideoEditorSupport,    // Support for video editor
   ECamSettingItemStaticCommonRangeMax,    // Range marker for static common settings
   // -----------------------------------------------------
 
@@ -99,6 +102,7 @@ enum TCamSettingItemIds
   ECamSettingItemUserSceneImageSharpness,
   ECamSettingItemUserSceneColourSaturation,
   ECamSettingItemUserSceneLightSensitivity, // shared key is "UserSceneLightSensitivity"
+  ECamSettingItemUserSceneDefault,          // shared key is "UserSceneDefault"
   ECamSettingItemUserSceneRangeMax,         // Range marker for user scene settings
 
   ECamSettingItemUserSceneReset,            // This needs to be out of the range as it is not stored
@@ -590,6 +594,8 @@ const TUint16* const KCamSettingItemNames[] =
   (const TUint16* const)_S16("ItemDefaultAlbumId"),
   (const TUint16* const)_S16("ItemDefaultAlbumName"),
   (const TUint16* const)_S16("ItemRecLocation"),
+  (const TUint16* const)_S16("ItemPhotoEditorSupport"),
+  (const TUint16* const)_S16("ItemVideoEditorSupport"),
   (const TUint16* const)_S16("ItemStaticCommonRangeMax"),
   // -----------------------------------------------------
   (const TUint16* const)_S16("ItemUserSceneRangeMin"),
@@ -603,6 +609,7 @@ const TUint16* const KCamSettingItemNames[] =
   (const TUint16* const)_S16("ItemUserSceneImageSharpness"),
   (const TUint16* const)_S16("ItemUserSceneColourSaturation"),
   (const TUint16* const)_S16("ItemUserSceneLightSensitivity"),
+  (const TUint16* const)_S16("ItemUserSceneDefault"), 
   (const TUint16* const)_S16("ItemUserSceneRangeMax"),
   (const TUint16* const)_S16("ItemUserSceneReset"),
   // -----------------------------------------------------

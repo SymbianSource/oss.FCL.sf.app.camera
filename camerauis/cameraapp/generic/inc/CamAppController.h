@@ -1955,7 +1955,9 @@ public:
     * @return Camera orientation value.
     */
     static TCamImageOrientation MapSensorOrientatio2CamOrientation( 
-        const TSensrvOrientationData::TSensrvDeviceOrientation& aSensorOrientation, TCamImageOrientation aLastImageOrientation);
+        const TSensrvOrientationData::TSensrvDeviceOrientation& aSensorOrientation, 
+        TCamImageOrientation aLastImageOrientation, 
+        TCamActiveCamera aActiveCamera );
         
     /**
     * Mapping from camera orientation data type to bitmap orientation type.
@@ -2162,7 +2164,7 @@ public:
 		* @return remaining time
 		*/       
 		TTimeIntervalMicroSeconds 
-			CalculateVideoTimeRemainingL(const TCamMediaStorage 
+			CalculateVideoTimeRemainingL( TCamMediaStorage 
 										aStorage = ECamMediaStorageCurrent);
         /**
         * Sets orientation of the application to CCamera
@@ -2200,6 +2202,12 @@ public:
          * Toggles between highest 16:9 and 4:3 quality levels.
          */
         TBool ToggleWideScreenQuality( TBool aWide );             
+
+        /**
+         * Returns the value of iSaveStarted
+         */
+        TBool IsSaveStarted();
+        
   private:
 
     // -----------------------------------------------------

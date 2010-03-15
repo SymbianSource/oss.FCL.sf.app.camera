@@ -137,6 +137,7 @@ void CCamSettingsModel::ResetUserSceneWithoutActivatingChangesL()
         }
     iStaticModel->ResetSettingItem( KCamCrUserSceneContrast );
     iStaticModel->ResetSettingItem( KCamCrUserSceneImageSharpness );
+    iStaticModel->ResetSettingItem( KCamCrUserSceneDefault ); 
 
     // Reload the static user scene settings
     iUserSceneSettings.ResetAndDestroy();
@@ -397,7 +398,7 @@ CCamSettingsModel::SetIntegerSettingValueL( TInt aSettingItem,
     // If there is only one setting changed other than scene mode setting 
     // and if the Dynamic Scene mode is "User Scene" we update the new setting
     // value to the camera dynamic settings
-    if ( !userSceneModeSettingChanged )
+    if ( !userSceneModeSettingChanged && settingId != ECamSettingItemUserSceneDefault ) 
       {
       TInt scene = IntegerSettingValue( ECamSettingItemDynamicPhotoScene );
       // If user scene is the currently active photo scene then activate the
@@ -733,9 +734,9 @@ void CCamSettingsModel::LoadStaticSettingsL( TBool aIsEmbedded )
     // The model registers with the AppUi which is created after the model.
     // Registration is done here so we can guarantee that the AppUi has 
     // been created.
-    CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>
-                                            ( iEnv->AppUi() );
-    appUi->AddBurstModeObserverL(  this );
+    
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() ); 
+    appUi->AddBurstModeObserverL( this );
 
     // Free all memory currently used by the static settings.
     UnloadStaticSettings();
@@ -746,6 +747,10 @@ void CCamSettingsModel::LoadStaticSettingsL( TBool aIsEmbedded )
                     iUserSceneSettings
                    );
     iStaticModel->LoadStaticSettingsL( aIsEmbedded );
+    if ( appUi->ReturningFromPretendExit() || appUi->IsFirstBoot() )
+      {
+      SetUserSceneDefault(); 
+      }
 
     PRINT(_L("Camera <= CCamSettingsModel::LoadStaticSettingsL" ))
 
@@ -1289,16 +1294,21 @@ void CCamSettingsModel::PhotoSceneHasChangedL( TInt aSceneId )
                  
 	    if ( iUiConfigManager->IsFaceTrackingSupported() ) // FT supported
          {      
-         if ( ECamSceneScenery == aSceneId || ECamSceneSports == aSceneId )
+         if ( ECamSceneScenery == aSceneId ||
+              ECamSceneSports == aSceneId ||
+              ECamSceneMacro == aSceneId)
             {
-            if ( ECamSceneScenery != iPreviousSceneMode && ECamSceneSports != iPreviousSceneMode ) // <- DATAMAKE
+            if ( ECamSceneScenery != iPreviousSceneMode && 
+                 ECamSceneSports != iPreviousSceneMode &&
+                 ECamSceneMacro != iPreviousSceneMode )
                {	
                iPreviousFaceTrack = TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) );	
                }
             SetIntegerSettingValueL( ECamSettingItemFaceTracking, ECamSettOff );	
             }
          else if ( ( ECamSceneScenery == iPreviousSceneMode ||
-                     ECamSceneSports == iPreviousSceneMode ) &&
+                     ECamSceneSports == iPreviousSceneMode ||
+                     ECamSceneMacro == iPreviousSceneMode ) &&
                    ( ECamSettOff == TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) ) ) )
              {
              SetIntegerSettingValueL( ECamSettingItemFaceTracking, iPreviousFaceTrack );
@@ -2305,7 +2315,9 @@ void CCamSettingsModel::StoreFaceTrackingValue()
       return;	
       }
    TInt activeScene = IntegerSettingValue( ECamSettingItemDynamicPhotoScene );	
-   if ( ECamSceneScenery == activeScene || ECamSceneSports == activeScene ) 	
+   if ( ECamSceneScenery == activeScene ||
+        ECamSceneSports == activeScene ||
+        ECamSceneMacro == activeScene) 	
       {
       PRINT( _L("Camera <> CCamSettingsModel::StoreFaceTrackingValue(), Scenery or Sports mode" ) )		      	      	
       if ( iPreviousFaceTrack != TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) ) )
@@ -2374,5 +2386,40 @@ void CCamSettingsModel::StoreUserSceneSettingsL()
     CopySettingsL(iUserSceneSettings, iUserSceneSettingsBackup);   
     }
 
+// ---------------------------------------------------------------------------
+// CCamSettingsModel::SetUserSceneDefault
+//
+// Set userScene as default 
+// ---------------------------------------------------------------------------
+// 
+void CCamSettingsModel::SetUserSceneDefault()
+    {
+    PRINT( _L("Camera => CCamSettingsModel::SetUserSceneDefault ") );
+    TInt settingsCount = iDynamicPhotoIntSettings.Count();
+    TInt userVal;
+    for ( TInt i = 0; i < settingsCount; ++i )
+       {
+       if ( iDynamicPhotoIntSettings[i]->iItemId == ECamSettingItemDynamicPhotoScene )
+         {
+         TInt sceneSetCount = iUserSceneSettings.Count();
+         for ( TInt j = 0; j < sceneSetCount; ++j )
+             {
+             if ( iUserSceneSettings[j]->iItemId == ECamSettingItemUserSceneDefault )
+                 {
+                 userVal = iUserSceneSettings[j]->iValueId;
+                 }
+             }
+         if ( userVal )
+             {
+             PRINT1( _L("Camera <> CCamSettingsModel::SetUserSceneDefault set userVal= %d"), userVal);
+             iDynamicPhotoIntSettings[i]->iValueId = ECamSceneUser;
+             ActivateUserSceneSettingsL();
+             }
+         
+         }
+       }
+    
+    PRINT( _L("Camera <= CCamSettingsModel::SetUserSceneDefault ") );
+    }
 // ===========================================================================
 // end of File  

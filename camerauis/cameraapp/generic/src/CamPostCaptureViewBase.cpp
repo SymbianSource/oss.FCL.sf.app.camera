@@ -143,16 +143,17 @@ void CCamPostCaptureViewBase::HandleCommandL( TInt aCommand )
             inCall = iSFIUtils->IsCLIValidL();
 #endif	            */
             //use both inCall and InCallOrRinging() conditions to make sure if it is in call state
-            if ( /*inCall &&*/ iController.InCallOrRinging() )
-                {
-#ifndef __WINS__
-                DoInCallSendL();
-#endif
-                }
-            else
-                {
+// In-Call-Send no longer used
+//            if ( /*inCall &&*/ iController.InCallOrRinging() )
+//                {
+//#ifndef __WINS__
+//                DoInCallSendL();
+//#endif
+//                }
+//            else
+//                {
                 DoSendAsL();                    	
-                }    
+//                }    
             }
             break;
 
@@ -212,6 +213,35 @@ void CCamPostCaptureViewBase::HandleCommandL( TInt aCommand )
                     { // Lint warnings
                     }*/
             StartAddToAlbumOperationL();
+            }
+            break;
+        case KAiwCmdEdit:
+        case ECamCmdEdit:
+            {
+            CAiwGenericParamList& inputParams = iAiwServiceHandler->InParamListL();
+            TPtrC currentFullFileName(iController.CurrentFullFileName());
+            TAiwGenericParam param( EGenericParamFile, TAiwVariant(currentFullFileName));
+            inputParams.AppendL( param );
+            
+            
+            TAiwVariant param2Variant;
+            if(Id().iUid == ECamViewIdVideoPostCapture)
+                {
+                param2Variant.Set(_L("video/*"));
+                }
+            else
+                {
+                param2Variant.Set(_L("image/jpeg"));
+                }
+            TAiwGenericParam param2( EGenericParamMIMEType, param2Variant );
+            inputParams.AppendL( param2 );
+
+            iAiwServiceHandler->ExecuteServiceCmdL(KAiwCmdEdit, inputParams, iAiwServiceHandler->OutParamListL());        
+            }
+            break;
+        case KAiwCmdView: // SHARE_AIW
+            {
+            iAiwServiceHandler->ExecuteServiceCmdL(KAiwCmdView, iAiwServiceHandler->InParamListL(), iAiwServiceHandler->OutParamListL());        
             }
             break;
         default:
@@ -324,10 +354,13 @@ CCamPostCaptureViewBase::HandleControllerEventL( TCamControllerEvent aEvent,
                   CAknToolbar* fixedToolbar = Toolbar();
                   if ( fixedToolbar )
                       {
-                      fixedToolbar->SetItemDimmed( ECamCmdPhotos, EFalse, ETrue );
+                      /*fixedToolbar->SetItemDimmed( ECamCmdPhotos, EFalse, ETrue );
+                      fixedToolbar->SetItemDimmed( ECamCmdEdit, EFalse, ETrue );
                       fixedToolbar->SetItemDimmed( ECamCmdDelete, EFalse, ETrue );
                       fixedToolbar->SetItemDimmed( ECamCmdOneClickUpload, EFalse, ETrue );
-                      fixedToolbar->SetItemDimmed( ECamCmdSend, EFalse, ETrue );
+                      fixedToolbar->SetItemDimmed( ECamCmdSend, EFalse, ETrue );*/
+                      fixedToolbar->SetDimmed(EFalse);
+                      fixedToolbar->DrawNow();
                       }
                   }
               }
@@ -450,10 +483,11 @@ CCamPostCaptureViewBase::HandleForegroundEventL( TBool aForeground )
                 CAknToolbar* fixedToolbar = Toolbar();
                 if ( fixedToolbar )
                     {
-                    fixedToolbar->SetItemDimmed( ECamCmdPhotos, ETrue, ETrue );
+                    /*fixedToolbar->SetItemDimmed( ECamCmdPhotos, ETrue, ETrue );
                     fixedToolbar->SetItemDimmed( ECamCmdDelete, ETrue, ETrue );
                     fixedToolbar->SetItemDimmed( ECamCmdOneClickUpload, ETrue, ETrue );
-                    fixedToolbar->SetItemDimmed( ECamCmdSend, ETrue, ETrue );
+                    fixedToolbar->SetItemDimmed( ECamCmdEdit, ETrue, ETrue );
+                    fixedToolbar->SetItemDimmed( ECamCmdSend, ETrue, ETrue );*/
                     }
                 }
             }
@@ -518,6 +552,8 @@ void CCamPostCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId, TUid a
 
     CCamAppUi* appui = static_cast<CCamAppUi*>( AppUi() );
 
+    iAiwServiceHandler->AttachL(R_CAM_AIW_EDIT_INTEREST);
+    
     CCamViewBase::DoActivateL( aPrevViewId, aCustomMessageId, aCustomMessage );
 
     // fixed toolbar is used only with touch devices
@@ -534,8 +570,12 @@ void CCamPostCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId, TUid a
             else
                 {
                 fixedToolbar->SetToolbarObserver( this );
-                fixedToolbar->SetToolbarVisibility( ETrue );   
                 UpdateToolbarIconsL();
+                if(Id().iUid != ECamViewIdVideoPostCapture)
+                    {
+                    fixedToolbar->SetDimmed(ETrue);
+                    }
+                fixedToolbar->SetToolbarVisibility( ETrue );
                 }
             }
         }
@@ -613,6 +653,12 @@ CCamPostCaptureViewBase::DoDeactivate()
     CCamViewBase::DoDeactivate();
 
     iController.RemoveControllerObserver( this );
+    CAknToolbar* fixedToolbar = Toolbar();
+    if(fixedToolbar)
+        {
+        fixedToolbar->SetToolbarVisibility( EFalse );
+        }
+    
     PRINT( _L( "Camera <= CCamPostCaptureViewBase::DoDeactivate" ) );    
     }
 
@@ -636,7 +682,13 @@ void CCamPostCaptureViewBase::DynInitMenuPaneL( TInt /*aResourceId*/,
             {
             aMenuPane->SetItemDimmed( ECamCmdAddToAlbum, ETrue );
             }
-        } 
+        }
+    // Hide menu item, if Share not available
+    if ( !iOneClickUploadUtility->OneClickUploadSupported() && 
+         aMenuPane->MenuItemExists( KAiwCmdView, itemPos ) )
+        {
+        aMenuPane->SetItemDimmed( KAiwCmdView, ETrue );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -801,9 +853,12 @@ void CCamPostCaptureViewBase::ResetSendAvailabilityL( CCamActivePaletteHandler* 
     if ( aApHandler )
         {
         //use both inCall and InCallOrRinging() conditions to make sure if it is in call state
-        aApHandler->SetItemVisible( ECamCmdSend, !( /*inCall &&*/ iController.InCallOrRinging() ) );
-        aApHandler->SetItemVisible( ECamCmdSendToCallerMultimedia, ( /*inCall &&*/ iController.InCallOrRinging() ) );
-
+        
+        // In-Call-Send no longer used. Always use ECamCmdSend regardless of phone call state.
+        //aApHandler->SetItemVisible( ECamCmdSend, !( /*inCall &&*/ iController.InCallOrRinging() ) );
+        //aApHandler->SetItemVisible( ECamCmdSendToCallerMultimedia, ( /*inCall &&*/ iController.InCallOrRinging() ) );
+        aApHandler->SetItemVisible( ECamCmdSend, ETrue );
+        
         TBool uploadSupported = EFalse;
         if ( iOneClickUploadUtility &&
              iOneClickUploadUtility->OneClickUploadSupported() )
@@ -928,18 +983,33 @@ void CCamPostCaptureViewBase::UpdateToolbarIconsL()
                     state->SetHelpTextL( *tooltipText );
                     CleanupStack::PopAndDestroy( tooltipText );    
                     }    
-                } 
+                }
             button = dynamic_cast<CAknButton*>(
                     toolbar->ControlOrNull( ECamCmdOneClickUpload ) );
-            if ( button )
+            if ( button && iOneClickUploadUtility->OneClickUploadSupported())
                 {
                CAknButtonState* state = button->State();
                if ( state )
                    {
                    state->SetHelpTextL(
                            iOneClickUploadUtility->ButtonTooltipL() );
+                                      
                    }
                }
+            button = dynamic_cast<CAknButton*>(toolbar->ControlOrNull( ECamCmdEdit ));
+            if( button )
+                {
+                CAknButtonState* state = button->State();
+                if( state )
+                    {
+                    TInt resource = (Id().iUid == ECamViewIdStillPostCapture)?
+                                    R_QTN_LCAM_TT_IMAGE_EDITOR:
+                                    R_QTN_LCAM_TT_VIDEO_EDITOR;
+                    HBufC* helpText = StringLoader::LoadLC( resource );
+                    state->SetHelpTextL(*helpText);
+                    CleanupStack::PopAndDestroy(helpText);
+                    }
+                } 
            }
         }
     PRINT( _L("Camera <= CCamPostCaptureViewBase::UpdateToolbarIconsL") );    

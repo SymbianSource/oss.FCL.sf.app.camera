@@ -93,7 +93,7 @@ class CCamStillUserSceneSetupView : public CCamUserSceneSetupViewBase
         * @param aMode
         * @since 3.0
         */
-        void SwitchToInfoListBoxL( TCamInfoListBoxMode aMode ); 
+        void SwitchToInfoListBoxL( TCamInfoListBoxMode aMode, TBool aFullySkinned=EFalse );        
         
         /**
         * From CCamCaptureSetupViewBase

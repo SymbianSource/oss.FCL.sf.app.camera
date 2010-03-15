@@ -367,10 +367,17 @@ RESOURCE MENU_PANE r_cam_still_post_capture_menu_portrait
             command = KAiwCmdAssign;
             txt     = qtn_lcam_use_image_postcapture_menu;
             cascade = AIW_INTELLIGENT_CASCADE_ID;
-            },            
+            },
         MENU_ITEM
             {
             command = ECamCmdShareOnOvi;
+            // AIW provider fills the menu item title.
+            // No submenu, only 1 provider acccepted.
+            txt     = "";
+            },
+        MENU_ITEM // SHARE_AIW
+            {
+            command = KAiwCmdView;
             // AIW provider fills the menu item title.
             // No submenu, only 1 provider acccepted.
             txt     = "";

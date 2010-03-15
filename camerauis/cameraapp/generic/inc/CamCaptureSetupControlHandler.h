@@ -70,7 +70,8 @@ class CCamCaptureSetupControlHandler : public CBase,
         * @since 2.8
         * @return A pointer to the new control
         */
-        CCoeControl* CreateCaptureSetupControlL( const CCoeControl* aParent );
+        CCoeControl* CreateCaptureSetupControlL( const CCoeControl* aParent,
+               TBool aSkinnedBackGround = EFalse  );
 
         /**
         * From MCamSettingValueObserver

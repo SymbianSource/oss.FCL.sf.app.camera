@@ -1058,8 +1058,10 @@ TInt CamUtility::GetPsiIntArrayL( TCamPsiKey aKey, RArray<TInt>& aArray )
       
       if ( configManager->IsContrastSupported() )
           User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_CONTRAST_DATA ) );
-
-      User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_RESET_DATA        ) );
+      
+      User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_SET_USER_DEFAULT ) ); 
+            
+      User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_RESET_DATA ) );
       break;
       }
     // -----------------------------------------------------

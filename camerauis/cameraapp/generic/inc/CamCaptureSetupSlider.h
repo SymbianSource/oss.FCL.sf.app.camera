@@ -40,6 +40,7 @@ class CCamSliderLegend : public CBase
 public:
     virtual ~CCamSliderLegend();
 
+    CCamSliderLegend( TBool aFullySkinned=EFalse );
     /**
     * Constructs the layout information for a text object
     * @since 5.0
@@ -83,6 +84,7 @@ private:
 	TAknLayoutRect iIconRect;
 	CFbsBitmap* iBitmap;
 	CFbsBitmap* iMask;
+    TBool iFullySkinned;
     };
 
 
@@ -102,7 +104,8 @@ class CCamCaptureSetupSlider : public CCoeControl
         static CCamCaptureSetupSlider* NewL( const CCoeControl* aParent, 
                                              MCamSettingValueObserver* aObserver,
                                              TCamSettingItemIds aSettingType,
-                                             TInt aSteps );
+                                             TInt aSteps,
+                                             TBool aFullySkinned=EFalse );
         
         /**
         * Destructor.
@@ -189,7 +192,7 @@ class CCamCaptureSetupSlider : public CCoeControl
         */
         CCamCaptureSetupSlider( MCamSettingValueObserver* aObserver, 
                                 TCamSettingItemIds aSettingType,
-                                TInt aSteps );
+                                TInt aSteps, TBool aFullySkinned=EFalse );
 
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -301,6 +304,8 @@ class CCamCaptureSetupSlider : public CCoeControl
         
         // number of slider steps
         TInt iSteps;
+        // Drawing mode
+        TBool iFullySkinned;
     };
 
 #endif      // __CCAMCAPTURESETUPSLIDER_H   

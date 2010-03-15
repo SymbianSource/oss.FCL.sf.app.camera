@@ -912,7 +912,7 @@ RESOURCE AVKON_VIEW r_cam_video_post_capture_view_camcorder
     menubar = r_cam_video_post_capture_menubar_camcorder;
     //cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
     cba = r_cam_softkeys_options_back_toggletoolbar;
-    toolbar = r_cam_video_postcapture_toolbar;
+    toolbar = r_cam_postcapture_common_toolbar;
     }
 
 // ---------------------------------------------------------
@@ -957,6 +957,13 @@ RESOURCE MENU_PANE r_cam_video_post_capture_menu_camcorder
         MENU_ITEM
             {
             command = ECamCmdShareOnOvi;
+            // AIW provider fills the menu item title.
+            // No submenu, only 1 provider acccepted.
+            txt     = "";
+            },
+        MENU_ITEM // SHARE_AIW
+            {
+            command = KAiwCmdView;
             // AIW provider fills the menu item title.
             // No submenu, only 1 provider acccepted.
             txt     = "";

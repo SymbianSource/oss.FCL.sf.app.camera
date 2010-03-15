@@ -387,7 +387,8 @@ void CCamPreCaptureViewBase::HandleForegroundEventL( TBool aForeground )
             StartViewFinder();
             }
         }
-                                    
+    // Check if currently selected storagemedia has available memory for next capturing
+    appUi->CheckMemoryAvailableForCapturing();                                   
     
     // <CAMERAAPP_CAPI_V2_MIGRATION/>
     // if ( iController.EngineState() == ECamEngineStillCapturePrepared ||
@@ -1362,7 +1363,9 @@ void CCamPreCaptureViewBase::ExitStandbyModeL()
     // Need to update appui viewstate
     PRINT( _L("Camera <> CCamPreCaptureViewBase::ExitStandbyModeL: emit ECamCmdSwitchToPrecapture" ) )
     appUi->HandleCommandL( ECamCmdSwitchToPrecapture );
-    
+    // Check if currently selected storagemedia has available memory for next capturing
+    appUi->CheckMemoryAvailableForCapturing();      
+        
     if ( uiOverride )
         {
         appUi->SetActivePaletteVisibility( EFalse );    

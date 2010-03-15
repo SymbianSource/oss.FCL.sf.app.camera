@@ -346,6 +346,11 @@ class CCamSettingsModel : public CBase,
   public:
 
     /*
+    * Sets user scene setting to default if user has once selected
+    */
+	void SetUserSceneDefault(); 
+    
+	/*
     * Gets the handle to the settings model, which is used inturn by the
     * plugin to call the interfaces for performing needed actions.
     */

@@ -74,6 +74,25 @@ class CCamShootingModeContainer : public CCamContainerBase,
                                                  TBool aUserBaseScenes = EFalse );
 
         /**
+        * Symbian OS two-phased constructor
+        * @since 2.8
+        * @param aRect Frame rectangle for container.
+        * @param aView Reference to the view containing this container
+        * @param aMode Current capture mode
+        * @param aController reference to CCamAppControllerBase instance
+        * @param aUserBaseScenes Specifies whether this list should
+        * display the base scenes for the user scene.
+        * @param aFullySkinned Specifies whether this list should
+        * be displayed as transparent or skinned background.
+        */
+        static CCamShootingModeContainer* NewL( const TRect& aRect, 
+                                                 TBool aFullySkinned,
+                                                 CAknView& aView,
+                                                 TCamCameraMode aMode,
+                                                 CCamAppController& aController,
+                                                 TBool aUserBaseScenes );        
+        
+        /**
         * Destructor.
         * @since 2.8
         */
@@ -99,7 +118,8 @@ class CCamShootingModeContainer : public CCamContainerBase,
         CCamShootingModeContainer( TCamCameraMode aMode, 
                                     CCamAppController& aController,
                                     CAknView& aView,
-                                    TBool aUserBaseScenes );
+                                    TBool aUserBaseScenes,
+                                    TBool aFullySkinned=ETrue );
 
     public: // New functions
         /**
@@ -265,6 +285,8 @@ class CCamShootingModeContainer : public CCamContainerBase,
       // Specifies whether or not the scene list is for 
       // the user base scenes
       TBool iUserBaseScenes;
+
+      TBool iFullySkinned;
       // Array of bitmaps for the large summary icon
       RPointerArray<CFbsBitmap> iSummaryBitmapArray;        
       // Array of all shooting mode titles

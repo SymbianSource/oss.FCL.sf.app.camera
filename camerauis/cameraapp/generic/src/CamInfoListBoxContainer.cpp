@@ -41,6 +41,8 @@
 const TInt KInfoTooltipDelay = 0; // time (milliseconds) delay when showing the tooltip
 const TInt KInfoTooltipDisplayTime = 5000; // maximum time (milliseconds) the tooltip is displayed
 const TInt KExplTxtGranularity = 6;
+const TUint32 KToolbarExtensionBgColor = 0x00000000;
+const TInt KToolBarExtensionBgAlpha = 0x7F;
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -55,12 +57,14 @@ CCamInfoListBoxContainer* CCamInfoListBoxContainer::NewL( const TRect& aRect,
                                                             TInt aListBoxResource,
                                                             TInt aSummaryResource,
                                                             TInt aSettingValue,
-                                                            TInt aTitleResource  )
+                                                            TInt aTitleResource,
+                                                            TBool aSkinnedBackGround )
     {
     CCamInfoListBoxContainer* self = 
                   new( ELeave ) CCamInfoListBoxContainer(  aController,
                                                            aView,
-                                                           aSettingValue );
+                                                           aSettingValue,
+                                                           aSkinnedBackGround );
     CleanupStack::PushL( self );
     self->ConstructL( aRect, aListBoxResource, aSummaryResource, aTitleResource);
     CleanupStack::Pop( self );
@@ -142,7 +146,8 @@ void CCamInfoListBoxContainer::ConstructL( const TRect& aRect, TInt aListBoxReso
 
     // Construct the listbox
     iListBox =  new( ELeave ) CCamInfoListBox( this, iController );                           
-    iListBox->ConstructL( iController, this, iTitleArray, iDescArray, aListBoxResource );
+    iListBox->ConstructL( iController, this, iTitleArray, iDescArray, aListBoxResource,
+            iSkinnedBackGround );
     iListBox->DisableSingleClick( ETrue );
 
     // Highlight the currently active setting value
@@ -252,12 +257,14 @@ void CCamInfoListBoxContainer::ConstructL( const TRect& aRect, TInt aListBoxReso
 //
 CCamInfoListBoxContainer::CCamInfoListBoxContainer(     CCamAppController& aController,
                                                         CAknView& aView,
-                                                        TInt aSettingValue )
+                                                        TInt aSettingValue,
+                                                        TBool aSkinnedBackGround )
 : CCamContainerBase( aController, aView ), iSettingValue( aSettingValue ),
 iTooltipController(NULL),
 iShowTooltip(EFalse),
 iTooltipIndex(-1),
-iActivateOnTouchRelease(EFalse)
+iActivateOnTouchRelease(EFalse),
+iSkinnedBackGround(aSkinnedBackGround)
 
     {
     }
@@ -329,12 +336,44 @@ void CCamInfoListBoxContainer::Draw( const TRect& aRect ) const
 	CWindowGc& gc = SystemGc();
     if ( CamUtility::IsNhdDevice() )
         {
+        TRgb color;
+        if( iSkinnedBackGround )
+            {
         MAknsSkinInstance* skin = AknsUtils::SkinInstance();
         AknsDrawUtils::Background( skin, iBgContext, gc, aRect );
         // draw the title text   
-        TRgb color;
         AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors,
                                                 EAknsCIQsnTextColorsCG6 );
+            }
+        else
+            {
+            // Fill control with transparency bg colour
+            gc.SetPenStyle( CGraphicsContext::ENullPen );
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            color = TRgb( 0,0 );
+            gc.SetBrushColor( color );
+            gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+            gc.DrawRect( aRect );
+            gc.SetBrushColor( color );
+            gc.DrawRect( iTitleTextRectLayout.TextRect() );            
+            // Reset the brush after use (otherwise anything drawn
+            // after the viewfinder will also show viewfinder frames)
+
+            gc.SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
+            gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+            gc.DrawRect( TRect( iLayoutAreaRect.iTl.iX,
+                                iLayoutAreaRect.iTl.iY,
+                                iLayoutAreaRect.iBr.iX,
+                                iTitleTextRectLayout.TextRect().iBr.iY ) );
+            
+            gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+            
+
+            CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );            
+            appUi->StatusPane()->MakeVisible( EFalse );
+            
+            color = TRgb( KRgbWhite );
+            }
         iTitleTextRectLayout.DrawText( gc, *iListboxTitle, ETrue, color );        
         }
     else
@@ -430,6 +469,10 @@ void CCamInfoListBoxContainer::HandlePointerEventL( const TPointerEvent& aPointe
             aPointerEvent.iPosition.iX,
             aPointerEvent.iPosition.iY );
     iListBox->HandlePointerEventL(aPointerEvent);
+    if( !iController.IsViewFinding() && !iSkinnedBackGround )
+        {
+        ReserveAndStartVF();        
+        }
     /*TInt oldListItemIndex = -1;
     TInt newListItemIndex = -1;
     TBool handleItemActivation = EFalse;
@@ -665,8 +708,15 @@ TRect CCamInfoListBoxContainer::TouchLayout()
                             AknLayoutScalable_Apps::main_cset_list_pane( 1 ) ); 
         }
  
+    if( !iSkinnedBackGround )
+        {
+        iTitleTextRectLayout.LayoutText( iLayoutAreaRect,  AknLayoutScalable_Apps::main_cset_text_pane_t1( 0 ) );
+        }    
+    else
+        {    
     iTitleTextRectLayout.LayoutText( iLayoutAreaRect, 
                            AknLayoutScalable_Apps::main_cam_set_pane_t1( 3 ) );
+        }
     
     return wholeListboxLayoutRect.Rect();
     }

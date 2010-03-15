@@ -138,6 +138,7 @@ enum TCamCmd
   ECamCmdPrintIntent,
   ECamCmdPrintPlugin,
   ECamCmdOneClickUpload,
+  ECamCmdSetUserDefault, 
   
   ECamCmdCaptureSetupLightSensitivityUser,
   

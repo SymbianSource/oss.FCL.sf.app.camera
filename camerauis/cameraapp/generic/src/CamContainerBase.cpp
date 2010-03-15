@@ -892,4 +892,50 @@ CCoeControl* CCamContainerBase::ComponentControl(TInt aIndex) const
     return control; 
     }
 
+// ---------------------------------------------------------
+// CCamCaptureSetupContainer::ReserveAndStartVF
+// ---------------------------------------------------------
+//
+void CCamContainerBase::ReserveAndStartVF()
+    {
+    PRINT ( _L("Camera => CCamContainerBase::ReserveAndStartVF") );
+    TCamCameraMode mode = iController.CurrentMode();
+    if(iController.IsAppUiAvailable())
+        {
+        TVwsViewId currentViewId;
+        CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+        appUi->GetActiveViewId( currentViewId );
+        switch ( currentViewId.iViewUid.iUid )
+            {
+            case ECamViewIdPhotoUserSceneSetup:
+            case ECamViewIdStillPreCapture:
+                {
+                mode = ECamControllerImage;
+                }
+                break;
+            case ECamViewIdVideoPreCapture:
+                {
+                mode = ECamControllerVideo;
+                }
+                break;
+            default:
+                {
+                //Assume imagemode if view cannot be determined.
+                if(mode==ECamControllerIdle)
+                    {
+                    mode = ECamControllerImage;                
+                    }
+                }
+                break;
+            }
+        }
+    //Don't reserve camera and start viewfinder if shutting down.
+    if(mode!=ECamControllerShutdown)
+        {
+        iController.EnterViewfinderMode( mode );
+        iController.StartIdleTimer();
+        }
+    PRINT ( _L("Camera <= CCamContainerBase::ReserveAndStartVF") );        
+    }
+
 // End of File  

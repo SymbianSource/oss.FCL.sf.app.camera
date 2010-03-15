@@ -1008,6 +1008,34 @@ RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_c
 
 //----------------------------------------------------
 //   
+//    r_cam_photo_user_scene_setup_list_set_user_default
+//    The data for the set user default item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//    
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_set_user_default
+    {
+    id = ECamSettingItemUserSceneDefault;
+    text = qtn_lcam_set_user_default;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamSettNo;
+            text = qtn_lcam_set_user_default_no;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamSettYes;
+            text = qtn_lcam_set_user_default_yes;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
 //    r_cam_photo_user_scene_setup_list_reset_data
 //    The data for the reset data item in the 
 //    photo user scene setup list

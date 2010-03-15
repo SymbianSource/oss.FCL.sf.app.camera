@@ -25,6 +25,7 @@
 
 #include "CamPreCaptureContainerBase.h"
 
+#include <eiksoftkeypostingtransparency.h>
 #include <eikbtgpc.h>
 #include <avkon.rsg>
 #include <StringLoader.h>
@@ -88,6 +89,23 @@ void CCamUserSceneSetupViewBase::HandleCommandL( TInt aCommand )
             userSceneSetup->UpdateListItems();
             break;
             }
+        case ECamCmdSetUserDefault:  
+            {
+            TInt currentVal = iController.IntegerSettingValue( ECamSettingItemUserSceneDefault );
+            if ( currentVal )
+              {
+              currentVal = ECamSettNo; 
+              }
+            else
+              {
+              currentVal = ECamSettYes;
+              }
+            TRAP_IGNORE( iController.SetIntegerSettingValueL( ECamSettingItemUserSceneDefault, currentVal) );
+            CCamUserSceneSetupContainer* userSceneSetup = static_cast<CCamUserSceneSetupContainer*>( iContainer );
+            userSceneSetup->UpdateListItems();  
+            userSceneSetup->UpdateDisplayL();
+            }
+            break;
         case ECamCmdUserSceneReset:
             {
             DisplayResetUserSceneDlgL();
@@ -113,7 +131,7 @@ void CCamUserSceneSetupViewBase::HandleCommandL( TInt aCommand )
             break;
      	case ECamCmdCaptureSetupLightSensitivityUser:
       		{
-       		SwitchToInfoListBoxL( EInfoListBoxModeISO );
+       		SwitchToInfoListBoxL( EInfoListBoxModeISO, ETrue );
       		}    
 			break;
         // If capture setup menu is active and user presses softkey cancel,
@@ -424,15 +442,32 @@ void CCamUserSceneSetupViewBase::UpdateCbaL()
     // if the view is in capture setup mode
     else if ( iCaptureSetupModeActive )
         {
-        SetSoftKeysL( R_AVKON_SOFTKEYS_OK_CANCEL__OK );
+        if( iForceAvkonCBA )
+            {
+            SetSoftKeysL( R_AVKON_SOFTKEYS_OK_CANCEL__OK ); //Avkon softkeys. Not transparent
+            }
+        else
+            {
+            SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
+            }
         }
     else if ( iSceneSettingModeActive )
     	{
     	SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE  );
+        if( iForceAvkonCBA )
+            {
+            EikSoftkeyPostingTransparency::MakeTransparent(
+                    *ViewCba(), EFalse );            
+            }
     	}
     else if ( iInfoListBoxActive )
         {
         SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE );
+        if( iForceAvkonCBA )
+            {
+            EikSoftkeyPostingTransparency::MakeTransparent(
+                    *ViewCba(), EFalse );            
+            }
         }
     // if the view is user scene setup
     else
@@ -482,6 +517,7 @@ void CCamUserSceneSetupViewBase::SwitchToUserSceneSetupModeL()
     StatusPane()->MakeVisible( ETrue );
     
     // Update the command button array.
+    iForceAvkonCBA=ETrue;
     UpdateCbaL();
     SetTitlePaneTextL();
     PRINT( _L("Camera <= CCamUserSceneSetupViewBase::SwitchToUserSceneSetupModeL()") );  	   
@@ -508,7 +544,7 @@ void CCamUserSceneSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand )
 
     // Remove the view's main container, and add the capture setup 
     // control associated with the input command to the container stack.
-    CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( aSetupCommand );   
+    CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( aSetupCommand, EFalse );
    StatusPane()->MakeVisible( EFalse ); 	
     PRINT( _L("Camera <= CCamUserSceneSetupViewBase::SwitchToCaptureSetupModeL()") );  	   	
     }

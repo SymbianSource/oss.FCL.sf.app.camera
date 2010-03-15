@@ -195,7 +195,7 @@ void CCamStillUserSceneSetupView::SwitchToSceneSettingModeL()
 // CCamStillUserSceneSetupView::SwitchToInfoListBoxL
 // ---------------------------------------------------------------------------
 //
-void CCamStillUserSceneSetupView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMode )
+void CCamStillUserSceneSetupView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMode, TBool aFullySkinned )
     {   
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iCoeEnv->AppUi() );  	
 
@@ -246,7 +246,12 @@ void CCamStillUserSceneSetupView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMod
                 listBoxResource,
                 summaryResource,
                 initialValue,
-                titleResource );		
+                titleResource,
+                aFullySkinned);		
+        if( !aFullySkinned )
+            {
+            StartViewFinder();
+            }
         iInfoListBoxMode = aMode;          
         iSettingModeTitleResourceId = titleResource;                                                   										    			
 
@@ -254,7 +259,7 @@ void CCamStillUserSceneSetupView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMod
 
         // Remove the view's main container, and add the capture setup 
         // control associated with the input command to the container stack.
-        CCamCaptureSetupViewBase::SwitchToInfoListBoxL( aMode );        
+        CCamCaptureSetupViewBase::SwitchToInfoListBoxL( aMode, aFullySkinned );        
         }
     }
     

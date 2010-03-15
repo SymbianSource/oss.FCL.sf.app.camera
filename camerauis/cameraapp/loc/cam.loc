@@ -4241,5 +4241,10 @@ CHARACTER_SET UTF8
 //l: popup_note_window
 #define qtn_lcam_insert_mmc_note "Please insert memory card in order to capture photos and videos"
 
+//d:Capture tone off setting in photo settings list
+//l:list_set_graphic_pane_t1
+//
+#define qtn_lcam_shuttersound_off "Off"
+
 // end of file
 

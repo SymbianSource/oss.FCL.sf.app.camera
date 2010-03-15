@@ -719,7 +719,9 @@ void CCamBurstThumbnailView::DoActivateL( const TVwsViewId& aPrevViewId, TUid aC
             R_CAM_SET_AS_CALL_IMAGE_INTEREST );
     iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
             R_CAM_SHARE_ON_OVI_INTEREST );
-            
+    // SHARE_AIW
+    iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU,
+                                     R_CAM_AIW_VIEW_INTEREST );
     
     static_cast<CCamAppUiBase*>( AppUi() )->PushDefaultNaviPaneL();
     PERF_EVENT_END_L2( EPerfEventBurstThumbnailViewActivation );

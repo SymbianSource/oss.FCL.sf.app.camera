@@ -362,7 +362,32 @@ RESOURCE TBUF r_cam_scene_description_night_portrait
     buf = qtn_lcam_scene_nightport_ex_v2;
     }
 
+//-----------------------------------------------------------------------------
+//
+//    r_qtn_lcam_tt_image_editor
+//    Tooltip for "Image editor" button in postcapture view.
+//    Uses string defined in cam.loc
+//
+//-----------------------------------------------------------------------------
+//	
+RESOURCE TBUF r_qtn_lcam_tt_image_editor
+	{
+	buf = qtn_lcam_tt_image_editor;
+	}
 
+//-----------------------------------------------------------------------------
+//
+//    r_qtn_lcam_tt_video_editor
+//    Tooltip for "Video editor" button in postcapture view.
+//    Uses string defined in cam.loc
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_lcam_tt_video_editor
+	{
+	buf = qtn_lcam_tt_video_editor;
+	}
+	
 /**************************************
 *         Other structures            *
 **************************************/
@@ -1004,6 +1029,13 @@ RESOURCE AVKON_BUTTON_STATE_EXTENSION r_cam_ext_qgn_indi_cam4_tb_mark
     bmbSkinIdMajor = EAknsMajorGeneric;
     bmbSkinIdMinor = EAknsMinorGenericQgnIndiCam4TbMark;
     }
+	
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_cam_ext_qgn_indi_cam4_tb_edit
+    {
+    bmbSkinIdMajor = EAknsMajorGeneric;
+    bmbSkinIdMinor = EAknsMinorGenericQgnIndiMgTbEdit; //We are reusing the media gallery skinid 
+    }
+
 
 //----------------------------------------------------
 //   
@@ -1616,6 +1648,123 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar
 
 //----------------------------------------------------
 //   
+//    r_cam_postcapture_common_toolbar
+//    Toolbar for post-capture views( Primary/Secondary Still/Video views)
+//
+//----------------------------------------------------
+//
+
+RESOURCE AVKON_TOOLBAR r_cam_postcapture_common_toolbar
+    {
+    lines = 3;
+    flags = KAknToolbarFixed | KAknToolbarTransparent | KAknToolbarNoBackground;
+    items =
+        {
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECamCmdSend;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_send;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_send_mask;
+                        helptxt = qtn_lcam_tt_send;
+                        extension = r_cam_ext_qgn_indi_cam4_send;
+                        }
+                    };
+                };
+            },
+			TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECamCmdEdit;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_mg_tb_edit;
+                        bmpmask = EMbmCameraappQgn_indi_mg_tb_edit_mask;
+                        helptxt = ""; // Tooltip is set at run-time
+                        extension = r_cam_ext_qgn_indi_cam4_tb_edit;
+                        }
+                    };
+                };
+            },
+            TBAR_CTRL
+                {
+                type = EAknCtButton;
+                id = ECamCmdPhotos;
+                control = AVKON_BUTTON
+                    {
+                    flags = KAknButtonNoFrame;
+                    states =
+                        {
+                        AVKON_BUTTON_STATE
+                            {
+                            bmpfile = CAMERAAPP_BITMAP_FILE;
+                            bmpid = EMbmCameraappQgn_indi_cam4_tb_goto_gallery; 
+                            bmpmask = EMbmCameraappQgn_indi_cam4_tb_goto_gallery_mask;
+                            helptxt = qtn_lcam_tt_go_to_photos;
+                            extension = r_cam_ext_qgn_indi_cam4_tb_goto_photos;
+                            }
+                        };
+                    };
+                },
+		TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECamCmdOneClickUpload;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
+                        helptxt = ""; // Tooltip is set at run-time
+                        // extension = r_cam_ext_qgn_indi_cam4_tb_upload;
+                        }
+                    };
+                };
+            },		
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECamCmdDelete;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_delete;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_delete_mask;
+                        helptxt = qtn_lcam_tt_delete;
+                        extension = r_cam_ext_qgn_indi_cam4_delete;
+                        }
+                    };
+                };
+            }
+        };
+    }
+	
+//----------------------------------------------------
+//   
 //    r_cam_still_postcapture_toolbar
 //    Toolbar and toolbar extension for still post-capture view
 //
@@ -1735,8 +1884,8 @@ RESOURCE AVKON_TOOLBAR r_cam_still_postcapture_toolbar_upload
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_tb_upload;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_upload_mask;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
                         helptxt = ""; // Tooltip is set at run-time
                         extension = r_cam_ext_qgn_indi_cam4_tb_upload;
                         }
@@ -1959,8 +2108,8 @@ RESOURCE AVKON_TOOLBAR r_cam_still_postcapture_toolbar_portrait_upload
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_tb_upload;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_upload_mask;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
                         helptxt = ""; // Tooltip is set at run-time
                         extension = r_cam_ext_qgn_indi_cam4_tb_upload;
                         }
@@ -2034,8 +2183,8 @@ RESOURCE AVKON_TOOLBAR r_cam_still_postcapture_toolbar_landscape_upload
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_tb_upload;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_upload_mask;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
                         helptxt = ""; // Tooltip is set at run-time
                         extension = r_cam_ext_qgn_indi_cam4_tb_upload;
                         }
@@ -2522,8 +2671,8 @@ RESOURCE AVKON_TOOLBAR r_cam_video_postcapture_toolbar_upload
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_tb_upload;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_upload_mask;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
                         helptxt = ""; // Tooltip is set at run-time
                         extension = r_cam_ext_qgn_indi_cam4_tb_upload;
                         }
@@ -2745,8 +2894,8 @@ RESOURCE AVKON_TOOLBAR r_cam_video_postcapture_toolbar_portrait_upload
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_tb_upload;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_upload_mask;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
                         helptxt = ""; // Tooltip is set at run-time
                         extension = r_cam_ext_qgn_indi_cam4_tb_upload;
                         }
@@ -2820,8 +2969,8 @@ RESOURCE AVKON_TOOLBAR r_cam_video_postcapture_toolbar_landscape_upload
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_tb_upload;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_upload_mask;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
                         helptxt = ""; // Tooltip is set at run-time
                         extension = r_cam_ext_qgn_indi_cam4_tb_upload;
                         }
@@ -2986,8 +3135,8 @@ RESOURCE AVKON_TOOLBAR r_cam_burst_postcapture_toolbar_upload
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_tb_upload;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_upload_mask;
+                        bmpid = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_tb_oneclick_active_mask;
                         helptxt = ""; // Tooltip is set at run-time
                         extension = r_cam_ext_qgn_indi_cam4_tb_upload;
                         }
@@ -3106,11 +3255,52 @@ RESOURCE AIW_INTEREST r_cam_one_click_upload_interest
             serviceCmd          = KAiwCmdUpload;
             serviceClass        = KAiwClassBase;
             contentType         = "image/*";
-            defaultProvider = 0x2000BB53; //KShareAppUidVal;
+            defaultProvider     = 0x2002CC1F; //KShareAppUidVal;
             maxProviders        = 1;
             }
         };
     }
+// -----------------------------------------------------------------------------
+//
+// r_cam_aiw_view_interest
+// AIW interest structure for view (Share settings view)
+//
+// -----------------------------------------------------------------------------
+RESOURCE AIW_INTEREST r_cam_aiw_view_interest
+    {
+    items=
+        {
+        AIW_CRITERIA_ITEM // SHARE_AIW
+            {
+            id = KAiwCmdView;
+            serviceCmd = KAiwCmdView;
+            contentType = "*";
+            defaultProvider     = 0x2002CC1F; //KShareAppUidVal;	    
+            serviceClass = KAiwClassMenu;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_cam_aiw_edit_interest
+// AIW interest structure for edit
+//
+// -----------------------------------------------------------------------------
+RESOURCE AIW_INTEREST r_cam_aiw_edit_interest
+    {
+    items=
+        {
+        AIW_CRITERIA_ITEM
+            {
+            id = KAiwCmdEdit;
+            serviceCmd = KAiwCmdEdit;
+            contentType = "*";
+            serviceClass = KAiwClassMenu;
+            }
+        };
+    }
+	
 //----------------------------------------------------
 //   
 //    qtn_lcam_tb_turn_sequence_off

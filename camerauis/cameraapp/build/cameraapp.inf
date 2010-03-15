@@ -80,6 +80,7 @@ cameraapp.mmp
 PRJ_EXTENSIONS
 
 START EXTENSION s60/mifconv
+OPTION SOURCEDIR ../generic/icons
 OPTION TARGETFILE cameraapp.mif
 OPTION HEADERFILE cameraapp.mbg
 OPTION SOURCEFILE iconlist.txt

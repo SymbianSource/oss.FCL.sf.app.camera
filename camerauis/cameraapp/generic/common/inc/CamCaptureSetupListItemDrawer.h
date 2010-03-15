@@ -45,7 +45,7 @@ class CCamCaptureSetupListItemDrawer : public CListItemDrawer
         * @param aListBoxModel reference to a list box model used to access item data
         * @return pointer to the newly created object
         */
-        static CCamCaptureSetupListItemDrawer* NewL( MCamListboxModel& aListBoxModel );        
+        static CCamCaptureSetupListItemDrawer* NewL( MCamListboxModel& aListBoxModel, TBool aFullySkinned = EFalse );        
 
         /**
         * Destructor.
@@ -68,7 +68,7 @@ class CCamCaptureSetupListItemDrawer : public CListItemDrawer
         * @since 2.8
 		* @param aListBoxModel reference to a list box model used to access item data
         */
-        CCamCaptureSetupListItemDrawer( MCamListboxModel& aListBoxModel );
+        CCamCaptureSetupListItemDrawer( MCamListboxModel& aListBoxModel, TBool aFullySkinned = EFalse );
 
 		/**
         * Second phase construction
@@ -131,6 +131,13 @@ class CCamCaptureSetupListItemDrawer : public CListItemDrawer
         void DrawItemRect( const TRect& aActualItemRect ) const;
 
         /**
+        * Draws a rectangle for an item.
+        * @since 2.8
+        * @param the rectangular area to be drawn.
+        */
+        void DrawTransparentItemRect( const TRect& aActualItemRect ) const;
+
+        /**
         * Read list layout
         */
         void ReadLayout();
@@ -162,6 +169,8 @@ class CCamCaptureSetupListItemDrawer : public CListItemDrawer
         TAknTextComponentLayout   iTxtWithRbLayout;
         TAknWindowComponentLayout iBmpWithRbLayout;
         TAknWindowComponentLayout iHighlightLayout;
+        // Drawing mode
+        TBool iFullySkinned;
 	};
 
 #endif      // CAMCAPTURESETUPLISTITEMDRAWER_H

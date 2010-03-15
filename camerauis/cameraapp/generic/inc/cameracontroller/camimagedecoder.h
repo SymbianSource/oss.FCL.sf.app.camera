@@ -48,7 +48,7 @@ class MCamImageDecoderObserver
     *        KErrNone if all went as planned.
     * @param aBitmap Decoded bitmap. NULL if errors in decoding.
     */
-    virtual void ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap ) = 0;
+    virtual void ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* aMask ) = 0;
 
   };
   
@@ -100,6 +100,8 @@ class CCamImageDecoder : public CActive
   public:
 
     void StartConversionL( CCamBufferShare* aBuffer );
+    
+    void StartIconConversionL( TDesC* aFilePath );
 
   private:
 
@@ -158,6 +160,7 @@ class CCamImageDecoder : public CActive
     HBufC8*          iThumbnailData;
 
     CFbsBitmap*    iDecodedBitmap;
+    CFbsBitmap*    iDecodedMask;
     CImageDecoder* iDecoder;    
     
     TInt           iRetryCounter;

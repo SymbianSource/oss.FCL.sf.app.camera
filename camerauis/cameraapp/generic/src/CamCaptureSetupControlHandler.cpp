@@ -67,7 +67,8 @@ CCamCaptureSetupControlHandler::~CCamCaptureSetupControlHandler()
 // Ownership is transferred to the calling class.
 // -----------------------------------------------------------------------------
 //
-CCoeControl* CCamCaptureSetupControlHandler::CreateCaptureSetupControlL( const CCoeControl* aParent )
+CCoeControl* CCamCaptureSetupControlHandler::CreateCaptureSetupControlL( const CCoeControl* aParent,
+        TBool aSkinnedBackGround )
     {
     // create a new control determined by iSettingType.
     // set self as observer
@@ -84,7 +85,7 @@ CCoeControl* CCamCaptureSetupControlHandler::CreateCaptureSetupControlL( const C
 			{
 			// create and return a slider control
             CCamCaptureSetupSlider* captureSetupControl = 
-					CCamCaptureSetupSlider::NewL( aParent, this, iSettingType, 0 );
+					CCamCaptureSetupSlider::NewL( aParent, this, iSettingType, 0, aSkinnedBackGround );
             CleanupStack::PushL( captureSetupControl );                    
             captureSetupControl->InitializeL
                 ( iController.IntegerSettingValue( iSettingType ) );
@@ -101,7 +102,7 @@ CCoeControl* CCamCaptureSetupControlHandler::CreateCaptureSetupControlL( const C
 				// create and return a radio-button listbox    
 				CCamCaptureSetupListBox* captureSetupControl = 
 						new( ELeave ) CCamCaptureSetupListBox( this,
-										iController ); 
+										iController, aSkinnedBackGround ); 
 
 				CleanupStack::PushL( captureSetupControl );
 				captureSetupControl->ConstructL( aParent, resourceId, iSettingType );
@@ -289,9 +290,7 @@ TInt CCamCaptureSetupControlHandler::ControlPositionResourceId() const
 //
 TBool CCamCaptureSetupControlHandler::ControlUsesViewFinder() const
     {
-    return ( ( iSettingType != ECamSettingItemDynamicPhotoFlash ) &&
-        ( iSettingType != ECamSettingItemUserSceneFlash ) &&
-        ( iSettingType != ECamSettingItemDynamicSelfTimer ));
+    return ETrue;
     }
 
 

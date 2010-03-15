@@ -164,7 +164,6 @@ void CCamStillPreCaptureView::HandleCommandL( TInt aCommand )
         	}
         case ECamCmdCaptureImage:
             {
-      	    OstTrace0( CAMERAAPP_PERFORMANCE, DUP9_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_AF_LOCK 1" );
       	    OstTrace0( CAMERAAPP_PERFORMANCE, DUP10_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_SHUTTER_RELEASE_LAG 1" );
       	    if ( iController.IsViewFinding() && appUi->CheckMemoryL() &&
                 !iController.CaptureModeTransitionInProgress() &&
@@ -190,12 +189,24 @@ void CCamStillPreCaptureView::HandleCommandL( TInt aCommand )
                     && iController.UiConfigManagerPtr()->IsAutoFocusSupported()
                     && !iController.CurrentSceneHasForcedFocus() )
                     {
+                    // Next trace should be just before "e_CAM_PRI_SHUTTER_RELEASE_LAG 1", but only when AF is supported
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP9_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_AF_LOCK 1" );
                     if( iController.CurrentOperation() == ECamNoOperation )
                         {
                         iController.SetAfNeeded( ETrue );
                         }    
                     OstTrace0( CAMERAAPP_PERFORMANCE, DUP7_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_APP_AF 1" );
                     iController.StartAutoFocus();
+                    }
+                else // AF not needed, capture will start next
+                    {
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP11_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_APP_SHOT_TO_SNAPSHOT 1" );
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP12_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_SHOT_TO_SNAPSHOT 1" );
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP13_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_SHOT_TO_SAVE 1" );
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP14_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_SHOT_TO_SHOT 1" );
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP15_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_APP_SHOT_TO_STILL 1" );
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP16_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_APP_CAPTURE_START 1" );
+                    OstTrace0( CAMERAAPP_PERFORMANCE, DUP17_CCAMSTILLPRECAPTUREVIEW_HANDLECOMMANDL, "e_CAM_PRI_SERIAL_SHOOTING 1" );
                     }
             	TKeyEvent keyEvent;
             	appUi->StartCaptureL( keyEvent );
@@ -338,7 +349,7 @@ CCamStillPreCaptureView::HandleForegroundEventL( TBool aForeground )
 
     SetMenuBar();
     
-    if ( iContinueInBackground )
+    if ( iContinueInBackground && !iStandbyModeActive )
         {
         // make sure that CCamAppController is in view finder mode
         if ( iController.CurrentImageMode() == ECamImageCaptureNone )
@@ -679,7 +690,7 @@ void CCamStillPreCaptureView::UpdateCbaL()
   // if the view is in capture setup mode
   else if ( iCaptureSetupModeActive )
       {
-      SetSoftKeysL( R_AVKON_SOFTKEYS_OK_CANCEL__OK );
+      SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
       }
   // if the view is in scene settings mode
   else if ( iSceneSettingModeActive )
@@ -696,7 +707,14 @@ void CCamStillPreCaptureView::UpdateCbaL()
     }
   else if( iInfoListBoxActive )
   	{
-  	SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE );
+    if( !iForceAvkonCBA )
+        {
+        SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT );    
+        }
+    else
+        {
+        SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE );    
+        }    
   	}
   else if (  ( operation == ECamFocusing || operation == ECamFocused  || operation == ECamFocusFailed )
          && !iController.CurrentSceneHasForcedFocus() )
@@ -1031,6 +1049,7 @@ void CCamStillPreCaptureView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMode )
     TInt summaryResource;
     TInt initialValue;
     TInt titleResource;
+    TBool skinnedbackground = EFalse;
     
     switch( aMode )
     		{
@@ -1071,6 +1090,7 @@ void CCamStillPreCaptureView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMode )
     				    }
     				titleResource = R_CAM_LIGHT_SENSITIVITY_TITLE;   					    				
  					modeSelected = ETrue;
+ 					skinnedbackground = EFalse;
     				}
     				break;
     		
@@ -1085,8 +1105,11 @@ void CCamStillPreCaptureView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMode )
                                                              		iController,
                                                              		listBoxResource,
                                                              		summaryResource,
-                                                             		initialValue, titleResource );		
+                                                             		initialValue, titleResource,
+                                                             		skinnedbackground );		
+				
 				iInfoListBoxContainer->DrawableWindow()->SetOrdinalPosition(-1); 
+				iInfoListBoxContainer->SetMopParent( this ); 
 				iInfoListBoxMode = aMode;          
 				iSettingModeTitleResourceId = titleResource;                                                   					
 
@@ -1100,14 +1123,16 @@ void CCamStillPreCaptureView::SwitchToInfoListBoxL( TCamInfoListBoxMode aMode )
         		}
     		// Remove the view's main container, and add the capture setup 
     		// control associated with the input command to the container stack.
-    		CCamCaptureSetupViewBase::SwitchToInfoListBoxL( aMode );
+    		CCamCaptureSetupViewBase::SwitchToInfoListBoxL( aMode, skinnedbackground );
 
     		// only remove the capture setup menu container after 
     		// the switch completes successfully
     		RemoveCaptureSetupMenuContainers();
-
+    		if( skinnedbackground )
+    		    {
     		// Stop the viewfinder
     		StopViewFinder();    		    	        
+    		    }
     		}
     }
 

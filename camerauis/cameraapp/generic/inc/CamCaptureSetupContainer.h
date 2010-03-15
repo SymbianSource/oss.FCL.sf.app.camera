@@ -56,7 +56,8 @@ class CCamCaptureSetupContainer : public CCamContainerBase,
               CCamAppController&              aController, 
               CAknView&                       aView,
               CCamCaptureSetupControlHandler& aControlHandler,
-              const TRect&                    aRect  );
+              const TRect&                    aRect,
+              TBool aFullScreenVF=ETrue );
         
     /**
     * Destructor.
@@ -152,11 +153,6 @@ class CCamCaptureSetupContainer : public CCamContainerBase,
     */
     TRect TouchLayout();
     
-    /**
-    * Enters viewfinder mode either in image or videomode
-    * depending current visible view. Also starts idle timer.
-    */
-    void ReserveAndStartVF();
     
   // -----------------------------------------------------
   // Constructors
@@ -172,7 +168,8 @@ class CCamCaptureSetupContainer : public CCamContainerBase,
     CCamCaptureSetupContainer( 
         CCamAppController& aController,
         CAknView& aView,
-        CCamCaptureSetupControlHandler& aControlHandler );
+        CCamCaptureSetupControlHandler& aControlHandler,
+        TBool aFullScreenVF = ETrue );
 
     /**
     * Symbian OS 2nd phase constructor.
@@ -207,6 +204,8 @@ class CCamCaptureSetupContainer : public CCamContainerBase,
     TInt iListBoxWidth;
     
     TBool iActivateOnTouchRelease;
+
+    TBool iFullScreenVF;
     MTouchFeedback* iFeedback; // not own
     TRect iLayoutAreaRect; 
   };

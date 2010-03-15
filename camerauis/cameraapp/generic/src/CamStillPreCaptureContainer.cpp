@@ -616,8 +616,16 @@ CCamStillPreCaptureContainer::HandleCaptureKeyEventL( const TKeyEvent& aKeyEvent
           }
         }
 #endif // __WINS__
-    }
-
+      }
+  else
+      {
+      // in case AF is not supported, check memory here before capturing
+      if ( !iController.IsViewFinding() || !appui->CheckMemoryL() )
+          {
+          return EKeyWasConsumed; 
+          }         
+      }
+      
   if( iXenonFlashSupported
    && !appui->IsSecondCameraEnabled()
    && !MSKCapture

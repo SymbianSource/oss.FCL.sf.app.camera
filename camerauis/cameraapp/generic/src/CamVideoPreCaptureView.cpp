@@ -657,13 +657,20 @@ void CCamVideoPreCaptureView::UpdateCbaL()
   // if the view is in capture setup mode
   else if ( iCaptureSetupModeActive )
     {
-    SetSoftKeysL( R_AVKON_SOFTKEYS_OK_CANCEL__OK );
+    SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
     }
   // if the view is in scene settings mode
   else if ( iSceneSettingModeActive )
     {
     // R_AVKON_SOFTKEYS_OPTIONS_BACK
+    if( !iForceAvkonCBA )
+        {
+        SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT );    
+        }
+    else
+        {
     SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE ); //R_CAM_SOFTKEYS_OPTIONS_BACK__CHANGE );
+        }
     }
   else if ( iStandbyModeActive )
     {
@@ -995,9 +1002,12 @@ void CCamVideoPreCaptureView::SwitchToSceneSettingModeL()
     	{
 	    // Create the scene setting container for video mode.
 	    iSceneSettingContainer = CCamShootingModeContainer::NewL( AppUi()->ApplicationRect(),
+                                                               EFalse, //Notskinned background
 	                                                           *this,
 	                                                           ECamControllerVideo,
-	                                                           iController );
+	                                                           iController,
+	                                                           EFalse ); 
+
 	    iSceneSettingContainer->DrawableWindow()->SetOrdinalPosition(-1);
     	}
     
@@ -1020,7 +1030,7 @@ void CCamVideoPreCaptureView::SwitchToSceneSettingModeL()
     RemoveCaptureSetupMenuContainers();
 
     // Stop the viewfinder as it isn't required for scene settings
-    StopViewFinder();
+    //StopViewFinder();
     
     }
  

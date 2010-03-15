@@ -439,7 +439,7 @@ CCamSnapshot::HandleCameraEventL( TInt              aStatus,
 // ---------------------------------------------------------------------------
 //
 void 
-CCamSnapshot::ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap )
+CCamSnapshot::ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* /*aMask*/ )
   {
   PRINT1( _L("Camera => CCamSnapshot::ImageDecoded, status in: %d"), aStatus );
   if( iSnapshotOn )
@@ -590,7 +590,7 @@ CCamSnapshot::DoStartSnapshotProcessingL( CCamBufferShare* aBuffer,
     CFbsBitmap& bitmap = buffer->BitmapL( 0 );
     PRINT( _L("Camera <> Using bitmap data, just scale..") );
     // Simulate that the bitmap has been decoded now.
-    ImageDecoded( aError, &bitmap );
+    ImageDecoded( aError, &bitmap, NULL );
     });
 
   // If problems with bitmap data, try encoded data.

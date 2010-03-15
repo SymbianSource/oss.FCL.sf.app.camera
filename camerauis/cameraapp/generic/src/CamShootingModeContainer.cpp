@@ -43,6 +43,8 @@
 const TInt KInfoTooltipDelay = 0; // time (milliseconds) delay when showing the tooltip
 const TInt KInfoTooltipDisplayTime = 5000; // maximum time (milliseconds) the tooltip is displayed
 const TInt KExplTxtGranularity = 6;
+const TUint32 KToolbarExtensionBgColor = 0x00000000;
+const TInt KToolBarExtensionBgAlpha = 0x7F;
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -68,6 +70,27 @@ CCamShootingModeContainer::NewL( const TRect&             aRect,
   CleanupStack::Pop( self );
   return self;
   }
+
+
+CCamShootingModeContainer* 
+CCamShootingModeContainer::NewL( const TRect& aRect, 
+                                        TBool aFullySkinned,
+                                         CAknView& aView,
+                                         TCamCameraMode aMode,
+                                         CCamAppController& aController,
+                                         TBool aUserBaseScenes )
+    {
+    CCamShootingModeContainer* self = 
+        new( ELeave ) CCamShootingModeContainer( aMode, 
+                                                 aController,
+                                                 aView, 
+                                                 aUserBaseScenes,
+                                                 aFullySkinned );
+    CleanupStack::PushL( self );
+    self->ConstructL( aRect );
+    CleanupStack::Pop( self );
+    return self;    
+    }
 
 // ---------------------------------------------------------------------------
 // CCamShootingModeContainer::~CCamShootingModeContainer
@@ -155,7 +178,7 @@ CCamShootingModeContainer::ConstructL( const TRect& aRect )
         }                      
 
     // construct the listbox
-	iListBox =	new( ELeave ) CCamSceneListBox( iMode, this, iController );                           
+	iListBox =	new( ELeave ) CCamSceneListBox( iMode, this, iController, iFullySkinned );                           
 	iListBox->ConstructL( iController, this, iTitleArray, iDescArray, 
 	                      iUserBaseScenes  );	
 	iListBox->InitializeL( iController.IntegerSettingValue( scene ) );
@@ -315,11 +338,13 @@ CCamShootingModeContainer::CCamShootingModeContainer(
         TCamCameraMode aMode,
         CCamAppController& aController,
         CAknView& aView,
-        TBool aUserBaseScenes )
+        TBool aUserBaseScenes,
+        TBool aFullySkinned )
 : CCamContainerBase( aController, aView ),
     iListBox( NULL ),
     iMode( aMode ), 
     iUserBaseScenes( aUserBaseScenes ),
+    iFullySkinned( aFullySkinned ),
     iTooltipController( NULL ),
     iListboxTitle( NULL ),
     iTooltipIndex( -1 ),
@@ -498,11 +523,35 @@ void CCamShootingModeContainer::Draw( const TRect& aRect ) const
     CWindowGc& gc = SystemGc();
     if ( CamUtility::IsNhdDevice() )
         {
+        TRgb color;
+        if( iFullySkinned )
+            {
         MAknsSkinInstance* skin = AknsUtils::SkinInstance();
         AknsDrawUtils::Background( skin, iBgContext, gc, aRect );
-        TRgb color;
         AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors,
                                                 EAknsCIQsnTextColorsCG6 );  
+            }
+        else
+            {            
+            // Fill control with transparency bg colour
+            gc.SetPenStyle( CGraphicsContext::ENullPen );
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            color = TRgb( 0,0 );
+            gc.SetBrushColor( color );
+            gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+            gc.DrawRect( aRect );
+            gc.SetBrushColor( color );
+            gc.DrawRect( iTitleTextRectLayout.TextRect() );            
+            gc.SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
+            gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+            gc.DrawRect( TRect( iLayoutAreaRect.iTl.iX,
+                                iLayoutAreaRect.iTl.iY,
+                                iLayoutAreaRect.iBr.iX,
+                                iTitleTextRectLayout.TextRect().iBr.iY ) );
+            
+            gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+            color = TRgb( KRgbWhite );
+            }
         iTitleTextRectLayout.DrawText( gc, *iListboxTitle, ETrue, color ); 
         }
     else

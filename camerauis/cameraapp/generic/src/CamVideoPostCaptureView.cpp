@@ -24,6 +24,7 @@
 #include <sendnorm.rsg>
 #include <sendui.h>
 #include <akntoolbar.h>
+#include <aknbutton.h>
 #ifndef __WINS__
   //#include <SFIUtilsAppInterface.h>
   #include <aknnotewrappers.h>  // CAknInformationNote
@@ -233,8 +234,7 @@ void CCamVideoPostCaptureView::DoActivateL(
         }
 
     CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );
-
-    if ( iController.IsTouchScreenSupported() )
+    /*if ( iController.IsTouchScreenSupported() )
         {
         if ( appUi->IsSecondCameraEnabled() )
             {
@@ -264,11 +264,15 @@ void CCamVideoPostCaptureView::DoActivateL(
                 CreateAndSetToolbarL( R_CAM_VIDEO_POSTCAPTURE_TOOLBAR );
                 }
             }
-        }
+        }*/
 
     iAiwServiceHandler->Reset();
     iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ),
             R_CAM_SHARE_ON_OVI_INTEREST );
+    
+    // SHARE_AIW
+    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID),
+                                     R_CAM_AIW_VIEW_INTEREST );
 
     CCamPostCaptureViewBase::DoActivateL(
             aPreViewId, aCustomMessageId, aCustomMessage );
@@ -330,6 +334,8 @@ void CCamVideoPostCaptureView::ConstructL()
     CCamPostCaptureViewBase::ConstructL();
 
     iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ), R_CAM_SHARE_ON_OVI_INTEREST );
+    // SHARE_AIW
+    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), R_CAM_AIW_VIEW_INTEREST );
 
     PRINT( _L("Camera <= CCamVideoPostCaptureView::ConstructL"))
     }
@@ -493,6 +499,11 @@ void CCamVideoPostCaptureView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane*
                 ECamCmdSendToCallerMultimedia, !showSendToCaller );
             }
 
+        if(iController.IntegerSettingValue(ECamSettingItemVideoEditorSupport))
+            {
+            showSend = ETrue;
+            }
+        
         if( aMenuPane->MenuItemExists( ECamCmdSend, itemPos ) )
             {
             aMenuPane->SetItemDimmed(
@@ -556,14 +567,50 @@ void CCamVideoPostCaptureView::DynInitToolbarL( TInt aResourceId,
     (void)aResourceId; // remove compiler warning
 
     // fixed toolbar is used only with touch devices
-    if ( iController.IsTouchScreenSupported() && iEmbedded && aToolbar )
+    if ( iController.IsTouchScreenSupported() && aToolbar )
         {
         // HideItem will not do anything if a button for the given
         // command ID is not found.
-        aToolbar->HideItem( ECamCmdSend, ETrue, EFalse );
-        aToolbar->HideItem( ECamCmdDelete, ETrue, EFalse );
-        aToolbar->HideItem( ECamCmdOneClickUpload, ETrue, EFalse );
-        aToolbar->HideItem( ECamCmdPlay, ETrue, EFalse );
+		if( iEmbedded )
+			{
+			aToolbar->HideItem( ECamCmdSend, ETrue, EFalse );
+			aToolbar->HideItem( ECamCmdEdit, ETrue, EFalse );
+			aToolbar->HideItem( ECamCmdDelete, ETrue, EFalse );
+			aToolbar->HideItem( ECamCmdOneClickUpload, ETrue, EFalse );
+			aToolbar->HideItem( ECamCmdPlay, ETrue, EFalse );
+			}
+        else
+			{
+            if(iController.IntegerSettingValue(ECamSettingItemVideoEditorSupport))
+                {
+                aToolbar->RemoveItem( ECamCmdSend );
+                CAknButton* editButton = dynamic_cast<CAknButton*>(aToolbar->ControlOrNull( ECamCmdEdit ));
+                if( editButton )
+                    {
+                    CAknButtonState* state = editButton->State();
+                    if( state )
+                        {
+                        HBufC* helpText = StringLoader::LoadLC( R_QTN_LCAM_TT_VIDEO_EDITOR );
+                        state->SetHelpTextL(*helpText);
+                        CleanupStack::PopAndDestroy(helpText);
+                        }
+                    }
+                }
+            else
+                {
+                aToolbar->RemoveItem( ECamCmdEdit );
+                }
+            
+            if(iOneClickUploadUtility->OneClickUploadSupported())
+                {
+                aToolbar->RemoveItem( ECamCmdPhotos );
+                }
+            else
+                {
+                aToolbar->RemoveItem( ECamCmdOneClickUpload );
+                }
+            
+			}
         }
 
     PRINT2( _L("Camera <= CCamVideoPostCaptureView::DynInitToolbarL(%d, 0x%X)" ), aResourceId, aToolbar );

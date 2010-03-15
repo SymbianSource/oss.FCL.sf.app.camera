@@ -681,10 +681,7 @@ CCamStaticSettingsModel::MapSettingItem2CRKey( TCamSettingItemIds aSettingId,
 
       case ECamSettingItemImageToolbarItems:        crKey = KCamCrImageToolbarItems;        break;
       case ECamSettingItemImageToolbarDefaultItems: crKey = KCamCrImageToolbarDefaultItems; break;
-      case ECamSettingItemContinuousAutofocus: 
-          crKey = KCamCrContinuousAutofocus;
-          break;
-
+      case ECamSettingItemContinuousAutofocus:      crKey = KCamCrContinuousAutofocus;      break;
       default:                                      CamPanic( ECamPanicUnknownSettingItem );
                                                     break;
       }
@@ -732,6 +729,8 @@ CCamStaticSettingsModel::MapSettingItem2CRKey( TCamSettingItemIds aSettingId,
       case ECamSettingItemDefaultAlbumId:     crKey = KCamCrDefaultAlbumId;     break;
       case ECamSettingItemDefaultAlbumName:   crKey = KCamCrDefaultAlbumTitle;  break;
       case ECamSettingItemRecLocation:        crKey = KCamCrPhotoStoreLocation; break;
+      case ECamSettingItemPhotoEditorSupport: crKey = KCamCrPhotoEditorSupport; break;
+      case ECamSettingItemVideoEditorSupport: crKey = KCamCrVideoEditorSupport; break;
       default:                                CamPanic( ECamPanicUnknownSettingItem );
                                               break;
       }
@@ -753,6 +752,7 @@ CCamStaticSettingsModel::MapSettingItem2CRKey( TCamSettingItemIds aSettingId,
       case ECamSettingItemUserSceneImageSharpness:    crKey = KCamCrUserSceneImageSharpness;    break;
       case ECamSettingItemUserSceneColourSaturation:  crKey = KCamCrUserSceneColourSaturation;  break;
       case ECamSettingItemUserSceneLightSensitivity:  crKey = KCamCrUserSceneLightSensitivity;  break;
+      case ECamSettingItemUserSceneDefault:           crKey = KCamCrUserSceneDefault;           break; 
       default:                                        CamPanic( ECamPanicUnknownSettingItem );
                                                       break;
       }

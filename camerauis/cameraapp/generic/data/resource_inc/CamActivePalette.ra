@@ -69,7 +69,7 @@ RESOURCE CAM_AP_POST_CAPTURE_ITEM r_cam_ap_properties
 RESOURCE CAM_AP_POST_CAPTURE_ITEM r_cam_ap_one_click_upload
     {
     text = ""; // Updated at run-time
-    bitmap_id = EMbmCameraappQgn_indi_cam4_tb_upload;
+    bitmap_id = EMbmCameraappQgn_indi_cam4_tb_oneclick_active;
     }
 
 // End of File
