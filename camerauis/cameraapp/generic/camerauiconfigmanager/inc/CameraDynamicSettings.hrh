@@ -132,12 +132,12 @@ enum TCamDynamicSettings
 // Photo scene settings 
 const TInt KCamColorToneEnums[] =
   {
-    { ECamColourFilterColour },
-    { ECamColourFilterBlackAndWhite },
-    { ECamColourFilterSepia },
-    { ECamColourFilterNegative },
-    { ECamColourFilterVivid },
-    { KCamLastSettingItem }
+    ECamColourFilterColour,
+    ECamColourFilterBlackAndWhite,
+    ECamColourFilterSepia,
+    ECamColourFilterNegative,
+    ECamColourFilterVivid,
+    KCamLastSettingItem
   };
 
 const TUint16* const KCamColorToneStrings[] =
@@ -156,12 +156,12 @@ const TUint16* const KCamColorToneStrings[] =
 
 const TInt KCamWhiteBalanceEnums[] =
   {
-    { ECamWhiteBalanceAWB },
-    { ECamWhiteBalanceDaylight },
-    { ECamWhiteBalanceCloudy },
-    { ECamWhiteBalanceTungsten },
-    { ECamWhiteBalanceFlourescent },
-    { KCamLastSettingItem }
+    ECamWhiteBalanceAWB,
+    ECamWhiteBalanceDaylight,
+    ECamWhiteBalanceCloudy,
+    ECamWhiteBalanceTungsten,
+    ECamWhiteBalanceFlourescent,
+    KCamLastSettingItem
   };
 
 const TUint16* const KCamWhiteBalanceStrings[] =
@@ -180,11 +180,11 @@ const TUint16* const KCamWhiteBalanceStrings[] =
 */
 const TInt KCamFlashModeEnums[] =
   {
-    { ECamFlashAuto       },
-    { ECamFlashForced     },
-    { ECamFlashAntiRedEye },
-    { ECamFlashOff        },
-    { KCamLastSettingItem }
+    ECamFlashAuto,
+    ECamFlashForced,
+    ECamFlashAntiRedEye,
+    ECamFlashOff,
+    KCamLastSettingItem
   };
 
 const TUint16* const KCamFlashModeStrings[] =
@@ -204,56 +204,56 @@ const TUint16* const KCamFlashModeStrings[] =
  */
  const TInt KCamSceneModeEnums[] =
     {
-      { ECamSceneAuto       },
-      { ECamSceneUser       },
-      { ECamSceneMacro      },
-      { ECamScenePortrait   },
-      { ECamSceneScenery    },
-      { ECamSceneSports     },
-      { ECamSceneNight      },
-      { ECamSceneNightPortrait },
-      { ECamSceneNormal },
-      { ECamSceneLowLight },
+      ECamSceneAuto,
+      ECamSceneUser,
+      ECamSceneMacro,
+      ECamScenePortrait,
+      ECamSceneScenery,
+      ECamSceneSports,
+      ECamSceneNight,
+      ECamSceneNightPortrait,
+      ECamSceneNormal,
+      ECamSceneLowLight,
       // Exposure modes for each scene
-      { ECamSceneAEModeAuto },
-      { ECamSceneAEModeNight },
-      { ECamSceneAEModeBacklight },
-      { ECamSceneAEModeCenter },
-      { ECamSceneAEModeSports },
+      ECamSceneAEModeAuto,
+      ECamSceneAEModeNight,
+      ECamSceneAEModeBacklight,
+      ECamSceneAEModeCenter,
+      ECamSceneAEModeSports,
       // AF modes for each scene
-      { ECamSceneAFModeMacro      },
-      { ECamSceneAFPortrait       },
-      { ECamSceneAFModeNormal     },
-      { ECamSceneAFModeInfinity   },
-      { ECamSceneAFModeHyperfocal },
-      { ECamSceneAFModeContinuous },
+      ECamSceneAFModeMacro,
+      ECamSceneAFPortrait,
+      ECamSceneAFModeNormal,
+      ECamSceneAFModeInfinity,
+      ECamSceneAFModeHyperfocal,
+      ECamSceneAFModeContinuous,
       // flash mode
-      { ECamFlashAuto       },
-      { ECamFlashForced     },
-      { ECamFlashAntiRedEye },
-      { ECamFlashOff        },
+      ECamFlashAuto,
+      ECamFlashForced,
+      ECamFlashAntiRedEye,
+      ECamFlashOff,
       // white balance ecam
-      { ECamWhiteBalanceAWB },
-      { ECamWhiteBalanceDaylight },
-      { ECamWhiteBalanceCloudy },
-      { ECamWhiteBalanceTungsten },
-      { ECamWhiteBalanceFlourescent },
+      ECamWhiteBalanceAWB,
+      ECamWhiteBalanceDaylight,
+      ECamWhiteBalanceCloudy,
+      ECamWhiteBalanceTungsten,
+      ECamWhiteBalanceFlourescent,
       // light sensitivity enums
-      { ECamLightSensitivityAuto },
-      { ECamLightSensitivityLow },
-      { ECamLightSensitivityLowMed },
-      { ECamLightSensitivityMed },
-      { ECamLightSensitivityMedHigh },
-      { ECamLightSensitivityHigh },
+      ECamLightSensitivityAuto,
+      ECamLightSensitivityLow,
+      ECamLightSensitivityLowMed,
+      ECamLightSensitivityMed,
+      ECamLightSensitivityMedHigh,
+      ECamLightSensitivityHigh,
       // sharpness modes that ui supports
-      { ECamImageSharpnessNorm },
-      { ECamImageSharpnessSoft },
-      { ECamImageSharpnessHard },
+      ECamImageSharpnessNorm,
+      ECamImageSharpnessSoft,
+      ECamImageSharpnessHard,
       // contrast modes that ui supports
-      { ECamContrastNorm },
-      { ECamContrastPlus },
-      { ECamContrastNeg },
-      { KCamLastSettingItem }
+      ECamContrastNorm,
+      ECamContrastPlus,
+      ECamContrastNeg,
+      KCamLastSettingItem
     }; 
  
 /*
