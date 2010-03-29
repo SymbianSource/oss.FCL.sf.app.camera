@@ -393,7 +393,7 @@ class CCamAppUi : public CCamAppUiBase,
         * 
         * @return ETrue if wait dialog exist
         */
-        TBool CCamAppUi::IsWaitDialog() const;
+        TBool IsWaitDialog() const;
 
         /**
         * Returns the active camera
