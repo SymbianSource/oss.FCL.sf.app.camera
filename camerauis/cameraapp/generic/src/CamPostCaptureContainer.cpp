@@ -294,14 +294,21 @@ void CCamPostCaptureContainer::Draw( const TRect& /*aRect*/ ) const
         }
     // Draw the current image - snapshot or thumbnail
     CWindowGc& gc = SystemGc();
-    gc.SetFaded( EFalse );
-
-    gc.SetBrushColor( KRgbBlack );
-    gc.Clear();
-
     const CFbsBitmap* snapshot = iController.SnapshotImage();
     TRect containerRect = Rect();
 
+    TBool lateOperation = ( ECamCapturing == iController.CurrentOperation() 
+                            || ECamCompleting == iController.CurrentOperation() );
+
+    if ( iView.Id().iUid != ECamViewIdVideoPostCapture &&
+       ( iController.ActiveCamera() != ECamActiveCameraSecondary ||
+         lateOperation ) )
+         {
+         gc.SetFaded( EFalse );
+         gc.SetBrushColor( KRgbBlack );
+         gc.Clear( iProcessingTextLayout.TextRect() );   
+         }
+                       
     // If snapshot contains a bitmap
     if ( snapshot )
         {
@@ -341,30 +348,26 @@ void CCamPostCaptureContainer::Draw( const TRect& /*aRect*/ ) const
         OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMPOSTCAPTURECONTAINER_DRAW, "e_CAM_APP_SNAPSHOT_DRAW 0" );    //CCORAPP_SNAPSHOT_DRAW_END
         }
 
-  TBool lateOperation = ( ECamCapturing == iController.CurrentOperation() 
-                       || ECamCompleting == iController.CurrentOperation() );
-
-  if( iProcessingText &&  //iProcessingBg && 
-      iController.ActiveCamera() != ECamActiveCameraSecondary && 
-      lateOperation
-    )  
-    {
-    PRINT( _L("Camera <> CCamPostCaptureContainer: draw processing text..") );
-    // When iProcessingText exists (and we are in correct state), the processing
-    // image text needs to be drawn.
-    //iProcessingBg->Draw( gc, Rect() );
+    if( iProcessingText &&  //iProcessingBg && 
+        iController.ActiveCamera() != ECamActiveCameraSecondary && 
+        lateOperation )  
+        {
+        PRINT( _L("Camera <> CCamPostCaptureContainer: draw processing text..") );
+        // When iProcessingText exists (and we are in correct state), the processing
+        // image text needs to be drawn.
+        //iProcessingBg->Draw( gc, Rect() );
     
-    gc.SetBrushColor( KRgbWhite );
-    gc.SetBrushStyle( CGraphicsContext::ENullBrush );
-    iProcessingTextLayout.DrawText( gc, *iProcessingText, ETrue, KRgbBlack ); 
-    }
+        gc.SetBrushColor( KRgbWhite );
+        gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+        iProcessingTextLayout.DrawText( gc, *iProcessingText, ETrue, KRgbBlack ); 
+        }
 
 	if( iBatteryPaneController )
 		{
 		if( iPaneInUse == ECamPaneCounter )
-	    		{
-	    		iNaviCounterControl->DrawNaviCtr( gc );
-	    		}
+	        {
+	    	iNaviCounterControl->DrawNaviCtr( gc );
+	    	}
 	    // Draw the battery pane
  	 	iBatteryPaneController->Draw( gc );
 		}

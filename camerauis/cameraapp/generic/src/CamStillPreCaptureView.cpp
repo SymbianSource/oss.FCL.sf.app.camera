@@ -309,6 +309,14 @@ CCamStillPreCaptureView::HandleForegroundEventL( TBool aForeground )
     PRINT( _L("Camera <> CCamStillPreCaptureView::HandleForegroundEventL: to foreground") );
     PRINT1( _L("Camera <> CCamStillPreCaptureView .. Current controller operation [%s]"), KCamCaptureOperationNames[iController.CurrentOperation()] );
     PRINT1( _L("Camera <> CCamStillPreCaptureView .. Current controller mode      [%s]"), KCamModeNames[iController.CurrentMode()] );
+    if( ECamViewStateStandby == appUi->CurrentViewState() )
+      {
+      CAknToolbar* fixedToolbar = appUi->CurrentFixedToolbar();
+      if( fixedToolbar )
+        {
+        fixedToolbar->SetToolbarVisibility( EFalse );    
+        }
+      }
 
 
     if( iController.SequenceCaptureInProgress() )
@@ -1275,7 +1283,7 @@ void CCamStillPreCaptureView::DynInitToolbarL( TInt aResourceId,
         UpdateToolbarIconsL();
         if( aToolbar )
                 {            
-                if ( iEmbedded && appUi->IsSecondCameraEnabled() )
+                if ( iEmbedded /* && appUi->IsSecondCameraEnabled()*/ )
                     {
 					aToolbar->SetItemDimmed(ECamCmdNewVideo, ETrue, ETrue);
                     }

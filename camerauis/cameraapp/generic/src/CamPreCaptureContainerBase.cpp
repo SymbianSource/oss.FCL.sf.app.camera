@@ -61,6 +61,7 @@
 #endif
 #include "camconfiguration.h"
 #include "CameraUiConfigManager.h"
+#include "camstartuplogo.h"
 
 
 // CONSTANTS
@@ -106,6 +107,8 @@ CCamPreCaptureContainerBase::~CCamPreCaptureContainerBase()
     }
   delete iZoomTimer;
   delete iVfGridDrawer;
+
+  delete iStartupLogo;
 
   if ( iController.UiConfigManagerPtr() && 
        iController.UiConfigManagerPtr()->IsAutoFocusSupported() )
@@ -294,7 +297,12 @@ void CCamPreCaptureContainerBase::BaseConstructL( const TRect& aRect )
   iController.SetViewfinderWindowHandle( &Window() );
   appUi->SetViewFinderInTransit(EFalse);
   iController.StartIdleTimer();
-  
+
+  if (appUi->StartupLogoController())
+    {
+    TRAP_IGNORE(iStartupLogo = CCamStartupLogo::NewL(*appUi->StartupLogoController(), aRect));
+    }
+
   PRINT( _L("Camera <= CCamPreCaptureContainerBase::BaseConstructL ") );
   }
 
@@ -1164,6 +1172,39 @@ CCamPreCaptureContainerBase
           else
             {
             PRINT_FRQ( _L("Camera <> CCamPreCaptureContainerBase: iBitmapGc == NULL"));
+            //in DSA case draw snapshot already here if available
+            const CFbsBitmap* snapshot = iController.SnapshotImage();
+            if (snapshot)
+              {
+              TSize snapshotSize = snapshot->SizeInPixels();
+              TRect bmCropRect( snapshotSize );
+        
+              // Get the required snapshot layout rect
+              TRect vfRect( ViewFinderFrameRect() ); 
+
+              RWindow window = Window();
+              window.Invalidate( Rect() );
+              window.BeginRedraw( Rect() ); 
+              gc.BitBlt( vfRect.iTl, snapshot, bmCropRect );
+              
+              TBool lateOperation = ( ECamCapturing == iController.CurrentOperation() 
+                                     || ECamCompleting == iController.CurrentOperation() );
+
+              if( iProcessingText &&
+                  iController.ActiveCamera() != ECamActiveCameraSecondary && 
+                  lateOperation )
+                {  
+                gc.SetBrushColor( KRgbWhite );
+                gc.SetBrushStyle( CGraphicsContext::ENullBrush );
+                iProcessingTextLayout.DrawText( gc, *iProcessingText, ETrue, KRgbBlack ); 
+                }
+              
+              if( iBatteryPaneController )
+                {
+                iBatteryPaneController->Draw( gc );
+                }
+              window.EndRedraw();
+              }   
             }
           }
         DeactivateGc();

@@ -308,8 +308,16 @@ void CCamVideoPostCaptureView::DoActivateL(
             {   
             }
         }
-    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ), 
-            R_CAM_SET_AS_RING_TONE_INTEREST );
+    if ( iController.IntegerSettingValue(ECamSettingItemVideoEditorSupport) )
+        {
+        iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ), 
+                R_CAM_SET_AS_RING_TONE_INTEREST_EDITOR );
+        }
+    else
+        {
+        iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ), 
+                R_CAM_SET_AS_RING_TONE_INTEREST );
+        }
     }
 
 // ---------------------------------------------------------------------------

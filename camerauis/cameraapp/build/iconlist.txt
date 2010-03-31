@@ -162,3 +162,4 @@
 -c8,8 qgn_bg_lcam_vid_postcap_play.svg
 -c8,8 qgn_bg_lcam_vid_postcap_play_pressed.svg
 -c8,1 qgn_indi_mg_tb_edit.svg
+-c8,8 qgn_menu_cams.svg

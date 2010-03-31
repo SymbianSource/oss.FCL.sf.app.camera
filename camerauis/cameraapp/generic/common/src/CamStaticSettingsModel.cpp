@@ -731,6 +731,8 @@ CCamStaticSettingsModel::MapSettingItem2CRKey( TCamSettingItemIds aSettingId,
       case ECamSettingItemRecLocation:        crKey = KCamCrPhotoStoreLocation; break;
       case ECamSettingItemPhotoEditorSupport: crKey = KCamCrPhotoEditorSupport; break;
       case ECamSettingItemVideoEditorSupport: crKey = KCamCrVideoEditorSupport; break;
+      case ECamSettingItemRemovePhoneMemoryUsage: crKey = KCamCrRemovePhoneMemoryUsage; break;
+      
       default:                                CamPanic( ECamPanicUnknownSettingItem );
                                               break;
       }

@@ -68,6 +68,8 @@ class CCamCollectionManagerAO;
 class CCamStillPreCaptureView;
 class CCamVideoPreCaptureView;
 class CCamMemoryMonitor;
+class CCamStartupLogoController;
+
 
 // ===========================================================================
 // CLASS DECLARATION
@@ -1014,9 +1016,14 @@ class CCamAppUi : public CCamAppUiBase,
         * @return ETrue if memory available for capturing
         **/
         TBool IsMemoryAvailableForCapturing() const;
-        
 
-            
+        /**
+        * Get a pointer to the startup logo controller.
+        * AppUi keeps ownership.
+        * @return Pointer to CCamStartupLogoController or NULL.
+        */
+        CCamStartupLogoController* StartupLogoController();
+
     private: // New functions
 
       /**
@@ -1805,6 +1812,8 @@ class CCamAppUi : public CCamAppUiBase,
         TInt iPortraitScreenMode;
         
         TBool iMemoryAvailableForCapturing;
+
+        CCamStartupLogoController* iStartupLogoController;
         };
 
 // ===========================================================================

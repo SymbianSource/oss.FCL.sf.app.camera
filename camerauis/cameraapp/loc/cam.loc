@@ -4246,5 +4246,11 @@ CHARACTER_SET UTF8
 //
 #define qtn_lcam_shuttersound_off "Off"
 
+//d: This popup note is displayed when both the mass storage 
+//d: and memory card become inaccessible. For instance when 
+//d: USB is connected in mass torage mode
+//l: popup_note_window
+#define qtn_lcam_storage_inaccessible_note "All storage inaccessible at the moment. Please try again later"
+
 // end of file
 

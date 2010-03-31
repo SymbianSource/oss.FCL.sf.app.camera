@@ -157,8 +157,6 @@ RESOURCE CBA R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE
         };
     }
 
-
-//ME:START
 RESOURCE CBA R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT
     {
     flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
@@ -181,8 +179,6 @@ RESOURCE CBA R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT
             }
         };
     }
-//ME:END
-
 
 //----------------------------------------------------
 //
@@ -2923,6 +2919,11 @@ RESOURCE ARRAY r_cam_capture_tone_text_and_value_array
             {
             value = ECamSettTone4;
             text = qtn_lcam_set_camera_4;
+            },
+        AVKON_ENUMERATED_TEXT
+            {
+            value = ECamSettToneOff;
+            text = qtn_lcam_shuttersound_off;
             }
         };
     }

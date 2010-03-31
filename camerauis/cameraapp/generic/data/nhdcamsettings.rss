@@ -1124,7 +1124,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar_landscape
     flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
-        TBAR_CTRL
+        /*TBAR_CTRL
             {
             type = EAknCtButton;
             id = ECamCmdCaptureImage;
@@ -1143,8 +1143,9 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar_landscape
                         }
                     };
                 };
-            },
-        TBAR_CTRL
+            },*/
+        
+         TBAR_CTRL
             {
             type = EAknCtButton;
             id = ECamCmdNewVideo;
@@ -1165,25 +1166,45 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar_landscape
                 };
             },
          TBAR_CTRL
-            {
-            type = EAknCtButton;
-            id = ECamCmdSwitchCamera;
-            control = AVKON_BUTTON
-                {
-                flags = KAknButtonNoFrame; 
-                states =
-                    {
-                    AVKON_BUTTON_STATE
-                        {
-                        bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_tb_cam4_goto_main;
-                        bmpmask = EMbmCameraappQgn_indi_tb_cam4_goto_main_mask;
-                        helptxt = qtn_lcam_tt_camera_main;
-                        extension = r_cam_ext_qgn_indi_cam4_mode_camera;
-                        }
-                    };
-                };
-            }
+             {
+             type = EAknCtButton;
+             id = ECamCmdPhotos;
+             control = AVKON_BUTTON
+                 {
+                 flags = KAknButtonNoFrame; 
+                 states =
+                     {
+                     AVKON_BUTTON_STATE
+                         {
+                         bmpfile = CAMERAAPP_BITMAP_FILE;
+                         bmpid = EMbmCameraappQgn_indi_cam4_goto_gallery;
+                         bmpmask = EMbmCameraappQgn_indi_cam4_goto_gallery_mask;
+                         helptxt = qtn_lcam_tt_go_to_photos;
+                         extension = r_cam_ext_qgn_indi_cam4_goto_photos;
+                         }
+                     };
+                 };
+             },   
+         TBAR_CTRL
+             {
+             type = EAknCtButton;
+             id = ECamCmdSwitchCamera;
+             control = AVKON_BUTTON
+                 {
+                 flags = KAknButtonNoFrame; 
+                 states =
+                     {
+                     AVKON_BUTTON_STATE
+                         {
+                         bmpfile = CAMERAAPP_BITMAP_FILE;
+                         bmpid = EMbmCameraappQgn_indi_tb_cam4_goto_main;
+                         bmpmask = EMbmCameraappQgn_indi_tb_cam4_goto_main_mask;
+                         helptxt = qtn_lcam_tt_camera_main;
+                         extension = r_cam_ext_qgn_indi_cam4_mode_camera;
+                         }
+                     };
+                 };
+             }  
         };
     }
 
@@ -1276,7 +1297,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_landscape
     flags = KAknToolbarFixed | KAknToolbarDsaMode | KAknToolbarNoBackground | KAknToolbarTransparent;
     items =
         {
-        TBAR_CTRL
+        /*TBAR_CTRL
             {
             type = EAknCtButton;
             id = ECamCmdRecord;
@@ -1295,7 +1316,8 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_landscape
                         }
                     };
                 };
-            },
+            },*/
+                
         TBAR_CTRL
             {
             type = EAknCtButton;
@@ -1316,7 +1338,27 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_landscape
                     };
                 };
             },
-         TBAR_CTRL
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECamCmdPhotos;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame; 
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_cam4_goto_gallery;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_goto_gallery_mask;
+                        helptxt = qtn_lcam_tt_go_to_photos;
+                        extension = r_cam_ext_qgn_indi_cam4_goto_photos;
+                        }
+                    };
+                };
+            },   
+        TBAR_CTRL
             {
             type = EAknCtButton;
             id = ECamCmdSwitchCamera;
@@ -1335,7 +1377,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_landscape
                         }
                     };
                 };
-            }
+            }  
         };
     }
      
@@ -1357,6 +1399,26 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar
         TBAR_CTRL
             {
             type = EAknCtButton;
+            id = ECamCmdNewVideo;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_cam4_video;
+                        bmpmask = EMbmCameraappQgn_indi_cam4_video_mask;
+                        helptxt = qtn_lcam_tt_video_mode;
+                        extension = r_cam_ext_qgn_indi_cam4_video;
+                        }
+                    };
+                };
+            },
+        /*TBAR_CTRL
+            {
+            type = EAknCtButton;
             id = ECamCmdCaptureImage;
             control = AVKON_BUTTON
                 {
@@ -1373,7 +1435,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar
                         }
                     };
                 };
-            },
+            },*/    
         TBAR_CTRL
             {
             type = EAknCtButton;
@@ -1619,7 +1681,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar
                                     }
                                 };
                             };
-                        },
+                        }/*,
                         TBAR_CTRL
                         {
                         type = EAknCtButton;
@@ -1639,7 +1701,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar
                                     }
                                 };
                             };
-                        }                        
+                        }*/                        
                     };
                 };
             }
@@ -2232,6 +2294,26 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_videolight
         TBAR_CTRL
             {
             type = EAknCtButton;
+            id = ECamCmdNewPhoto;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame; 
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_cam4_camera; 
+                        bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask; 
+                        helptxt = qtn_lcam_tt_still_mode;
+                        extension = r_cam_ext_qgn_indi_cam4_camera;
+                        }
+                    };
+                };
+            },        
+        /*TBAR_CTRL
+            {
+            type = EAknCtButton;
             id = ECamCmdRecord;
             control = AVKON_BUTTON
                 {
@@ -2248,7 +2330,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_videolight
                         }
                     };
                 };
-            },
+            },*/
         TBAR_CTRL
             {
             type = EAknCtButton;
@@ -2365,7 +2447,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_videolight
                                     }
                                 };
                             };
-                        },
+                        }/*,
                     TBAR_CTRL
                         {
                         type = EAknCtButton;
@@ -2385,7 +2467,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_videolight
                                     }
                                 };
                             };
-                        }                        
+                        }*/                        
                     };
                 };
             }
@@ -2409,6 +2491,26 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
         TBAR_CTRL
             {
             type = EAknCtButton;
+            id = ECamCmdNewPhoto;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonNoFrame; 
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        bmpfile = CAMERAAPP_BITMAP_FILE;
+                        bmpid = EMbmCameraappQgn_indi_cam4_camera; 
+                        bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask; 
+                        helptxt = qtn_lcam_tt_still_mode;
+                        extension = r_cam_ext_qgn_indi_cam4_camera;
+                        }
+                    };
+                };
+            },        
+        /*TBAR_CTRL
+            {
+            type = EAknCtButton;
             id = ECamCmdRecord;
             control = AVKON_BUTTON
                 {
@@ -2425,7 +2527,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
                         }
                     };
                 };
-            },
+            },*/
         TBAR_CTRL
             {
             type = EAknCtButton;
@@ -2438,7 +2540,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
                     AVKON_BUTTON_STATE
                         {
                         //txt = qtn_lcam_tb_scenes;
-			helptxt = qtn_lcam_tt_goto_scenemode_settings;
+                        helptxt = qtn_lcam_tt_goto_scenemode_settings;
                         }
                     };
                 };
@@ -2523,7 +2625,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
                                     }
                                 };
                             };
-                        },
+                        }/*,
                     TBAR_CTRL
                         {
                         type = EAknCtButton;
@@ -2543,7 +2645,7 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
                                     }
                                 };
                             };
-                        }                        
+                        }*/                        
                     };
                 };
             }

@@ -75,8 +75,6 @@ class CCamInfoListBoxContainer : public CCamContainerBase,
                                                  TInt aTitleResource,
                                                  TBool aSkinnedBackGround = ETrue );
         
-        //ME:END
-
 
         /**
         * Destructor.

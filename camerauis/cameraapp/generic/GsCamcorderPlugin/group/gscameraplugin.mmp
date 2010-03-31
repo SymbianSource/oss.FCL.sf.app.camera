@@ -57,6 +57,9 @@ SOURCE              CamLocationSettingPage.cpp
 SOURCE              GSCamDefaultNameSettingItem.cpp
 SOURCE              GSCamdefaultnamesettingpage.cpp
 
+SOURCE 	            GSCamCaptureToneSettingItem.cpp
+
+
 SOURCEPATH          ../../common/src
 SOURCE              CamVideoQualityLevel.cpp
 SOURCE              CamStaticSettingsModel.cpp

@@ -341,3 +341,29 @@ RESOURCE AIW_INTEREST r_cam_set_as_ring_tone_interest
             }
         };
     }
+
+//----------------------------------------------------
+//   
+//    r_cam_set_as_ring_tone_interest_editor
+//    This resource is used to register an interest in 
+//    assinging video to Application InterWork (AIW)
+//    services with Photos editor
+//
+//----------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_cam_set_as_ring_tone_interest_editor
+    {
+    items = 
+        {
+        AIW_CRITERIA_ITEM   // 
+            {
+            id = KAiwCmdAssign;
+            serviceCmd = KAiwCmdAssign;        
+            contentType = "MediaEditor/*";
+            serviceClass = KAiwClassMenu; 
+            //maxProviders = 1;         
+            loadOptions = AIW_OPTIONS_ROM_ONLY;         
+            //defaultProvider = 0x10281F18;       
+            }
+        };
+    }

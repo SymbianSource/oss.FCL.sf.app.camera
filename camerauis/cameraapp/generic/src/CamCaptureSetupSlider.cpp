@@ -325,7 +325,6 @@ CCamCaptureSetupSlider* CCamCaptureSetupSlider::NewL( const CCoeControl* aParent
     CCamCaptureSetupSlider* self = 
         new( ELeave ) CCamCaptureSetupSlider( aObserver, aSettingItem, aSteps,
                 aFullySkinned );
-    //ME:END    
     CleanupStack::PushL( self );
     self->ConstructL( aParent );
     CleanupStack::Pop( self );
@@ -643,7 +642,7 @@ void CCamCaptureSetupSlider::TouchLayoutL()
         {
         // Set the shaft layout and icon size for Contrast slider
         iShaftLayout.LayoutRect( sliderRect, 
-                              AknLayoutScalable_Apps::cset_slider_pane( 5 )  );
+                              AknLayoutScalable_Apps::cset_slider_pane( 7 )  );
         // set Contrast slider legend layouts      
         TouchContrastLayoutL( sliderRect ); 
         }   
@@ -1001,7 +1000,7 @@ void CCamCaptureSetupSlider::NonTouchEVLayoutL( const TRect& aParentRect )
 //
 void CCamCaptureSetupSlider::HandlePointerEventL(const TPointerEvent& aPointerEvent)
     {   
-    if(!Rect().Contains(aPointerEvent.iPosition))
+    if( !Rect().Contains(aPointerEvent.iPosition) && iBitmapThumbCurrent != iBitmapThumbSelected )
         {
         return;
         }

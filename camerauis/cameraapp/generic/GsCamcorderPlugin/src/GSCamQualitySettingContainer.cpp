@@ -567,20 +567,33 @@ void CGSCamQualitySettingContainer::DrawStorageIcon( CWindowGc& aGc ) const
     {
     CFbsBitmap* icon = NULL;
     CFbsBitmap* mask = NULL;
-    if ( iStorageLocation == ECamMediaStoragePhone )
+
+    switch( iStorageLocation )
         {
-        icon = iPhoneIcon;
-        mask = iPhoneIconMask;
-        }
-    else if ( iStorageLocation == ECamMediaStorageMassStorage )
-        {
-        icon = iMassStorageIcon;
-        mask = iMassStorageIconMask;
-        }
-    else
-        {
-        icon = iMMCIcon;
-        mask = iMMCIconMask;
+        case ECamMediaStoragePhone:
+            {
+            icon = iPhoneIcon;
+            mask = iPhoneIconMask;
+            }
+            break;
+        case ECamMediaStorageMassStorage:
+            {
+            icon = iMassStorageIcon;
+            mask = iMassStorageIconMask;
+            }
+            break;            
+        case ECamMediaStorageCard:
+            {
+            icon = iMMCIcon;
+            mask = iMMCIconMask;
+            }
+            break;            
+        case ECamMediaStorageNone:
+        default:
+            {
+            //TODO: Get icons when none is available
+            }
+            break;
         }
 
     iLayoutIcon.DrawImage( aGc, icon, mask );

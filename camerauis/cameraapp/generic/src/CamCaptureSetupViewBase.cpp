@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -160,6 +160,7 @@ void CCamCaptureSetupViewBase::HandleCommandL( TInt aCommand )
                 }
             else if ( iInfoListBoxActive )
                 {
+                iController.CancelPreviewChangesL();
                 ExitAllModesL();
                 break;
                 }
@@ -684,6 +685,7 @@ void CCamCaptureSetupViewBase::SwitchToSceneSettingModeL()
     
     appUi->SetToolbarVisibility();
     
+    iForceAvkonCBA = ETrue;
     UpdateCbaL();
     SetTitlePaneTextL();
     appUi->PushDefaultNaviPaneL();
@@ -843,11 +845,11 @@ void CCamCaptureSetupViewBase::CleanupExit( TAny* aAny )
 //
 void CCamCaptureSetupViewBase::ExitSceneSettingModeL()
     {   
-	PRINT( _L( "Camera => CCamCaptureSetupViewBase::ExitSceneSettingModeL" ) );
-    
+    PRINT( _L( "Camera => CCamCaptureSetupViewBase::ExitSceneSettingModeL" ) );
+    iForceAvkonCBA = EFalse;
     if ( !iSceneSettingModeActive )
-		{
-	   	AppUi()->RemoveFromStack( iSceneSettingContainer );  
+        {
+        AppUi()->RemoveFromStack( iSceneSettingContainer );  
 		
         if ( iSceneSettingContainer )
         	{
@@ -919,6 +921,7 @@ void CCamCaptureSetupViewBase::ExitInfoListBoxL()
     // Cleanup the view correctly if a leave occurs
     CleanupStack::PushL( TCleanupItem( CleanupExit, this ) );
     AppUi()->AddToStackL( *this, iContainer );
+    iController.SetViewfinderWindowHandle( &iContainer->Window() );
   	PRINT( _L( "Camera => CCamCaptureSetupViewBase::ExitInfoListBoxL removing iInfoListBoxContainer" ) );
     AppUi()->RemoveFromStack( iInfoListBoxContainer );
     delete iInfoListBoxContainer;

@@ -27,6 +27,7 @@
 #include <AknWaitDialog.h>
 #include <CAknMemorySelectionSettingItemMultiDrive.h>
 #include <driveinfo.h> // DriveInfo
+#include <AknCommonDialogsDynMem.h>
 
 #include "GSCamcorderPlugin.hrh"
 #include "Cam.hrh"
@@ -46,6 +47,7 @@
 #include "CamWaitDialog.h"
 #include "CamLocationSettingItem.h"
 #include "camconfiguration.h"
+#include "GSCamCaptureToneSettingItem.h"
 
 // ========================= MEMBER FUNCTIONS ================================
 
@@ -201,7 +203,7 @@ CAknSettingItem* CGSCamPhotoSettingsList::CreateSettingItemL( TInt aIdentifier )
      case ECamSettingItemPhotoCaptureTone:
             {
             settingItem = new( ELeave ) 
-                CAknEnumeratedTextPopupSettingItem( aIdentifier, valueId );
+                CGSCamCaptureToneSettingItem( aIdentifier, valueId );    
             }
             break;
 
@@ -227,18 +229,27 @@ CAknSettingItem* CGSCamPhotoSettingsList::CreateSettingItemL( TInt aIdentifier )
             // Convert the setting to a memory enum
             iMemVal = static_cast<DriveInfo::TDefaultDrives>
                     ( CamUtility::MapToSettingsListMemory( valueId ) );
-            __ASSERT_DEBUG( iMemVal != KErrNotFound,
-                            CamPanic( ECamPanicUnhandledCreateSettingItem ) );
-
+            
 		    // Get the root path of the default mass storage memory.
-		    TInt driveInt;
-		    TInt err = DriveInfo::GetDefaultDrive( iMemVal, driveInt );
-		    iDrive = static_cast<TDriveNumber>(driveInt);
-
+		    if(iMemVal != KErrNotFound)
+		        {
+                TInt driveInt;
+		        TInt err = DriveInfo::GetDefaultDrive( iMemVal, driveInt );
+		        iDrive = static_cast<TDriveNumber>(driveInt);
+		        }
+		    else
+		        {
+                iDrive = static_cast<TDriveNumber>(0); //Doesn't matter
+		        }
+		    TInt includedMedias = AknCommonDialogsDynMem::EMemoryTypeMMCExternal |
+                                 AknCommonDialogsDynMem::EMemoryTypeInternalMassStorage;   
 		    settingItem = new ( ELeave ) 
 		                  CAknMemorySelectionSettingItemMultiDrive(
 		                                                      aIdentifier,
-                                                              iDrive );
+                                                              iDrive
+                                                              );
+		    static_cast<CAknMemorySelectionSettingItemMultiDrive*>(settingItem)
+		                        ->SetIncludedMediasL(includedMedias);
             }
             break;
  
@@ -329,6 +340,9 @@ void CGSCamPhotoSettingsList::EditItemL( TInt aIndex, TBool aCalledFromMenu )
         {
         iMemVal = static_cast<DriveInfo::TDefaultDrives>(CamUtility::GetDriveTypeFromDriveNumber( iDrive ));
         settingValue = CamUtility::MapFromSettingsListMemory( iMemVal );
+        settingValue = ( (settingValue == ECamMediaStoragePhone) && 
+                         parent->IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage)  )?
+                                 ECamMediaStorageNone:settingValue;
         }
     else if ( editedItem->Identifier() == ECamSettingItemPhotoQuality )
         {

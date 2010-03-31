@@ -43,7 +43,35 @@ RESOURCE TBUF r_cam_standby_camera_unavailable_text
      {
      buf = qtn_lcam_standby_hardware_failure;
      }
-     
+
+//----------------------------------------------------
+//   
+//    r_cam_standby_camera_storage_inaccessible
+//    Text string displayed in standby container
+//    when all storages are inacessible/not ready
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_standby_camera_storage_inaccessible
+     {
+     buf = qtn_lcam_storage_inaccessible_note;
+     }
+
+//----------------------------------------------------
+//   
+//    r_cam_standby_camera_insert_mmc
+//    When a device has no mass memory and memory card is not 
+//    inserted when opening the camera, the user will get a note
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_standby_camera_insert_mmc
+     {
+     buf = qtn_lcam_insert_mmc_note;
+     }
+
+
+
 //----------------------------------------------------
 //   
 //    r_cam_standby_empty_text

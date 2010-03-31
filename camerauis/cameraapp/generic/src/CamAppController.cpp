@@ -2225,7 +2225,7 @@ void CCamAppController::CancelFocusAndCapture()
    && ECamCompleting  != CurrentOperation() )
     {  
     // If we are currently focused, cancel autofocus
-    if ( IsViewFinding() && CurrentOperation() != ECamCapturing ) // Cannot do AF operations if VF not on. AF is anyway cancelled on VF start event.
+    if ( IsViewFinding() && CurrentOperation() != ECamCapturing && !InCallOrRinging() ) // Cannot do AF operations if VF not on. AF is anyway cancelled on VF start event.
       {
       if( ECamFocusing == CurrentOperation() )
         {
@@ -3143,9 +3143,9 @@ CCamAppController::GenerateModeChangeSequenceL( RCamRequestArray& aSequence )
                 }
             else
                 {
-                PRINT( _L( "Camera <> CCamAppController::GenerateModeChangeSequenceL: Snapshot off" ) );
+                PRINT( _L( "Camera <> CCamAppController::GenerateModeChangeSequenceL: Snapshot on" ) );
                 aSequence.Append( ECamRequestSsRelease );
-                aSequence.Append( ECamRequestSsStop );
+                aSequence.Append( ECamRequestSsStart ); // SS is requested and delivered to tn-manager, but not shown on display
                 }
             }
         }
@@ -3186,9 +3186,9 @@ CCamAppController::GenerateModeChangeSequenceL( RCamRequestArray& aSequence )
               }
           else
               {
-              PRINT( _L( "Camera <> CCamAppController::GenerateModeChangeSequenceL: Snapshot off" ) );
+              PRINT( _L( "Camera <> CCamAppController::GenerateModeChangeSequenceL: Snapshot on" ) );
               aSequence.Append( ECamRequestSsRelease );
-              aSequence.Append( ECamRequestSsStop );
+              aSequence.Append( ECamRequestSsStart );
               }
           }
       break;
@@ -3299,11 +3299,16 @@ void CCamAppController::UsePhoneMemoryL() const
         }
     else
         {        
+        TCamMediaStorage storage = iSettingModel->
+                                    IntegerSettingValue( ECamSettingItemRemovePhoneMemoryUsage )?
+                                    ECamMediaStorageNone:
+                                    ECamMediaStoragePhone;
+
         iSettingsModel->SetIntegerSettingValueL( ECamSettingItemPhotoMediaStorage, 
-                                             ECamMediaStoragePhone );
+                                                    storage );
         
         iSettingsModel->SetIntegerSettingValueL( ECamSettingItemVideoMediaStorage, 
-                                             ECamMediaStoragePhone );
+                                                    storage );
         }
 
 #endif // PRODUCT_SUPPORTS_FORCE_MEDIA_STORAGE_VALUE
@@ -3512,7 +3517,9 @@ TInt CCamAppController::CurrentPhotoStorageLocation() const
       }
     else
       {
-      storageLocation = ECamMediaStoragePhone;
+      storageLocation = IntegerSettingValue( ECamSettingItemRemovePhoneMemoryUsage)? 
+                          ECamMediaStorageNone:
+                          ECamMediaStoragePhone;
       }
     }
   return storageLocation;
@@ -5698,7 +5705,9 @@ void CCamAppController::GenerateNextVideoFilePathL( TBool aForcePhoneMem )
     else
       {
       PRINT( _L("Camera <> Force ECamMediaStoragePhone") );
-      store = ECamMediaStoragePhone;
+      store = IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage)?
+                  ECamMediaStorageNone:
+                  ECamMediaStoragePhone;
       }
     }
 
@@ -6942,8 +6951,11 @@ void CCamAppController::ForceUsePhoneMemoryL( TBool aEnable )
     else
       {
       PRINT( _L("Camera <> Force ECamMediaStoragePhone") );
-      iForcedStorageLocation = ECamMediaStoragePhone;
-      SetPathnamesToNewStorageL( ECamMediaStoragePhone );
+      TCamMediaStorage storage = IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage)?
+                                  ECamMediaStorageNone:
+                                  ECamMediaStoragePhone;
+      iForcedStorageLocation = storage;
+      SetPathnamesToNewStorageL( storage );
       }
 		}
 	// Revert back to memory card, if aEnable is EFalse
@@ -8302,6 +8314,14 @@ TBool CCamAppController::IsProfileSilentL()
     TInt value;
     User::LeaveIfError( cr->Get( KProEngActiveWarningTones, value ) );
     CleanupStack::PopAndDestroy( cr );
+    
+    //In case the phone variant allows turning camera tones off,
+    // first check if that is the case here.
+    if ( iSettingsModel->IntegerSettingValue( ECamSettingItemPhotoCaptureTone )
+            == ECamSettToneOff )
+        {
+        return ETrue;
+        }
 
     return ( value == 0 );
     }
@@ -8896,6 +8916,7 @@ CCamAppController
       if( iSettingsRestoreNeeded )
         {
         iSettingsRestoreNeeded = EFalse;  
+        TRAP_IGNORE( iCameraController->DirectSettingsChangeL( ECameraSettingFacetracking ) );
         TRAP( aStatus, RestoreSettingsToCameraL() );  
         }
       // fixed toolbar is used only with touch devices
@@ -8928,6 +8949,8 @@ CCamAppController
                 }
             }
         }
+      //Check if profile is silent and/or camera tones are set off
+      IsProfileSilent();
 
       break;
       }
@@ -9333,10 +9356,13 @@ CCamAppController::DoVideoNameRetryL( TInt aStatus )
         }
     else
         {
+        TCamMediaStorage storage = IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage)?
+                                ECamMediaStorageNone:
+                                ECamMediaStoragePhone;
         TRAP_IGNORE( 
            {
            iSettingsModel->SetIntegerSettingValueL( ECamSettingItemVideoMediaStorage, 
-                                                    ECamMediaStoragePhone );
+                                                       storage );
            GenerateNextValidVideoPathL();
            });       
         
@@ -9798,7 +9824,11 @@ CCamAppController::SetStateFromEvent( TCamCameraEventId aEventId )
                     !iCaptureRequested && appUi &&	appUi->SelfTimer() && 
                     !appUi->SelfTimer()->IsActive())
                     {
-                    PlaySound( ECamAutoFocusComplete, EFalse );
+                    if ( !iSilentProfile || iShutterSndAlwaysOn  )
+                        {
+                        // Play only if camera tones are not set off
+                        PlaySound(ECamAutoFocusComplete, EFalse);
+                        }
                     }
                 SetOperation( ECamFocused );
 	            }    

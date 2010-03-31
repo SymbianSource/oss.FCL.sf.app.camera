@@ -548,7 +548,9 @@ TInt CGSCamcorderPlugin::IntegerSettingValue( const TInt aSettingItem )
               }
           else
               {
-              settingValue = ECamMediaStoragePhone;
+              settingValue = iSettingsModel->IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage)?
+                              ECamMediaStorageNone:
+                              ECamMediaStoragePhone;
               }
           }
         return settingValue;

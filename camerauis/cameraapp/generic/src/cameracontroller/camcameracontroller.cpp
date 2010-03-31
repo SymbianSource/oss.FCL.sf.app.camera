@@ -4027,7 +4027,6 @@ CCamCameraController::HandlePowerOnEvent( TInt aStatus )
     {
     SetFlags( iInfo.iState, ECamPowerOn|ECamReserved );
 
-    TRAP_IGNORE( SetFaceTrackingL() );
 #if defined( CAMERAAPP_CAE_FOR_VIDEO ) && !defined( CAMERAAPP_CAE_FIX )
     // We need to tell to CCaeEngine that the CCamera has been reserved
     // and powered on "behind its back".
@@ -4931,9 +4930,17 @@ CCamCameraController
             notify          = EFalse;
             proceedSequence = ETrue;
             PRINT1( _L( "Camera <> CCamCameraController::HandleCallbackEvent - %d reserve try again left" ), iReserveTryAgainCount );
-
             }
-        else
+        else if(KErrBadName == aStatus &&
+                iSequenceIndex >= 0 &&   
+                Request2Event( iSequenceArray[iSequenceIndex] ) == aEventId)  
+            {
+            aStatus         = KErrNone;
+            notify          = ETrue;
+            proceedSequence = ETrue;
+            //EndSequence( aStatus );      
+            }
+        else 
             {
 
             notify          = EFalse;

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -246,8 +246,8 @@ void CCamInfoListBoxContainer::ConstructL( const TRect& aRect, TInt aListBoxReso
         iFeedback->SetFeedbackArea( iListBox, 0, iListBox->Rect(), 
                                   ETouchFeedbackBasic, ETouchEventStylusDown );
         }
-
-	PRINT(_L("Camera <= CCamInfoListBoxContainer::ConstructL") )    
+    iController.SetViewfinderWindowHandle( &Window() );
+    PRINT(_L("Camera <= CCamInfoListBoxContainer::ConstructL") )    
     }
    
 // ---------------------------------------------------------------------------
@@ -468,11 +468,18 @@ void CCamInfoListBoxContainer::HandlePointerEventL( const TPointerEvent& aPointe
             aPointerEvent.iType,
             aPointerEvent.iPosition.iX,
             aPointerEvent.iPosition.iY );
-    iListBox->HandlePointerEventL(aPointerEvent);
+  
     if( !iController.IsViewFinding() && !iSkinnedBackGround )
         {
-        ReserveAndStartVF();        
+        PRINT ( _L("Camera <> CCamInfoListBoxContainer::HandlePointerEventL  start viewfinder") );
+        ReserveAndStartVF();
         }
+    else
+        {
+        PRINT ( _L("Camera <> CCamInfoListBoxContainer::HandlePointerEventL  handle selected item") );
+        iListBox->HandlePointerEventL(aPointerEvent);
+        }
+
     /*TInt oldListItemIndex = -1;
     TInt newListItemIndex = -1;
     TBool handleItemActivation = EFalse;
@@ -581,6 +588,8 @@ void CCamInfoListBoxContainer::HandleListBoxEventL( CEikListBox* aListBox, TList
         case EEventItemClicked:
         case EEventItemSingleClicked:
             {
+            TInt settingValue = CurrentSettingItemValue();
+            iController.PreviewSettingChangeL( ECamSettingItemDynamicPhotoLightSensitivity, settingValue );
             ShowTooltipL();
             }
             break;
@@ -607,7 +616,13 @@ void CCamInfoListBoxContainer::ShowTooltipL()
         iTooltipController->HideInfoPopupNote();
 
         iTooltipController->SetTextL( *iDescArray[iListBox->CurrentItemIndex()] );     
-        iTooltipController->SetPositionByHighlight( iListBox->HighlightRect() );
+        TRect hl = iListBox->HighlightRect();
+        TPoint tt = hl.Center();
+        if ( AknLayoutUtils::LayoutMirrored() )
+            {
+            tt.iX -= hl.Width();
+            }
+        iTooltipController->SetPositionAndAlignment( tt, EHLeftVBottom ); 
         
         iTooltipIndex = iListBox->CurrentItemIndex();
         }
@@ -704,21 +719,14 @@ TRect CCamInfoListBoxContainer::TouchLayout()
         }
     else
         {
-        iListboxLayoutRect.LayoutRect( wholeListboxLayoutRect.Rect(), 
-                            AknLayoutScalable_Apps::main_cset_list_pane( 1 ) ); 
+        iListboxLayoutRect.LayoutRect( iLayoutAreaRect, 
+              AknLayoutScalable_Apps::main_cset_listscroll_pane( 2 ) ); //Same as WB
         }
- 
-    if( !iSkinnedBackGround )
-        {
-        iTitleTextRectLayout.LayoutText( iLayoutAreaRect,  AknLayoutScalable_Apps::main_cset_text_pane_t1( 0 ) );
-        }    
-    else
-        {    
+   
     iTitleTextRectLayout.LayoutText( iLayoutAreaRect, 
                            AknLayoutScalable_Apps::main_cam_set_pane_t1( 3 ) );
-        }
     
-    return wholeListboxLayoutRect.Rect();
+    return iListboxLayoutRect.Rect();
     }
 
 // --------------------------------------------------------------------------

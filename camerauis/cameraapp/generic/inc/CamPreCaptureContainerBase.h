@@ -45,7 +45,7 @@ class CCamZoomPane;
 class CCamIndicator;
 class CCamTimeLapseSlider;
 class MCamVfGridDrawer;
-
+class CCamStartupLogo;
 
 
 // ===========================================================================
@@ -731,6 +731,9 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     CPeriodic* iIndBlinkTimer;
     TBool iDrawIndicator;
     TInt iToggleCountdown;
+
+    // Startup animation control
+    CCamStartupLogo* iStartupLogo;
   // =========================================================================
   };
     

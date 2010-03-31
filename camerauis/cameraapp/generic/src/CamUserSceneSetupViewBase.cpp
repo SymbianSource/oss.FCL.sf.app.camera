@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -131,7 +131,7 @@ void CCamUserSceneSetupViewBase::HandleCommandL( TInt aCommand )
             break;
      	case ECamCmdCaptureSetupLightSensitivityUser:
       		{
-       		SwitchToInfoListBoxL( EInfoListBoxModeISO, ETrue );
+      		SwitchToInfoListBoxL( EInfoListBoxModeISO, EFalse );//No skin
       		}    
 			break;
         // If capture setup menu is active and user presses softkey cancel,
@@ -448,7 +448,7 @@ void CCamUserSceneSetupViewBase::UpdateCbaL()
             }
         else
             {
-            SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
+            SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT );//color etc.
             }
         }
     else if ( iSceneSettingModeActive )
@@ -462,12 +462,9 @@ void CCamUserSceneSetupViewBase::UpdateCbaL()
     	}
     else if ( iInfoListBoxActive )
         {
-        SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE );
-        if( iForceAvkonCBA )
-            {
-            EikSoftkeyPostingTransparency::MakeTransparent(
-                    *ViewCba(), EFalse );            
-            }
+        SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT );
+        EikSoftkeyPostingTransparency::MakeTransparent(   
+                            *ViewCba(), !iForceAvkonCBA );
         }
     // if the view is user scene setup
     else
@@ -517,7 +514,7 @@ void CCamUserSceneSetupViewBase::SwitchToUserSceneSetupModeL()
     StatusPane()->MakeVisible( ETrue );
     
     // Update the command button array.
-    iForceAvkonCBA=ETrue;
+    iForceAvkonCBA=EFalse;
     UpdateCbaL();
     SetTitlePaneTextL();
     PRINT( _L("Camera <= CCamUserSceneSetupViewBase::SwitchToUserSceneSetupModeL()") );  	   
@@ -544,7 +541,7 @@ void CCamUserSceneSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand )
 
     // Remove the view's main container, and add the capture setup 
     // control associated with the input command to the container stack.
-    CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( aSetupCommand, EFalse );
+    CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( aSetupCommand, ETrue );
    StatusPane()->MakeVisible( EFalse ); 	
     PRINT( _L("Camera <= CCamUserSceneSetupViewBase::SwitchToCaptureSetupModeL()") );  	   	
     }

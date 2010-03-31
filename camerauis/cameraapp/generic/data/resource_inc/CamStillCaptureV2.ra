@@ -194,6 +194,29 @@ RESOURCE AIW_INTEREST r_cam_share_on_ovi_interest
     
 //----------------------------------------------------
 //   
+//    r_cam_set_as_call_image_interest_editor
+//    This resource is used to register an interest in 
+//    Set as contact call image Application InterWork (AIW)
+//    with Photos editor
+//
+//----------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_cam_set_as_call_image_interest_editor
+    {
+    items = 
+        {
+        AIW_CRITERIA_ITEM  
+            {
+            id = KAiwCmdAssign;
+            serviceCmd = KAiwCmdAssign;
+            contentType = "MediaEditor/*";
+            serviceClass = KAiwClassMenu;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
 //    r_cam_set_as_call_image_interest
 //    This resource is used to register an interest in 
 //    Set as contact call image Application InterWork (AIW)

@@ -1002,7 +1002,7 @@ void CCamVideoPreCaptureView::SwitchToSceneSettingModeL()
     	{
 	    // Create the scene setting container for video mode.
 	    iSceneSettingContainer = CCamShootingModeContainer::NewL( AppUi()->ApplicationRect(),
-                                                               EFalse, //Notskinned background
+                                                               ETrue, //Skinned background
 	                                                           *this,
 	                                                           ECamControllerVideo,
 	                                                           iController,
@@ -1030,7 +1030,7 @@ void CCamVideoPreCaptureView::SwitchToSceneSettingModeL()
     RemoveCaptureSetupMenuContainers();
 
     // Stop the viewfinder as it isn't required for scene settings
-    //StopViewFinder();
+    StopViewFinder();
     
     }
  
@@ -1189,7 +1189,7 @@ void CCamVideoPreCaptureView::DynInitToolbarL( TInt aResourceId,
         UpdateToolbarIconsL();
         if( aToolbar )
             {            
-            if ( iEmbedded && appUi->IsSecondCameraEnabled() )
+            if ( iEmbedded /* && appUi->IsSecondCameraEnabled()*/ )
                 {
                 aToolbar->SetItemDimmed(ECamCmdNewPhoto, ETrue, ETrue);
                 }

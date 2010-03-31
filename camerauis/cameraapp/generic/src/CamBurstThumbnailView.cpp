@@ -715,8 +715,18 @@ void CCamBurstThumbnailView::DoActivateL( const TVwsViewId& aPrevViewId, TUid aC
     // initialise AIW services for touch menu
     iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
                                      R_CAM_MOVE_TO_STILL_IMAGE_SEQUENCE_INTEREST );
-    iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
-            R_CAM_SET_AS_CALL_IMAGE_INTEREST );
+    
+    if ( iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport) )
+        {    
+        iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
+                R_CAM_SET_AS_CALL_IMAGE_INTEREST_EDITOR );
+        }
+    else
+        {
+        iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
+                    R_CAM_SET_AS_CALL_IMAGE_INTEREST );
+        }
+
     iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
             R_CAM_SHARE_ON_OVI_INTEREST );
     // SHARE_AIW

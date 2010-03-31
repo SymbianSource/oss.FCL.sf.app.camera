@@ -192,7 +192,8 @@ enum TCamSettingsCaptureTone
     ECamSettTone1,
     ECamSettTone2,
     ECamSettTone3,
-    ECamSettTone4
+    ECamSettTone4,
+    ECamSettToneOff
     };
 
 // File name base type settings

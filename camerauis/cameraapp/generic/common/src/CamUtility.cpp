@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -1029,6 +1029,7 @@ TInt CamUtility::GetPsiIntArrayL( TCamPsiKey aKey, RArray<TInt>& aArray )
     // Resource ids for User Scene setup items  
     case ECamPsiUserSceneResourceIds:
       {
+      User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_SET_USER_DEFAULT ) );
       User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_SCENEBASE_DATA    ) );
       if ( configManager->IsFlashModeSupported() )
           User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_FLASH_DATA ) );
@@ -1058,9 +1059,7 @@ TInt CamUtility::GetPsiIntArrayL( TCamPsiKey aKey, RArray<TInt>& aArray )
       
       if ( configManager->IsContrastSupported() )
           User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_CONTRAST_DATA ) );
-      
-      User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_SET_USER_DEFAULT ) ); 
-            
+         
       User::LeaveIfError( aArray.Append( R_CAM_PHOTO_USER_SCENE_SETUP_LIST_RESET_DATA ) );
       break;
       }

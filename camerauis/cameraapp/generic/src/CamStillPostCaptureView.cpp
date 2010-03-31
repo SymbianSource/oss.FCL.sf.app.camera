@@ -340,9 +340,18 @@ void CCamStillPostCaptureView::DoActivateL(
     // SHARE_AIW
     iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID),
             R_CAM_AIW_VIEW_INTEREST );
+   
+    if ( iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport) )
+        {    
+        iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), 
+                R_CAM_SET_AS_CALL_IMAGE_INTEREST_EDITOR );
+        }
+    else
+        {
+        iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), 
+                    R_CAM_SET_AS_CALL_IMAGE_INTEREST );
+        }
     
-    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), 
-            R_CAM_SET_AS_CALL_IMAGE_INTEREST ); 
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP1_CCAMSTILLPOSTCAPTUREVIEW_DOACTIVATEL, "e_CCamStillPostCaptureView_DoActivateL 0" );
     }
 

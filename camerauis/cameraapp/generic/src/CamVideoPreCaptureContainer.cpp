@@ -288,8 +288,9 @@ CCamVideoPreCaptureContainer
 // Handle events sending app to foreground and background
 // ---------------------------------------------------------
 
-void CCamVideoPreCaptureContainer::HandleForegroundEventL( TBool /*aForeground*/ )
+void CCamVideoPreCaptureContainer::HandleForegroundEventL( TBool aForeground )
 	{
+    CCamPreCaptureContainerBase::HandleForegroundEventL( aForeground );
 	}
 
 

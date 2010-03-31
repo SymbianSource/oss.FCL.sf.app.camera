@@ -1779,7 +1779,8 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
     PRINT( _L("Camera => CCamPreCaptureViewBase::HandleTouchGestureL") );
     
     // Skipped modes here
-    if ( iController.ActiveCamera() == ECamActiveCameraSecondary )
+    if ( ( iController.ActiveCamera() == ECamActiveCameraSecondary ) || 
+         ( ECamNoOperation != iController.CurrentOperation() )  )
         {
         PRINT( _L("Camera <= CCamPreCaptureViewBase::HandleTouchGestureL") );
         return;
@@ -1800,6 +1801,11 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
             // level between top widescreen and vga levels
             CCamPreCaptureContainerBase* container = static_cast<CCamPreCaptureContainerBase*>( iContainer );
             container->BlinkResolutionIndicatorOnChange( ETrue );
+
+            // Hide the zoom pane in case of pinch
+            CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+            appUi->ZoomPane()->MakeVisible( EFalse, ETrue );
+
             if ( iController.ToggleWideScreenQuality( wide ) )
                 {
                 iLastMovement = currMove;

@@ -993,7 +993,8 @@ void CCamPostCaptureViewBase::UpdateToolbarIconsL()
                    {
                    state->SetHelpTextL(
                            iOneClickUploadUtility->ButtonTooltipL() );
-                                      
+                   
+                   iOneClickUploadUtility->UpdateUploadIcon( toolbar, iController.CurrentMode() );
                    }
                }
             button = dynamic_cast<CAknButton*>(toolbar->ControlOrNull( ECamCmdEdit ));

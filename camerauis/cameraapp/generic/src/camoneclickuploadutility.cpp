@@ -32,7 +32,7 @@
 #include "Cam.hrh"
 
 #include <cameraapp.mbg>
-#include "camutility.h"
+#include "CamUtility.h"
 
 const TUid KShareOnlineCrUid = { 0x2002CC1F };
 const TUint32 KShareCrApplicationVersion = 0x01010020;
@@ -391,6 +391,8 @@ void CCamOneClickUploadUtility::ImageDecoded( TInt aStatus, const CFbsBitmap* aB
         {
         delete iIconImage;
         delete iIconMask;
+        iIconImage = NULL;
+        iIconMask = NULL;
         
         iIconImage = new (ELeave) CFbsBitmap;
         iIconImage->Duplicate( aBitmap->Handle() );

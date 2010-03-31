@@ -537,7 +537,11 @@ CCamNaviCounterModel::SetCaptureModeL( TCamCameraMode       aMode,
     
   if (ECamMediaStorageMassStorage ==iStorageLocation)
    {
-   iStorageLocation = iController.ExistMassStorage()?ECamMediaStorageMassStorage:ECamMediaStoragePhone;
+   iStorageLocation = iController.ExistMassStorage()?
+                       ECamMediaStorageMassStorage:
+                       iController.IntegerSettingValue( ECamSettingItemRemovePhoneMemoryUsage )?
+                       ECamMediaStorageNone:
+                       ECamMediaStoragePhone;
    }
   }
 
@@ -893,21 +897,33 @@ CCamNaviCounterModel::DrawStorageIconToBitmap( CFbsBitGc& aBmpGc,
   {
   CFbsBitmap* icon = NULL;
   CFbsBitmap* mask = NULL;
-  if ( iStorageLocation == ECamMediaStoragePhone )
-    {
-    icon = iPhoneIcon;
-    mask = iPhoneIconMask;
-    }
-  else if ( iStorageLocation == ECamMediaStorageMassStorage )
-    {
-    icon = iMassStorageIcon;
-    mask = iMassStorageIconMask;
-    }
-  else
-    {
-    icon = iMMCIcon;
-    mask = iMMCIconMask;
-    }
+  switch( iStorageLocation )
+      {
+      case ECamMediaStoragePhone:
+          {
+          icon = iPhoneIcon;
+          mask = iPhoneIconMask;
+          }
+          break;
+      case ECamMediaStorageMassStorage:
+          {
+          icon = iMassStorageIcon;
+          mask = iMassStorageIconMask;
+          }
+          break;            
+      case ECamMediaStorageCard:
+          {
+          icon = iMMCIcon;
+          mask = iMMCIconMask;
+          }
+          break;            
+      case ECamMediaStorageNone:
+      default:
+          {
+          //TODO: Get icons when none is available
+          }
+          break;
+      }
   // Should use layout                
   aBmpGc.BitBlt(TPoint(0,0), icon);
   aBmpMaskGc.BitBlt(TPoint(0,0), mask);
@@ -923,21 +939,38 @@ CCamNaviCounterModel::DrawStorageIcon( CBitmapContext& aGc ) const
   {
   CFbsBitmap* icon = NULL;
   CFbsBitmap* mask = NULL;
-  if ( iStorageLocation == ECamMediaStoragePhone )
+  switch( iStorageLocation )
     {
-    icon = iPhoneIcon;
-    mask = iPhoneIconMask;
+    case ECamMediaStoragePhone:
+        {
+        icon = iPhoneIcon;
+        mask = iPhoneIconMask;
+        }
+        break;
+    case ECamMediaStorageMassStorage:
+        {
+        icon = iMassStorageIcon;
+        mask = iMassStorageIconMask;
+        }
+        break;            
+    case ECamMediaStorageCard:
+        {
+        icon = iMMCIcon;
+        mask = iMMCIconMask;
+        }
+        break;            
+    case ECamMediaStorageNone:
+    default:
+        {
+        //TODO: Get icons when none is available
+        }
+        break;
     }
-  else if ( iStorageLocation == ECamMediaStorageMassStorage )
-    {
-    icon = iMassStorageIcon;
-    mask = iMassStorageIconMask;
-    }
-  else
-    {
-    icon = iMMCIcon;
-    mask = iMMCIconMask;
-    }
+  
+  if( icon == NULL || mask == NULL)
+      {
+      return;
+      }
   
   if ( iMode == ECamControllerVideo )
     {
@@ -1250,7 +1283,10 @@ void CCamNaviCounterModel::ForceNaviPaneUpdate()
   
   if (ECamMediaStorageMassStorage ==iStorageLocation)
     {
-    iStorageLocation = iController.ExistMassStorage()?ECamMediaStorageMassStorage:ECamMediaStoragePhone;
+    TCamMediaStorage storage = iController.IntegerSettingValue( ECamSettingItemRemovePhoneMemoryUsage )?
+                                ECamMediaStorageNone:
+                                ECamMediaStoragePhone;
+    iStorageLocation = iController.ExistMassStorage()?ECamMediaStorageMassStorage:storage;
     }
   UpdateCounter();    
 
@@ -1312,7 +1348,10 @@ CCamNaviCounterModel::HandleControllerEventL( TCamControllerEvent aEvent,
         
         if (ECamMediaStorageMassStorage ==iStorageLocation)
           {
-          iStorageLocation = iController.ExistMassStorage()?ECamMediaStorageMassStorage:ECamMediaStoragePhone;
+          TCamMediaStorage storage = iController.IntegerSettingValue( ECamSettingItemRemovePhoneMemoryUsage )?
+                                     ECamMediaStorageNone:
+                                     ECamMediaStoragePhone;  
+          iStorageLocation = iController.ExistMassStorage()?ECamMediaStorageMassStorage:storage;
           }
         }
       BroadcastEvent( ECamObserverEventNaviModelUpdated );

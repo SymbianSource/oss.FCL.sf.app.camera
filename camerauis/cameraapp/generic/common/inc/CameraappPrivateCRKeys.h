@@ -92,6 +92,9 @@ const TUint32 KCamCrImageToolbarDefaultItems = 0x59;
 const TUint32 KCamCrPhotoEditorSupport = 0x5A;
 const TUint32 KCamCrVideoEditorSupport = 0x5B;
 
+//Remove phone memory usage
+const TUint32 KCamCrRemovePhoneMemoryUsage = 0x5C;
+
 // =========================================================
 // Cameraapp variant settings file
 const TUid KCRUidCameraappVariant = {0x10208A43};

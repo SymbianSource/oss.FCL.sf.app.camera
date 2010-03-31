@@ -37,7 +37,7 @@
 
 // ===========================================================================  
 // Constants
-
+const TReal32 KCamSoundVol = 0.75f; 
 // Migrated directly from old sound player.
 #ifndef __WINSCW__
   static const TUint KAudioPriority = KAudioPriorityCameraTone;
@@ -136,6 +136,7 @@ CCamAudioPlayerWrapper::Play( TBool aCallback )
       iPlayRequested = EFalse;
       iState         = CCamAudioPlayerWrapper::EPlaying;
       iCallback      = aCallback;
+      iPlayer->SetVolume( static_cast<TInt>( iPlayer->MaxVolume()* KCamSoundVol ) );
       iPlayer->Play();
       break;
 

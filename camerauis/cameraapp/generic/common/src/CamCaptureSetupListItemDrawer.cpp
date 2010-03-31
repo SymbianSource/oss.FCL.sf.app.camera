@@ -54,10 +54,8 @@
 // CONSTANTS
 static const TInt KRadioButtonSelectedIconIndex = 0;
 static const TInt KRadioButtonUnselectedIconIndex = 1;
-//ME:START
 const TUint32 KToolbarExtensionBgColor = 0x00000000;
 const TInt KToolBarExtensionBgAlpha = 0x7F;
-//ME:END
 
 
 // ================= MEMBER FUNCTIONS =======================
@@ -67,13 +65,11 @@ const TInt KToolBarExtensionBgAlpha = 0x7F;
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-//ME:START
 CCamCaptureSetupListItemDrawer* 
 CCamCaptureSetupListItemDrawer::NewL( MCamListboxModel& aListBoxModel, TBool aFullySkinned )
     {
     CCamCaptureSetupListItemDrawer* self = new( ELeave ) 
                     CCamCaptureSetupListItemDrawer( aListBoxModel, aFullySkinned );               
-//ME:END
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -226,8 +222,6 @@ void CCamCaptureSetupListItemDrawer::DrawActualItem( TInt aItemIndex,
         }
 #endif // RD_UI_TRANSITION_EFFECTS_LIST
     // Draw unhighlighted rectangle that encapsulates the item text and bitmap.
-    
-    //ME:START
     PRINT1( _L("Camera <> CCamCaptureSetupListItemDrawer::DrawActualItem iFullySkinned=%d"), iFullySkinned );
 
     if( iFullySkinned )
@@ -238,8 +232,6 @@ void CCamCaptureSetupListItemDrawer::DrawActualItem( TInt aItemIndex,
         {
         DrawTransparentItemRect( aActualItemRect );               
         }	
-    //ME:END
-	
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST   
    	if ( transApi )
    	    {
@@ -472,7 +464,6 @@ void CCamCaptureSetupListItemDrawer::DrawRadioButton( const TRect& aActualItemRe
     }
 
 
-//ME:START
 // ---------------------------------------------------------
 // CCamCaptureSetupListItemDrawer::DrawItemRect
 // Draws a rectangle for an item.
@@ -487,22 +478,13 @@ void CCamCaptureSetupListItemDrawer::DrawTransparentItemRect(
         if ( control )
             {
             iGc->SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            iGc->SetPenSize( TSize( 1, 1 ) );
+            iGc->SetPenStyle( CGraphicsContext::EDottedPen );
             iGc->SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
             iGc->SetBrushStyle( CGraphicsContext::ESolidBrush );
             iGc->DrawRect( aActualItemRect );            
-            // Reset the brush after use (otherwise anything drawn
-            // after the viewfinder will also show viewfinder frames)    
-            iGc->SetDrawMode( CGraphicsContext::EDrawModePEN );
-            TSize penSize( 1, 1 );
-            iGc->SetPenSize( penSize );
-            iGc->SetPenStyle( CGraphicsContext::EDottedPen );
-            iGc->SetPenColor( KRgbWhite );
-            iGc->SetBrushStyle( CGraphicsContext::ENullBrush );
-            iGc->DrawRect( aActualItemRect );                    
             }
         }
-//ME:END
-
 // ---------------------------------------------------------
 // CCamCaptureSetupListItemDrawer::DrawItemRect
 // Draws a rectangle for an item.

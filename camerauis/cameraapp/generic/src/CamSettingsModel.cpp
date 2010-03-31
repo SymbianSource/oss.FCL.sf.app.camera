@@ -2396,7 +2396,7 @@ void CCamSettingsModel::SetUserSceneDefault()
     {
     PRINT( _L("Camera => CCamSettingsModel::SetUserSceneDefault ") );
     TInt settingsCount = iDynamicPhotoIntSettings.Count();
-    TInt userVal;
+    TInt userVal = 0;
     for ( TInt i = 0; i < settingsCount; ++i )
        {
        if ( iDynamicPhotoIntSettings[i]->iItemId == ECamSettingItemDynamicPhotoScene )
