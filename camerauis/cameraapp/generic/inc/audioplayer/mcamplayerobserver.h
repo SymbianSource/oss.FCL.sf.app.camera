@@ -40,7 +40,7 @@ class MCamPlayerObserver
     virtual void PlayComplete( TInt aStatus, TInt aSoundId ) = 0;
   };
 
-#endif MCAM_PLAYEROBSERVER_H
+#endif // MCAM_PLAYEROBSERVER_H
 
 // ===========================================================================
 // end of file

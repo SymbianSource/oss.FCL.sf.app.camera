@@ -46,6 +46,6 @@ namespace NCamCameraController
     }
   }
 
-#endif CAM_CAMERACONTROLLER_PAN
+#endif // CAM_CAMERACONTROLLER_PAN
 
 // end of file

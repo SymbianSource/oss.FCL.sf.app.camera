@@ -1406,7 +1406,6 @@ class CCamAppUi : public CCamAppUiBase,
                 
 
         /**
-        /**
         * Dismisses out of memory / memory card removed note, if active.
         */
         void DismissMemoryNoteL();  
