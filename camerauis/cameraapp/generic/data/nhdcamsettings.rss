@@ -1080,8 +1080,8 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar_portrait
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_video;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_video_mask;
+                        bmpid = EMbmCameraappQgn_indi_vid4_tb_video; 
+                        bmpmask = EMbmCameraappQgn_indi_vid4_tb_video_mask;
                         helptxt = qtn_lcam_tt_video_mode;
                         extension = r_cam_ext_qgn_indi_cam4_video;
                         }
@@ -1157,8 +1157,8 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar_landscape
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_video;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_video_mask;
+                        bmpid = EMbmCameraappQgn_indi_vid4_tb_video; 
+                        bmpmask = EMbmCameraappQgn_indi_vid4_tb_video_mask;
                         helptxt = qtn_lcam_tt_video_mode;
                         extension = r_cam_ext_qgn_indi_cam4_video;
                         }
@@ -1252,8 +1252,8 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_portrait
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_camera; 
-                        bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask; 
+                        bmpid = EMbmCameraappQgn_indi_vid4_tb_still; 
+                        bmpmask = EMbmCameraappQgn_indi_vid4_tb_still_mask; 
                         helptxt = qtn_lcam_tt_still_mode;
                         extension = r_cam_ext_qgn_indi_cam4_camera;
                         }
@@ -1330,8 +1330,8 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_landscape
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_camera; 
-                        bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask; 
+                        bmpid = EMbmCameraappQgn_indi_vid4_tb_still; 
+                        bmpmask = EMbmCameraappQgn_indi_vid4_tb_still_mask; 
                         helptxt = qtn_lcam_tt_still_mode;
                         extension = r_cam_ext_qgn_indi_cam4_camera;
                         }
@@ -1408,8 +1408,8 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_video;
-                        bmpmask = EMbmCameraappQgn_indi_cam4_video_mask;
+                        bmpid = EMbmCameraappQgn_indi_vid4_tb_video; 
+                        bmpmask = EMbmCameraappQgn_indi_vid4_tb_video_mask;
                         helptxt = qtn_lcam_tt_video_mode;
                         extension = r_cam_ext_qgn_indi_cam4_video;
                         }
@@ -2303,8 +2303,8 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar_videolight
                     AVKON_BUTTON_STATE
                         {
                         bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_camera; 
-                        bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask; 
+                        bmpid = EMbmCameraappQgn_indi_vid4_tb_still; 
+                        bmpmask = EMbmCameraappQgn_indi_vid4_tb_still_mask; 
                         helptxt = qtn_lcam_tt_still_mode;
                         extension = r_cam_ext_qgn_indi_cam4_camera;
                         }
@@ -2499,9 +2499,9 @@ RESOURCE AVKON_TOOLBAR r_cam_video_precapture_toolbar
                     {
                     AVKON_BUTTON_STATE
                         {
-                        bmpfile = CAMERAAPP_BITMAP_FILE;
-                        bmpid = EMbmCameraappQgn_indi_cam4_camera; 
-                        bmpmask = EMbmCameraappQgn_indi_cam4_camera_mask; 
+                        bmpfile = CAMERAAPP_BITMAP_FILE; 
+                        bmpid = EMbmCameraappQgn_indi_vid4_tb_still; 
+                        bmpmask = EMbmCameraappQgn_indi_vid4_tb_still_mask; 
                         helptxt = qtn_lcam_tt_still_mode;
                         extension = r_cam_ext_qgn_indi_cam4_camera;
                         }

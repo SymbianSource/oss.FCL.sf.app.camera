@@ -88,6 +88,9 @@ void CCamZoomModel::ConstructL()
     iCurZoomStepOptical = 0;
     iCurZoomStepDigital = 0;        
 
+    // Default zoom jump multiplier
+    iZoomStepMultiplier = 1;
+
     // Timer used to give smooth zooming    
     iZoomTimer = CPeriodic::NewL( CActive::EPriorityHigh );          
     
@@ -293,9 +296,18 @@ void CCamZoomModel::ZoomIn( TBool aOneClick )
         }
     else
         {
-        // Start the timer to zoom-in again when timer expires
-        PRINT( _L( "CCamZoomModel::ZoomIn start zoom timer" ) );
-        StartZoomTimer();
+        // Don't restart timer (Auto-stop) timer when no zoom was done
+        if( optZoomJump || digZoomJump || extZoomJump )
+            {
+            // Start the timer to zoom-in again when timer expires
+            PRINT( _L( "CCamZoomModel::ZoomIn start zoom timer" ) );
+            StartZoomTimer();
+            }
+        else
+            {
+            PRINT( _L("Camera <> CCamZoomModel::ZoomOut - stopping zoom at boundary") );
+            StopZoom();
+            }
         }
     
     PRINT( _L( "Camera <= CCamZoomModel::ZoomIn " ) );
@@ -417,7 +429,7 @@ void CCamZoomModel::ZoomStepsToJump( TInt& aOpt, TInt& aDig, TInt& aExt ) const
     {  
     PRINT( _L( "Camera => CCamZoomModel::ZoomStepsToJump (by reference)" ) );
     
-    TInt steps = ZoomStepsToJump();
+    TInt steps = iZoomStepMultiplier * ZoomStepsToJump();
 
     TCamZoomBoundary boundary = CheckBoundary();
     
@@ -669,9 +681,18 @@ void CCamZoomModel::ZoomOut( TBool aOneClick )
         }
     else
         {
-        // Start the timer to zoom-in again when timer expires
-        PRINT( _L( "CCamZoomModel::ZoomIn start zoom timer" ) );
-        StartZoomTimer();
+        // Don't restart timer (auto-stop) timer when no zoom was done
+        if( optZoomJump || digZoomJump || extZoomJump )
+            {
+            // Start the timer to zoom-in again when timer expires
+            PRINT( _L( "CCamZoomModel::ZoomIn start zoom timer" ) );
+            StartZoomTimer();
+            }
+        else
+            {
+            PRINT( _L("Camera <> CCamZoomModel::ZoomOut - stopping zoom at boundary") );
+            StopZoom();
+            }
         }
     
     PRINT( _L( "Camera <= CCamZoomModel::ZoomOut " ) );
@@ -1046,10 +1067,13 @@ void CCamZoomModel::StopZoom()
         {
         iZoomTimer->Cancel();
         }
-        
+
     // Clear the zoom state
-    iState = ECamZoomModelStateZoomNone;     
-    
+    iState = ECamZoomModelStateZoomNone;
+
+    // Reset zoom multiplier
+    iZoomStepMultiplier = 1;
+
     if ( iPauseState == EPauseStatePaused )
         {
         iPauseState = EPauseStateReleased;
@@ -1228,8 +1252,8 @@ void CCamZoomModel::StartZoomTimer()
             else
                 {
                 // use slower speed for videomode        
-                stepPeriod = iZoomLAF.iZoomSpeedDig * 2000;
-                }    
+                stepPeriod = iZoomLAF.iZoomSpeedDig * 2500;
+                }
             break;        
             }
         
@@ -1360,7 +1384,7 @@ TInt CCamZoomModel::CurrentZoom() const
         // Return the combined zoom value
         PRINT( _L( "Camera <= CCamZoomModel::CurrentZoom optical+digital" ) );
         return (iCurZoomStepOptical + iCurZoomStepDigital);
-        }        
+        }
     }
 
 
@@ -1497,5 +1521,18 @@ CCamZoomModel::ReadCurrentResolution()
     }
   PRINT1( _L("Camera <= CCamZoomModel::ReadCurrentResolution, got:%d"), iCurrentResolution );
   }
+
+// -----------------------------------------------------------------------------
+// SetZoomMultiplier
+// -----------------------------------------------------------------------------
+//
+void CCamZoomModel::SetZoomMultiplier( TInt aZoomStepMultiplier )
+    {
+    iZoomStepMultiplier = aZoomStepMultiplier;
+    if ( iCameraState & ECamVideoOn )
+        {
+        iZoomStepMultiplier *= 2;
+        }
+    }
 
 //  End of File  

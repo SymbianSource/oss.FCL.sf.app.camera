@@ -394,10 +394,24 @@ TKeyResponse CCamInfoListBoxContainer::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
     TEventCode aType )
     {
+    if( iController.CurrentMode() == ECamControllerIdle || 
+        iController.CurrentMode() == ECamControllerShutdown )
+        {
+        if( !iController.IsViewFinding() && !iSkinnedBackGround
+            && ( IsCaptureKeyL( aKeyEvent, aType ) 
+            || IsShutterKeyL( aKeyEvent, aType ) ) )
+            {
+            PRINT( _L("Camera <> CCamInfoListBoxContainer::OfferKeyEventL coming back from standby" ))
+            ReserveAndStartVF();
+            }
+        return EKeyWasNotConsumed;
+        }
     iController.StartIdleTimer();
-
-    // If the Ok button is pressed, select the current item
-    if ( aKeyEvent.iCode == EKeyOK && aKeyEvent.iRepeats == 0 && aType == EEventKey )
+    
+    // If the Ok button or shutter key is pressed, select the current item
+    if ( ( aKeyEvent.iCode == EKeyOK && aKeyEvent.iRepeats == 0 && aType == EEventKey ) ||
+         ( aType == EEventKeyDown && 
+         ( IsCaptureKeyL( aKeyEvent, aType ) || IsShutterKeyL( aKeyEvent, aType ) ) ) )
         {
         TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );
         iView.HandleCommandL( EAknSoftkeySelect );

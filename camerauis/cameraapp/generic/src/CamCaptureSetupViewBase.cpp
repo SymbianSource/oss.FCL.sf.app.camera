@@ -610,6 +610,12 @@ void CCamCaptureSetupViewBase::ExitCaptureSetupModeL()
     SetCaptureSetupModeActive(EFalse);
 
     UpdateCbaL();
+
+    if ( Cba() )
+        {
+        Cba()->DrawNow();
+        }
+		
     SetTitlePaneTextL();  
     CleanupStack::Pop(); // CleanupExit
 
@@ -879,6 +885,12 @@ void CCamCaptureSetupViewBase::ExitSceneSettingModeL()
             }
       	SetSceneSettingMode(EFalse);
         UpdateCbaL();
+
+       if ( Cba() )
+    	    {
+    	    Cba()->DrawNow();
+    	    }
+	
         SetTitlePaneTextL();
         CleanupStack::Pop(); // CleanupExit
         
@@ -936,6 +948,12 @@ void CCamCaptureSetupViewBase::ExitInfoListBoxL()
         }
     SetInfoListBoxMode(EFalse);
     UpdateCbaL();
+
+    if ( Cba() )
+        {
+        Cba()->DrawNow();
+        }
+		
     SetTitlePaneTextL();
     CleanupStack::Pop(); // CleanupExit
 

@@ -202,6 +202,13 @@ class CCamZoomModel : public CBase,
     * @since 3.0
     */                        
     void ResetZoomTo1x();
+    
+    /***
+     * Use an external zoom multiplier factor to zoom quickly
+     * with lesser number of transitions
+     * @since 5.1
+     */
+    void SetZoomMultiplier( TInt aZoomStepMultiplier );
 
   private:
     
@@ -387,6 +394,10 @@ class CCamZoomModel : public CBase,
     
     // Max allowed zoom step (taking into account optical, digital and extended)
     TInt iMaxZoomStep;
+
+    // Zoom step/jump multiplier for skipping some zoom levels 
+    // (for quick zooming to max and min zoom levels)  
+    TInt iZoomStepMultiplier;
     
     // Stores the current state of the model, and the last-notified
     // engine state.

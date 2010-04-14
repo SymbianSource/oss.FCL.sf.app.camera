@@ -47,6 +47,8 @@
 const TInt KDivisorFactor = 10000;    // integer scaling factor to avoid the 
                                      // use of floating point arithmetic
 const TInt KTouchAreaExpansion = 35; // Pixels to grow touchable area                                    
+const TInt KFastZoomMultiplier = 4;  // Multiplier to skip some zoom levels 
+                                     // to make zooming faster. Used with double tap.
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -526,7 +528,18 @@ TBool CCamZoomPane::IsZoomAtMinimum() const
     PRINT2(_L("Camera =><= CCamZoomPane::IsZoomAtMinimum iCurZoom = %d, iMinZoom = %d"), iCurZoom, iMinZoom);
     return iCurZoom == iMinZoom;
     }
-    
+
+// -----------------------------------------------------------------------------
+// CCamZoomPane::IsZoomAtMaximum
+// Returns whether the current zoom value is the maximum zoom
+// -----------------------------------------------------------------------------
+//
+TBool CCamZoomPane::IsZoomAtMaximum() const
+    {
+    PRINT2(_L("Camera =><= CCamZoomPane::IsZoomAtMaximum iCurZoom = %d, iMaxZoom = %d"), iCurZoom, iMaxZoom);
+    return iCurZoom == iMaxZoom;
+    }
+
 // -----------------------------------------------------------------------------
 // CCamZoomPane::OkToShowPane
 // Returns whether or not the Zoom Pane can currently be shown.
@@ -1209,6 +1222,28 @@ void CCamZoomPane::Touchfeedback()
                                     ETouchFeedbackNone : ETouchFeedbackBasic );        
         }
     PRINT( _L( "Camera <= CCamZoomPane::Touchfeedback" ) );
+    }
+
+// -----------------------------------------------------------------------------
+// CCamZoomPane::ZoomToMinimum
+// Zooms out to min zoom level. Should be stopped by StopZoom(), if needed
+// -----------------------------------------------------------------------------
+//
+void CCamZoomPane::ZoomToMinimum()
+    {
+    iModel->SetZoomMultiplier( KFastZoomMultiplier );
+    iModel->ZoomOut();
+    }
+
+// -----------------------------------------------------------------------------
+// CCamZoomPane::ZoomToMaximum
+// Zooms in to max zoom level. Should be stopped by StopZoom(), if needed 
+// -----------------------------------------------------------------------------
+//
+void CCamZoomPane::ZoomToMaximum()
+    {
+    iModel->SetZoomMultiplier( KFastZoomMultiplier );
+    iModel->ZoomIn();
     }
 
 //  End of File  

@@ -456,52 +456,16 @@ CCamSettingsModel::TextSettingValue( TInt aSettingItem ) const
 TBool CCamSettingsModel::SettingValueEnabled( TInt aSettingItem, 
                                              TInt aSettingValue ) const
     {
-    TCamImageQualitySetting maxPhoto = static_cast<TCamImageQualitySetting>( iPhotoQualityLevels[iPhotoQualityLevels.Count() - 1].iPhotoResolution );
-    // If the setting value is maximum photo size, and the current
-    // scene is sports, then this setting value is disabled
-    if ( ( aSettingItem == ECamSettingItemPhotoQuality ) && 
-         ( aSettingValue == maxPhoto ) )
-        {
-        // If the current scene is sports, disable the option
-        TCamSceneId scene = static_cast< TCamSceneId >
-               ( IntegerSettingValue( ECamSettingItemDynamicPhotoScene ) );
-        if ( scene == ECamSceneSports )
-            {
-            return EFalse;
-            }
-        // Otherwise, if the current scene is the user scene and
-        // it is based on the 'Sports' scene then disable the option.
-        else if ( scene == ECamSceneUser ) 
-            {
-            // ...Get the based on scene.
-            TCamSceneId baseScene = static_cast< TCamSceneId >
-                ( IntegerSettingValue( ECamSettingItemUserSceneBasedOnScene ) );
-            if ( baseScene == ECamSceneSports )
-                {
-                return EFalse;
-                }
-            }
-        else
-            {
-            // Otherwise, the option is enabled
-            return ETrue;
-            }       
-        }
     // The high quality video setting is not supported if
     // the second camera is enabled
-    else if ( aSettingItem == ECamSettingItemVideoQuality && 
-              aSettingValue == ECamVideoQualityHigh &&
-              static_cast<CCamAppUiBase*>( 
-                    iEnv->AppUi() )->IsSecondCameraEnabled() )
+    if ( aSettingItem == ECamSettingItemVideoQuality && 
+            aSettingValue == ECamVideoQualityHigh &&
+            static_cast<CCamAppUiBase*>( 
+            iEnv->AppUi() )->IsSecondCameraEnabled() )
         {
         return EFalse;
         }
     // All other setting item values are allowed
-    else 
-        {
-        return ETrue;
-        }
-
     return ETrue;
     }
 

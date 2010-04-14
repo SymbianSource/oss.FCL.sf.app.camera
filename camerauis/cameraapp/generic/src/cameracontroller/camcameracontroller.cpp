@@ -6428,12 +6428,34 @@ void CCamCameraController::SetViewfinderWindowHandle( RWindowBase* aWindow )
         iInfo.iVfMode == ECamViewfinderDirect )
         {
         PRINT( _L("Camera <> viewfinder active and window handle changed, restarting viewfinder...") );
-        iCamera->StopViewFinder();
-        iInfo.iVfState = ECamTriInactive;
+         iCamera->StopViewFinder();
+        
+        if ( iViewfinderWindow != NULL )
+            {
+            iViewfinderWindow = aWindow;
+            // Use the same viewfinder position and size as for bitmap viewfinder
+            TPckgBuf<TCamParamsVfBitmap> params;
+            iSettingProvider.ProvideCameraParamL( ECameraParamVfBitmap, &params );
+            
+            CEikonEnv* env = CEikonEnv::Static();
+    
+              TInt orgPos = SetVfWindowOrdinal(); // Set visible
+              iCamera->StartViewFinderDirectL(
+                  env->WsSession(),
+                  *env->ScreenDevice(),
+                  *iViewfinderWindow,
+                  params().iRect );
+              (void) SetVfWindowOrdinal( orgPos ); // back to original
+            }
+        else
+            {
+            iCamera->StopViewFinder();
+            iInfo.iVfState = ECamTriInactive;
 
-        // restart viewfinder
-        //TRAP_IGNORE( ProcessVfStartRequestL() );
-		iAppController.EnterViewfinderMode(iAppController.CurrentMode());
+            // restart viewfinder
+       
+		    iAppController.EnterViewfinderMode(iAppController.CurrentMode());
+            }
         }
     iViewfinderWindow = aWindow;
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -66,12 +66,7 @@ CGSCamQualitySettingContainer::CGSCamQualitySettingContainer(
     iParent( aParent ),
     iMode      ( aMode       )
   {
-  TInt key = (ECamControllerVideo == iMode)
-             ? ECamSettingItemVideoMediaStorage
-             : ECamSettingItemPhotoMediaStorage;
-  // Get the total remaining record time from the controller
-  iStorageLocation = 
-    static_cast<TCamMediaStorage>( iController.IntegerSettingValue( key ) );
+
   }
 
 // -----------------------------------------------------------------------------
@@ -565,10 +560,15 @@ void CGSCamQualitySettingContainer::DrawQualityTexts( CWindowGc& aGc, TRgb aColo
 //
 void CGSCamQualitySettingContainer::DrawStorageIcon( CWindowGc& aGc ) const
     {
+    TInt key = (ECamControllerVideo == iMode)
+             ? ECamSettingItemVideoMediaStorage
+             : ECamSettingItemPhotoMediaStorage;
+    TCamMediaStorage storageLocation = 
+        static_cast<TCamMediaStorage>( iController.IntegerSettingValue( key ) );
     CFbsBitmap* icon = NULL;
     CFbsBitmap* mask = NULL;
 
-    switch( iStorageLocation )
+    switch( storageLocation )
         {
         case ECamMediaStoragePhone:
             {

@@ -774,7 +774,7 @@ void CCamPostCaptureContainer::HandlePointerEventL(const TPointerEvent& aPointer
             else if(aPointerEvent.iType == TPointerEvent::EButton1Up )
                 {
                 iPlayIconPressed = EFalse;
-                iDraggedInAlready = ETrue;
+                iDraggedInAlready = EFalse;
                 //feedback->InstantFeedback( ETouchFeedbackBasicButton );
                 iView.HandleCommandL(ECamCmdPlay);
                 }

@@ -402,13 +402,9 @@ void CCamLocationIconController::Draw( CBitmapContext& aGc ) const
     {
     PRINT( _L("Camera => CCamLocationIconController::Draw") );
 
-    // draw location indicator icon only for main camera
-    if ( iController.ActiveCamera() == ECamActiveCameraPrimary )
-          {
-          // Make sure no brush is being used
-          aGc.SetBrushStyle( CGraphicsContext::ENullBrush );    
-          iLocationIndicators[iLocationState]->Draw( aGc );
-          }
+    // Make sure no brush is being used
+    aGc.SetBrushStyle( CGraphicsContext::ENullBrush );    
+    iLocationIndicators[iLocationState]->Draw( aGc );
 
     PRINT( _L("Camera <= CCamLocationIconController::Draw") );
     }    

@@ -422,18 +422,12 @@ void CCamCaptureSetupSlider::Draw( const TRect& /*aRect*/ ) const
     else
         {
         gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        gc.SetPenSize( TSize (1,1) );
+        gc.SetPenStyle( CGraphicsContext::ENullPen );
+        gc.SetPenColor( TRgb( 0x00ffffff, KToolBarExtensionBgAlpha ) );
         gc.SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
         gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
         gc.DrawRect( Rect() );            
-        // Reset the brush after use (otherwise anything drawn
-        // after the viewfinder will also show viewfinder frames)    
-        gc.SetDrawMode( CGraphicsContext::EDrawModePEN );
-        TSize penSize( 1, 1 );
-        gc.SetPenSize( penSize );
-        gc.SetPenStyle( CGraphicsContext::EDottedPen );
-        gc.SetPenColor( KRgbWhite );
-        gc.SetBrushStyle( CGraphicsContext::ENullBrush );
-        gc.DrawRect( Rect() );                            
         }
     
     // STEP 1: Draw the legend text

@@ -2816,8 +2816,14 @@ void CCamAppController::ReleaseCamera()
         appUi->SetAssumePostCaptureView( EFalse ); 
         } 
       }
-
-    if ( Busy() )
+      
+    TBool cancelingAutoFocus = ( ECamControllerImage == CurrentMode() && 
+                                           iInfo.iActiveCamera == ECamActiveCameraPrimary &&
+                                           iConfigManager && 
+                                           iConfigManager->IsAutoFocusSupported() && 
+                                           iAFCancelInProgress );                                           
+                                                                                      
+    if ( Busy() || cancelingAutoFocus )
       {
       PRINT( _L("Camera <> CCamAppController::ReleaseCamera: set release pending") );
       iPendingRelease = ETrue;
@@ -2842,6 +2848,13 @@ void CCamAppController::ReleaseCamera()
         TRAP_IGNORE ( IssueDirectRequestL( ECamRequestImageCancel ) );
         NotifyControllerObservers( ECamEventCaptureComplete, KErrCancel );          
         }
+      //In SetOperation(), it notify observer with ECamEventOperationStateChanged, 
+      //the clear work for flash indicator flag can be done with ECamEventOperationStateChanged in some abnormal cases.
+      if ( ECamControllerImage == CurrentMode() && iInfo.iActiveCamera == ECamActiveCameraPrimary )
+        {             
+        SetOperation( ECamNoOperation );
+        }
+
         
       //iInfo.iMode            = ECamControllerShutdown;
       //iInfo.iTargetMode      = ECamControllerIdle;

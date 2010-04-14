@@ -2508,6 +2508,7 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
     case ECamEventSaveLocationChanged:
         {
         PRINT( _L( "Camera <> case ECamEventSaveLocationChanged" ) )
+        DismissMemoryNoteL();
         if ( IsMMCRemovedNotePending() && 
            ( CamUtility::MemoryCardStatus() != ECamMemoryCardNotInserted ) )
             {
@@ -2517,6 +2518,10 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
         if ( IsDirectViewfinderActive() )
             {
             TRAP_IGNORE( HandleCommandL( ECamCmdRedrawScreen ) );
+            }
+        if ( ECamViewStatePostCapture == iViewState )
+            {
+            iTargetViewState = ECamViewStatePreCapture;
             }
         break;
         }   
@@ -4356,11 +4361,12 @@ CCamAppUi::CheckMemoryL()
         else if(IsMemoryFullOrUnavailable( storeToCheck ))
             {
             HBufC* text = StringLoader::LoadLC(R_NOTE_TEXT_MEMORY_FULL);
-            CAknStaticNoteDialog* note = new( ELeave ) CAknStaticNoteDialog;
-            note->PrepareLC( R_CAM_OOM_NOTE_OK_CANCEL);
-            note->SetTextL( *text );
+            iMemoryNote = new( ELeave ) CAknStaticNoteDialog;
+            iMemoryNote->PrepareLC( R_CAM_OOM_NOTE_OK_CANCEL);
+            iMemoryNote->SetTextL( *text );
             iController.StopIdleTimer();
-            TInt ret = note->RunDlgLD();
+            TInt ret = iMemoryNote->RunDlgLD();
+            iMemoryNote = NULL;
             CleanupStack::PopAndDestroy( text );
             if(EAknSoftkeyOk == ret)
                 {
@@ -4412,10 +4418,11 @@ CCamAppUi::CheckMemoryL()
                                                 R_CAM_MEMORY_SELECT_DIALOG,
                                                 EFalse,
                                                 supportedMemTypes );
+                CleanupStack::PushL(memoryDialog);
                 TDriveNumber driveNumber = static_cast<TDriveNumber>(KErrNotFound);    
                 CAknCommonDialogsBase::TReturnKey result = 
                                 memoryDialog->ExecuteL( driveNumber );
-
+                CleanupStack::PopAndDestroy(memoryDialog);
                 if ( result != CAknCommonDialogsBase::TReturnKey(
                                 CAknCommonDialogsBase::ERightSoftkey) )
                     {

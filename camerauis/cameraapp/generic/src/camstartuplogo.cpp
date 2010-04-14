@@ -18,7 +18,7 @@
 #include <fbs.h>
 #include <e32math.h>
 #include <e32debug.h>
-#include <akniconutils.h>
+#include <AknIconUtils.h>
 #include <cameraapp.mbg>
 #include "camlogging.h"
 #include "camstartuplogo.h"

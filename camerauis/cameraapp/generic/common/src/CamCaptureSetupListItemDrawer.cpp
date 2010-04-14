@@ -283,9 +283,9 @@ void CCamCaptureSetupListItemDrawer::DrawActualItem( TInt aItemIndex,
         layoutText.LayoutText( aActualItemRect, iTxtLayout );  
         // ...Pass the text to be drawn, into the text layout object
         // ...and draw it.    
-        if( !iFullySkinned )
+        if( !iFullySkinned && !aItemIsCurrent )
             {
-            color=KRgbWhite;       
+            color = KRgbWhite;       
             }
 
         layoutText.DrawText( *iGc, iModel.ItemText( aItemIndex ), 
@@ -319,9 +319,9 @@ void CCamCaptureSetupListItemDrawer::DrawActualItem( TInt aItemIndex,
         layoutText.LayoutText( aActualItemRect, iTxtWithRbLayout );
         // ...Pass the text to be drawn, into the text layout object
         // ...and draw it.    
-        if( !iFullySkinned )
+        if( !iFullySkinned && !aItemIsCurrent )
             {
-            color=KRgbWhite;       
+            color = KRgbWhite;       
             }
 
         layoutText.DrawText( *iGc, iModel.ItemText( aItemIndex ), ETrue, color );
@@ -478,11 +478,15 @@ void CCamCaptureSetupListItemDrawer::DrawTransparentItemRect(
         if ( control )
             {
             iGc->SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-            iGc->SetPenSize( TSize( 1, 1 ) );
-            iGc->SetPenStyle( CGraphicsContext::EDottedPen );
+            iGc->SetPenColor( TRgb( 0x00ffffff, KToolBarExtensionBgAlpha ) );
+            iGc->SetPenStyle( CGraphicsContext::ENullPen );
             iGc->SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
             iGc->SetBrushStyle( CGraphicsContext::ESolidBrush );
-            iGc->DrawRect( aActualItemRect );            
+            iGc->DrawRect( aActualItemRect );
+            iGc->SetPenSize( TSize( 1, 3 ) );
+            iGc->SetPenStyle( CGraphicsContext::ESolidPen );
+            iGc->DrawLine( TPoint( aActualItemRect.iTl.iX ,
+                    aActualItemRect.iBr.iY ), aActualItemRect.iBr );
             }
         }
 // ---------------------------------------------------------

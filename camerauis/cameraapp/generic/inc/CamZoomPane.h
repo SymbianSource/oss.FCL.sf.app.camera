@@ -242,6 +242,25 @@ class CCamZoomPane : public CBase,
         TBool IsZoomAtMinimum() const;
 
         /**
+        * Returns whether the current zoom value is the maximum zoom
+        * @since 5.1
+        * @return Whether the current zoom value is the maximum zoom
+        */
+        TBool IsZoomAtMaximum() const;
+
+        /**
+        * Zooms to max zoom value
+        * @since 5.1
+        */                        
+        void ZoomToMaximum();
+
+        /**
+        * Zooms to min zoom value
+        * @since 5.1
+        */                        
+        void ZoomToMinimum();
+
+        /**
         * Stops all zooming activity
         */
         void StopZoom();

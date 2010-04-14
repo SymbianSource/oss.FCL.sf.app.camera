@@ -64,6 +64,10 @@
 CCamPreCaptureViewBase::~CCamPreCaptureViewBase()
   {
   PRINT( _L("Camera => ~CCamPreCaptureViewBase") );
+  if ( iGestureFw ) 
+      {
+      delete iGestureFw;
+      }
   PRINT( _L("Camera <= ~CCamPreCaptureViewBase") );
   }
 
@@ -887,9 +891,9 @@ void CCamPreCaptureViewBase::ExitCaptureSetupModeL()
     {
     PRINT( _L("Camera => CCamPreCaptureViewBase::ExitCaptureSetupModeL") )
      
-    CCamCaptureSetupViewBase::ExitCaptureSetupModeL();
     
     iController.SetViewfinderWindowHandle( &iContainer->Window() );
+    CCamCaptureSetupViewBase::ExitCaptureSetupModeL();
     
     if( !iController.IsViewFinding() && !iController.InVideocallOrRinging() )
       {
@@ -918,6 +922,7 @@ void CCamPreCaptureViewBase::ExitCaptureSetupModeL()
     	SwitchToCaptureSetupMenuModeL();
 		}
 	
+	UpdateCbaL();
     PRINT( _L("Camera <= CCamPreCaptureViewBase::ExitCaptureSetupModeL") )
     }
 
@@ -1763,8 +1768,13 @@ void CCamPreCaptureViewBase::CreateContainerL()
     PRINT( _L("Camera => CCamPreCaptureViewBase::CreateContainerL") );
 
     // Create gesture fw object, set observer and gesture interest
+    if ( iGestureFw ) 
+        {
+        delete iGestureFw;
+        }
+
     iGestureFw = CAknTouchGestureFw::NewL( *this, *iContainer );
-    iGestureFw->SetGestureInterestL( EAknTouchGestureFwGroupPinch );
+    iGestureFw->SetGestureInterestL( EAknTouchGestureFwGroupPinch | EAknTouchGestureFwGroupTap );
 
     PRINT( _L("Camera <= CCamPreCaptureViewBase::CreateContainerL") );            
     }
@@ -1779,15 +1789,14 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
     PRINT( _L("Camera => CCamPreCaptureViewBase::HandleTouchGestureL") );
     
     // Skipped modes here
-    if ( ( iController.ActiveCamera() == ECamActiveCameraSecondary ) || 
-         ( ECamNoOperation != iController.CurrentOperation() )  )
+    if ( iController.ActiveCamera() == ECamActiveCameraSecondary )
         {
-        PRINT( _L("Camera <= CCamPreCaptureViewBase::HandleTouchGestureL") );
+        PRINT( _L("Camera <= CCamPreCaptureViewBase::HandleTouchGestureL - skipped") );
         return;
         }
 
     MAknTouchGestureFwPinchEvent *pinch = AknTouchGestureFwEventPinch( aEvent );
-    if ( pinch )
+    if ( pinch && (ECamNoOperation == iController.CurrentOperation()) )
         {
         // Determine the direction of pinch: +ve -> pinch outward / zoom / widen VF
         TInt currMove = pinch->Movement();
@@ -1816,6 +1825,31 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
                 container->BlinkResolutionIndicatorOnChange( EFalse );
                 }
             }
+        }
+    else if ( EAknTouchGestureFwDoubleTap == aEvent.Type() )
+        {
+        PRINT( _L("Camera <> *** double tap event") );
+        CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+        CCamZoomPane *zoomPane = appUi->ZoomPane();
+        
+        CCamPreCaptureContainerBase* container = static_cast<CCamPreCaptureContainerBase*>( iContainer );
+        container->ShowZoomPaneWithTimer();
+
+        // Zoom to max (if not already at max) zoom level, otherwise zoom out to min level
+        if ( !zoomPane->IsZoomAtMaximum() )
+            {
+            PRINT( _L("Camera <> Zooming to max level") );
+            zoomPane->ZoomToMaximum();
+            }
+        else
+            {
+            PRINT( _L("Camera <> Zooming out to min level") );
+            zoomPane->ZoomToMinimum();
+            }
+        }
+    else
+        {
+        PRINT1( _L("Camera <> HandleTouchGestureL - gesture not used, type:%d"), aEvent.Type() );
         }
 
     PRINT( _L("Camera <= CCamPreCaptureViewBase::HandleTouchGestureL") );

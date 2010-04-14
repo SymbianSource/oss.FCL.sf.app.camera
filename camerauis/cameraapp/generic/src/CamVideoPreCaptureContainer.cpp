@@ -35,6 +35,7 @@
 #include <eikapp.h>		// For CEikApplication
 #include <AknIconUtils.h>
 #include <akntoolbar.h>
+#include <akntoolbarextension.h>
 #include <barsread.h>
 #include <cameraapp.rsg>
 #include <vgacamsettings.rsg>
@@ -477,10 +478,30 @@ void CCamVideoPreCaptureContainer::BlankSoftkeysL()
 // Change the current capture state following shutter 
 // key events
 // ----------------------------------------------------
-//  
+//
 TKeyResponse CCamVideoPreCaptureContainer::HandleShutterKeyEventL( const TKeyEvent& /*aKeyEvent*/,
-                                                                   TEventCode /*aType*/ )
-    {    
+                                                                   TEventCode aType )
+    {
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+          
+    if ( appUi && 
+         appUi->CurrentViewState() == ECamViewStatePreCapture &&
+         aType == EEventKeyDown &&
+         iController.IsTouchScreenSupported() )
+        {
+        CAknToolbar* toolbar = appUi->CurrentFixedToolbar();
+        if ( toolbar )
+            {
+            CAknToolbarExtension* toolbarExtension =
+            toolbar->ToolbarExtension();
+            if ( toolbarExtension && toolbarExtension->IsShown() )
+                {
+                toolbarExtension->SetShown( EFalse );
+                return EKeyWasConsumed;
+                }
+            }
+        }
+      
     return EKeyWasNotConsumed;
     }
 

@@ -374,7 +374,8 @@ TKeyResponse CCamCaptureSetupContainer::OfferKeyEventL(
         iController.CurrentMode() == ECamControllerShutdown )
         {
         if( !iController.IsViewFinding() && iViewFinding 
-           && IsCaptureKeyL( aKeyEvent, aType ) )             
+            && ( IsCaptureKeyL( aKeyEvent, aType )
+            || IsShutterKeyL( aKeyEvent, aType ) ) )
             {
             PRINT( _L("Camera <> CCamCaptureSetupContainer::OfferKeyEventL coming back from standby" ))
             ReserveAndStartVF();
@@ -391,9 +392,11 @@ TKeyResponse CCamCaptureSetupContainer::OfferKeyEventL(
         // If VF was stopped by stand-by-timer, restart VF here
         ReserveAndStartVF();
         }
-
-    // If the Ok button is pressed, select the current item
-    if ( aKeyEvent.iCode == EKeyOK && aKeyEvent.iRepeats == 0 && aType == EEventKey )
+    
+    // If the Ok button or shutter key is pressed, select the current item
+    if ( ( aKeyEvent.iCode == EKeyOK && aKeyEvent.iRepeats == 0 && aType == EEventKey ) ||
+         ( aType == EEventKeyDown && 
+         ( IsCaptureKeyL( aKeyEvent, aType ) || IsShutterKeyL( aKeyEvent, aType ) ) ) )  
         {
         TKeyResponse response = iCaptureSetupControl->OfferKeyEventL( aKeyEvent, aType );
         iView.HandleCommandL( EAknSoftkeyOk );
