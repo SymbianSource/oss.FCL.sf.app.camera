@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="tiny" height="32" version="1.1" viewBox="0 0 32 32" width="32">
+<g>
+<rect fill="none" height="32" width="32"/>
+<path d="M22.915,14.004C23.344,13.33,24,11.459,24,9.999C24,5.588,20.411,2,16,2S8,5.588,8,9.999   c0,1.46,0.563,3.112,1.085,4.005C4.625,13.924,1,17.588,1,21.999S4.589,30,9,30c3.01,0,5.635-1.674,7-4.137   C17.365,28.326,19.99,30,23,30c4.411,0,8-3.59,8-8.001C31,17.799,27.75,14.004,22.915,14.004z" fill="#FFFFFF"/>
+<path d="M16,4c-3.313,0-6,2.686-6,5.999S12.687,16,16,16c3.313,0,6-2.688,6-6.001S19.313,4,16,4z M16,14   c-2.21,0-4-1.791-4-4s1.79-4,4-4s4,1.791,4,4S18.21,14,16,14z" fill="#040404"/>
+<circle cx="23" cy="21.999" fill="#040404" r="6"/>
+<circle cx="9" cy="21.999" fill="#040404" r="6"/>
+<circle cx="9" cy="22" fill="#B2B2B2" r="4"/>
+</g>
+</svg>

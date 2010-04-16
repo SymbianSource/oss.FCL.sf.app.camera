@@ -1,5 +1,0 @@
-EXPORTS
-	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
-	_ZTI23CActivePaletteContainer @ 2 NONAME ; #<TI>#
-	_ZTV23CActivePaletteContainer @ 3 NONAME ; #<VT>#
-

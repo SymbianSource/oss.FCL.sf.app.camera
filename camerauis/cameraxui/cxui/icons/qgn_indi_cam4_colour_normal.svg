@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="tiny" height="32" version="1.1" viewBox="0 0 32 32" width="32">
+<g>
+<rect fill="none" height="32" width="32"/>
+<path d="M22.915,14.004C23.344,13.33,24,11.459,24,10c0-4.411-3.589-8-8-8s-8,3.588-8,8   c0,1.46,0.563,3.111,1.085,4.005C4.625,13.923,1,17.588,1,22s3.589,8,8,8c3.01,0,5.635-1.672,7-4.135C17.365,28.328,19.99,30,23,30   c4.411,0,8-3.588,8-8C31,17.798,27.75,14.004,22.915,14.004z" fill="#FFFFFF"/>
+<circle cx="16" cy="10" fill="#040404" r="6"/>
+<circle cx="16" cy="10" fill="#ED2224" r="4"/>
+<circle cx="23" cy="22" fill="#040404" r="6"/>
+<circle cx="23" cy="22" fill="#3A54A5" r="4"/>
+<circle cx="9" cy="22" fill="#040404" r="6"/>
+<circle cx="9" cy="22" fill="#6ABD45" r="4"/>
+</g>
+</svg>

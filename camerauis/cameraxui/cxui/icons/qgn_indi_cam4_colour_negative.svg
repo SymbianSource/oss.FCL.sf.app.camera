@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1 Tiny//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11-tiny.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="tiny" height="32" version="1.1" viewBox="0 0 32 32" width="32">
+<g>
+<rect fill="#FFFFFF" height="32" width="32"/>
+<rect fill="#040404" height="28" width="28" x="2" y="2"/>
+<circle cx="16" cy="10" fill="#71CDDD" r="5"/>
+<circle cx="23" cy="22" fill="#F6EB16" r="5"/>
+<circle cx="9" cy="22" fill="#B9539F" r="5"/>
+</g>
+</svg>

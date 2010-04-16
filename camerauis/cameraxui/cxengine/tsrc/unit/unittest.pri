@@ -1,0 +1,43 @@
+#
+# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# All rights reserved.
+# This component and the accompanying materials are made available
+# under the terms of "Eclipse Public License v1.0"
+# which accompanies this distribution, and is available
+# at the URL "http://www.eclipse.org/legal/epl-v10.html".
+#
+# Initial Contributors:
+# Nokia Corporation - initial contribution.
+#
+# Contributors:
+#
+# Description:
+#
+
+!cxeunit_no_system_paths {
+    include(../../../camerax.pri)
+} else {
+    message( "CameraX common system paths NOT included!" )
+}
+
+# Common setup for unit tests
+
+TEMPLATE = app
+
+CONFIG += console symbian_test
+QT += testlib
+
+DEPENDPATH += . ../../fakeclasses ../../../src ../../../src/dummyengine ../../../inc/api ../../../inc ../utils
+INCLUDEPATH += . ../../../inc ../../../inc/api ../../fakeclasses ../../../traces ../../../src/dummyengine ../utils
+
+symbian {
+    TARGET.CAPABILITY = ALL -TCB -DRM
+    RSS_RULES = "group_name=\"Qt Camera\";"
+}
+
+
+# Common utility classes
+
+SOURCES += cxetestutils.cpp
+HEADERS += cxetestutils.h
+
