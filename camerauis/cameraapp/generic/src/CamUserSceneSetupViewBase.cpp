@@ -244,9 +244,9 @@ void CCamUserSceneSetupViewBase::HandleCommandL( TInt aCommand )
 void CCamUserSceneSetupViewBase::HandleForegroundEventL( TBool aForeground )
     {
     PRINT1( _L("Camera => CCamUserSceneSetupViewBase::HandleForegroundEventL %d"), aForeground );
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );
     if ( aForeground )
         {
-        CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );
         // if foreground event is received while in videocall, go to standby with error
         if ( iController.InVideocallOrRinging() && ECamNoOperation == iController.CurrentOperation() )
             {
@@ -286,7 +286,7 @@ void CCamUserSceneSetupViewBase::HandleForegroundEventL( TBool aForeground )
             }
         }        
     // To background
-    else
+    else if( !aForeground && appUi->AppInBackground( EFalse ) )
         {
         PRINT( _L("Camera <> CCamUserSceneSetupViewBase::HandleForegroundEventL dec engine count") );
         // Register that we nolonger need the engine
@@ -531,14 +531,14 @@ void CCamUserSceneSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand )
     {
     PRINT( _L("Camera => CCamUserSceneSetupViewBase::SwitchToCaptureSetupModeL()") );  	   	
     iUserSceneSetupModeActive = EFalse;
+    SetCaptureSetupModeActive(ETrue);
     iContainer->MakeVisible( ETrue );  
     AppUi()->RemoveFromStack( iContainer );
     iVFRequested=ETrue;    
     StartViewFinder();
     iController.StartIdleTimer();
 
-    SetCaptureSetupModeActive(ETrue);
-
+    
     // Remove the view's main container, and add the capture setup 
     // control associated with the input command to the container stack.
     CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( aSetupCommand, ETrue );

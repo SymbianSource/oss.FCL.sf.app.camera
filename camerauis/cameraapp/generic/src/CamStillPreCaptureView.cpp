@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -709,9 +709,13 @@ void CCamStillPreCaptureView::UpdateCbaL()
     {
     PRINT( _L("Camera <> CCamStillPreCaptureView::UpdateCbaL: Setting standby softkeys..") );        
     if( KErrNone == appui->StandbyStatus() )
+	  {
       SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_EXIT__CONTINUE );
-    else
-      SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_EXIT );
+	  }
+    else if( appui->IsRecoverableStatus() )
+	  {
+	  SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_EXIT );
+	  }
     }
   else if( iInfoListBoxActive )
   	{
@@ -1282,34 +1286,56 @@ void CCamStillPreCaptureView::DynInitToolbarL( TInt aResourceId,
         {
         UpdateToolbarIconsL();
         if( aToolbar )
-                {            
-                if ( iEmbedded /* && appUi->IsSecondCameraEnabled()*/ )
+            {            
+            if ( iEmbedded /* && appUi->IsSecondCameraEnabled()*/ )
+                {
+                // Dim mode switch icon and disable tooltip
+                aToolbar->SetItemDimmed( ECamCmdNewVideo, ETrue, ETrue );
+               
+                CAknButton* videoModeButton = static_cast<CAknButton*>(
+                        aToolbar->ControlOrNull( ECamCmdNewVideo ) );
+                if ( videoModeButton ) 
                     {
-					aToolbar->SetItemDimmed(ECamCmdNewVideo, ETrue, ETrue);
+                    videoModeButton->SetDimmedHelpTextL( KNullDesC );
                     }
-                CAknToolbarExtension* extension = aToolbar->ToolbarExtension();
-
-                if( extension )
+               
+            
+            
+                if ( appUi && appUi->IsSecondCameraEnabled() )
                     {
-
-                    if ( iEmbedded )
+                    aToolbar->SetItemDimmed( ECamCmdPhotos, ETrue, ETrue );
+                    CAknButton* photosButton = static_cast<CAknButton*>(
+                            aToolbar->ControlOrNull( ECamCmdPhotos ) );
+                    if ( photosButton ) 
                         {
-						extension->HideItemL( ECamCmdNewVideo, ETrue );
-                        extension->HideItemL( ECamCmdTimeLapseSlider, ETrue );
-                        extension->HideItemL( ECamCmdPhotos, ETrue );
-                        }
-                    else
-                        {
-                        extension->HideItemL( ECamCmdNewVideo, EFalse );
-                        extension->HideItemL( ECamCmdToggleFacetracking, EFalse );
-                        extension->HideItemL( ECamCmdPhotos, EFalse );
-                        }
-                    if(aResourceId == ECamCmdToolbarExtension)
-                        {
-                        appUi->ZoomPane()->MakeVisible(EFalse,ETrue);
+                        // do not show tooltip for dimmed item
+                        photosButton->SetDimmedHelpTextL( KNullDesC );
                         }
                     }
                 }
+            CAknToolbarExtension* extension = aToolbar->ToolbarExtension();
+        
+            if( extension )
+                {
+        
+                if ( iEmbedded )
+                    {
+                    extension->HideItemL( ECamCmdNewVideo, ETrue );
+                    extension->HideItemL( ECamCmdTimeLapseSlider, ETrue );
+                    extension->HideItemL( ECamCmdPhotos, ETrue );
+                    }
+                else
+                    {
+                    extension->HideItemL( ECamCmdNewVideo, EFalse );
+                    extension->HideItemL( ECamCmdToggleFacetracking, EFalse );
+                    extension->HideItemL( ECamCmdPhotos, EFalse );
+                    }
+                if(aResourceId == ECamCmdToolbarExtension)
+                    {
+                    appUi->ZoomPane()->MakeVisible(EFalse,ETrue);
+                    }
+                }
+            }
         }
     
     PRINT2( _L("Camera <= CCamStillPreCaptureView::DynInitToolbarL(%d, 0x%X)" ), aResourceId, aToolbar );

@@ -855,16 +855,6 @@ RESOURCE AVKON_SOUND_INFO_LIST r_cam_sound_list
             preference = EAknAudioPrefCamera;
             file = KCamAutoFocusSuccFile;
             volume = 5;
-            },
-        // Self-timer beep
-        AVKON_SOUND_INFO 
-            { 
-            sid = ECamSelfTimerSoundId; 
-            priority = EAvkonAlarmTonesPriority;
-            preference = EAknAudioPrefDefaultTone; 
-            sequencelength = 6;
-            sequence = { 0, 17, 6, 118, 10, 11 };
-            volume = 9; 
             }
          
         };
@@ -3374,10 +3364,12 @@ RESOURCE AIW_INTEREST r_cam_aiw_view_interest
         {
         AIW_CRITERIA_ITEM // SHARE_AIW
             {
-            id = KAiwCmdView;
-            serviceCmd = KAiwCmdView;
-            contentType = "*";
+            id              = ECamCmdShareSettings;
+            serviceCmd      = KAiwCmdView;
+            contentType     = "*";
+            defaultProvider = 0x2002CC1F; //KShareAppUidVal;	    
             serviceClass = KAiwClassMenu;
+            maxProviders    = 1;
             }
         };
     }

@@ -31,7 +31,6 @@ class CAknKeySoundSystem;
 class CCamAppController;
 class MCamAudioPlayerObserver;
 class CCamPlayerWrapperBase;
-class CCamTonePlayerWrapper;
 
 // ===========================================================================
 // Class definitions
@@ -81,15 +80,6 @@ class CCamAudioPlayerController : public CBase,
     *                  callback to MCamAudioPlayerObserver::PlayComplete
     */
     void PlaySound( TInt  aSoundId, 
-                    TBool aCallback );
-
-    /**
-    * @param aCallback If set ETrue, calling method this results in one 
-    *                  callback to MCamAudioPlayerObserver::PlayComplete
-    */
-    void PlayTone( TInt    aToneInHz, 
-                   TInt    aLengthInUs, 
-                   TReal32 aVolumeInPercent, 
                    TBool   aCallback );
 
     /**
@@ -139,7 +129,6 @@ class CCamAudioPlayerController : public CBase,
     MCamPlayerObserver&                  iObserver;
 
     RPointerArray<CCamPlayerWrapperBase> iPlayers;
-    CCamTonePlayerWrapper*               iTonePlayer;
 
     TInt                                 iCameraMode;     // TCamCameraMode value
     TInt                                 iCaptureSoundId; // Sound id or -1 if not set

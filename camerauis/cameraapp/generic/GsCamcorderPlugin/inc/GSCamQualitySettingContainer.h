@@ -284,7 +284,7 @@ class CGSCamQualitySettingContainer : public CCoeControl,
         CGSCamQualitySettingSlider* iSlider;
         // The current capture mode (video/still)
         TCamCameraMode iMode;
-
+        
         // Array of supported qualities
         RArray<TInt> iSupportedQualitiesArray;
         

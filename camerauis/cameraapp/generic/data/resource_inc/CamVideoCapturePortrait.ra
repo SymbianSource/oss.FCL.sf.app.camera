@@ -614,7 +614,7 @@ RESOURCE MENU_PANE r_cam_video_post_capture_menu_portrait
             },
         MENU_ITEM // SHARE_AIW
             {
-            command = KAiwCmdView;
+            command = ECamCmdShareSettings;
             // AIW provider fills the menu item title.
             // No submenu, only 1 provider acccepted.
             txt     = "";

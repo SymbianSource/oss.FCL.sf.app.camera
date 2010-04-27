@@ -341,7 +341,8 @@ void CCamCaptureSetupViewBase::DoDeactivate()
 // ---------------------------------------------------------------------------
 //
 CCamCaptureSetupViewBase::CCamCaptureSetupViewBase( CCamAppController& aController )
-    : CCamViewBase( aController ),iForceAvkonCBA(EFalse)
+    : CCamViewBase( aController ),iForceAvkonCBA(EFalse),
+      iCaptureSetupModeActive( EFalse )
     {
     }
 
@@ -1057,6 +1058,8 @@ void CCamCaptureSetupViewBase::ExitAllModesL()
 //
 void CCamCaptureSetupViewBase::SetSceneSettingMode(TBool aActive)
     {
+    TUid view = Id();
+    TBool userSceneActive = ( view.iUid == ECamViewIdPhotoUserSceneSetup );
     // This should be the only place iSceneSettingModeActive is set!
     // We need to inform the AppUi
     iSceneSettingModeActive = aActive;
@@ -1069,8 +1072,8 @@ void CCamCaptureSetupViewBase::SetSceneSettingMode(TBool aActive)
             {
             appUi->SetPreCaptureMode(ECamPreCapSceneSetting);
             iChangeButtonPressed = EFalse; 
-            }
-        else if ( iChangeButtonPressed )
+            } // userSceneActive to avoit toolbar flicker after back from scene setting
+        else if ( iChangeButtonPressed || userSceneActive )
         	{
         	// transfering to user scene setup view
         	 appUi->SetPreCaptureMode(ECamPreCapSceneSetting);
@@ -1118,7 +1121,7 @@ void CCamCaptureSetupViewBase::SetCaptureSetupModeActive(TBool aActive)
     // This should be the only place iCaptureSetupModeActive is set!
     // We need to inform the AppUi
     iCaptureSetupModeActive = aActive;
-
+    PRINT1( _L("Camera <> CCamCaptureSetupViewBase::SetCaptureSetupModeActive iCaptureSetupModeActive=%d"),iCaptureSetupModeActive);
     CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( AppUi() );
     
     if ( appUi)

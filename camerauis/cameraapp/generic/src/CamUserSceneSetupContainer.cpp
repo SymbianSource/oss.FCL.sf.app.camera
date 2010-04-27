@@ -26,6 +26,7 @@
 #include <AknIconArray.h>
 #include <barsread.h>
 #include <aknview.h>
+#include "CameraUiConfigManager.h"
 
 #include "CamUtility.h"
 
@@ -211,7 +212,9 @@ void CCamUserSceneSetupContainer::ConstructL
     {
     const TInt KSettingItemArrayGranularity = 5;
 
-    CreateWindowL();
+    CCamContainerBase::BaseConstructL( aRect );
+    
+    //CreateWindowL();
 
     // Create the listbox in the right style
     iUserSceneSetupList = new ( ELeave ) CAknSettingStyleListBox;
@@ -442,6 +445,23 @@ TKeyResponse CCamUserSceneSetupContainer::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
     TEventCode aType )
     {
+    if ( iController.UiConfigManagerPtr()
+         && iController.UiConfigManagerPtr()->IsAutoFocusSupported() )
+        {
+        if( aType == EEventKeyDown && IsShutterKeyL( aKeyEvent, aType ) )
+            {
+            TKeyResponse response = iUserSceneSetupList->OfferKeyEventL( aKeyEvent, aType );
+            iView.HandleCommandL( EAknSoftkeyBack );
+            return response;
+            }
+        }
+    else if( aType == EEventKeyDown && IsCaptureKeyL( aKeyEvent, aType ) )
+        {
+        TKeyResponse response = iUserSceneSetupList->OfferKeyEventL( aKeyEvent, aType );
+        iView.HandleCommandL( EAknSoftkeyBack );
+        return response;
+        }
+       
 	return iUserSceneSetupList->OfferKeyEventL( aKeyEvent, aType );
     }
 

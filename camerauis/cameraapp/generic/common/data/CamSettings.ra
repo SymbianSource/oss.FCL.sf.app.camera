@@ -1076,7 +1076,7 @@ RESOURCE AVKON_SETTING_PAGE r_cam_gssettings_quality_settings_page
 	// The custom quality control is used instead
 	type = EAknCtPopupSettingList;
 	editor_resource_id = r_cam_setting_listbox;
-	softkey_resource = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+	softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
 	}
 
 //----------------------------------------------------

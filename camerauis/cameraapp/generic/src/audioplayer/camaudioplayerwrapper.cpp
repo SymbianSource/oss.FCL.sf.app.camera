@@ -275,8 +275,7 @@ CCamAudioPlayerWrapper::MapSoundId2FilenameL( TInt aSoundId )
     case ECamBurstCaptureSoundId3: filename.Set( KCamBurstCaptureTone3 );      break;
     case ECamBurstCaptureSoundId4: filename.Set( KCamBurstCaptureTone4 );      break;
     
-    case ECamSelfTimerSoundId:     User::Leave( KErrNotSupported );       break;
-    case ECamInCallToneId:         User::Leave( KErrNotSupported );       break;
+    case ECamSelfTimerSoundId:     filename.Set( KCamSelfTimerTone );      break;
 
     default:
       __ASSERT_DEBUG( EFalse, CamPanic( ECamPanicNotSupported ) );

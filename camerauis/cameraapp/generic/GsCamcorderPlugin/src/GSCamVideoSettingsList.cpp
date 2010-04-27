@@ -258,7 +258,7 @@ CAknSettingItem* CGSCamVideoSettingsList::CreateSettingItemL( TInt aIdentifier )
                 iDefaultNameBase = parent->TextSettingValue( 
                                             ECamSettingItemVideoNameBase );
                 }
-            TBool flag = ( iLaunchedFromGS || iSecondaryCameraSettings );
+            TBool flag = ( iLaunchedFromGS );
             settingItem = new( ELeave ) 
                           CGSCamDefaultNameSettingItem( iDefaultNameBase, 
                                                         ECamControllerVideo, 

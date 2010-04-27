@@ -2685,6 +2685,18 @@ void CCamPreCaptureContainerBase::DrawResolutionIndicator()
     PRINT( _L("Camera => CCamPreCaptureContainerBase::DrawResolutionIndicator") );
     iToggleCountdown--;
 
+    // Stop immediately the periodic timer for showing correctly 
+    // the text "Processing image" when capturing a still image. 
+    TBool stillCapturing = ECamControllerImage == iController.CurrentMode() && 
+                           ECamImageCaptureSingle == iController.CurrentImageMode() &&
+                           iController.IsProcessingCapture();
+    if ( stillCapturing )
+      {        
+      iBlinkResolutionIndicator = EFalse;
+      iIndBlinkTimer->Cancel();
+      return;
+      }  
+      
     // State changed, need to redraw
     ActivateGc();
 

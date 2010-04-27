@@ -202,8 +202,6 @@ class CCamUserSceneSetupViewBase :  public CCamCaptureSetupViewBase,
         
     protected:
 
-    private:   // data
-
         // Specifies whether the user scene setup mode is active
         TBool iUserSceneSetupModeActive;
 

@@ -89,6 +89,7 @@ _LIT( KCamVideoStartTone,    "z:\\system\\sounds\\digital\\cameraappStart.wav"  
 _LIT( KCamVideoPauseTone,    "z:\\system\\sounds\\digital\\cameraappStop.wav"      );
 _LIT( KCamVideoStopTone,     "z:\\system\\sounds\\digital\\cameraappStop.wav"      );
 _LIT( KCamAutoFocusComplete, "z:\\system\\sounds\\digital\\cameraappFocusSucc.wav" );
+_LIT( KCamSelfTimerTone, "z:\\system\\sounds\\digital\\cameraappSelfTimer.wav" );
 
 #endif //CAMERAAPP_PLUGIN_BUILD
 

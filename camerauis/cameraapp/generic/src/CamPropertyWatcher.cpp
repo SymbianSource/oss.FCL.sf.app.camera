@@ -63,8 +63,11 @@ CCamPropertyWatcher::~CCamPropertyWatcher()
 void CCamPropertyWatcher::Subscribe()
     {
     PRINT( _L( "Camera => CCamPropertyWatcher::Subscribe()" ) )
-    iProperty.Subscribe( iStatus );
-    SetActive();
+    if(!IsActive())
+        {
+        iProperty.Subscribe( iStatus );
+        SetActive();
+        }
     PRINT( _L( "Camera <= CCamPropertyWatcher::Subscribe()" ) )
     }
 

@@ -224,6 +224,21 @@ class CCamAppUi : public CCamAppUiBase,
         */
         TInt StandbyStatus() const;
 
+        /**
+         * returns ETrue if the stsnby status is recoverable
+         */
+        TBool IsRecoverableStatus();
+        
+        /**
+         * Change the standby status
+         */
+        TBool ChangeStandbyStatusL( TInt aError );
+        
+        /**
+        * returns Getter for iPreCaptureMode
+        */
+        TCamPreCaptureMode PreCaptureMode();
+        
         /*
         * Check for file name deletion/renaming outside camera
         */
@@ -842,8 +857,8 @@ class CCamAppUi : public CCamAppUiBase,
         void SetSuppressUIRiseOnViewfinderStart(TBool aSuppress);
         
         /**
-        * Whether the current capture was selftimer initiated
-        * @return ETrue if the current capture was started via selftimer
+        * Whether the latest capture was selftimer initiated
+        * @return ETrue if the latest capture was started via selftimer
         */
         TBool IsSelfTimedCapture() const;
 
@@ -1333,7 +1348,7 @@ class CCamAppUi : public CCamAppUiBase,
         * returns ETrue if headset is connected
         */ 
         TBool IsHeadsetConnected() const;
-
+        
     public:
         /**
         * Display error note

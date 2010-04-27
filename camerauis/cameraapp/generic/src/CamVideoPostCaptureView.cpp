@@ -269,7 +269,7 @@ void CCamVideoPostCaptureView::DoActivateL(
     iAiwServiceHandler->Reset();
     iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ),
             R_CAM_SHARE_ON_OVI_INTEREST );
-    
+
     // SHARE_AIW
     iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID),
                                      R_CAM_AIW_VIEW_INTEREST );
@@ -340,10 +340,6 @@ void CCamVideoPostCaptureView::ConstructL()
     PRINT( _L("Camera => CCamVideoPostCaptureView::ConstructL"))
     BaseConstructL( ROID(R_CAM_VIDEO_POST_CAPTURE_VIEW_ID));
     CCamPostCaptureViewBase::ConstructL();
-
-    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ), R_CAM_SHARE_ON_OVI_INTEREST );
-    // SHARE_AIW
-    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), R_CAM_AIW_VIEW_INTEREST );
 
     PRINT( _L("Camera <= CCamVideoPostCaptureView::ConstructL"))
     }

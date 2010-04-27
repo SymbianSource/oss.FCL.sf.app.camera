@@ -159,6 +159,14 @@ class CCamPreCaptureViewBase : 	public CCamCaptureSetupViewBase,
         * @return ETrue if started.
         */
         virtual TBool StartMskCaptureL() = 0;
+        
+        
+        /**
+        * Getter for iCaptureSetupModeActive
+        * @since 9.2
+        * @return iCaptureSetupModeActive
+        */
+        TBool IsSetupModeActive();
 
     protected:    // Functions from base classes
 

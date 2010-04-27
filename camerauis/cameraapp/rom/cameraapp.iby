@@ -42,6 +42,7 @@ data = ABI_DIR\BUILD_DIR\z\system\sounds\Digital\cameraappCaptureShort1.wav    s
 data = ABI_DIR\BUILD_DIR\z\system\sounds\Digital\cameraappCaptureShort2.wav    system\sounds\Digital\cameraappCaptureShort2.wav
 data = ABI_DIR\BUILD_DIR\z\system\sounds\Digital\cameraappCaptureShort3.wav    system\sounds\Digital\cameraappCaptureShort3.wav
 data = ABI_DIR\BUILD_DIR\z\system\sounds\Digital\cameraappCaptureShort4.wav    system\sounds\Digital\cameraappCaptureShort4.wav
+data = ABI_DIR\BUILD_DIR\z\system\sounds\Digital\cameraappSelfTimer.wav    system\sounds\Digital\cameraappSelfTimer.wav
 
 // Backup registration
 data = ZPRIVATE\101FFA86\backup_registration.xml                          private\101FFA86\backup_registration.xml

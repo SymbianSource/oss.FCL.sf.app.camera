@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -40,6 +40,7 @@ const TInt KCamShareOnlineVersionBufLen = 12;
 const TVersion KShareOnlineMinimumVersion( 5, 0, 0 );
 const TUid KOpenModeOneClick = { 2 };
 const TUid KCmdGetOneClickToolTip = { 15 };
+const TUid KOpenModeShareSettings  = { 11 };
 
 const TUint32 KShareImageServiceIconFileName = 0x00000002;
 const TUint32 KShareVideoServiceIconFileName = 0x00000003;
@@ -87,6 +88,7 @@ void CCamOneClickUploadUtility::ConstructL()
         {
         CheckVersionL();
         InitializeAiwL();
+        ButtonTooltipL();
         iUploadSupported = ETrue;
         } );
 #else
@@ -183,6 +185,11 @@ const TDesC& CCamOneClickUploadUtility::ButtonTooltipL()
     {
     __ASSERT_ALWAYS( iAiwServiceHandler, CamPanic( ECamPanicNullPointer ) );
 
+    if ( iTooltip )
+        {
+        return *iTooltip;
+        }
+
     CAiwGenericParamList& paramList = iAiwServiceHandler->InParamListL();
     paramList.Reset();
 
@@ -212,6 +219,25 @@ const TDesC& CCamOneClickUploadUtility::ButtonTooltipL()
     return *iTooltip;
     }
 
+// ---------------------------------------------------------------------------
+// Launch Share settings view
+// ---------------------------------------------------------------------------
+//
+void CCamOneClickUploadUtility::LaunchShareSettings()
+    {
+    PRINT( _L("Camera => CCamOneClickUploadUtility::LaunchShareSettings") );
+    
+    CAiwGenericParamList& paramList = iAiwServiceHandler->InParamListL();
+    paramList.Reset();
+    
+    TAiwVariant openVariant( KOpenModeShareSettings );
+    TAiwGenericParam openParam( EGenericParamModeActivation, openVariant );
+    paramList.AppendL( openParam );
+    iAiwServiceHandler->ExecuteServiceCmdL( KAiwCmdView, 
+            paramList, iAiwServiceHandler->OutParamListL() );
+    
+    PRINT( _L("Camera <= CCamOneClickUploadUtility::LaunchShareSettings") );
+    }
 
 // ---------------------------------------------------------------------------
 // Check Share Online version
@@ -289,6 +315,8 @@ void CCamOneClickUploadUtility::InitializeAiwL()
 
     iAiwServiceHandler = CAiwServiceHandler::NewL();
     iAiwServiceHandler->AttachL( R_CAM_ONE_CLICK_UPLOAD_INTEREST );
+    iAiwServiceHandler->AttachL( R_CAM_AIW_VIEW_INTEREST );
+    PRINT( _L("Camera <> CCamOneClickUploadUtility::InitializeAiwL - initialized") );
     }
 
 // ---------------------------------------------------------------------------
@@ -297,7 +325,7 @@ void CCamOneClickUploadUtility::InitializeAiwL()
 //
 void CCamOneClickUploadUtility::CurrentIconPathL( TCamCameraMode aMode, TDes& aPath )
     {
-    PRINT( _L("Camera => CCamOneClickUploadUtility::CurrentIconPathL") );
+    PRINT1( _L("Camera => CCamOneClickUploadUtility::CurrentIconPathL mode:%d"), aMode );
     TUint32 serviceIconId = KShareCommonServiceIconFileName;
 
     if ( ECamControllerVideo == aMode )
@@ -316,13 +344,13 @@ void CCamOneClickUploadUtility::CurrentIconPathL( TCamCameraMode aMode, TDes& aP
     }
 
 // -----------------------------------------------------------------------------
-// CCamOneClickUploadUtility::UpdateUploadIcon
+// CCamOneClickUploadUtility::UpdateUploadIconL
 // -----------------------------------------------------------------------------
 //
-void CCamOneClickUploadUtility::UpdateUploadIcon( CAknToolbar *aToolbar, 
+void CCamOneClickUploadUtility::UpdateUploadIconL( CAknToolbar *aToolbar,
                                                   TCamCameraMode aMode )
     {
-    PRINT( _L("Camera => CCamOneClickUploadUtility::UpdateUploadIcon") );
+    PRINT( _L("Camera => CCamOneClickUploadUtility::UpdateUploadIconL") );
 
     TFileName currIcon;
     CurrentIconPathL( aMode, currIcon );
@@ -346,17 +374,20 @@ void CCamOneClickUploadUtility::UpdateUploadIcon( CAknToolbar *aToolbar,
             PRINT( _L("Camera <> Copying icon") );
             CAknButton* button = dynamic_cast<CAknButton*>(
                 aToolbar->ControlOrNull( ECamCmdOneClickUpload ) );
-            CAknButtonState* state = button->State();
+            if ( button )
+                {
+                CAknButtonState* state = button->State();
 
-            CGulIcon *icon = CGulIcon::NewL( iIconImage, iIconMask );
-            state->SetIcon( icon );
-            icon->SetBitmapsOwnedExternally( ETrue );
+                CGulIcon *icon = CGulIcon::NewL( iIconImage, iIconMask );
+                state->SetIcon( icon );
+                icon->SetBitmapsOwnedExternally( ETrue );
 
-            button->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
-            aToolbar->DrawNow();
+                button->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
+                aToolbar->DrawNow();
+                }
             }
         }
-    PRINT( _L("Camera <= CCamOneClickUploadUtility::UpdateUploadIcon") );
+    PRINT( _L("Camera <= CCamOneClickUploadUtility::UpdateUploadIconL") );
     }
 
 // -----------------------------------------------------------------------------
@@ -380,12 +411,12 @@ void CCamOneClickUploadUtility::DecodeIconL( TDesC* aPath )
     }
 
 // ---------------------------------------------------------------------------
-// Image decoding complete notification
+// Image decoding complete notificationL
 // ---------------------------------------------------------------------------
 //
-void CCamOneClickUploadUtility::ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* aMask )
+void CCamOneClickUploadUtility::ImageDecodedL( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* aMask )
     {
-    PRINT( _L("Camera => CCamOneClickUploadUtility::ImageDecoded") );
+    PRINT( _L("Camera => CCamOneClickUploadUtility::ImageDecodedL") );
 
     if ( aStatus == KErrNone )
         {
@@ -409,13 +440,30 @@ void CCamOneClickUploadUtility::ImageDecoded( TInt aStatus, const CFbsBitmap* aB
             
             CAknButton* uploadButton =
                         static_cast<CAknButton*> (iToolbar->ControlOrNull(ECamCmdOneClickUpload));
-            CAknButtonState* currentState = uploadButton->State();
-
-            CGulIcon *icon =  CGulIcon::NewL( iIconImage, iIconMask );
+            
+            CAknButtonState* currentState(NULL);
+            if ( uploadButton )
+                {
+                currentState = uploadButton->State();
+                }
+            CGulIcon *icon(NULL);
+            if ( iIconMask )
+                {
+                icon =  CGulIcon::NewL( iIconImage, iIconMask );
+                }
+            else
+                {
+                icon =  CGulIcon::NewL( iIconImage ); //Prevent freed pointer warning
+                }
             icon->SetBitmapsOwnedExternally( ETrue );
-            currentState->SetIcon( icon );
-
-            uploadButton->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
+            if ( currentState )
+                {
+                currentState->SetIcon( icon );
+                }
+            if ( uploadButton )
+                {
+                uploadButton->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
+                }
             iToolbar->DrawNow();
             }
         }

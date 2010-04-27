@@ -646,8 +646,6 @@ OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP7_CCAMAPPUI_CONSTRUCTL, "e_ReadUiOri
   iLostFocusToNewWindow = EFalse;
   iFirstVFStart = ETrue;
 
-  iInternalStorage = iController.ExistMassStorage()?ECamMediaStorageMassStorage:ECamMediaStoragePhone;
-
   if ( !uiOrientationOverride )
     {
     iUiConstructionComplete = ETrue;
@@ -2195,6 +2193,11 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
                   }
                 }
               }
+          if ( iInSelfTimerMode != ECamSelfTimerDisabled )
+              {
+              // This is set to false when StartCaptureL() is run
+              iSelfTimedCapture = ETrue;
+              }
           }
       
       // Always switch to post capture view if self timer is enabled
@@ -2375,8 +2378,6 @@ CCamAppUi::HandleControllerEventL( TCamControllerEvent aEvent,
           }
         }
             // reset the selftimed capture flag for next capture
-            PRINT( _L("resetting iSelfTimedCapture") )
-            iSelfTimedCapture = EFalse;
       break;
       }     
     // -----------------------------
@@ -2680,7 +2681,7 @@ CCamAppUi::HandleStandbyEventL( TInt aStatus )
         else 
             {
             PRINT( _L( "Camera <> CCamAppUi::HandleStandbyEventL: call iView->ExitAllModesL") );
-            PRINT1( _L( "Camera <> CCamAppUi::HandleStandbyEventL: iView = 0x%x"), iView );
+            PRINT2( _L( "Camera <> CCamAppUi::HandleStandbyEventL: iView = 0x%x, iViewId = %d"), iView, iView->Id().iUid );
             // Exit any special modes.
             // If AppUI construction is not finished, do it first, otherwise
             // the view has not been created yet
@@ -2694,7 +2695,11 @@ CCamAppUi::HandleStandbyEventL( TInt aStatus )
               {    
               if( iView)
                   {
-                  static_cast<CCamViewBase*>( iView )->ExitAllModesL();
+                  CCamViewBase* view  = dynamic_cast<CCamViewBase*>( iView );
+                  if( view )
+                      {
+                      view->ExitAllModesL();
+                      }
                   }
               }
              
@@ -4857,6 +4862,7 @@ CCamAppUi::StartCaptureL( const TKeyEvent& /*aKeyEvent*/ )
     {
     PRINT( _L("Camera => CCamAppUi::StartCaptureL") );
     iLensCoverExit = EFalse; 
+    iSelfTimedCapture = EFalse;
     if ( iMode != ECamControllerVideo )
         {
         // Check for active viewfinder before proceeding with capture
@@ -5149,6 +5155,18 @@ void CCamAppUi::CloseAppL()
         // this will exit when any current process completes
         iController.EnterShutdownMode( EFalse );
         }
+    
+    if( iController.IntegerSettingValue( ECamSettingItemPhotoMediaStorage ) == ECamMediaStorageNone )
+        {
+        iController.SetIntegerSettingValueL(ECamSettingItemPhotoMediaStorage, iInternalStorage );
+        }
+    
+    if( iController.IntegerSettingValue( ECamSettingItemVideoMediaStorage ) == ECamMediaStorageNone )
+        {
+        iController.SetIntegerSettingValueL(ECamSettingItemVideoMediaStorage, iInternalStorage );
+        }
+        
+    
     PRINT( _L("Camera <= CCamAppUi::CloseAppL") )        
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP_CCAMAPPUI_CLOSEAPPL, "e_CCamAppUi_CloseAppL 0" );
     
@@ -7379,7 +7397,7 @@ TBool CCamAppUi::FullScreenViewfinderEnabled() const
 //
 void CCamAppUi::SetPreCaptureModeL(TCamPreCaptureMode aMode)  
     {
-    PRINT(_L("Camera=>CCamAppUi::SetPreCaptureMode"))
+    PRINT1(_L("Camera=>CCamAppUi::SetPreCaptureMode aMode=%d"), aMode);
     iPreCaptureMode = aMode;
 
     CCamViewBase* precapView = NULL;
@@ -7837,7 +7855,7 @@ TInt CCamAppUi::SensorIdleCallBack( TAny* aSelf )
 
 // ---------------------------------------------------------------------------
 // CCamAppUi::IsSelfTimedCapture
-// Whether the current capture was selftimer initiated
+// Whether the latest capture was selftimer initiated
 // ---------------------------------------------------------------------------
 //         
 TBool CCamAppUi::IsSelfTimedCapture() const
@@ -8386,6 +8404,8 @@ void CCamAppUi::CompleteAppUIConstructionL()
     // Load the settings model static settings
     PRINT( _L("Camera <> call CCamAppController::LoadStaticSettingsL..") )
     iController.LoadStaticSettingsL( IsEmbedded() );
+    
+    iInternalStorage = static_cast<TCamMediaStorage>(iController.IntegerSettingValue( ECamSettingItemPhotoMediaStorage ));
     // store the userscene settings
     iController.StoreUserSceneSettingsL();
 
@@ -8574,6 +8594,85 @@ TBool CCamAppUi::IsMemoryAvailableForCapturing() const
 CCamStartupLogoController* CCamAppUi::StartupLogoController()
     {
     return iStartupLogoController;
+    }
+
+
+// -----------------------------------------------------------------------------
+// CCamAppUi::IsRecoverableStatus 
+// -----------------------------------------------------------------------------
+//
+TBool CCamAppUi::IsRecoverableStatus()
+    {
+    TBool ret = ETrue;
+    switch(iStandbyStatus)
+        {
+        case ECamErrMassStorageMode:
+        case ECamErrMemoryCardNotInserted:
+            ret = EFalse;
+            break;
+        default:
+            break;
+        }
+    return ret;
+    }
+
+// -----------------------------------------------------------------------------
+// CCamAppUi::ChangeStandbyStatusL 
+// -----------------------------------------------------------------------------
+//
+TBool CCamAppUi::ChangeStandbyStatusL( TInt aError )
+    {
+    PRINT( _L("Camera => CCamAppUi::ChangeStandbyStatusL") );
+    TBool ret = ETrue;
+    if( ECamViewStateStandby == iViewState )
+        {
+        CCamViewBase* view = static_cast<CCamViewBase*>( iView );
+        if( view )
+            {
+            PRINT( _L("Camera <> CCamAppUi::ChangeStandbyStatusL ECamViewStateStandby") );
+            view->SetStandbyStatusL( aError );
+            }
+        else
+            {
+            ret = EFalse;
+            }
+        }
+    else if( ECamViewStatePreCapture == iViewState )
+        {
+        CCamPreCaptureViewBase* view = static_cast<CCamPreCaptureViewBase*>( iView );
+        PRINT( _L("Camera <> CCamAppUi::ChangeStandbyStatusL ECamViewStatePreCapture") );
+        if( view ) 
+            {
+            if( TBool(ETrue)  == view->IsSetupModeActive() ) // Boolean corruption
+                {
+                ret = ETrue;
+                }
+            else
+                {
+                ret = EFalse;
+                }
+            }
+        }
+    else
+        {
+        if( ECamViewStatePreCapture ==  iTargetViewState  || ECamPreCapViewfinder == iPreCaptureMode)
+            {
+            ret = EFalse;
+            }
+        PRINT3( _L("Camera <> CCamAppUi::ChangeStandbyStatusL iViewState=%d iTargetViewState=%d iPreCaptureMode=%d"), iViewState, iTargetViewState, iPreCaptureMode );
+        }
+    PRINT1( _L("Camera <= CCamAppUi::ChangeStandbyStatusL ret=%d"), ret);
+    return ret;
+    }
+
+// -----------------------------------------------------------------------------
+// CCamAppUi::PreCaptureMode 
+// -----------------------------------------------------------------------------
+//
+TCamPreCaptureMode CCamAppUi::PreCaptureMode()
+    {
+    PRINT1( _L("Camera <> CCamAppUi::PreCaptureMode %d"), iPreCaptureMode);
+    return iPreCaptureMode;
     }
 
 //  End of File

@@ -168,6 +168,13 @@ class CCamViewBase : public CAknView
          * 
          */
         virtual void UpdateToolbarIconsL();
+        
+        /**
+        * Sets the standby to the current error if the current state is in standby; else does nothing
+        * @since 5.1
+        * @aError System wide error code
+        */
+        virtual void SetStandbyStatusL( TInt aError );
 
     public: // Functions from base classes
 

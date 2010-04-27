@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -239,9 +239,12 @@ void CCamPostCaptureViewBase::HandleCommandL( TInt aCommand )
             iAiwServiceHandler->ExecuteServiceCmdL(KAiwCmdEdit, inputParams, iAiwServiceHandler->OutParamListL());        
             }
             break;
-        case KAiwCmdView: // SHARE_AIW
+        case ECamCmdShareSettings: // SHARE_AIW
+        case KAiwCmdView:
             {
-            iAiwServiceHandler->ExecuteServiceCmdL(KAiwCmdView, iAiwServiceHandler->InParamListL(), iAiwServiceHandler->OutParamListL());        
+            PRINT1( _L("Camera <> CCamPostCaptureViewBase::HandleCommandL - ECamCmdShareSettings start, cmd:%d"), aCommand );
+            iOneClickUploadUtility->LaunchShareSettings();
+            PRINT( _L("Camera <> CCamPostCaptureViewBase::HandleCommandL - ECamCmdShareSettings end") );            
             }
             break;
         default:
@@ -442,6 +445,14 @@ CCamPostCaptureViewBase::HandleForegroundEventL( TBool aForeground )
       }
     else
       {
+      // Update the one click, in case it was modified
+      if ( iOneClickUploadUtility && iOneClickUploadUtility->OneClickUploadSupported() )
+          {
+          iOneClickUploadUtility->UpdateUploadIconL( Toolbar(), 
+						  ( Id().iUid == ECamViewIdVideoPostCapture ) ? 
+        				    ECamControllerVideo : ECamControllerImage );
+          }
+
       // ensure cba is reset if we're not embedded
       if ( !iWaitForImageSave )
         {
@@ -571,7 +582,7 @@ void CCamPostCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId, TUid a
                 {
                 fixedToolbar->SetToolbarObserver( this );
                 UpdateToolbarIconsL();
-                if(Id().iUid != ECamViewIdVideoPostCapture)
+                if( Id().iUid != ECamViewIdVideoPostCapture && !appui->IsSelfTimedCapture() )
                     {
                     fixedToolbar->SetDimmed(ETrue);
                     }
@@ -683,11 +694,11 @@ void CCamPostCaptureViewBase::DynInitMenuPaneL( TInt /*aResourceId*/,
             aMenuPane->SetItemDimmed( ECamCmdAddToAlbum, ETrue );
             }
         }
-    // Hide menu item, if Share not available
+    // SHARE_AIW: Hide menu item, if Share not available
     if ( !iOneClickUploadUtility->OneClickUploadSupported() && 
-         aMenuPane->MenuItemExists( KAiwCmdView, itemPos ) )
+         aMenuPane->MenuItemExists( ECamCmdShareSettings, itemPos ) )
         {
-        aMenuPane->SetItemDimmed( KAiwCmdView, ETrue );
+        aMenuPane->SetItemDimmed( ECamCmdShareSettings, ETrue );
         }
     }
 
@@ -991,10 +1002,8 @@ void CCamPostCaptureViewBase::UpdateToolbarIconsL()
                CAknButtonState* state = button->State();
                if ( state )
                    {
-                   state->SetHelpTextL(
-                           iOneClickUploadUtility->ButtonTooltipL() );
-                   
-                   iOneClickUploadUtility->UpdateUploadIcon( toolbar, iController.CurrentMode() );
+                   TRAP_IGNORE( state->SetHelpTextL( iOneClickUploadUtility->ButtonTooltipL() ) );
+                   iOneClickUploadUtility->UpdateUploadIconL( toolbar, iController.CurrentMode() );
                    }
                }
             button = dynamic_cast<CAknButton*>(toolbar->ControlOrNull( ECamCmdEdit ));

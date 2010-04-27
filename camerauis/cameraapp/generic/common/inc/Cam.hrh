@@ -166,6 +166,7 @@ enum TCamCmd
   ECamCmdEditVideo,
   ECamCmdPrint,
   ECamCmdShareOnOvi,
+  ECamCmdShareSettings,  
   ECamMSKCmdAppChange,
   ECamMSKCmdAppCapture,
   ECamMSKCmdAppRecord,
@@ -220,7 +221,6 @@ enum TCamSoundId
     ECamVideoStopSoundId,
     ECamVideoPauseSoundId,
     ECamVideoResumeSoundId,
-    ECamInCallToneId,
     ECamStillCaptureSoundId1,
     ECamStillCaptureSoundId2,
     ECamStillCaptureSoundId3,
@@ -335,6 +335,17 @@ enum TCamSettingsPluginExitMessage
     ECameraPluginExit = 0,
     ECameraInternalExit,
     ECameraCompleteExit
+    };
+
+/** 
+ * Cameraui error codes
+ */
+
+enum TCamErrorCode
+    {
+    ECamMinErrCode = -16384,
+    ECamErrMassStorageMode,
+    ECamErrMemoryCardNotInserted
     };
 
 #endif // CAM_HRH

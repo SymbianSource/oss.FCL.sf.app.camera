@@ -223,7 +223,6 @@ SOURCE            CameraappTestBitmapManager.cpp
 SOURCEPATH      ../generic/src/audioplayer
 SOURCE camaudioplayercontroller.cpp
 SOURCE camaudioplayerwrapper.cpp
-SOURCE camtoneplayerwrapper.cpp
 
 // Test code sources
 SOURCEPATH        ../generic/dummyengine

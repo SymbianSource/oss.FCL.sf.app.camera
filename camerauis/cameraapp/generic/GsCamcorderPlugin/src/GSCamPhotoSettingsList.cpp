@@ -259,7 +259,7 @@ CAknSettingItem* CGSCamPhotoSettingsList::CreateSettingItemL( TInt aIdentifier )
                 {
                 iDefaultNameBase = parent->TextSettingValue(
                                    ECamSettingItemPhotoNameBase );
-                TBool flag = ( iLaunchedFromGS || iSecondaryCameraSettings );
+                TBool flag = ( iLaunchedFromGS );
                 settingItem = 
                     new( ELeave ) CGSCamDefaultNameSettingItem( iDefaultNameBase, 
                                                                 ECamControllerImage,

@@ -49,6 +49,7 @@
 #include <UsbWatcherInternalPSKeys.h>
 #include <usbpersonalityids.h>
 
+#include <UikonInternalPSKeys.h>
 
 #include <cameraapp.rsg>
 #include <vgacamsettings.rsg>
@@ -2143,22 +2144,25 @@ TBool CCamAppController::TryAFRequest( TInt aAFRequest )
     case  ECamRequestCancelAutofocus:
     case ECamRequestStartAutofocus:
         {
-        if(iPendingAFRequest==0)
+        if( iPendingAFRequest == 0 ||
+          ( !iAFCancelInProgress &&
+            iPendingAFRequest == ECamRequestCancelAutofocus &&
+            iCurrentAFRequest == ECamRequestCancelAutofocus ) )
             {
             if ( !( UiConfigManagerPtr()->IsContinuosAutofocusSupported()&& ECamControllerVideo == CurrentMode() ) ) 
-                            {
-            iPendingAFRequest=aAFRequest;
-            TRAPD( err, IssueDirectRequestL( TCamCameraRequestId(aAFRequest) ) );
-            //TRAPD( err, iCameraController->DirectRequestL( aAFRequest ) );            
-            if ( err != KErrNone )
                 {
-                // There is an error, we leave without focusing
-                iPendingAFRequest=0;
-                return EFalse; // Not doing any autofocus request.
-                //This is only case where AFrequest cause EFalse to be returned.
+                iPendingAFRequest=aAFRequest;
+                TRAPD( err, IssueDirectRequestL( TCamCameraRequestId(aAFRequest) ) );
+                //TRAPD( err, iCameraController->DirectRequestL( aAFRequest ) );            
+                if ( err != KErrNone )
+                    {
+                    // There is an error, we leave without focusing
+                    iPendingAFRequest=0;
+                    return EFalse; // Not doing any autofocus request.
+                    //This is only case where AFrequest cause EFalse to be returned.
+                    }
                 }
-            }
-            }
+            } 
         else
             {
             CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
@@ -2431,28 +2435,6 @@ void CCamAppController::PlaySound( TCamSoundId aSoundId, TBool aEnableCallback )
     PRINT( _L("Camera <= CCamAppController::PlaySound") );                 
     }
 
-
-// ---------------------------------------------------------------------------
-// CCamAppController::PlayTone
-// Play a tone with specified frequency, period and volume
-// ---------------------------------------------------------------------------
-//
-void CCamAppController::PlayTone( TInt      aToneHz, 
-                                  TInt      aLenMicSec, 
-                                  TReal32   aVolume, 
-                                  TBool     aEnableCallback )
-  {    
-  if ( !iShutterSndAlwaysOn && 
-     iSilentProfile )
-    {
-    // don't play shutter sound if we are following
-    // current profile setting and profile is silent
-    }
-  else
-    {    
-    iSoundPlayer->PlayTone( aToneHz, aLenMicSec, aVolume, aEnableCallback );
-    }
-  }
 
 // ---------------------------------------------------------------------------
 // CCamAppController::AllOptionsVisibleForSettingItem
@@ -3001,23 +2983,55 @@ CCamAppController::IssueModeChangeSequenceL( TBool aStartup )
 
   if( !aStartup )
     {
-    GenerateModeChangeSequenceL( sequence );
-	
-	if( iCameraReferences ) 
-      {
-      SetFlags( iBusyFlags, EBusySequence );
-      TCleanupItem clearBusy( ClearSequenceBusyFlag, &iBusyFlags );
-      CleanupStack::PushL( clearBusy );
-      iCameraController->RequestSequenceL( sequence );
-      CleanupStack::Pop();
-   
-      iCaptureModeTransitionInProgress = ETrue;
-      
-      }
-    else 
-  	  {
-      PRINT( _L("Camera <> No camera users, not requesting sequence.") );
-      }
+    TBool usbPersonality = 0;
+    User::LeaveIfError ( RProperty::Get (KPSUidUsbWatcher, 
+                          KUsbWatcherSelectedPersonality, usbPersonality));
+    TInt mmcInserted = 0;
+    User::LeaveIfError( RProperty::Get( KPSUidUikon, KUikMMCInserted, mmcInserted ) );
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+    
+    if(IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage) &&
+            !IsMemoryAvailable(ECamMediaStorageMassStorage) &&
+            !IsMemoryAvailable(ECamMediaStorageCard) &&
+            ( appUi->PreCaptureMode() == ECamPreCapViewfinder ||
+              appUi->PreCaptureMode() == ECamPreCapGenericSetting ) )
+        {
+        if( KUsbPersonalityIdMS == usbPersonality )
+            {
+            SwitchToStandbyL( ECamErrMassStorageMode );
+            }
+        else if( !mmcInserted )
+            {
+            SwitchToStandbyL( ECamErrMemoryCardNotInserted );
+            }
+        else
+            {
+            CamPanic(ECamPanicInvalidState);
+            }
+        
+        iIssueModeChangeSequenceSucceeded = EFalse;
+        }
+    else
+        {
+        GenerateModeChangeSequenceL( sequence );
+        
+        if( iCameraReferences ) 
+            {
+            SetFlags( iBusyFlags, EBusySequence );
+            TCleanupItem clearBusy( ClearSequenceBusyFlag, &iBusyFlags );
+            CleanupStack::PushL( clearBusy );
+            iCameraController->RequestSequenceL( sequence );
+            CleanupStack::Pop();
+            
+            iCaptureModeTransitionInProgress = ETrue;
+            
+            }
+        else 
+            {
+            PRINT( _L("Camera <> No camera users, not requesting sequence.") );
+            }
+        iIssueModeChangeSequenceSucceeded = ETrue;
+        }  
     }
   else
     {
@@ -3028,6 +3042,7 @@ CCamAppController::IssueModeChangeSequenceL( TBool aStartup )
     CleanupStack::PushL( clearBusy );
     iCameraController->RequestSequenceL( sequence );
     CleanupStack::Pop();
+    iIssueModeChangeSequenceSucceeded = ETrue;
     }
   
   CleanupStack::PopAndDestroy(); // sequence.Close()
@@ -3431,8 +3446,8 @@ CCamAppController::HandleImageQualitySettingChangeL()
       IssueDirectRequestL( ECamRequestVfStop    );
       IssueDirectRequestL( ECamRequestSsRelease );
       IssueDirectRequestL( ECamRequestImageInit );
-      IssueDirectRequestL( ECamRequestSsStart   );
       IssueDirectRequestL( ECamRequestVfStart   );
+      IssueDirectRequestL( ECamRequestSsStart   );
       });
       
     if( KErrNone != status )
@@ -4306,7 +4321,7 @@ CCamAppController::SetIntegerSettingValueL( TInt aSettingItem,
     case ECamSettingItemPhotoMediaStorage:
     case ECamSettingItemVideoMediaStorage:
       {
-      PRINT(_L("Camera SetIntegerSettingValueL calling SetPathnamesToNewStorageL" ))
+      PRINT1(_L("Camera SetIntegerSettingValueL calling SetPathnamesToNewStorageL %d" ), aSettingValue);
       // reset iForceUseOfPhoneMemory flag when user chooses 
       // from settings.
       iForceUseOfPhoneMemory = EFalse;
@@ -6369,7 +6384,6 @@ CCamAppController::HandleImageCaptureEventL( TInt             aStatus,
         // check if snapshot bitmap needs to be rotated before creating a thumbnail from it
         TBool rotate( ( ECamSettOn == iSettingsModel->IntegerSettingValue( ECamSettingItemImageRotation ) || 
                       iInfo.iActiveCamera == ECamActiveCameraSecondary ) &&
-                      ECamSettOn == IntegerSettingValue( ECamSettingItemShowCapturedPhoto ) &&
                       iCaptureOrientation != ECamOrientation0 );
 
         if ( ECamImageCaptureBurst != iInfo.iImageMode )
@@ -8947,21 +8961,12 @@ CCamAppController
               }
           }
 
-      if ( UiConfigManagerPtr()->IsLocationSupported() )
+      if ( UiConfigManagerPtr()->IsLocationSupported() &&
+              ECamLocationOn == IntegerSettingValue( ECamSettingItemRecLocation ) )
         {
-        if( ECamLocationOn == IntegerSettingValue( ECamSettingItemRecLocation ) )
-            {
-            if( ECamActiveCameraPrimary == ActiveCamera())
-                {
-                StartLocationTrailL();
-                }
-            else // Secondary camera 
-                {
-                PRINT( _L("Camera: CCamAppController::HandleCameraEventL - secondary camera, stop location trail") )
-                StopLocationTrail();
-                }
-            }
+        StartLocationTrailL();
         }
+
       //Check if profile is silent and/or camera tones are set off
       IsProfileSilent();
 
@@ -10332,8 +10337,8 @@ CCamAppController::CalculateVideoTimeRemainingL( TCamMediaStorage aStorage )
   									ECamSettingItemVideoAudioRec );
   TBool audioMute = ECamSettOff == audioRec;
   
+  TInt64 videoLimit =  KMaxTUint32; // 4G limit
   // Video file size limit (MMS case)
-  TInt videoLimit = 0;
   if( ECamVideoClipShort == level.VideoLength() )
     {
     // Short video, needs to fit into MMS message
@@ -10604,6 +10609,9 @@ TBool CCamAppController::IsKeyLockOn()
 TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
   {
   PRINT1( _L("Camera => CCamAppController::DriveChangeL aType: %d" ), aType );
+  CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+  appUi->CheckMemoryAvailableForCapturing();
+  
     
   TCamCameraMode mode = CurrentMode();
   TCamMediaStorage currentStorage;
@@ -10624,7 +10632,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
     {
     PRINT( _L("Camera <> Phone memory is the preferred storage location. Nothing to be done here. Return KErrNone.") )
     PRINT( _L("Camera <= CCamAppController::DriveChangeL" ) );
-    return KErrNone;
+
     }
    
   if  ( ( !IsMemoryAvailable( ECamMediaStorageCard, EFalse ) || 
@@ -10656,6 +10664,13 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
       {
       iVideoRequested = EFalse;
       }
+    
+    if ( appUi->SelfTimerEnabled() && appUi->AllMemoriesFullOrUnavailable() )
+      {
+      PRINT( _L("Camera <> All storages full or unavailable. Cancel selftimer.") )
+      appUi->HandleCommandL( ECamCmdSelfTimerCancel );
+      }
+    
     if ( SequenceCaptureInProgress() )
       {
       PRINT( _L("Camera <> Sequence capture in progress. -> Stop and skip postcapture.") )
@@ -10674,26 +10689,15 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
       // to switch to (forced) phone memory
       ForceUsePhoneMemoryL( ETrue ); 
       PRINT( _L("Camera <= CCamAppController::DriveChangeL dismount pending" ) );  	
-      return KErrNotReady;
+
       }
     else
       {    	           
       // Mass memory may be the forced storage location. Then it's necessary 
       // to switch to (forced) phone memory
       ForceUsePhoneMemoryL( ETrue );
-                
-      // Make sure toolbar is visible
-      CCamAppUi* appUi = static_cast<CCamAppUi*>( 
-                                                CEikonEnv::Static()->AppUi() );
-      CAknToolbar* fixedToolbar = appUi->CurrentFixedToolbar();
-      
-      if ( fixedToolbar && ECamNoOperation == CurrentOperation() )
-        {
-        fixedToolbar->SetToolbarVisibility( ETrue );
-        }
-        
       PRINT( _L("Camera <= CCamAppController::DriveChangeL dismount ok" ) );  	    
-      return KErrNone;
+
       }        
     }
   else if ( IsMemoryAvailable( iPreferredStorageLocation, ETrue ) &&
@@ -10714,6 +10718,45 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
       }
     }
   
+  if( IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage) )
+        {
+        if( aType == EDriveMount &&
+            !appUi->IsRecoverableStatus() )
+              {
+              SwitchToStandbyL( KErrNone );
+              }
+          else if( aType == EDriveDismount &&
+                  appUi->IsRecoverableStatus() )
+              {
+              TInt mmcInserted = 0;
+              User::LeaveIfError( RProperty::Get( KPSUidUikon, KUikMMCInserted, mmcInserted ) );
+              if( !IsMemoryAvailable(ECamMediaStorageMassStorage) &&
+                   !IsMemoryAvailable(ECamMediaStorageCard) )
+                  {
+                  if( mmcInserted )
+                      {
+                      SwitchToStandbyL( ECamErrMassStorageMode );
+
+                      }
+                  else
+                      {
+                      SwitchToStandbyL( ECamErrMemoryCardNotInserted );
+
+                      }
+                  }
+              }
+          else if ( aType == EDriveUSBMassStorageModeOn )
+              {
+              SwitchToStandbyL(ECamErrMassStorageMode);
+
+              }
+          else if ( aType == EDriveUSBMassStorageModeOff )
+              {
+              SwitchToStandbyL( KErrNone );
+              }
+        }
+    
+
   PRINT( _L("Camera <= CCamAppController::DriveChangeL" ) );  	
   return KErrNone;
   }
@@ -10995,7 +11038,7 @@ void CCamAppController::RotateSnapshotL()
         }    
     iRotatorAo->RotateL( iRotatedSnapshot, MapCamOrientation2RotationAngle( iCaptureOrientation ) );
         
-    CleanupStack::Pop( snapshot );
+    CleanupStack::PopAndDestroy(snapshot);
     PRINT( _L( "Camera <= CCamAppController::RotateSnapshotL" ) );    
     } 
     
@@ -11016,8 +11059,10 @@ void CCamAppController::RotationCompleteL( TInt aErr )
         }
     TRAP_IGNORE( iImageSaveActive->CreateThumbnailsL( *iRotationArray ) );
             
+    delete iRotatedSnapshot; 
+    iRotatedSnapshot = NULL;
     PRINT( _L( "Camera <= CCamAppController::RotationCompleteL" ) );         
-        }     
+    }     
       
 // ---------------------------------------------------------------------------
 // CCamAppController::StoreFaceTrackingValue
@@ -11130,14 +11175,13 @@ TBool CCamAppController::ToggleWideScreenQuality( TBool aWide )
         {
         PRINT( _L("Camera => CCamAppController::ToggleWideScreenQuality - image mode") );
         TInt qualityIndex = IntegerSettingValue( ECamSettingItemPhotoQuality );
-        if ( qualityIndex <= ECamImageQualityPrintW9m )
+        if ( qualityIndex <= EImageQualityPrint )
             {
-            TCamPhotoQualitySetting imageQuality = iConfiguration->ImageQuality( qualityIndex );
-            if ( ( imageQuality.iPhotoResolution == EImageResolution12MP &&  aWide ) || 
-                 ( imageQuality.iPhotoResolution == EImageResolutionW9MP && !aWide ) )
+            if ( ( qualityIndex == EImageQualityPrintHigh &&  aWide )  
+                 || ( qualityIndex == EImageQualityPrint && !aWide ) )
                 {
-                qualityIndex = (ECamImageQualityPrintW9m==qualityIndex) ? ECamImageQualityPrint12m 
-                                                                        : ECamImageQualityPrintW9m;
+                qualityIndex = (EImageQualityPrint==qualityIndex) ? EImageQualityPrintHigh 
+                                                                  : EImageQualityPrint;
 
                 // Ensure that the setting value is enabled/usable.
                 if ( iSettingsModel->SettingValueEnabled( ECamSettingItemPhotoQuality, qualityIndex ) )
@@ -11189,6 +11233,59 @@ TBool CCamAppController::ToggleWideScreenQuality( TBool aWide )
 TBool CCamAppController::IsSaveStarted()
     {
     return iSaveStarted;    
+    }
+
+// ---------------------------------------------------------------------------
+// CCamAppController::SwitchToStandby
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::SwitchToStandbyL( TInt aStatus )
+    {
+    PRINT( _L("Camera => CCamAppController::SwitchToStandbyL") );
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+    __ASSERT_DEBUG( appUi, CamPanic( ECamPanicNullPointer ) );
+    if( !appUi->ChangeStandbyStatusL(aStatus) )
+        {
+        SetOperation( ECamStandby, aStatus );
+        iIdleTimer->Cancel();
+
+        // Use backlight timer also with bitmap vf
+        if( iBacklightTimer )
+            {
+            if( ECamTriActive == iCameraController->ViewfinderState() )
+                {
+                User::ResetInactivityTime();
+                }
+            iBacklightTimer->Cancel();
+            }
+        }
+    switch( aStatus )
+        {
+        case ECamErrMassStorageMode:
+        case ECamErrMemoryCardNotInserted:
+            {
+            iCurrentStorage = static_cast<TCamMediaStorage>(IntegerSettingValueUnfiltered( ECamSettingItemPhotoMediaStorage ));
+            }
+            break;
+        default:
+            {
+            SetIntegerSettingValueL( ECamSettingItemPhotoMediaStorage, iCurrentStorage );
+            SetIntegerSettingValueL( ECamSettingItemVideoMediaStorage, iCurrentStorage );
+            }
+            break;
+        }
+    PRINT( _L("Camera <= CCamAppController::SwitchToStandbyL") );
+    }	
+
+// ---------------------------------------------------------------------------
+// CCamAppController::IssueModeChangeSequenceSucceeded
+// 
+// ---------------------------------------------------------------------------
+//
+TBool CCamAppController::IssueModeChangeSequenceSucceeded()
+    {
+    return iIssueModeChangeSequenceSucceeded;
     }
 //  End of File  
 

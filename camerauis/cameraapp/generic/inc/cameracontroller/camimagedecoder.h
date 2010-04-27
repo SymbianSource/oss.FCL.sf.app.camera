@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -48,7 +48,7 @@ class MCamImageDecoderObserver
     *        KErrNone if all went as planned.
     * @param aBitmap Decoded bitmap. NULL if errors in decoding.
     */
-    virtual void ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* aMask ) = 0;
+    virtual void ImageDecodedL( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* aMask ) = 0;
 
   };
   

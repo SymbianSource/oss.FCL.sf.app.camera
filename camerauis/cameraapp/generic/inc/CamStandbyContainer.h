@@ -90,6 +90,12 @@ class CCamStandbyContainer : public CCamContainerBase
         * @since 2.8
         */
         TInt GetStandbyError() const;
+        
+        /**
+        * Sets the current error and updates the label text and cba
+        * @since 5.1
+        */
+        void SetStandbyErrorL( TInt aError );
 
     private:
         /**

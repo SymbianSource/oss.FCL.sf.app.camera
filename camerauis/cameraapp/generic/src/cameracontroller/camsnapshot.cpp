@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -435,11 +435,11 @@ CCamSnapshot::HandleCameraEventL( TInt              aStatus,
 // from MCamImageDecoderObserver
 
 // ---------------------------------------------------------------------------
-// ImageDecoded <<virtual>>
+// ImageDecodedL <<virtual>>
 // ---------------------------------------------------------------------------
 //
 void 
-CCamSnapshot::ImageDecoded( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* /*aMask*/ )
+CCamSnapshot::ImageDecodedL( TInt aStatus, const CFbsBitmap* aBitmap, const CFbsBitmap* /*aMask*/ )
   {
   PRINT1( _L("Camera => CCamSnapshot::ImageDecoded, status in: %d"), aStatus );
   if( iSnapshotOn )
@@ -590,7 +590,7 @@ CCamSnapshot::DoStartSnapshotProcessingL( CCamBufferShare* aBuffer,
     CFbsBitmap& bitmap = buffer->BitmapL( 0 );
     PRINT( _L("Camera <> Using bitmap data, just scale..") );
     // Simulate that the bitmap has been decoded now.
-    ImageDecoded( aError, &bitmap, NULL );
+    ImageDecodedL( aError, &bitmap, NULL );
     });
 
   // If problems with bitmap data, try encoded data.

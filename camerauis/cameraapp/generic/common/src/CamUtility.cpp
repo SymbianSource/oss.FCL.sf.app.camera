@@ -1103,8 +1103,8 @@ TInt CamUtility::GetPsiAnyL( TCamPsiKey aKey, TAny* aValue )
 
       // First period is at 2-seconds remaining, "always on"
       timerPeriod1.iThreshold  [0] = 2*KMicroSecPerSec;
-      timerPeriod1.iFlashPeriod[0] = KMaxTInt;
-      timerPeriod1.iBeepPeriod [0] = KMaxTInt;
+      timerPeriod1.iFlashPeriod[0] = KMicSecInQuartSec;// KMaxTInt;
+      timerPeriod1.iBeepPeriod [0] = KMicSecInHalfSec;// KMaxTInt;
 
       // There are no other periods
 
@@ -1125,12 +1125,12 @@ TInt CamUtility::GetPsiAnyL( TCamPsiKey aKey, TAny* aValue )
       timerPeriod2.iBeepPeriod [0] = KMicroSecPerSec;       // Beep every second
 
       // Second period starts at 3-seconds until capture, flashing twice every second
-      timerPeriod2.iThreshold  [1] = 5*KMicroSecPerSec;
+      timerPeriod2.iThreshold  [1] = 2*KMicroSecPerSec;
       timerPeriod2.iFlashPeriod[1] = KMicSecInQuartSec;  // 250ms on/250ms off
       timerPeriod2.iBeepPeriod [1] = KMicSecInHalfSec;   // Beep twice every second
 
       // Third period is not supported
-      timerPeriod2.iThreshold  [2] = 3*KMicroSecPerSec;
+      timerPeriod2.iThreshold  [2] = 0*KMicroSecPerSec;
       timerPeriod2.iFlashPeriod[2] = KMaxTInt;
       timerPeriod2.iBeepPeriod [2] = KMaxTInt;
 
@@ -1151,12 +1151,12 @@ TInt CamUtility::GetPsiAnyL( TCamPsiKey aKey, TAny* aValue )
       timerPeriod3.iBeepPeriod [0] = KMicroSecPerSec;       // Beep every second
 
       // Second period starts at 3-seconds until capture, flashing twice every second
-      timerPeriod3.iThreshold  [1] = 5*KMicroSecPerSec;
+      timerPeriod3.iThreshold  [1] = 2*KMicroSecPerSec;
       timerPeriod3.iFlashPeriod[1] = KMicSecInQuartSec;  // 250ms on/250ms off
       timerPeriod3.iBeepPeriod [1] = KMicSecInHalfSec;   // Beep twice every second
 
       // Third period is not supported
-      timerPeriod3.iThreshold  [2] = 3*KMicroSecPerSec;
+      timerPeriod3.iThreshold  [2] = 0*KMicroSecPerSec;
       timerPeriod3.iFlashPeriod[2] = KMaxTInt;
       timerPeriod3.iBeepPeriod [2] = KMaxTInt;
 

@@ -29,6 +29,7 @@
 #include "CamUtility.h"
 #include "CamAppUi.h"
 #include "CamViewBase.h"
+#include "CamPanic.h"
 #include <cameraapp.rsg>
 #include <vgacamsettings.rsg>
 #include <ctsydomainpskeys.h>
@@ -97,64 +98,8 @@ void CCamStandbyContainer::ConstructL( const TRect& aRect, TInt aError )
     // AknBidiTextUtils::ConvertToVisualAndWrapToStringL
     iText->UseLogicalToVisualConversion( EFalse );
 
-    // Get label text from resource
-    HBufC* labelText;
-    if ( static_cast<CCamAppUi*>( iEikonEnv->AppUi() )->IsConstructionComplete() )
-        {
-	    switch( aError )
-	        {
-	        case KErrNone:
-	            labelText = StringLoader::LoadLC( R_CAM_STANDBY_TEXT );
-	            break;
-	        case KErrInUse:
-	            labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_IN_USE_TEXT );
-	            break;
-	        case KErrNoMemory:
-	        	labelText = StringLoader::LoadLC( R_CAM_MEMLO_NOT_ENOUGH_MEMORY );
-	            break;
-	        case KErrPermissionDenied:
-	            labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_DISABLED_TEXT );
-                break;
-	        default: // any other error
-	            labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_UNAVAILABLE_TEXT );
-	            break;
-	        }
-        }
-	 else
-        {
-        labelText = StringLoader::LoadLC( R_CAM_STANDBY_EMPTY_TEXT );
-        }        
-
-
-    iText->SetTextL( *labelText );
-    // Wrap the text, where it doesn't fit.
-    // ...Create the line width array necessary for ConvertToVisual..()
-    const TInt KLabelMaxLines = 5;
-    CArrayFix<TInt>* lineWidths = 
-        new ( ELeave ) CArrayFixFlat<TInt> ( KLabelMaxLines );
-    CleanupStack::PushL( lineWidths );
-    for (TInt i = 0; i < KLabelMaxLines; ++i )
-        {
-        lineWidths->AppendL( aRect.Width() );            
-        }
-    // ...Create the text buffer that will receive the wrapped text.
-    iWrappedLabelText = HBufC::NewL(
-        labelText->Length() + KLabelMaxLines * ( KAknBidiExtraSpacePerLine + 1 ) );
-    TPtr ptr = iWrappedLabelText->Des();
-    // ...Get the wrapped text conversion.
-    AknBidiTextUtils::ConvertToVisualAndWrapToStringL(
-        labelText->Des(),
-        *lineWidths,
-        *AknLayoutUtils::FontFromId( EAknLogicalFontPrimaryFont ),
-        ptr,
-        ETrue
-        );
-    // ...Cleanup
-    CleanupStack::PopAndDestroy( lineWidths );  
-    CleanupStack::PopAndDestroy( labelText );
-
-    // Set the wrapped text to the label.
-    iText->SetTextL( *iWrappedLabelText );
+    SetStandbyErrorL( aError );
+    
 
     // Initialise foreground timer - used to delay the exit
     // from standby when foreground is gained
@@ -305,6 +250,11 @@ TKeyResponse CCamStandbyContainer::OfferKeyEventL(
 //
 void CCamStandbyContainer::HandleForegroundEventL( TBool aForeground )
     {
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi());
+    if( appUi && !appUi->IsRecoverableStatus() )
+        {
+        return;
+        }
     if ( aForeground )
         {
         // start timer to delay exit from standby
@@ -372,7 +322,9 @@ void CCamStandbyContainer::HandlePointerEventL( const TPointerEvent& aPointerEve
         aPointerEvent.iType,
         aPointerEvent.iPosition.iX,
         aPointerEvent.iPosition.iY );
-
+      CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi());  
+      if(appUi && !appUi->IsRecoverableStatus())
+          return;
       TInt callType( EPSCTsyCallTypeUninitialized );
       RProperty::Get( KPSUidCtsyCallInformation, KCTsyCallType, callType );
        if ( callType != EPSCTsyCallTypeH324Multimedia)
@@ -392,6 +344,82 @@ void CCamStandbyContainer::CreateBackgroundContextL()
     {
     iBgContext = CAknsBasicBackgroundControlContext::NewL( 
         KAknsIIDQsnBgAreaMain, Rect(), EFalse );
+    }
+
+void CCamStandbyContainer::SetStandbyErrorL( TInt aError )
+    {
+    iStandbyError = aError;
+    __ASSERT_DEBUG( iText, CamPanic( ECamPanicNullPointer ) );
+    
+    HBufC* labelText;
+    if ( static_cast<CCamAppUi*>( iEikonEnv->AppUi() )->IsConstructionComplete() )
+        {
+        switch( aError )
+            {
+            case KErrNone:
+                labelText = StringLoader::LoadLC( R_CAM_STANDBY_TEXT );
+                break;
+            case KErrInUse:
+                labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_IN_USE_TEXT );
+                break;
+            case KErrNoMemory:
+                labelText = StringLoader::LoadLC( R_CAM_MEMLO_NOT_ENOUGH_MEMORY );
+                break;
+            case KErrPermissionDenied:
+                labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_DISABLED_TEXT );
+                break;
+            case ECamErrMassStorageMode:
+                labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_STORAGE_INACCESSIBLE );
+                break;
+            case ECamErrMemoryCardNotInserted:
+                labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_INSERT_MMC );
+                break;
+            default: // any other error
+                labelText = StringLoader::LoadLC( R_CAM_STANDBY_CAMERA_UNAVAILABLE_TEXT );
+                break;
+            }
+        }
+     else
+        {
+        labelText = StringLoader::LoadLC( R_CAM_STANDBY_EMPTY_TEXT );
+        }        
+
+
+    //iText->SetTextL( *labelText );
+    // Wrap the text, where it doesn't fit.
+    // ...Create the line width array necessary for ConvertToVisual..()
+    const TInt KLabelMaxLines = 5;
+    CArrayFix<TInt>* lineWidths = 
+        new ( ELeave ) CArrayFixFlat<TInt> ( KLabelMaxLines );
+    CleanupStack::PushL( lineWidths );
+    for (TInt i = 0; i < KLabelMaxLines; ++i )
+        {
+        lineWidths->AppendL( Rect().Width() );            
+        }
+    // ...Create the text buffer that will receive the wrapped text.
+    if( iWrappedLabelText )
+        {
+        delete iWrappedLabelText;
+        iWrappedLabelText = NULL;
+        }
+    iWrappedLabelText = HBufC::NewL(
+        labelText->Length() + KLabelMaxLines * ( KAknBidiExtraSpacePerLine + 1 ) );
+    TPtr ptr = iWrappedLabelText->Des();
+    // ...Get the wrapped text conversion.
+    AknBidiTextUtils::ConvertToVisualAndWrapToStringL(
+        labelText->Des(),
+        *lineWidths,
+        *AknLayoutUtils::FontFromId( EAknLogicalFontPrimaryFont ),
+        ptr,
+        ETrue
+        );
+    // ...Cleanup
+    CleanupStack::PopAndDestroy( lineWidths );  
+    CleanupStack::PopAndDestroy( labelText );
+
+    // Set the wrapped text to the label.
+    iText->SetTextL( *iWrappedLabelText );
+    iText->DrawNow();
     }
 
 // End of File  

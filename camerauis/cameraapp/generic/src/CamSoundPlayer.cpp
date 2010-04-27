@@ -36,13 +36,7 @@
 // EXTERNAL FUNCTION PROTOTYPES  
 
 // CONSTANTS
-#if 0 // Old constants that may be used again in the future
-const TInt KCamInCallToneHz = 1760;         
-const TInt KCamInCallToneLen= 450000;       
-_LIT( KCamSelfTimerSoundFile , "z:\\system\\sounds\\simple\\cameraappSelfTimer.rng" );
-#endif 
 
-const TReal32 KCamInCallToneVol = 0.75f;    
 
 _LIT( KCamAutoFocusComplete, "z:\\system\\sounds\\digital\\cameraappFocusSucc.wav" );
 //_LIT( KCamAutoFocusFailed,   "c:\\system\\sounds\\digital\\focus2.wav" ); NOT DEFINED YET
@@ -72,11 +66,6 @@ void CCamSoundPlayer::ConstructL()
     {
     iAudioPlayer = CMdaAudioPlayerUtility::NewL( *this, 
                                                  KAudioPriorityCameraTone,
-                                                 TMdaPriorityPreference( KAudioPrefCamera ) );
-
-    iTonePlayer = CMdaAudioToneUtility::NewL( *this, 
-                                              NULL, 
-                                              KAudioPriorityVideoRecording,
                                               TMdaPriorityPreference( KAudioPrefCamera ) );
     }
 
@@ -111,8 +100,6 @@ CCamSoundPlayer::~CCamSoundPlayer()
     delete iAudioPlayer;
     }
   
-  CancelTonePlayer();    
-  delete iTonePlayer;
   PRINT( _L("Camera <= ~CCamSoundPlayer") );
   }
 
@@ -222,53 +209,20 @@ void CCamSoundPlayer::PlaySound( TCamSoundId aSoundId,
             StartPlaySound( KCamCaptureTone4(), aEnableCallback );         	
             break;
             } 
-#if 0
-        case ECamInCallToneId:
+
+        case ECamSelfTimerSoundId:
             {
-            PlayTone( KCamInCallToneHz, KCamInCallToneLen, KCamInCallToneVol, aEnableCallback );
+            StartPlaySound( KCamSelfTimerTone(), aEnableCallback );
             break;
             }
-#endif
     
         default:
             {
-            // Other sounds are played using the key sound system                
-#if !( defined(__WINS__) || defined(__WINSCW__) )
-#if 0
-            iKeySoundSystem->PlaySound( aSoundId );
-#endif            
-#endif
             iEnableCallback = EFalse;
             break;
             }
         }  
     PRINT( _L("Camera <= CCamSoundPlayer::PlaySound") );            
-    }
-
-// -----------------------------------------------------------------------------
-// CCamSoundPlayer::PlayTone
-// Plays the requested tone
-// -----------------------------------------------------------------------------
-//
-void CCamSoundPlayer::PlayTone( TInt aToneHz, TInt aLenMicSec, TReal32 aVolume, TBool aEnableCallback )
-    {
-    if ( !iOpenFileInProgress )
-        {   
-        iOpenFileInProgress = ETrue;
-        TInt64 len = aLenMicSec;
-        iTonePlayer->PrepareToPlayTone( aToneHz, TTimeIntervalMicroSeconds( len ) );
-        iTonePlayer->SetVolume( static_cast<TInt>( aVolume * iTonePlayer->MaxVolume() ) );
-        }
-    else
-        {
-        if ( iEnableCallback )
-            {
-            iObserver->PlaySoundComplete();
-            iEnableCallback = EFalse;
-            }
-        }  
-
-    iEnableCallback = aEnableCallback;
     }
 
 
@@ -308,48 +262,6 @@ void CCamSoundPlayer::StartPlaySound( const TDesC& aFile, const TBool aEnableCal
     }
 
 // ---------------------------------------------------------------------------
-// CCamSoundPlayer::StartPlayTone
-// Attempts to begin playing the specified tone
-// ---------------------------------------------------------------------------
-//
-void CCamSoundPlayer::StartPlayTone( const TDesC& aFile, const TBool aEnableCallback )
-    {
-    // Check if we are already trying to open/play a tone, and stop it 
-    // if so
-    if ( iOpenFileInProgress )
-        {
-        iTonePlayer->CancelPrepare();
-        iOpenFileInProgress = EFalse;
-        if ( iEnableCallback )
-            {
-            iObserver->PlaySoundComplete();
-            iEnableCallback = EFalse;
-            }
-        }
-    else if ( iTonePlayInProgress )
-        {
-        iTonePlayer->CancelPlay();
-        iTonePlayInProgress = EFalse;
-        if ( iEnableCallback )
-            {
-            iObserver->PlaySoundComplete();
-            iEnableCallback = EFalse;
-            }
-        }    
-    else
-        {
-        // empty statement to remove Lint error.
-        }
-
-    iEnableCallback = aEnableCallback;
-
-    iOpenFileInProgress = ETrue;
-    iTonePlayer->PrepareToPlayFileSequence( aFile );
-    iTonePlayer->SetVolume( static_cast<TInt>( KCamInCallToneVol * iTonePlayer->MaxVolume() ) );
-    }
-
-
-// ---------------------------------------------------------------------------
 // CCamSoundPlayer::MapcInitComplete
 // CMdaAudioPlayerUtility initialization complete
 // ---------------------------------------------------------------------------
@@ -382,52 +294,6 @@ void CCamSoundPlayer::MapcInitComplete( TInt aError,
 void CCamSoundPlayer::MapcPlayComplete( TInt /*aError*/ )
     {
     if ( iEnableCallback && iObserver)
-        {
-        iObserver->PlaySoundComplete();
-        iEnableCallback = EFalse;
-        }
-    }
-
-
-// ---------------------------------------------------------------------------
-// CCamSoundPlayer::MatoPrepareComplete
-// Tone prepare complete.
-// ---------------------------------------------------------------------------
-//
-void CCamSoundPlayer::MatoPrepareComplete( TInt aError )
-    {
-    iOpenFileInProgress = EFalse;
-
-    if ( !aError )
-        {
-        iTonePlayInProgress = ETrue;
-        iTonePlayer->Play();
-#ifdef __WINS__
-// The tone player does not give a call back on the emulator so
-// we have to force a callback here
-    MatoPlayComplete( KErrNone );
-#endif // __WINS__
-        }
-    else
-        {
-        if ( iEnableCallback )
-            {
-            iObserver->PlaySoundComplete();
-            iEnableCallback = EFalse;
-            }
-        }
-    }
-
-
-// ---------------------------------------------------------------------------
-// CCamSoundPlayer::MatoPlayComplete
-// Tone playback complete.
-// ---------------------------------------------------------------------------
-//
-void CCamSoundPlayer::MatoPlayComplete( TInt /*aError*/ )
-    {
-    iTonePlayInProgress = EFalse;
-    if ( iEnableCallback )
         {
         iObserver->PlaySoundComplete();
         iEnableCallback = EFalse;
@@ -497,40 +363,5 @@ void CCamSoundPlayer::EnableAllKeySounds()
         iAllKeysSilent = EFalse;
         }
     }
-
-
-// ---------------------------------------------------------------------------
-// CCamSoundPlayer::CancelTonePlayer
-// Cancels any outstanding tone player activity
-// ---------------------------------------------------------------------------
-//
-void CCamSoundPlayer::CancelTonePlayer()
-    {
-    if ( iOpenFileInProgress && iTonePlayer )
-        {   
-        iTonePlayer->CancelPrepare();
-        iOpenFileInProgress = EFalse;
-
-        if ( iEnableCallback && iObserver )
-            {
-            iObserver->PlaySoundComplete();
-            iEnableCallback = EFalse;
-            }
-        }
-        
-    if ( iTonePlayInProgress && iTonePlayer )
-        {
-        iTonePlayer->CancelPlay();        
-        iTonePlayInProgress = EFalse;
-
-        if ( iEnableCallback && iObserver )
-            {
-            iObserver->PlaySoundComplete();
-            iEnableCallback = EFalse;
-            }        
-        }
-    }
-    
-
 
 //  End of File  

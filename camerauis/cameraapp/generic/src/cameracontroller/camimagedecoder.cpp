@@ -319,7 +319,7 @@ CCamImageDecoder::RunL()
       // CImageDecoder has finished using the data,
       // so we are able to free it.
       SetImageData( NULL );
-      iObserver.ImageDecoded( iStatus.Int(), iDecodedBitmap, iDecodedMask );
+      iObserver.ImageDecodedL( iStatus.Int(), iDecodedBitmap, iDecodedMask );
       break;
       }
     case KErrUnderflow :
@@ -364,7 +364,7 @@ CCamImageDecoder::RunError( TInt aError )
   SetImageData( NULL );
   // Leave has occurred in RunL.
   // Notify observer with error.
-  iObserver.ImageDecoded( aError, NULL, NULL );
+  TRAP_IGNORE(iObserver.ImageDecodedL( aError, NULL, NULL ));
 
   PRINT( _L("Camera <= CCamImageDecoder::RunError") );
   return KErrNone;

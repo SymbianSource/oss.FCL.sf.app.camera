@@ -33,8 +33,6 @@
 #endif
 
 // CONSTANTS
-const TInt    KCamSelfTimerToneHz  = 1760;         
-const TReal32 KCamSelfTimerToneVol = 0.75f;    
 
 
 // MACROS
@@ -477,7 +475,7 @@ void CCamSelfTimer::DoIndication( TBool aOn )
     if ( aOn )        
         {        
         NotifyObservers( ECamSelfTimerEventTimerOn );
-        iController.PlayTone( KCamSelfTimerToneHz, iTimerTickPeriod.Int()/2, KCamSelfTimerToneVol, EFalse );
+        iController.PlaySound( ECamSelfTimerSoundId,  EFalse );
         }
     else
         {

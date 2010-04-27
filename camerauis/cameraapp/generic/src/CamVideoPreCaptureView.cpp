@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -1191,14 +1191,33 @@ void CCamVideoPreCaptureView::DynInitToolbarL( TInt aResourceId,
             {            
             if ( iEmbedded /* && appUi->IsSecondCameraEnabled()*/ )
                 {
+                // Dim mode switch icon and disable tooltip
                 aToolbar->SetItemDimmed(ECamCmdNewPhoto, ETrue, ETrue);
+                CAknButton* imageModeButton = static_cast<CAknButton*>(
+					          aToolbar->ControlOrNull( ECamCmdNewPhoto ) );
+                if ( imageModeButton ) 
+                    {
+                    imageModeButton->SetDimmedHelpTextL( KNullDesC );
+ 					}
+                
+                if ( appUi && appUi->IsSecondCameraEnabled() )
+                    {
+                    aToolbar->SetItemDimmed( ECamCmdPhotos, ETrue, ETrue );
+                    CAknButton* photosButton = static_cast<CAknButton*>(
+                        aToolbar->ControlOrNull( ECamCmdPhotos ) );
+                    if ( photosButton ) 
+                        {
+                        // do not show tooltip for dimmed item
+                        photosButton->SetDimmedHelpTextL( KNullDesC );
+                        }
+                    }
                 }
             CAknToolbarExtension* extension = aToolbar->ToolbarExtension();
             if( extension )
                 {
                 if ( iEmbedded )
                     {
-					extension->HideItemL( ECamCmdNewPhoto, ETrue );
+                    extension->HideItemL( ECamCmdNewPhoto, ETrue );
                     extension->HideItemL( ECamCmdPhotos, ETrue );
                     }
                 else

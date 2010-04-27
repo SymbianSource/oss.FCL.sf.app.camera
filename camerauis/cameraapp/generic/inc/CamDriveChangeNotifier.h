@@ -22,6 +22,8 @@
 
 //  INCLUDES
 #include <f32file.h>
+#include "campropertywatcher.h"
+#include "campropertyobserver.h"
 
 // FORWARD DECLARATIONS
 class MCamDriveChangeNotifierObserver;
@@ -39,7 +41,9 @@ class MCamDriveChangeNotifierObserver
         enum TCamDriveChangeType
             {
             EDriveDismount,
-            EDriveMount
+            EDriveMount,
+            EDriveUSBMassStorageModeOn,
+            EDriveUSBMassStorageModeOff
             };
             
     public: // New functions
@@ -64,7 +68,8 @@ class MCamDriveChangeNotifierObserver
 *
 *  @since 5.0
 */
-class CCamDriveChangeNotifier : public CBase
+class CCamDriveChangeNotifier : public CBase, 
+                                public MPropertyObserver
 
     {
     private:
@@ -74,7 +79,6 @@ class CCamDriveChangeNotifier : public CBase
                 static CCamDiskChangeListener* NewLC( 
                      RFs& aFs,
                      TDriveNumber aDrive,
-                     MCamDriveChangeNotifierObserver::TCamDriveChangeType aType,
                      CCamDriveChangeNotifier& aObserver );
                 ~CCamDiskChangeListener();
                 
@@ -85,7 +89,6 @@ class CCamDriveChangeNotifier : public CBase
                 CCamDiskChangeListener( 
                      RFs& aFs,
                      TDriveNumber aDrive,
-                     MCamDriveChangeNotifierObserver::TCamDriveChangeType aType,
                      CCamDriveChangeNotifier& aObserver );
                 
             private:
@@ -102,10 +105,9 @@ class CCamDriveChangeNotifier : public CBase
             private:
                 RFs& iFs;
                 TDriveNumber iDrive;
-                MCamDriveChangeNotifierObserver::TCamDriveChangeType iType;
                 CCamDriveChangeNotifier& iObserver;
             };
-
+        
     public:  // Constructors and destructor
 
         /**
@@ -137,6 +139,14 @@ class CCamDriveChangeNotifier : public CBase
         void StartMonitoring();
         void CancelMonitoring();
 
+    public: // From MPropertyObserver
+        /**
+        * The value of a watched property has changed
+        * @param aCategory The category of the property
+        * @param aKey the Identifier of the property
+        */    
+        void HandlePropertyChangedL( const TUid& aCategory, const TUint aKey );
+        
     private:
 
         /**
@@ -145,6 +155,8 @@ class CCamDriveChangeNotifier : public CBase
         CCamDriveChangeNotifier( 
                                 RFs& aFs,
                                 MCamDriveChangeNotifierObserver& aObserver );
+        
+        void ConstructL();
 
     private:    // Data
         // Ref.
@@ -154,6 +166,10 @@ class CCamDriveChangeNotifier : public CBase
         RFs& iFs;
 
         RPointerArray<CCamDiskChangeListener> iListeners;
+        
+        CCamPropertyWatcher* iUsbMSWatcher;
+        
+        TBool iMassStorageModeOn;
 
     };
 

@@ -19,11 +19,17 @@
 
 // INCLUDE FILES
 #include    <pathinfo.h>
+#include    <driveinfo.h>
+#include    <usbwatcherinternalpskeys.h>
+#include    <usbpersonalityids.h>
 
 #include    "CamDriveChangeNotifier.h"
 #include    "camlogging.h"
 #include    "CamUtility.h"
 
+
+_LIT(KDriveE, "E:\\");
+_LIT(KDriveF, "F:\\");
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -35,13 +41,12 @@ CCamDriveChangeNotifier::CCamDiskChangeListener*
     CCamDriveChangeNotifier::CCamDiskChangeListener::NewLC(
                   RFs& aFs,
                   TDriveNumber aDrive,                                         
-                  MCamDriveChangeNotifierObserver::TCamDriveChangeType aType,
                   CCamDriveChangeNotifier& aObserver )
   {
   PRINT( _L( "Camera => CCamDiskChangeListener::NewLC" ) );
 
   CCamDiskChangeListener* self = 
-        new( ELeave ) CCamDiskChangeListener( aFs, aDrive, aType, aObserver );
+        new( ELeave ) CCamDiskChangeListener( aFs, aDrive, aObserver );
   CleanupStack::PushL( self );
 
   PRINT( _L( "Camera <= CCamDiskChangeListener::NewLC" ) );
@@ -66,12 +71,10 @@ CCamDriveChangeNotifier::CCamDiskChangeListener::~CCamDiskChangeListener()
 CCamDriveChangeNotifier::CCamDiskChangeListener::CCamDiskChangeListener(
                   RFs& aFs,
                   TDriveNumber aDrive,                                         
-                  MCamDriveChangeNotifierObserver::TCamDriveChangeType aType,
                   CCamDriveChangeNotifier& aObserver )
     : CActive( CActive::EPriorityIdle ),
       iFs( aFs ),
       iDrive( aDrive ),
-      iType( aType ),
       iObserver( aObserver )                                          
   {
   CActiveScheduler::Add( this );
@@ -89,7 +92,19 @@ void CCamDriveChangeNotifier::CCamDiskChangeListener::Start()
     PRINT( _L( "Camera <> CCamDiskChangeListener::Start SetActive()" ) );
         
     // Start listening for change events
-    iFs.NotifyChange( ENotifyDisk, iStatus );
+    if(iDrive == EDriveE)
+        {
+        iFs.NotifyChange( ENotifyDisk, iStatus, KDriveE );
+        }
+    else if( iDrive == EDriveF )
+        {
+        iFs.NotifyChange( ENotifyDisk, iStatus, KDriveF );
+        }
+    else
+        {
+        iFs.NotifyChange( ENotifyDisk, iStatus );
+        }
+    
     SetActive();
     }
   PRINT( _L( "Camera <= CCamDiskChangeListener::Start" ) );
@@ -123,13 +138,30 @@ void CCamDriveChangeNotifier::CCamDiskChangeListener::DoCancel()
 //
 void CCamDriveChangeNotifier::CCamDiskChangeListener::RunL()
   {
-  PRINT2( _L( "Camera => CCamDiskChangeListener::RunL iType: %d, iStatus: %d" ), iType, iStatus.Int() );
+  PRINT1( _L( "Camera => CCamDiskChangeListener::RunL, iStatus: %d" ), iStatus.Int() );
   TInt ret = KErrNone;
   
   if ( iStatus == KErrNone )
     {
-    ret = iObserver.NotifyChangeL( iType );
-        
+    TUint driveStatus;  
+    ret = DriveInfo::GetDriveStatus(iFs, iDrive, driveStatus );
+    
+    if( ret == KErrNone)
+        {
+        if( !( driveStatus & DriveInfo::EDrivePresent ) ||
+                ( ( driveStatus & DriveInfo::EDrivePresent ==  DriveInfo::EDrivePresent ) &&
+                  ( driveStatus & DriveInfo::EDriveInUse ==  DriveInfo::EDriveInUse ) ) )
+            {
+            RDebug::Print(_L("CCamDiskChangeListener::RunL Dismount:%d"),iDrive);
+            ret = iObserver.NotifyChangeL( MCamDriveChangeNotifierObserver::EDriveDismount );
+            }
+        else if( ( driveStatus & DriveInfo::EDrivePresent ) == DriveInfo::EDrivePresent )
+            {
+            RDebug::Print(_L("CCamDiskChangeListener::RunL Mount:%d"),iDrive);
+            ret = iObserver.NotifyChangeL( MCamDriveChangeNotifierObserver::EDriveMount );
+            }
+        }
+
     if( ret == KErrNone )
       {
       Start();
@@ -145,6 +177,7 @@ void CCamDriveChangeNotifier::CCamDiskChangeListener::RunL()
   PRINT( _L( "Camera <= CCamDiskChangeListener::RunL" ) );
   }
 
+                
 // -----------------------------------------------------------------------------
 // CCamDriveChangeNotifier::CCamDriveChangeNotifier
 // -----------------------------------------------------------------------------
@@ -170,17 +203,8 @@ CCamDriveChangeNotifier* CCamDriveChangeNotifier::NewL(
   CCamDriveChangeNotifier* self =
                       new( ELeave ) CCamDriveChangeNotifier( aFs, aObserver );
   
-  self->iListeners.AppendL( CCamDiskChangeListener::NewLC( self->iFs, EDriveE, 
-                      MCamDriveChangeNotifierObserver::EDriveMount, *self ) );
-    
-  self->iListeners.AppendL( CCamDiskChangeListener::NewLC( self->iFs, EDriveD, 
-                      MCamDriveChangeNotifierObserver::EDriveMount, *self ) );
+  self->ConstructL();
   
-  CleanupStack::Pop(); // listener
-  CleanupStack::Pop(); // listener 2
-    
-  self->StartMonitoring();
-
   PRINT( _L( "Camera <= CCamDriveChangeNotifier::NewL" ) );
   return self;
   }
@@ -192,6 +216,15 @@ CCamDriveChangeNotifier::~CCamDriveChangeNotifier()
   PRINT( _L( "Camera => CCamDriveChangeNotifier::~CCamDriveChangeNotifier" ) );
   CancelMonitoring();
   iListeners.ResetAndDestroy();
+  if( iUsbMSWatcher )
+      {
+      if( iUsbMSWatcher->IsActive() )
+          {
+          iUsbMSWatcher->Cancel();
+          }
+      delete iUsbMSWatcher;
+      iUsbMSWatcher = NULL;
+      }
   PRINT( _L( "Camera <= CCamDriveChangeNotifier::~CCamDriveChangeNotifier" ) );
   }
 
@@ -207,7 +240,9 @@ void CCamDriveChangeNotifier::StartMonitoring()
     {
     iListeners[i]->Start();
     }
-
+  
+  iUsbMSWatcher->Subscribe();
+  
   PRINT( _L( "Camera <= CCamDriveChangeNotifier::StartMonitoring" ) );
   }
 
@@ -223,7 +258,7 @@ void CCamDriveChangeNotifier::CancelMonitoring()
     {
     iListeners[i]->Stop();
     }
-
+  //iUsbMSWatcher->Cancel();
   PRINT( _L( "Camera <= CCamDriveChangeNotifier::CancelMonitoring" ) );
   }
     
@@ -242,7 +277,7 @@ TInt CCamDriveChangeNotifier::NotifyChangeL(
     PRINT( _L("Camera <> iFs.AllowDismount( EDriveE )") )
     iFs.AllowDismount( EDriveE );
     PRINT( _L("Camera <> iFs.AllowDismount( EDriveD )") )
-    iFs.AllowDismount( EDriveD );
+    iFs.AllowDismount( EDriveF );
     }
         
   PRINT( _L( "Camera <= CCamDriveChangeNotifier::NotifyChangeL" ) );        
@@ -257,8 +292,61 @@ void CCamDriveChangeNotifier::SendAllowDismount()
   {
   PRINT( _L( "Camera => CCamDriveChangeNotifier::SendAllowDismount" ) );
   iFs.AllowDismount( EDriveE );
-  iFs.AllowDismount( EDriveD );
+  iFs.AllowDismount( EDriveF );
   StartMonitoring();
   PRINT( _L( "Camera <= CCamDriveChangeNotifier::SendAllowDismount" ) );
-  }    
+  }
+
+// -----------------------------------------------------------------------------
+// CCamDriveChangeNotifier::HandlePropertyChangedL
+// -----------------------------------------------------------------------------
+//
+void CCamDriveChangeNotifier::HandlePropertyChangedL( const TUid& aCategory, const TUint aKey )
+    {
+    PRINT( _L( "Camera => CCamDriveChangeNotifier::HandlePropertyChangedL" ) );
+    TInt value = 0;
+    if(KPSUidUsbWatcher == aCategory && 
+       KUsbWatcherSelectedPersonality == aKey)
+        {
+        iUsbMSWatcher->Get( value );
+        if( KUsbPersonalityIdMS == value )
+            {
+            iMassStorageModeOn = ETrue;
+            iObserver.DriveChangeL( MCamDriveChangeNotifierObserver::EDriveUSBMassStorageModeOn );
+            }
+        else
+            {
+            if( iMassStorageModeOn )
+                {
+                iMassStorageModeOn = EFalse;
+                iObserver.DriveChangeL( MCamDriveChangeNotifierObserver::EDriveUSBMassStorageModeOff );
+                }
+            }
+        }
+    
+    PRINT( _L( "Camera <= CCamDriveChangeNotifier::HandlePropertyChangedL" ) );
+    }
+
+// -----------------------------------------------------------------------------
+// CCamDriveChangeNotifier::ConstructL
+// -----------------------------------------------------------------------------
+//
+void CCamDriveChangeNotifier::ConstructL()
+    {
+    
+    iListeners.AppendL( CCamDiskChangeListener::NewLC( iFs, EDriveE, 
+                          *this ) );
+    
+    iListeners.AppendL( CCamDiskChangeListener::NewLC( iFs, EDriveF, 
+                         *this ) );  
+    
+    iUsbMSWatcher = CCamPropertyWatcher::NewL(*this, KPSUidUsbWatcher, 
+                        KUsbWatcherSelectedPersonality );
+    
+    CleanupStack::Pop(); // listener
+    CleanupStack::Pop(); // listener 2
+    
+    StartMonitoring();
+
+    }
 //  End of File

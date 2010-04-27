@@ -400,6 +400,10 @@ void CCamViewBase::SwitchToStandbyModeL( TCamAppViewIds aViewId, TInt aError )
     else
         {
         SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_EXIT__CONTINUE );
+        if( Cba() && !appUi->IsRecoverableStatus() )
+            {
+            Cba()->MakeCommandVisible( ECamCmdExitStandby, EFalse );
+            }
         }
 
     // change options menu
@@ -410,7 +414,7 @@ void CCamViewBase::SwitchToStandbyModeL( TCamAppViewIds aViewId, TInt aError )
         }
 
 //    if ( iStandbyError != KErrNone )
-    if ( appUi->StandbyStatus() != KErrNone )
+    if ( appUi->StandbyStatus() != KErrNone && appUi->IsRecoverableStatus())
         {
         // stop idle timer - non recoverable error
         iController.StopIdleTimer();
@@ -1040,4 +1044,40 @@ void CCamViewBase::HandleCommandAoL( TInt aCommand )
     iCommandHandlerAo->HandleCommandL( aCommand );
     }    
 
+// -----------------------------------------------------------------------------
+// CCamViewBase::SetStandbyStatusL
+// -----------------------------------------------------------------------------    
+ 
+void CCamViewBase::SetStandbyStatusL( TInt aError )
+    {
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );
+    __ASSERT_DEBUG( appUi, CamPanic( ECamPanicNullPointer ) );
+    if( iStandbyModeActive )
+        {
+        appUi->SetStandbyStatus( aError );
+        iStandbyContainer->SetStandbyErrorL( aError );
+        if ( aError == KErrInUse ||
+             aError == KErrPermissionDenied ||
+             aError == KErrAccessDenied )
+            {
+            SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_EXIT );    
+            }   
+        else if ( iEmbedded )
+            {
+            SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_BACK__CONTINUE );
+            }
+        else
+            {
+            SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_EXIT__CONTINUE );
+            if( Cba() && !appUi->IsRecoverableStatus() )
+                {
+                Cba()->MakeCommandVisible( ECamCmdExitStandby, EFalse );
+                }
+            else
+                {
+                Cba()->MakeCommandVisible( ECamCmdExitStandby, ETrue );
+                }
+            }
+        }
+    }
 //  End of File  

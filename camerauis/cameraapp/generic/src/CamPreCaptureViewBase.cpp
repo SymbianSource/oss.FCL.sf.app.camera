@@ -48,6 +48,7 @@
 #include "CamPreCaptureViewBaseTraces.h"
 #endif
 
+#include "camstartuplogocontroller.h" 
 
 // ===========================================================================
 // Constants
@@ -546,7 +547,8 @@ void CCamPreCaptureViewBase::HandleControllerEventL( TCamControllerEvent aEvent,
         TBool noToolbar = (ECamCompleting == iController.CurrentOperation() ) && appUi->IsSecondCameraEnabled();
 
         if ( ECamCameraPreparedImage == iController.CameraState() &&
-               !appUi->IsBurstEnabled() && !noToolbar )
+               !appUi->IsBurstEnabled() && !noToolbar
+               && !iStandbyModeActive )
             {
             // Also fixed toolbar might need to be enabled.
             appUi->SetToolbarVisibility();
@@ -891,9 +893,9 @@ void CCamPreCaptureViewBase::ExitCaptureSetupModeL()
     {
     PRINT( _L("Camera => CCamPreCaptureViewBase::ExitCaptureSetupModeL") )
      
-    
+    CCamCaptureSetupViewBase::ExitCaptureSetupModeL();    
     iController.SetViewfinderWindowHandle( &iContainer->Window() );
-    CCamCaptureSetupViewBase::ExitCaptureSetupModeL();
+
     
     if( !iController.IsViewFinding() && !iController.InVideocallOrRinging() )
       {
@@ -1049,12 +1051,13 @@ CCamPreCaptureViewBase::ExitAllModesL()
       break;
     }
 
-  if ( iController.InVideocallOrRinging() )
+  if ( iController.InVideocallOrRinging() || !iController.IssueModeChangeSequenceSucceeded() )
       {
       return;
       }	
-      
+  
   appUi->HandleCommandL(ECamCmdSwitchToPrecapture);
+  
 
   if ( !( iController.UiConfigManagerPtr() && 
             iController.UiConfigManagerPtr()->IsUIOrientationOverrideSupported() ) )
@@ -1293,7 +1296,17 @@ void CCamPreCaptureViewBase::SwitchToStandbyModeL( TCamAppViewIds aViewId, TInt 
             fixedToolbar->SetToolbarVisibility( EFalse );
             }
         }
-  
+
+    // Hide the startup logo in standby mode. 
+    // Camera application will enter standby mode if it detect camera hardware is in use
+    // by another application (such as video call) when camera application is starting up. 
+    // If this, we need hiding startup logo in standby mode.
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() ); 
+    if ( appUi->StartupLogoController() )
+      {
+      appUi->StartupLogoController()->HideLogo();
+      }
+      
     // stop viewfinding
     StopViewFinder();
 
@@ -1771,6 +1784,7 @@ void CCamPreCaptureViewBase::CreateContainerL()
     if ( iGestureFw ) 
         {
         delete iGestureFw;
+        iGestureFw = NULL;
         }
 
     iGestureFw = CAknTouchGestureFw::NewL( *this, *iContainer );
@@ -1855,4 +1869,21 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
     PRINT( _L("Camera <= CCamPreCaptureViewBase::HandleTouchGestureL") );
     }
 
+// ---------------------------------------------------------------------------
+// CCamPreCaptureViewBase::IsCaptureSetupMenuModeActive
+//
+// ---------------------------------------------------------------------------
+//
+TBool CCamPreCaptureViewBase::IsSetupModeActive()
+    {
+    TBool trueValue = ETrue;
+    TBool ret = ( iCaptureSetupModeActive == trueValue ||
+             iCaptureSetupMenuModeActive == trueValue || 
+             iSceneSettingModeActive == trueValue ||
+             iInfoListBoxActive == trueValue
+             );
+    PRINT1( _L("Camera <> CCamPreCaptureViewBase::IsSetupModeActive %d"), ret );
+    return ret;
+    }
 //  End of File  
+

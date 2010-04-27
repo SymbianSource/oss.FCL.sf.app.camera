@@ -202,13 +202,14 @@ void CCamStillPostCaptureView::HandleCommandL( TInt aCommand )
         case ECamCmdPrintIntent:
             {
             // we are 'embedding' Edit & Print apps
-          PRINT( _L("Camera => CCamStillPostCaptureView::HandleCommandL ECamCmdPrintIntent"))
+            PRINT( _L("Camera => CCamStillPostCaptureView::HandleCommandL ECamCmdPrintIntent"))
             static_cast<CCamAppUiBase*>( AppUi() ) ->SetEmbedding( ETrue );            
             }
             break;
-          
+
         default:
             {
+            PRINT1( _L("Camera => CCamStillPostCaptureView::HandleCommandL default cmd (%d)"), aCommand )
             // Handle AIW commands
             TInt aiwServiceCmd = iAiwServiceHandler->ServiceCmdByMenuCmd( aCommand );
             if ( aiwServiceCmd != KAiwCmdNone )
@@ -340,7 +341,7 @@ void CCamStillPostCaptureView::DoActivateL(
     // SHARE_AIW
     iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID),
             R_CAM_AIW_VIEW_INTEREST );
-   
+
     if ( iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport) )
         {    
         iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), 
@@ -438,10 +439,6 @@ void CCamStillPostCaptureView::ConstructL()
     BaseConstructL( ROID(R_CAM_STILL_POST_CAPTURE_VIEW_ID));
     CCamPostCaptureViewBase::ConstructL();
   
-    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), R_CAM_SHARE_ON_OVI_INTEREST );
-    // SHARE_AIW
-    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), R_CAM_AIW_VIEW_INTEREST );
-    
 	iRockerKeyPress = EFalse;
     }
 

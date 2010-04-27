@@ -399,7 +399,17 @@ TKeyResponse CCamCaptureSetupContainer::OfferKeyEventL(
          ( IsCaptureKeyL( aKeyEvent, aType ) || IsShutterKeyL( aKeyEvent, aType ) ) ) )  
         {
         TKeyResponse response = iCaptureSetupControl->OfferKeyEventL( aKeyEvent, aType );
-        iView.HandleCommandL( EAknSoftkeyOk );
+        if ( aType == EEventKeyDown && IsShutterKeyL( aKeyEvent, aType ) && 
+            ( ECamSettingItemDynamicPhotoFlash == iControlHandler.SettingType() ||
+            ECamSettingItemDynamicSelfTimer == iControlHandler.SettingType() ) )
+            {
+            iView.HandleCommandL( EAknSoftkeyCancel );
+            }
+            else
+            {
+            iView.HandleCommandL( EAknSoftkeyOk );
+            }
+        
         return response;
         }
     return iCaptureSetupControl->OfferKeyEventL( aKeyEvent, aType );

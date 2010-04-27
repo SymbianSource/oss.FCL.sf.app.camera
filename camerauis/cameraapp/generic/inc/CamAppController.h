@@ -1028,15 +1028,6 @@ public:
     */
     void PlaySound( TCamSoundId aSoundId, TBool aEnableCallback );
 
-    /**
-    * Initiates the playing of the specified tone
-    * @since 2.8
-    * @param aToneHz The frequency of the tone to play in Hertz
-    * @param aLenMicSec The length of tone to play in microseconds
-    * @param aVolume The volume of the tone, range 0.0 to 1.0
-    * @param aEnableCallback Whether to be called back when playback complete
-    */
-    void PlayTone( TInt aToneHz, TInt aLenMicSec, TReal32 aVolume,  TBool aEnableCallback );
 
     /** 
     * Releases the camera hardware for other apps to use
@@ -1171,6 +1162,14 @@ public:
      */
     TCamEvCompRange EvRange() const;
 
+    /**
+     * Switches camera to standby
+     * @since 5.1
+     * @param aSratus Error code for Standby mode
+     * @return
+     */
+    void SwitchToStandbyL( TInt aStatus = KErrNone );
+    
   public: // Derived from MCamCallStateObserver base class     
     /**
     * Callback for when the current phone call state changes
@@ -2208,6 +2207,11 @@ public:
          */
         TBool IsSaveStarted();
         
+        /**
+         * Getter for iIssueModeChangeSequenceSucceeded
+         */
+        TBool IssueModeChangeSequenceSucceeded();
+        
   private:
 
     // -----------------------------------------------------
@@ -2591,6 +2595,8 @@ public:
     CCamSnapShotRotator* iSnapShotRotator;
     // orientation at capture time
     TCamImageOrientation  iCaptureOrientation;
+    
+    TBool iIssueModeChangeSequenceSucceeded;
     
     };
 

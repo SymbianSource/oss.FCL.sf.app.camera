@@ -917,7 +917,7 @@ RESOURCE MENU_PANE r_cam_burst_thumbnail_menu
             },
         MENU_ITEM // SHARE_AIW
             {
-            command = KAiwCmdView;
+            command = ECamCmdShareSettings;
             // AIW provider fills the menu item title.
             // No submenu, only 1 provider acccepted.
             txt     = "";

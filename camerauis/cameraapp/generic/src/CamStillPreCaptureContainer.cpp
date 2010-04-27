@@ -21,6 +21,7 @@
 #include <cameraapp.rsg>
 #include <vgacamsettings.rsg>
 #include <akntoolbar.h>
+#include <akntoolbarextension.h>
 #include <aknlayoutscalable_apps.cdl.h>
 
 #include "CamStillPreCaptureContainer.h"
@@ -740,6 +741,16 @@ CCamStillPreCaptureContainer::HandleShutterKeyEventL( const TKeyEvent& aKeyEvent
         {
         OstTrace0( CAMERAAPP_PERFORMANCE, CCAMSTILLPRECAPTURECONTAINER_HANDLESHUTTERKEYEVENTL, "e_CAM_APP_AF 1" );  //CCORAPP_AF_START
         iController.StartAutoFocus();
+        }
+
+      CAknToolbar* fixedToolbar = appui->CurrentFixedToolbar();
+      if ( appui->SelfTimerEnabled() && fixedToolbar )
+        {
+        CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
+        if ( extension )
+            {
+            extension->SetShown( EFalse );
+            }
         }
 
       return EKeyWasConsumed;

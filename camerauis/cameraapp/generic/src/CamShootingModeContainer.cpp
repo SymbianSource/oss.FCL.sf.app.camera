@@ -583,6 +583,38 @@ TKeyResponse CCamShootingModeContainer::OfferKeyEventL(
         iView.HandleCommandL( EAknSoftkeySelect );
         return response;
         }
+    
+    if ( iController.UiConfigManagerPtr()
+         && iController.UiConfigManagerPtr()->IsAutoFocusSupported() )
+        {
+        if( aType == EEventKeyDown && IsShutterKeyL( aKeyEvent, aType ) )
+            {
+            TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );
+            if( UserSceneHighlighted() )
+                {
+                iView.HandleCommandL( ECamCmdSelect );
+                }
+                else
+                {
+                iView.HandleCommandL( EAknSoftkeySelect );
+                }
+            return response;
+            }
+        }
+    else if( aType == EEventKeyDown && IsCaptureKeyL( aKeyEvent, aType ) )
+        {
+        TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );
+        if( UserSceneHighlighted() )
+            {
+            iView.HandleCommandL( ECamCmdSelect );
+            }
+            else
+            {
+            iView.HandleCommandL( EAknSoftkeySelect );
+            }
+        return response;
+        }
+           
     TKeyResponse returnvalue = iListBox->OfferKeyEventL( aKeyEvent, aType );
 
     // for non touch, we use key presses to scroll thru the scene modes

@@ -33,7 +33,6 @@
 #include "mcamplayerobserver.h"
 #include "mcamplayerwrapper.h"
 #include "camaudioplayerwrapper.h"
-#include "camtoneplayerwrapper.h"
 #include "camaudioplayercontroller.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -256,35 +255,6 @@ CCamAudioPlayerController::PlaySound( TInt  aSoundId,
 
 
 // ---------------------------------------------------------------------------
-// PlayTone
-// ---------------------------------------------------------------------------
-// 
-void
-CCamAudioPlayerController::PlayTone( TInt    aToneInHz, 
-                                     TInt    aLengthInUs, 
-                                     TReal32 aVolumeInPercent, 
-                                     TBool   aCallback )
-  {
-  TInt status( KErrNone );
-
-  if( !iTonePlayer )
-    {
-    TRAP( status, iTonePlayer = CCamTonePlayerWrapper::NewL( iObserver ) );
-    }
-
-  if( KErrNone == status )
-    {
-    iTonePlayer->PlayTone( aToneInHz, aLengthInUs, aVolumeInPercent, aCallback );
-    }
-  else
-    {
-    if( aCallback )
-      iObserver.PlayComplete( status, -1 );
-    }
-  }
-  
-
-// ---------------------------------------------------------------------------
 // CancelAllPlaying
 // ---------------------------------------------------------------------------
 //
@@ -293,10 +263,6 @@ CCamAudioPlayerController::CancelAllPlaying()
   {
   PRINT( _L("Camera => CCamAudioPlayerController::CancelAllPlaying") );
 
-  if( iTonePlayer )
-    {
-    iTonePlayer->CancelPlay();
-    }
   for( TInt i = 0; i < iPlayers.Count(); i++ )
     {
     iPlayers[i]->CancelPlay();
@@ -587,8 +553,6 @@ CCamAudioPlayerController::Reset()
   PRINT ( _L("Camera => CCamAudioPlayerController::Reset") );
   iPlayers.ResetAndDestroy();
 
-  delete iTonePlayer;
-  iTonePlayer = NULL;
 
   iCameraMode     = ECamControllerIdle;
   iCaptureSoundId = -1;

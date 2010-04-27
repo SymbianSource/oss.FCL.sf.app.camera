@@ -50,6 +50,8 @@ PRJ_EXPORTS
 ../generic/data/cameraappStart.wav    /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappStart.wav
 ../generic/data/cameraappStop.wav    /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappStop.wav
 ../generic/data/cameraappStop.wav     /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappStop.wav
+../generic/data/cameraappSelfTimer.wav   /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappSelfTimer.wav
+../generic/data/cameraappSelfTimer.wav   /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappSelfTimer.wav
 
 
 ../generic/data/cameraappCaptureShort1.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCaptureShort1.wav

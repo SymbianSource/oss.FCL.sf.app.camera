@@ -856,6 +856,10 @@ CCamCameraController::McaeoVideoPrepareComplete( TInt aError )
   HandleVideoEvent( ECamCameraEventVideoInit, aError );
   // DelayCallback( ECamCameraEventVideoInit, aError, 500000 );
 #else
+  if( aError == KErrWrite )
+      {
+      aError = KErrNone;
+      }
   if( aError &&
       ( iIveCancel || ( !iIveSequenceActive && iIveRecoveryOngoing ) ) )
       // Return if error and recovering process has been started,
@@ -994,6 +998,10 @@ CCamCameraController::McaeoVideoRecordingComplete( TInt aError )
 #ifdef CAMERAAPP_CAE_ERR_SIMULATION
   HandleVideoEvent( ECamCameraEventVideoStop, KErrUnknown );
 #else
+  if( aError == KErrWrite )
+      {
+      aError = KErrNone;
+      }
   HandleVideoEvent( ECamCameraEventVideoStop, aError );
 #endif // CAMERAAPP_CAE_ERR_SIMULATION
   // Change stopping mode back to default sync mode
@@ -2890,7 +2898,7 @@ CCamCameraController
                   params().iRect );
               (void) SetVfWindowOrdinal( orgPos ); // back to original
 
-              if ( ECamActiveCameraSecondary == appUi->ActiveCamera() )
+              if ( appUi && ECamActiveCameraSecondary == appUi->ActiveCamera() )
                   {
                   iCamera->SetViewFinderMirrorL(ETrue);
                   }
@@ -2959,7 +2967,10 @@ CCamCameraController
 
         iInfo.iVfState = ECamTriActive;
         //view finder started now(set stop status as false)
-        appUi->SetViewFinderStoppedStatus( EFalse );
+        if ( appUi )
+            {
+            appUi->SetViewFinderStoppedStatus( EFalse );
+            }
         break;
         }
       // -----------------------------------------------------
@@ -4228,7 +4239,7 @@ CCamCameraController::HandleReserveLostEvent( TInt aStatus )
        iIveRecoveryCount &&                   // Give up eventually
        !appUi->AppInBackground( EFalse ) &&   // Only if on the foreground
        ( !iReleasedByUi ||             // Try recover if unknown reason
-         appUi->StandbyStatus() ) &&    // or known error
+         ( appUi->StandbyStatus() && appUi->IsRecoverableStatus() ) ) &&    // or known error 
          !iAppController.InVideocallOrRinging() && // Video telephony parallel use case
          !iIveRecoveryOngoing        //  processing recovery sequence
          )
@@ -6644,7 +6655,7 @@ void CCamCameraController::DoIveRecovery()
             return;
             }
 		__ASSERT_DEBUG(view, CamPanic(ECamPanicNullPointer));
-        if ( appUi->StandbyStatus() && view->IsInStandbyMode() )
+        if ( appUi->StandbyStatus() && appUi->IsRecoverableStatus() && view->IsInStandbyMode() ) 
             {
             PRINT( _L("Camera <> CCamCameraController::DoIveRecovery - Standby mode active, try to exit") )
             TRAP_IGNORE( appUi->HandleControllerEventL(  ECamEventCameraChanged,
@@ -6699,9 +6710,13 @@ void CCamCameraController::SetFaceTrackingL()
       TBool ftOn( EFalse );
       iSettingProvider.ProvideCameraSettingL( ECameraSettingFacetracking, &ftOn );
       PRINT1( _L("Camera <> Set facetracking: %d"), ftOn )
-      iCustomInterfaceFaceTracking->SetFaceTrackingL( ftOn );
-      iCustomInterfaceFaceTracking->EnableFaceIndicatorsL( ETrue );
-      DirectRequestL( ECamRequestSetAfRange );
+      if( ( ftOn && !iCustomInterfaceFaceTracking->FaceTrackingOn() ) ||
+          ( !ftOn && iCustomInterfaceFaceTracking->FaceTrackingOn() ) )
+          {
+          iCustomInterfaceFaceTracking->SetFaceTrackingL( ftOn );
+          iCustomInterfaceFaceTracking->EnableFaceIndicatorsL( ETrue );
+          DirectRequestL( ECamRequestSetAfRange );
+          }
       }
     }
 
