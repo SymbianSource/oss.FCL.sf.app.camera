@@ -44,6 +44,8 @@ class CxuiSettingDialog;
 class CxuiSettingRadioButtonList;
 class CxuiSettingSlider;
 class HbToolBarExtension;
+class HbWidget;
+class CxuiZoomSlider;
 
 /**
  * Pre-capture view
@@ -117,12 +119,12 @@ protected slots:
 
     // Settings related
     void launchNotSupportedNotification();
+    void launchDiskFullNotification();
     void showSettingsGrid();
     void hideSettingsGrid();
     void launchSliderSetting();
     void prepareToShowDialog(HbAction *action);
     void prepareToCloseDialog(HbAction *action);
-
 
 protected:
 
@@ -130,6 +132,8 @@ protected:
 
     void hideZoom();
     void showZoom();
+    void hideIndicators();
+    void showIndicators();
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -137,7 +141,7 @@ protected:
     bool eventFilter(QObject *object, QEvent *event);
     void launchSettingsDialog(QObject *action);
     bool isPostcaptureOn() const;
-    void addIncreaseDecreaseButtons(HbSlider *slider);
+    void addIncreaseDecreaseButtons(CxuiZoomSlider *slider);
     QString getSettingItemIcon(const QString &key, QVariant value);
     void updateQualityIcon();
     void createWidgetBackgroundGraphic(HbWidget *widget,
@@ -160,6 +164,7 @@ signals:
 
     // signal to report error to ErrorManager for further actions.
     void reportError(CxeError::Id errorId);
+    void showScenesView();
 
 protected:
     CxeEngine *mEngine; // not own
@@ -169,7 +174,7 @@ protected:
     CxuiDisplayPropertyHandler *mDisplayHandler;
     bool   mControlsVisible;
     QTimer mHideControlsTimeout;
-    HbSlider *mSlider; // zoom slider, not own, owned by the graphics scene
+    CxuiZoomSlider *mSlider; // zoom slider, not own, owned by the graphics scene
     HbToolBar *mToolBar; // not own, owned by the graphics scene
     HbToolBarExtension *mSettingsGrid;
     bool mZoomVisible;
@@ -178,6 +183,7 @@ protected:
     CxuiSettingRadioButtonList *mSettingsDialogList;
     CxuiCaptureKeyHandler *mKeyHandler;
     HbLabel *mQualityIcon;
+    HbWidget *mIndicators;
 
 private:
     CxuiSettingDialog* createSettingsDialog();

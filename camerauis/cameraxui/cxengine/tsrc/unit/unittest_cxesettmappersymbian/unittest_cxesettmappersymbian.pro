@@ -8,11 +8,16 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxesettmappersymbian
-LIBS += -lplatformenv
-SOURCES += unittest_cxesettingsmappersymbian.cpp \
+
+LIBS *= -lplatformenv
+
+SOURCES *= unittest_cxesettingsmappersymbian.cpp \
     cxesettingsmappersymbian.cpp
-HEADERS += unittest_cxesettingsmappersymbian.h \
+
+HEADERS *= unittest_cxesettingsmappersymbian.h \
     cxesettingsmappersymbian.h \
     cxesettings.h

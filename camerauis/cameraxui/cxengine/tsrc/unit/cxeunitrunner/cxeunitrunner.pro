@@ -18,10 +18,10 @@ include(../../../../camerax.pri)
 
 TEMPLATE = app
 TARGET =
-DEPENDPATH += .
-INCLUDEPATH += .
+DEPENDPATH *= .
+INCLUDEPATH *= .
 
-CONFIG += symbian_test
+CONFIG *= symbian_test
 
 symbian {
     TARGET.CAPABILITY = ALL -TCB -DRM
@@ -29,7 +29,7 @@ symbian {
 }
 
 # Input
-SOURCES += main.cpp \
+SOURCES *= main.cpp \
            cxetestrunner.cpp
 
-HEADERS += cxetestrunner.h
+HEADERS *= cxetestrunner.h

@@ -25,6 +25,8 @@
 */
 struct CxeImageDetails
 {
+    static const int UNKNOWN = -1;
+
     int mWidth;
     int mHeight;
     int mEstimatedSize; // size in bytes
@@ -42,6 +44,8 @@ data structure that holds ALL details of Video.
 */
 struct CxeVideoDetails
 {
+    static const int UNKNOWN = -1;
+
     int mWidth;
     int mHeight;
     int mRemainingTime;

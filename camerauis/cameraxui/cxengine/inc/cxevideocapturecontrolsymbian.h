@@ -22,7 +22,6 @@
 #include <QString>
 #include <driveinfo.h>
 #include <videorecorder.h>
-#include <ecam/camerasnapshot.h>
 
 #include "cxesettings.h"
 #include "cxequalitypresets.h"
@@ -31,26 +30,6 @@
 #include "cxevideocapturecontrol.h"
 #include "cxestatemachine.h"
 #include "cxenamespace.h"
-
-
-// constants
-const TInt KOneSecond = 1000000;
-
-//CamCControllerCustomCommands.h.
-
-// Controller UId, can be used by the client to identify the controller, e.g. if the custom command can be used
-const TUid KCamCControllerImplementationUid = {0x101F8503};
-const int KMaintainAspectRatio = false;
-// TMMFEvent UIDs for Async stop
-const TUid KCamCControllerCCVideoRecordStopped = {0x2000E546};
-const TUid KCamCControllerCCVideoFileComposed = {0x2000E547};
-
-// Custom command for setting a new filename without closing & reopening the controller
-enum TCamCControllerCustomCommands
-    {
-    ECamCControllerCCNewFilename = 0,
-    ECamCControllerCCVideoStopAsync
-    };
 
 
 // forward declarations
@@ -63,6 +42,7 @@ class CxeStillImageSymbian;
 class CxeSoundPlayerSymbian;
 class CxeCameraDeviceControl;
 class CxeVideoRecorderUtility;
+class CxeDiskMonitor;
 
 
 class CxeVideoCaptureControlSymbian : public CxeVideoCaptureControl,
@@ -73,12 +53,13 @@ class CxeVideoCaptureControlSymbian : public CxeVideoCaptureControl,
 
 public:  // constructors
 
-    CxeVideoCaptureControlSymbian( CxeCameraDevice &cameraDevice,
-                                   CxeViewfinderControl &viewfinderControl,
-                                   CxeCameraDeviceControl &cameraDeviceControl,
-                                   CxeFilenameGenerator &nameGenerator,
-                                   CxeSettings &settings,
-                                   CxeQualityPresets &qualityPresets);
+    CxeVideoCaptureControlSymbian(CxeCameraDevice &cameraDevice,
+                                  CxeViewfinderControl &viewfinderControl,
+                                  CxeCameraDeviceControl &cameraDeviceControl,
+                                  CxeFilenameGenerator &nameGenerator,
+                                  CxeSettings &settings,
+                                  CxeQualityPresets &qualityPresets,
+                                  CxeDiskMonitor &diskMonitor);
 
     virtual ~CxeVideoCaptureControlSymbian();
 
@@ -127,6 +108,8 @@ protected slots:
     void handleCameraEvent(int eventUid, int error);
     // settings call back
     void handleSettingValueChanged(const QString& settingId,QVariant newValue);
+    // Disk space change
+    void handleDiskSpaceChanged();
 
 private: // helper methods
     CxeError::Id findVideoController(const TDesC8& aMimeType, const TDesC&  aPreferredSupplier);
@@ -136,7 +119,7 @@ private: // helper methods
     int prepareVideoSnapshot();
     void initVideoRecorder();
     void open();
-	void prepare();
+    void prepare();
     TSize getSnapshotSize() const;
     virtual void createVideoRecorder();
     void calculateRemainingTime(CxeVideoDetails videoDetails, int &time);
@@ -159,6 +142,7 @@ private: // private data
     CxeFilenameGenerator &mFilenameGenerator;
     CxeSettings &mSettings;
     CxeQualityPresets &mQualityPresets;
+    CxeDiskMonitor &mDiskMonitor;
     //! Snapshot image.
     QPixmap mSnapshot;
     //! Soundplayers, own

@@ -18,7 +18,7 @@
 */
 
 #include <e32std.h> // For Symbian types used in mmsenginedomaincrkeys.h
-#include <mmsenginedomaincrkeys.h>
+#include <MmsEngineDomainCRKeys.h>
 
 #include "cxutils.h"
 #include "cxenamespace.h"
@@ -26,6 +26,10 @@
 #include "cxequalitydetails.h"
 #include "cxequalitypresetssymbian.h"
 
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cxequalitypresetssymbianTraces.h"
+#endif
 
 // constants
 namespace
@@ -83,6 +87,7 @@ Returns sorted list of image qualities in descending order.
 QList<CxeImageDetails> CxeQualityPresetsSymbian::imageQualityPresets(Cxe::CameraIndex cameraId)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEQUALITYPRESETSSYMBIAN_GETIMAGEPRESETS_IN, "msg: e_CX_QUALITYPRESETS_GETIMAGEPRESETS 1");
 
     QList<CxeImageDetails> presetList;
 
@@ -127,6 +132,7 @@ QList<CxeImageDetails> CxeQualityPresetsSymbian::imageQualityPresets(Cxe::Camera
     delete levels;
     levels = NULL;
 
+    OstTrace0(camerax_performance, CXEQUALITYPRESETSSYMBIAN_GETIMAGEPRESETS_OUT, "msg: e_CX_QUALITYPRESETS_GETIMAGEPRESETS 0");
     CX_DEBUG_EXIT_FUNCTION();
     return presetList;
 }
@@ -142,6 +148,7 @@ Returns sorted list if image qualities in descending order.
 QList<CxeVideoDetails> CxeQualityPresetsSymbian::videoQualityPresets(Cxe::CameraIndex cameraId)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEQUALITYPRESETSSYMBIAN_GETVIDEOPRESETS_IN, "msg: e_CX_QUALITYPRESETS_GETVIDEOPRESETS 1");
 
     QList<CxeVideoDetails> presetList;
 
@@ -192,6 +199,7 @@ QList<CxeVideoDetails> CxeQualityPresetsSymbian::videoQualityPresets(Cxe::Camera
     mIcm->GetCamcorderMMFPluginSettings(mmfPluginSettings);
     mCMRAvgVideoBitRateScaler = mmfPluginSettings.iCMRAvgVideoBitRateScaler;
 
+    OstTrace0(camerax_performance, CXEQUALITYPRESETSSYMBIAN_GETVIDEOPRESETS_OUT, "msg: e_CX_QUALITYPRESETS_GETVIDEOPRESETS 0");
     CX_DEBUG_EXIT_FUNCTION();
     return presetList;
 }
@@ -209,10 +217,11 @@ CxeImageDetails CxeQualityPresetsSymbian::createImagePreset(TImageQualitySet set
     // set setting values from quality set
     newPreset.mWidth = set.iImageWidth;
     newPreset.mHeight = set.iImageHeight;
-    newPreset.mImageFileExtension = toString(set.iImageFileExtension);
     newPreset.mEstimatedSize = set.iEstimatedSize;
     newPreset.mMpxCount = calculateMegaPixelCount(set.iImageWidth,
                                                   set.iImageHeight);
+    newPreset.mPossibleImages = CxeImageDetails::UNKNOWN;
+    newPreset.mImageFileExtension = toString(set.iImageFileExtension);
     newPreset.mAspectRatio = calculateAspectRatio(set.iImageWidth,
                                                   set.iImageHeight);
 
@@ -230,6 +239,8 @@ CxeVideoDetails CxeQualityPresetsSymbian::createVideoPreset(TVideoQualitySet set
     // set setting values from quality set
     newPreset.mWidth = set.iVideoWidth;
     newPreset.mHeight = set.iVideoHeight;
+
+    newPreset.mRemainingTime = CxeVideoDetails::UNKNOWN;
 
     // Check if this is a sharing (mms) quality, and set size limit accordingly.
     if (set.iCamcorderVisible < MMS_QUALITY_CAMCORDERVISIBLE_LIMIT) {

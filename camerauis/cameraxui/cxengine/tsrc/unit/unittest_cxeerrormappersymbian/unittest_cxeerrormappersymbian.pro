@@ -8,11 +8,14 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxeerrormappersymbian
 
-SOURCES += unittest_cxeerrormappersymbian.cpp \
+SOURCES *= unittest_cxeerrormappersymbian.cpp \
     cxeerrormappingsymbian.cpp
-HEADERS += unittest_cxeerrormappersymbian.h \
+
+HEADERS *= unittest_cxeerrormappersymbian.h \
     cxeerrormappingsymbian.h \
     cxeerror.h

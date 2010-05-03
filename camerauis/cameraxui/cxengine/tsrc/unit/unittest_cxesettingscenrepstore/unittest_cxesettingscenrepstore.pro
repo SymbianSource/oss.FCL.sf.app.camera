@@ -14,12 +14,12 @@ include(../unittest.pri)
 
 TARGET = unittest_cxesettingscenrepstore
 
-LIBS += -lxqsettingsmanager
+LIBS *= -lxqsettingsmanager
 
-SOURCES += unittest_cxesettingscenrepstore.cpp \
+SOURCES *= unittest_cxesettingscenrepstore.cpp \
            cxesettingscenrepstore.cpp
 
-HEADERS += unittest_cxesettingscenrepstore.h \
+HEADERS *= unittest_cxesettingscenrepstore.h \
            cxutils.h \
            cxeerror.h \
            cxenamespace.h \

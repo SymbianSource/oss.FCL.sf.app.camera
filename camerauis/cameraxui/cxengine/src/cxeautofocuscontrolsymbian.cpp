@@ -52,6 +52,7 @@ CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDe
 
     initializeStates();
 
+    OstTrace0(camerax_performance, CXEAUTOFOCUSCONTROLSYMBIAN_CREATE_MID1, "msg: e_CX_ENGINE_CONNECT_SIGNALS 1");
     // connect signals from cameraDevice, so we recieve events when camera reference changes
     QObject::connect( &cameraDevice,
                       SIGNAL(prepareForCameraDelete()),
@@ -64,6 +65,7 @@ CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDe
     QObject::connect( &cameraDevice,
                       SIGNAL(prepareForRelease()),
                       this,SLOT(prepareForRelease()) );
+    OstTrace0(camerax_performance, CXEAUTOFOCUSCONTROLSYMBIAN_CREATE_MID2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     initializeResources();
 
@@ -199,7 +201,8 @@ void CxeAutoFocusControlSymbian::handleCameraEvent(int eventUid, int error)
 
     // We're only interested in autofocus events
     if ( eventUid == KUidECamEventCameraSettingsOptimalFocusUidValue ||
-         eventUid == KUidECamEventCameraSettingAutoFocusType2UidValue ) {
+         eventUid == KUidECamEventCameraSettingAutoFocusType2UidValue ||
+         eventUid == KUidECamEventCameraSettingFocusRangeUidValue) {
          // Autofocus Event handle it.
          handleAfEvent(eventUid, error);
     }
@@ -410,6 +413,13 @@ void CxeAutoFocusControlSymbian::handleAfEvent(int eventUid, int error)
             } else {
                 setState(CxeAutoFocusControl::Failed, error);
             }
+         } else if (eventUid == KUidECamEventCameraSettingFocusRangeUidValue) {
+             // check for error, we don't need this event for anything else
+             if (error != KErrNone) {
+                 CX_DEBUG(("CxeAutofocusControlSymbian::handleAfEvent <> "
+                         "KUidECamEventCameraSettingFocusRangeUidValue: autofocus failed %d", error));
+                 setState(CxeAutoFocusControl::Failed, error);
+             }
          }
          break;
         }
@@ -433,6 +443,7 @@ void CxeAutoFocusControlSymbian::handleAfEvent(int eventUid, int error)
         break;
     } // end switch
 
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 // end of file

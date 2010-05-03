@@ -44,4 +44,4 @@ SUBDIRS = cxeunitrunner \
           unittest_cxeharvestercontrolsymbian \
           unittest_cxesettingscontrolsymbian
 
-CONFIG += ordered
+CONFIG *= ordered

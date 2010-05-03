@@ -8,12 +8,16 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxesettingsmodelimp
-SOURCES += unittest_cxesettingsmodelimp.cpp \
+
+SOURCES *= unittest_cxesettingsmodelimp.cpp \
     cxesettingsmodelimp.cpp \
 	cxefakesettingsstore.cpp
-HEADERS += unittest_cxesettingsmodelimp.h \
+
+HEADERS *= unittest_cxesettingsmodelimp.h \
     cxesettingsmodel.h \
     cxesettingsmodelimp.h \
     cxeerror.h \

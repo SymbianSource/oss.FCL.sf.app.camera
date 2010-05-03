@@ -45,8 +45,7 @@ CxuiSelfTimer::CxuiSelfTimer(CxeSettings &settings)
    mCounter(0),
    mTimer(this),
    mOldPostCaptureTimeOut(UNKNOWN),
-   mIndicatorContainer(NULL),
-   mButtonContainer(NULL),
+   mWidgetContainer(NULL),
    mTimerLabel(NULL),
    mCancelButton(NULL),
    mStartButton(NULL),
@@ -78,12 +77,8 @@ void CxuiSelfTimer::loadSelftimerWidgets(CxuiDocumentLoader *documentLoader) {
         QGraphicsWidget *widget = NULL;
         
         widget = documentLoader->findWidget(STILL_PRE_CAPTURE_SELFTIMER_CONTAINER);
-        mIndicatorContainer = qobject_cast<HbWidget *>(widget);
-        CX_DEBUG_ASSERT(mIndicatorContainer);
-
-        widget = documentLoader->findWidget(STILL_PRE_CAPTURE_SELFTIMER_BUTTON_CONTAINER);
-        mButtonContainer = qobject_cast<HbWidget *>(widget);
-        CX_DEBUG_ASSERT(mButtonContainer);
+        mWidgetContainer = qobject_cast<HbWidget *>(widget);
+        CX_DEBUG_ASSERT(mWidgetContainer);
 
         widget = documentLoader->findWidget(STILL_PRE_CAPTURE_SELFTIMER_COUNTER);
         mTimerLabel = qobject_cast<HbLabel *>(widget);
@@ -309,13 +304,10 @@ void CxuiSelfTimer::updateWidgets()
  */
 void CxuiSelfTimer::showWidgets()
 {
-    if (mIndicatorContainer){
-        mIndicatorContainer->show();
+    if (mWidgetContainer){
+        mWidgetContainer->show();
     }
 
-    if (mButtonContainer){
-        mButtonContainer->show();
-    }
 
 }
 
@@ -324,12 +316,10 @@ void CxuiSelfTimer::showWidgets()
  */
 void CxuiSelfTimer::hideWidgets()
 {
-    if (mIndicatorContainer){
-        mIndicatorContainer->hide();
+    if (mWidgetContainer){
+        mWidgetContainer->hide();
     }
 
-    if (mButtonContainer){
-        mButtonContainer->hide();
-    }
+
 
 }

@@ -9,22 +9,22 @@
 # Contributors:
 # Description:
 
-CONFIG += cxeunit_no_system_paths
+CONFIG *= cxeunit_no_system_paths
 
 include(../unittest.pri)
 
 TARGET = unittest_cxeharvestercontrolsymbian
 
-INCLUDEPATH += ../system_include
-DEPENDPATH  += ../system_include
+INCLUDEPATH *= ../system_include
+DEPENDPATH  *= ../system_include
 
-HEADERS += unittest_cxeharvestercontrolsymbian.h \
+HEADERS *= unittest_cxeharvestercontrolsymbian.h \
            cxeerrormappingsymbian.h \
            cxeharvestercontrolsymbian.h \
            harvesterclient.h \
            cxutils.h
 
-SOURCES += unittest_cxeharvestercontrolsymbian.cpp \
+SOURCES *= unittest_cxeharvestercontrolsymbian.cpp \
            cxeerrormappingsymbian.cpp \
            harvesterclient.cpp \
            cxeharvestercontrolsymbian.cpp

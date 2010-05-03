@@ -158,6 +158,11 @@ signals:
     void snapshotReady(CxeError::Id error, const QPixmap& snapshot, int id);
     void imageCaptured(CxeError::Id error, int id);
 
+    /**
+    * Amount of images that can be captured has changed.
+    */
+    void availableImagesChanged();
+
 protected:
     CxeStillCaptureControl() {} // protected empty contructor so that derived class construction works
 

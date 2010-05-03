@@ -14,6 +14,9 @@
 * Description:
 *
 */
+
+#include <xqserviceutil.h>
+
 #include "cxeenginesymbian.h"
 #include "cxecameradevicecontrolsymbian.h"
 #include "cxestillcapturecontrolsymbian.h"
@@ -33,17 +36,20 @@
 #include "cxesensoreventhandlersymbian.h"
 #include "cxefilesavethread.h"
 #include "cxecameradevice.h"
+#include "cxememorymonitor.h"
+#include "cxediskmonitor.h"
 
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxeenginesymbianTraces.h"
 #endif
-#include <xqserviceutil.h>
+
 
 //  Member Functions
 
 CxeEngineSymbian::CxeEngineSymbian()
     : mCameraDeviceControl(NULL),
+      mCameraDevice(NULL),
       mViewfinderControl(NULL),
       mStillCaptureControl(NULL),
       mVideoCaptureControl(NULL),
@@ -58,7 +64,20 @@ CxeEngineSymbian::CxeEngineSymbian()
       mQualityPresets(NULL),
       mFileSaveThread(NULL)
 {
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // Do secondary construction during reserve call.
+    connect(this, SIGNAL(reserveStarted()), this, SLOT(construct()));
+
+    CxeCameraDeviceControlSymbian *deviceControl = new CxeCameraDeviceControlSymbian();
+    mCameraDeviceControl = deviceControl;
+    mCameraDevice = deviceControl->cameraDevice();
+    CX_ASSERT_ALWAYS(mCameraDeviceControl);
+    CX_ASSERT_ALWAYS(mCameraDevice);
+
+    mCameraDeviceControl->init();
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 
@@ -77,42 +96,43 @@ void CxeEngineSymbian::construct()
 
 
 /*!
-    Create all control classes
+    Create all control classes.
+    Note: Throws an error, if free memory request by CxeMemoryMonitor constructor fails!
 */
 void CxeEngineSymbian::createControls()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (!mVideoCaptureControl) {
-        CxeCameraDeviceControlSymbian *deviceControl =
-                new CxeCameraDeviceControlSymbian();
+    // Check we do this only once.
+    if (!mSettingsModel) {
+        OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_IN, "e_CX_ENGINE_CREATE_CONTROLS 1");
 
-        mCameraDeviceControl = deviceControl;
-        CxeCameraDevice *cameraDevice = deviceControl->cameraDevice();
-
-        CxeSettingsCenRepStore *settingsStore;
-
+        CxeSettingsCenRepStore *settingsStore(NULL);
         if (XQServiceUtil::isService()) {
             settingsStore = new CxeSettingsLocalStore();
         } else {
             settingsStore = new CxeSettingsCenRepStore();
         }
-
         //ownership of settings store transferred to the settings model.
-        mSettingsModel = new CxeSettingsModelImp(
-                settingsStore);
-
+        mSettingsModel = new CxeSettingsModelImp(settingsStore);
         // assert if settings model fails to intialize
         CX_DEBUG_ASSERT(mSettingsModel);
-        mSettings = new CxeSettingsImp(*mSettingsModel);
 
+        mSettings = new CxeSettingsImp(*mSettingsModel);
+        // Connect P&S key updates to settings signal.
         connect(settingsStore, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
                 mSettings, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)));
 
+        mFeatureManager = new CxeFeatureManagerImp(*mSettingsModel);
+
+        // Memory monitor needed as early as possible to request free memory.
+        // Note: Throws error if enough memory cannot be freed!
+        mMemoryMonitor = new CxeMemoryMonitor(*mFeatureManager);
+
+        mDiskMonitor = new CxeDiskMonitor(*mSettings);
+
         mQualityPresets = new CxeQualityPresetsSymbian(*mSettings);
         CX_DEBUG_ASSERT(mQualityPresets);
-
-        mFeatureManager = new CxeFeatureManagerImp(*mSettingsModel);
 
         // sensor event handler initialization
         mSensorEventHandler = new CxeSensorEventHandlerSymbian();
@@ -120,26 +140,28 @@ void CxeEngineSymbian::createControls()
         mFilenameGenerator = new CxeFilenameGeneratorSymbian(*mSettings,
             mode());
 
-        mViewfinderControl = new CxeViewfinderControlSymbian(*cameraDevice,
-            *deviceControl);
+        mViewfinderControl = new CxeViewfinderControlSymbian(*mCameraDevice,
+            *mCameraDeviceControl);
 
-        mAutoFocusControl = new CxeAutoFocusControlSymbian(*cameraDevice);
+        mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice);
 
         mFileSaveThread = CxeFileSaveThreadFactory::createFileSaveThread();
 
         mStillCaptureControl = new CxeStillCaptureControlSymbian(
-            *cameraDevice, *mViewfinderControl, *deviceControl,
+            *mCameraDevice, *mViewfinderControl, *mCameraDeviceControl,
             *mFilenameGenerator, *mSensorEventHandler, *mAutoFocusControl,
-            *mSettings, *mQualityPresets, *mFileSaveThread);
+            *mSettings, *mQualityPresets, *mFileSaveThread, *mDiskMonitor);
 
-        mZoomControl = new CxeZoomControlSymbian( *cameraDevice,
-            *deviceControl, *mSettings, *mFeatureManager);
+        mZoomControl = new CxeZoomControlSymbian( *mCameraDevice,
+            *mCameraDeviceControl, *mSettings, *mFeatureManager);
 
         mVideoCaptureControl = new CxeVideoCaptureControlSymbian(
-            *cameraDevice, *mViewfinderControl, *deviceControl,
-            *mFilenameGenerator, *mSettings, *mQualityPresets);
+            *mCameraDevice, *mViewfinderControl, *mCameraDeviceControl,
+            *mFilenameGenerator, *mSettings, *mQualityPresets, *mDiskMonitor);
 
-        mSettingsControl = new CxeSettingsControlSymbian(*cameraDevice, *mSettings);
+        mSettingsControl = new CxeSettingsControlSymbian(*mCameraDevice, *mSettings);
+
+        OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_OUT, "e_CX_ENGINE_CREATE_CONTROLS 0");
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -151,6 +173,7 @@ void CxeEngineSymbian::createControls()
 void CxeEngineSymbian::connectSignals()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_IN, "e_CX_ENGINE_CONNECT_SIGNALS 1");
 
     // enabling scene setting change callbacks to Autofocus control
     connect(mSettings,
@@ -219,11 +242,7 @@ void CxeEngineSymbian::connectSignals()
             mFileSaveThread,
             SLOT(handleSnapshotReady(CxeError::Id, const QPixmap&, const QString&)));
 
-
-
-    // init camera device control. We init the camera device control
-    // when all necessary engine classes are constructed.
-    mCameraDeviceControl->init();
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_OUT, "e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -239,6 +258,8 @@ CxeEngineSymbian::~CxeEngineSymbian()
     delete mVideoCaptureControl;
     delete mViewfinderControl;
     delete mFilenameGenerator;
+    delete mDiskMonitor;
+    delete mMemoryMonitor;
     delete mFeatureManager;
     delete mSettings;
     delete mSettingsModel;
@@ -292,9 +313,17 @@ CxeSensorEventHandler &CxeEngineSymbian::sensorEventHandler()
 }
 
 
-CxeFeatureManager& CxeEngineSymbian::featureManager()
+CxeFeatureManager &CxeEngineSymbian::featureManager()
 {
     return *mFeatureManager;
+}
+
+/*!
+* Get memory monitor utility handle.
+*/
+CxeMemoryMonitor &CxeEngineSymbian::memoryMonitor()
+{
+    return *mMemoryMonitor;
 }
 
 /*
@@ -325,7 +354,7 @@ bool CxeEngineSymbian::isEngineReady()
 void CxeEngineSymbian::doInit()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXEENGINESYMBIAN_DOINIT, "e_CX_ENGINE_DO_INIT 1");
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_DOINIT_IN, "e_CX_ENGINE_DO_INIT 1");
 
     mFilenameGenerator->init(mode());
     // load settings whenever we change mode or start camera or switch camera
@@ -343,7 +372,7 @@ void CxeEngineSymbian::doInit()
         mVideoCaptureControl->init();
     }
 
-    OstTrace0(camerax_performance, DUP1_CXEENGINESYMBIAN_DOINIT, "e_CX_ENGINE_DO_INIT 0");
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_DOINIT_OUT, "e_CX_ENGINE_DO_INIT 0");
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -429,7 +458,7 @@ void CxeEngineSymbian::initMode(Cxe::CameraMode cameraMode)
             // Camera needs to be reserved. Initialization will continue
             // when we get the deviceReady() signal.
             CX_DEBUG(("initMode() - calling reserve()"));
-            mCameraDeviceControl->reserve();
+            reserve();
         } else if (initNeeded()) {
             // Camera is reserved and ready, but we need to prepare still image control or
             // video capture control
@@ -455,7 +484,7 @@ void CxeEngineSymbian::initMode(Cxe::CameraMode cameraMode)
 
         if (reserveNeeded()) {
             CX_DEBUG(("initMode() - calling reserve()"));
-            mCameraDeviceControl->reserve();
+            reserve();
         } else if (mCameraDeviceControl->state() == CxeCameraDeviceControl::Ready) {
             CX_DEBUG(("initMode() - calling doInit()"));
             // Camera device is ready... we only need to prepare video or still
@@ -469,6 +498,14 @@ void CxeEngineSymbian::initMode(Cxe::CameraMode cameraMode)
         }
     }
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+void CxeEngineSymbian::reserve()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mCameraDeviceControl->reserve();
+    emit reserveStarted();
     CX_DEBUG_EXIT_FUNCTION();
 }
 

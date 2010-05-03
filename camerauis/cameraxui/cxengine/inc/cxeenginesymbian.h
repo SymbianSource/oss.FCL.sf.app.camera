@@ -21,6 +21,7 @@
 #include "cxeengine.h"
 #include "cxefilenamegenerator.h"
 
+class CxeCameraDevice;
 class CxeCameraDeviceControl;
 class CxeViewfinderControl;
 class CxeStillCaptureControl;
@@ -36,7 +37,8 @@ class CxeSensorEventHandler;
 class CxeFilenameGenerator;
 class CxeQualityPresets;
 class CxeFileSaveThread;
-
+class CxeDiskMonitor;
+class CxeMemoryMonitor;
 
 
 class CxeEngineSymbian : public CxeEngine
@@ -45,8 +47,6 @@ class CxeEngineSymbian : public CxeEngine
 public:
     CxeEngineSymbian();
     virtual ~CxeEngineSymbian();
-
-    void construct();
 
     CxeCameraDeviceControl &cameraDeviceControl();
     CxeViewfinderControl &viewfinderControl();
@@ -57,14 +57,19 @@ public:
     CxeSettings &settings();
     CxeSensorEventHandler &sensorEventHandler();
     CxeFeatureManager &featureManager();
+    CxeMemoryMonitor &memoryMonitor();
     Cxe::CameraMode mode() const;
     void initMode(Cxe::CameraMode cameraMode);
     bool isEngineReady();
+
+signals:
+    void reserveStarted();
 
 protected:
     virtual void createControls();
 
 private slots:
+    void construct();
     void doInit();
 
 private:
@@ -72,9 +77,11 @@ private:
     bool reserveNeeded();
     bool initNeeded();
     bool startViewfinderNeeded();
+    void reserve();
 
 protected:
     CxeCameraDeviceControl *mCameraDeviceControl;
+    CxeCameraDevice *mCameraDevice; // not own
     CxeViewfinderControl *mViewfinderControl;
     CxeStillCaptureControl *mStillCaptureControl;
     CxeVideoCaptureControl *mVideoCaptureControl;
@@ -88,8 +95,11 @@ protected:
     CxeSensorEventHandler* mSensorEventHandler;
     CxeQualityPresets *mQualityPresets;
     CxeFileSaveThread *mFileSaveThread;
+    CxeDiskMonitor *mDiskMonitor;
+    CxeMemoryMonitor *mMemoryMonitor;
 };
 
 
 #endif  // CXEENGINESYMBIAN_H
+
 

@@ -16,6 +16,7 @@
 */
 
 
+#include <algorithm>
 #include <exception>
 #include <fbs.h>
 #include <QPixmap>
@@ -29,7 +30,6 @@
 #include "cxefilenamegenerator.h"
 #include "cxefilesavethread.h"
 #include "cxutils.h"
-#include "cxesysutil.h"
 #include "cxecameradevicecontrol.h"
 #include "cxecameradevice.h"
 #include "cxesoundplayersymbian.h"
@@ -44,6 +44,7 @@
 #include "cxesensoreventhandler.h"
 #include "cxesensoreventhandler.h"
 #include "cxequalitypresetssymbian.h"
+#include "cxediskmonitor.h"
 
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -60,34 +61,43 @@ const TInt64 KMinRequiredSpaceImage = 2000000;
  * Constructor.
  */
 CxeStillCaptureControlSymbian::CxeStillCaptureControlSymbian(
-        CxeCameraDevice &cameraDevice,
-        CxeViewfinderControl &viewfinderControl,
-        CxeCameraDeviceControl &cameraDeviceControl,
-        CxeFilenameGenerator &nameGenerator,
-        CxeSensorEventHandler &sensorEventHandler,
-        CxeAutoFocusControl &autoFocusControl,
-        CxeSettings &settings,
-        CxeQualityPresets &qualityPresets,
-        CxeFileSaveThread &fileSaveThread)
-: CxeStateMachine("CxeStillCaptureControlSymbian"),
-  mCameraDevice(cameraDevice),
-  mViewfinderControl(viewfinderControl),
-  mCameraDeviceControl(cameraDeviceControl),
-  mFilenameGenerator(nameGenerator),
-  mSensorEventHandler(sensorEventHandler),
-  mAutoFocusControl(autoFocusControl),
-  mSettings(settings),
-  mQualityPresets(qualityPresets),
-  mFileSaveThread(fileSaveThread),
-  mMode(SingleImageCapture),
-  mAfState(CxeAutoFocusControl::Unknown)
+    CxeCameraDevice &cameraDevice,
+    CxeViewfinderControl &viewfinderControl,
+    CxeCameraDeviceControl &cameraDeviceControl,
+    CxeFilenameGenerator &nameGenerator,
+    CxeSensorEventHandler &sensorEventHandler,
+    CxeAutoFocusControl &autoFocusControl,
+    CxeSettings &settings,
+    CxeQualityPresets &qualityPresets,
+    CxeFileSaveThread &fileSaveThread,
+    CxeDiskMonitor &diskMonitor)
+    : CxeStateMachine("CxeStillCaptureControlSymbian"),
+      mCameraDevice(cameraDevice),
+      mViewfinderControl(viewfinderControl),
+      mCameraDeviceControl(cameraDeviceControl),
+      mFilenameGenerator(nameGenerator),
+      mSensorEventHandler(sensorEventHandler),
+      mAutoFocusControl(autoFocusControl),
+      mSettings(settings),
+      mQualityPresets(qualityPresets),
+      mFileSaveThread(fileSaveThread),
+      mDiskMonitor(diskMonitor),
+      mMode(SingleImageCapture),
+      mAfState(CxeAutoFocusControl::Unknown)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_CREATE_IN, "msg: e_CX_STILLCAPTURECONTROL_NEW 1");
 
     qRegisterMetaType<CxeStillCaptureControl::State>();
     initializeStates();
     reset();
 
+    // If camera is already allocated, call the slot ourselves.
+    if (mCameraDevice.camera()) {
+        handleCameraAllocated(CxeError::None);
+    }
+
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_CREATE_MID1, "msg: e_CX_ENGINE_CONNECT_SIGNALS 1");
     // connect signals from cameraDevice to recieve events when camera reference changes
     connect(&cameraDevice, SIGNAL(prepareForCameraDelete()),
             this, SLOT(prepareForCameraDelete()));
@@ -110,10 +120,13 @@ CxeStillCaptureControlSymbian::CxeStillCaptureControlSymbian(
     connect(&mCameraDeviceControl, SIGNAL(cameraEvent(int,int)),
             this, SLOT(handleCameraEvent(int,int)));
 
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_CREATE_MID2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
+
     mImageDataQueue = new CxeImageDataQueueSymbian();
     mAutoFocusSoundPlayer = new CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::AutoFocus);
     mCaptureSoundPlayer = new CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::StillCapture);
 
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_CREATE_OUT, "msg: e_CX_STILLCAPTURECONTROL_NEW 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -171,7 +184,7 @@ void CxeStillCaptureControlSymbian::initializeStates()
 void CxeStillCaptureControlSymbian::init()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT, "msg: e_CX_STILL_CAPCONT_INIT 1");
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_IN, "msg: e_CX_STILL_CAPCONT_INIT 1");
 
     if (state() == Uninitialized) {
         prepare();
@@ -179,7 +192,7 @@ void CxeStillCaptureControlSymbian::init()
         mSensorEventHandler.init();
     }
 
-    OstTrace0(camerax_performance, DUP1_CXESTILLCAPTURECONTROLSYMBIAN_INIT, "msg: e_CX_STILL_CAPCONT_INIT 0");
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_OUT, "msg: e_CX_STILL_CAPCONT_INIT 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -189,12 +202,17 @@ void CxeStillCaptureControlSymbian::init()
 void CxeStillCaptureControlSymbian::deinit()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_STILL_CAPCONT_DEINIT 1" );
 
     if (state() == Uninitialized) {
         // nothing to do
         return;
     }
+
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_IN, "msg: e_CX_STILL_CAPCONT_DEINIT 1" );
+
+    // Stop monitoring disk space.
+    mDiskMonitor.stop();
+    disconnect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
 
     //stop viewfinder
     mViewfinderControl.stop();
@@ -211,7 +229,7 @@ void CxeStillCaptureControlSymbian::deinit()
     }
     setState(Uninitialized);
 
-    OstTrace0( camerax_performance, DUP1_CXESTILLCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_STILL_CAPCONT_DEINIT 0" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_OUT, "msg: e_CX_STILL_CAPCONT_DEINIT 0" );
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -228,7 +246,7 @@ void CxeStillCaptureControlSymbian::prepare()
         return;
     }
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_STILLCAPCONT_PREPARE 1" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_IN, "msg: e_CX_STILLCAPCONT_PREPARE 1" );
 
     int err = KErrNone;
     CxeError::Id cxErr = getImageQualityDetails(mCurrentImageDetails);
@@ -253,9 +271,9 @@ void CxeStillCaptureControlSymbian::prepare()
 
         // Prepare Image capture
         CCamera::TFormat imgFormat = supportedStillFormat(mCameraDeviceControl.cameraIndex());
-        OstTrace0(camerax_performance, DUP2_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_IMAGE_CAPTURE 1");
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_MID1, "msg: e_CX_PREPARE_IMAGE_CAPTURE 1");
         TRAP(err, mCameraDevice.camera()->PrepareImageCaptureL(imgFormat, ecamStillResolutionIndex));
-        OstTrace0(camerax_performance, DUP3_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_IMAGE_CAPTURE 0");
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_MID2, "msg: e_CX_PREPARE_IMAGE_CAPTURE 0");
 
         CX_DEBUG(("PrepareImageCaptureL done, err=%d, resolution index = %d", err, ecamStillResolutionIndex));
 
@@ -268,17 +286,22 @@ void CxeStillCaptureControlSymbian::prepare()
     }
 
     if (!err) {
-        MCameraFaceTracking *faceTracking = mCameraDevice.faceTracking();
-        if (faceTracking) {
-            // Enable AF reticule drawing by adaptation
-            TRAP_IGNORE(faceTracking->EnableFaceIndicatorsL(ETrue));
-        }
-
         // Start viewfinder before claiming to be ready,
         // as e.g. pending capture might be started by state change,
         // and viewfinder start might have problems with just started capturing.
         // If viewfinder is already running, this call does nothing.
         mViewfinderControl.start();
+
+        // Start monitoring disk space.
+        mDiskMonitor.start();
+        connect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
+
+
+        // Enable AF reticule drawing by adaptation
+        MCameraFaceTracking *faceTracking = mCameraDevice.faceTracking();
+        if (faceTracking) {
+            TRAP_IGNORE(faceTracking->EnableFaceIndicatorsL(ETrue));
+        }
 
         // Still capture and still snapshot are OK.
         // We can safely set state to READY.
@@ -295,7 +318,7 @@ void CxeStillCaptureControlSymbian::prepare()
     // Inform interested parties that image mode has been prepared for capture
     emit imagePrepareComplete(CxeErrorHandlingSymbian::map(err));
 
-    OstTrace0( camerax_performance, DUP1_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_STILLCAPCONT_PREPARE 0" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_OUT, "msg: e_CX_STILLCAPCONT_PREPARE 0" );
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -410,16 +433,31 @@ void CxeStillCaptureControlSymbian::capture()
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(mCameraDevice.camera());
 
-    // Play the capture sound and start image capture
-    mCaptureSoundPlayer->play();
-
-    setState(Capturing);
+    // Start the image capture as fast as possible to minimize lag.
+    // Check e.g. space available *after* this.
     mCameraDevice.camera()->CaptureImage();
 
-    //! @todo: NOTE: This call may not stay here. It can move depending on the implementation for burst capture.
-    if (mMode == BurstCapture) {
-        // Start a new filename sequence
-        mFilenameGenerator.startNewImageFilenameSequence();
+    if (imagesLeft() > 0) {
+        mCaptureSoundPlayer->play();
+        setState(Capturing);
+
+        //! @todo: NOTE: This call may not stay here. It can move depending on the implementation for burst capture.
+        if (mMode == BurstCapture) {
+            // Start a new filename sequence
+            mFilenameGenerator.startNewImageFilenameSequence();
+        }
+    } else {
+        // There's no space for the image.
+        // Cancel started capturing.
+        mCameraDevice.camera()->CancelCaptureImage();
+
+        // Report error.
+        // Ui notification has anyway some delays, hence handling VF after this.
+        emit imageCaptured(CxeError::DiskFull, CxeStillImage::INVALID_ID);
+
+        // Capturing stops viewfinder, so restart it now.
+        mViewfinderControl.stop();
+        mViewfinderControl.start();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -496,6 +534,7 @@ void CxeStillCaptureControlSymbian::handleSnapshotEvent(CxeError::Id error)
         prepareFilename(stillImage);
     }
 
+    OstTrace0( camerax_performance, DUP1_CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 0" );
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -553,7 +592,7 @@ QPixmap CxeStillCaptureControlSymbian::extractSnapshot()
 /**
  * handleImageData: Image data received from ECam
  */
-void CxeStillCaptureControlSymbian::handleImageData( MCameraBuffer* cameraBuffer, int error )
+void CxeStillCaptureControlSymbian::handleImageData(MCameraBuffer* cameraBuffer, int error)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -635,6 +674,31 @@ void CxeStillCaptureControlSymbian::handleSettingValueChanged(const QString& set
         if (state() == Ready) {
             deinit();
             init();
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Disk space changed.
+* Emit remaining images changed signal, if space change affects it.
+*/
+void CxeStillCaptureControlSymbian::handleDiskSpaceChanged()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // Ignore updates on other states.
+    if (state() == CxeStillCaptureControl::Ready) {
+
+        int images = calculateRemainingImages(mCurrentImageDetails.mEstimatedSize);
+
+        if (images != mCurrentImageDetails.mPossibleImages) {
+            CX_DEBUG(("CxeStillCaptureControlSymbian - available images changed %d -> %d",
+                      mCurrentImageDetails.mPossibleImages, images));
+
+            mCurrentImageDetails.mPossibleImages = images;
+            emit availableImagesChanged();
         }
     }
 
@@ -917,7 +981,14 @@ void CxeStillCaptureControlSymbian::updateRemainingImagesCounter()
 */
 int CxeStillCaptureControlSymbian::imagesLeft()
 {
-    return calculateRemainingImages(mCurrentImageDetails.mEstimatedSize);
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mCurrentImageDetails.mPossibleImages == CxeImageDetails::UNKNOWN) {
+        mCurrentImageDetails.mPossibleImages = calculateRemainingImages(mCurrentImageDetails.mEstimatedSize);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+    return mCurrentImageDetails.mPossibleImages;
 }
 
 
@@ -932,19 +1003,12 @@ CxeStillCaptureControlSymbian::calculateRemainingImages(int estimatedImagesize)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    //Check the memory in-use setting
-    qint64 memoryfree = CxeSysUtil::spaceAvailable(CCoeEnv::Static()->FsSession(), mSettings);
-
-    memoryfree = memoryfree - KMinRequiredSpaceImage;
-
-    if (memoryfree < 0) {
-        memoryfree = 0; // exception, inform ui
-    }
-    qint64 images = memoryfree / estimatedImagesize;
+    qint64 space = mDiskMonitor.free() - KMinRequiredSpaceImage;
+    int images = std::max(qint64(0), space / estimatedImagesize);
 
     CX_DEBUG_EXIT_FUNCTION();
 
-  return images;
+    return images;
 }
 
 // end of file

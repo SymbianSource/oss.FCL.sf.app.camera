@@ -22,8 +22,8 @@
 #include "cxenamespace.h"
 #include "cxeerror.h"
 
-class CxeSettings;
 class RFs;
+class CxeSettings;
 static const int KCamMonthFolderNameLength = 8;
 
 /**

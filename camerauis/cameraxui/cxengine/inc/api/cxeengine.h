@@ -17,7 +17,7 @@
 #ifndef CXEENGINE_H
 #define CXEENGINE_H
 
-#include <QObject> 
+#include <QObject>
 #include "cxenamespace.h"
 
 class CxeCameraDeviceControl;
@@ -29,11 +29,12 @@ class CxeZoomControl;
 class CxeImageDataQueue;
 class CxeFeatureManager;
 class CxeSettings;
+class CxeMemoryMonitor;
 
 /**
  * CxeEngine provides the the entry point into CameraX engine. This is the
  * first class the client needs to initialize. CxeEngine then provides
- * references to other CameraX engine objects. 
+ * references to other CameraX engine objects.
  */
 class CxeEngine : public QObject
 {
@@ -81,7 +82,16 @@ public:
      * Access the settings model.
      */
     virtual CxeSettings &settings() = 0;
+
+    /**
+     * Access the feature manager.
+     */
     virtual CxeFeatureManager &featureManager() = 0;
+
+    /**
+     * Memory monitor utility.
+     */
+    virtual CxeMemoryMonitor &memoryMonitor() = 0;
 
     /**
      * Get current camera mode.

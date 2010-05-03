@@ -166,7 +166,6 @@ CxeError::Id CxeViewfinderControlSymbian::start()
     TInt err = KErrNone;
 
     if ( state() == Running ) {
-        OstTrace0( camerax_performance, CXEVIEWFINDERCONTROLSYMBIAN_START, "msg: e_CX_GO_TO_VIDEO_MODE 0" );
         CX_DEBUG( ( "Viewfinder already running - ignored start()" ) );
         CX_DEBUG_EXIT_FUNCTION();
         return CxeError::None;
@@ -212,7 +211,7 @@ CxeError::Id CxeViewfinderControlSymbian::start()
                 CCoeEnv::Static()->WsSession(),
                 *CCoeEnv::Static()->ScreenDevice(),
                 *mVideoWindow, activeViewfinderRect));
-            OstTrace0(camerax_performance, DUP1_CXEVIEWFINDERCONTROLSYMBIAN_START, "msg: e_CX_STARTUP 0");
+            OstTrace0(camerax_performance, CXEVIEWFINDERCONTROLSYMBIAN_START, "msg: e_CX_STARTUP 0");
             setState(Running);
             break;
             }

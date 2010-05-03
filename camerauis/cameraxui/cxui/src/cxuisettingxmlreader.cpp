@@ -50,7 +50,8 @@ namespace
 
     static const char *ATTRIBUTE_SLIDER_MIN               = "min";
     static const char *ATTRIBUTE_SLIDER_MAX               = "max";
-    static const char *ATTRIBUTE_SLIDER_STEP              = "step";
+    static const char *ATTRIBUTE_SLIDER_MINOR_STEP        = "minorStep";
+    static const char *ATTRIBUTE_SLIDER_MAJOR_STEP        = "majorStep";
 
     // possible values that can be used in xml for "ATTRIBUTE_LISTBOXTYPE"
     static const char *SINGLE_LINE_LISTBOX                = "SingleLineListBox";
@@ -290,15 +291,28 @@ CxUiSettings::RadioButtonListParams *CxuiSettingXmlReader::parseSettingList(cons
     // Go through list of items
     // XML something like this
     // <item value="0" string="qtn_whitebalance_auto" />
+    bool ok(false);
+    int intValue(0);
+    QVariant value;
+    QString string;
     for (QDomNode n = element.firstChild(); !n.isNull(); n = n.nextSibling()) {
         e = n.toElement();
-
-        // get the string text id from the xml
-        QString string = e.attribute(ATTRIBUTE_LOCALIZATION_ID);
-        // get the equivalent engine value from xml
-        QVariant value = e.attribute(ATTRIBUTE_VALUE);
-
         CX_DEBUG(("tag name <%s>", e.tagName().toAscii().constData()));
+
+        // Get the item equivalent engine value from xml.
+        // We need to know later if it is a string or int type, hence the extra effort.
+        // QVariant has auto-conversion even from string to int, so can't use QVariant::canConvert<T>().
+        string = e.attribute(ATTRIBUTE_VALUE);
+        intValue = string.toInt(&ok);
+        if (ok) {
+            value.setValue(intValue);
+        } else {
+            value.setValue(string);
+        }
+
+
+        // get the string text id from the xml, and format based on type.
+        string = e.attribute(ATTRIBUTE_LOCALIZATION_ID);
         if (e.tagName() == TAG_ITEM) {
             // get the localizable string from the hbtrid
             string = hbTrId(string.toAscii().constData());
@@ -307,7 +321,6 @@ CxUiSettings::RadioButtonListParams *CxuiSettingXmlReader::parseSettingList(cons
             // format the setting string
             string = hbTrId(string.toAscii().constData(), lnValue.toInt());
         }
-
         CX_DEBUG(("attribute [%s] value[%s]", ATTRIBUTE_LOCALIZATION_ID, string.toAscii().constData()));
 
         if (!string.isNull()) {
@@ -364,15 +377,18 @@ CxUiSettings::SliderParams *CxuiSettingXmlReader::parseSettingSlider(const QDomE
         QString maxString = e.attribute(ATTRIBUTE_SLIDER_MAX);
 
         // get the step text id from the xml
-        QVariant stepString = e.attribute(ATTRIBUTE_SLIDER_STEP);
-        p->mStep = stepString.toReal();
+        QVariant stepString = e.attribute(ATTRIBUTE_SLIDER_MINOR_STEP);
+        p->mMinorStep = stepString.toReal();
+        stepString = e.attribute(ATTRIBUTE_SLIDER_MAJOR_STEP);
+        p->mMajorStep = stepString.toReal();
 
         // get the ln value from xml to generate strings for slider
         QString lnValue = e.attribute(ATTRIBUTE_LOCALIZATION_ID_LN_VALUE);
 
         // Don't create labels for slider if no strings are defined in settinsg xml
+        // Create labels only for major ticks
         if (!minString.isEmpty() && !maxString.isEmpty()) {
-            qreal step = p->mStep;
+            qreal step = p->mMajorStep;
             qreal value = lnValue.toDouble();
             // generating all negative valued strings for slider setting
             while (value > 0) {
@@ -383,7 +399,7 @@ CxUiSettings::SliderParams *CxuiSettingXmlReader::parseSettingSlider(const QDomE
             }
 
             // generating all non-negative valued strings for slider setting
-            step = p->mStep;
+            step = p->mMajorStep;
             value = 0;
             while(value <= lnValue.toInt()) {
                 // format the setting string

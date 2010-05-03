@@ -8,19 +8,21 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxeautofocuscontrolsymbian
-LIBS += -lecamadvsettings
-LIBS += -lecam
-LIBS += -lecampluginsupport
-LIBS += -lfbscli
-LIBS += -lbitgdi
-LIBS += -lecamsnapshot
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+LIBS *= -lecamadvsettings
+LIBS *= -lecam
+LIBS *= -lecampluginsupport
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
+LIBS *= -lecamsnapshot
 
-SOURCES += unittest_cxeautofocuscontrolsymbian.cpp \
+DEFINES *= CXE_USE_DUMMY_CAMERA
+
+SOURCES *= unittest_cxeautofocuscontrolsymbian.cpp \
     cxeautofocuscontrolsymbian.cpp \
     cxestatemachine.cpp \
     cxestate.cpp \
@@ -32,7 +34,7 @@ SOURCES += unittest_cxeautofocuscontrolsymbian.cpp \
     cxefakecameradevice.cpp \
     cxecameradevicecontrolsymbian.cpp \
     cxefakecameradevicecontrol.cpp
-HEADERS += unittest_cxeautofocuscontrolsymbian.h \
+HEADERS *= unittest_cxeautofocuscontrolsymbian.h \
     cxeautofocuscontrol.h \
     cxeautofocuscontrolsymbian.h \
     cxestatemachine.h \

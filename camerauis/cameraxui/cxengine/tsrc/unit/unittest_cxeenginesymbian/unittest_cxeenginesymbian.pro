@@ -18,36 +18,35 @@ include(../unittest.pri)
 
 TARGET = unittest_cxeenginesymbian
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+DEFINES *= CXE_USE_DUMMY_CAMERA
 
-INCLUDEPATH += ../../../inc/sensor
+INCLUDEPATH *= ../../../inc/sensor
 
-LIBS += -lecam
-LIBS += -lecamadvsettings
-LIBS += -lecamsnapshot
-LIBS += -lecamdirectviewfinder
-LIBS += -lfbscli
-LIBS += -lbitgdi
-LIBS += -lxqsettingsmanager
-LIBS += -lecampluginsupport
-LIBS += -lmediaclientvideo
-LIBS += -lefsrv
-LIBS += -lsysutil
-LIBS += -lbafl
-LIBS += -lmediaclientaudio
-LIBS += -lecom
-LIBS += -lmmfcontrollerframework
-LIBS += -lplatformenv
-LIBS += -lsensrvclient
-LIBS += -lsensrvutil
-LIBS += -limagingconfigmanager
-LIBS += -lalfclient
-LIBS += -lalfdecoderserverclient
-LIBS += -lxqserviceutil
+LIBS *= -lecam
+LIBS *= -lecamadvsettings
+LIBS *= -lecamsnapshot
+LIBS *= -lecamdirectviewfinder
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
+LIBS *= -lxqsettingsmanager
+LIBS *= -lecampluginsupport
+LIBS *= -lmediaclientvideo
+LIBS *= -lefsrv
+LIBS *= -lsysutil
+LIBS *= -lbafl
+LIBS *= -lmediaclientaudio
+LIBS *= -lecom
+LIBS *= -lmmfcontrollerframework
+LIBS *= -lplatformenv
+LIBS *= -lsensrvclient
+LIBS *= -lsensrvutil
+LIBS *= -limagingconfigmanager
+LIBS *= -lalfclient
+LIBS *= -lalfdecoderserverclient
+LIBS *= -lxqserviceutil
 
 
-SOURCES += unittest_cxeenginesymbian.cpp \
+SOURCES *= unittest_cxeenginesymbian.cpp \
            cxeenginesymbianunit.cpp \
            cxeenginesymbian.cpp \
            cxeengine.cpp \
@@ -102,11 +101,10 @@ SOURCES += unittest_cxeenginesymbian.cpp \
 
 
 
-HEADERS += unittest_cxeenginesymbian.h \
+HEADERS *= unittest_cxeenginesymbian.h \
            cxeenginesymbianunit.h \
            cxeenginesymbian.h \
            cxeengine.h \
-           cxesettingscontrolsymbian.h \
            cxeautofocuscontrol.h \
            cxeautofocuscontrolsymbian.h \
            cxefakeautofocuscontrol.h \
@@ -126,25 +124,25 @@ HEADERS += unittest_cxeenginesymbian.h \
            cxevideocontainer.h \
            cxevideocapturecontrol.h \
            cxefakevideocapturecontrol.h \
+           cxevideocapturecontrolsymbian.h \
            cxestatemachine.h \
            cxestatemachinebase.h \
            cxestate.h \
-           cxesettingsmodel.h \
+           cxesettings.h \
            cxesettingsimp.h \
+           cxefakesettings.h \
+           cxesettingsmodel.h \
            cxesettingscenrepstore.h \
+           cxesettingsmappersymbian.h \
+           cxesettingscontrolsymbian.h \
            cxefilenamegeneratorsymbian.h \
            cxefakefilenamegenerator.h \
            cxezoomcontrolsymbian.h \
            cxefakezoomcontrol.h \
            cxezoomcontrol.h \
-           cxevideocapturecontrolsymbian.h \
-           cxevideocapturecontrol.h \
            cxefeaturemanager.h \
            cxefeaturemanagerimp.h \
            cxefakefeaturemanager.h \
-           cxesettings.h \
-           cxefakesettings.h \
-           cxesettingsmappersymbian.h \
            cxesoundplayersymbian.h \
            cxesensoreventhandlersymbian.h \
            cxesensoreventhandler.h \

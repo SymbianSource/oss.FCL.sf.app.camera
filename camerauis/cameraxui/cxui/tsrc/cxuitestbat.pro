@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -35,7 +35,7 @@ INCLUDEPATH += . \
 
 QT += testlib
 CONFIG += qtestlib hb symbian_test
-HB += hbcore hbwidgets hbtools hbfeedback hbutils
+HB += hbcore hbwidgets hbfeedback hbutils
 
 LIBS += -lcxengine \
         -lcommonui \
@@ -53,9 +53,7 @@ SOURCES += cxuitestbat.cpp \
     cxuiautofocusreticule.cpp \
     cxuiprecaptureview.cpp \
     cxuivideoprecaptureview.cpp \
-    cxuivideoprecaptureview2.cpp \
     cxuistillprecaptureview.cpp \
-    cxuistillprecaptureview2.cpp \
     cxuipostcaptureview.cpp \
     cxuicapturekeyhandler.cpp \
     cxuiviewmanager.cpp \
@@ -65,8 +63,6 @@ SOURCES += cxuitestbat.cpp \
     cxuisettingradiobuttonlist.cpp \
     cxuisettingscenemoderadiobuttonlist.cpp \
     cxuiscenelabel.cpp \
-    cxuisettingbutton.cpp \
-    cxuisettingbuttoncontainer.cpp \
     cxuiselftimer.cpp \
 	cxuierrormanager.cpp \
     cxuistandby.cpp
@@ -75,21 +71,17 @@ HEADERS += cxuitestbat.h \
     cxuiautofocusreticule.h \
     cxuiprecaptureview.h \
     cxuistillprecaptureview.h \
-    cxuistillprecaptureview2.h \
     cxuivideoprecaptureview.h \
-    cxuivideoprecaptureview2.h \
     cxuipostcaptureview.h \
     cxuicapturekeyhandler.h \
     cxuiviewmanager.h \
     cxuienums.h \
     cxuidocumentloader.h \
     cxuidisplaypropertyhandler.h \
-	cxuisettingbutton.h \
 	cxuisettingslider.h \
     cxuisettingradiobuttonlist.h \
     cxuisettingscenemoderadiobuttonlist.h \
     cxuiscenelabel.h \
-	cxuisettingbuttoncontainer.h \
     cxuiselftimer.h \
 	cxuierrormanager.h \
     cxuistandby.h \

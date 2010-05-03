@@ -8,26 +8,28 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxecameradevice
-LIBS += -lecamadvsettings
-LIBS += -lecamsnapshot
-LIBS += -lecam
-LIBS += -lecampluginsupport
-LIBS += -lfbscli
-LIBS += -lbitgdi
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+LIBS *= -lecamadvsettings
+LIBS *= -lecamsnapshot
+LIBS *= -lecam
+LIBS *= -lecampluginsupport
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
 
-SOURCES += unittest_cxecameradevice.cpp \
+DEFINES *= CXE_USE_DUMMY_CAMERA
+
+SOURCES *= unittest_cxecameradevice.cpp \
     cxestate.cpp \
     cxestatemachinebase.cpp \
     cxestatemachine.cpp \
     cxedummycamera.cpp \
     cxecameradevice.cpp \
     cxeerrormappingsymbian.cpp
-HEADERS += unittest_cxecameradevice.h \
+HEADERS *= unittest_cxecameradevice.h \
     cxestate.h \
     cxestatemachinebase.h \
     cxestatemachine.h \

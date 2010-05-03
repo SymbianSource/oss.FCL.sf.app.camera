@@ -71,7 +71,8 @@ SliderParams& SliderParams::operator=(const SliderParams& other)
         mHeadingIcon = other.mHeadingIcon;
         mSettingStrings = other.mSettingStrings;
         mRange = other.mRange;
-        mStep = other.mStep;
+        mMinorStep = other.mMinorStep;
+        mMajorStep = other.mMajorStep;
         }
     CX_DEBUG_EXIT_FUNCTION();
     return *this;
@@ -209,14 +210,12 @@ void CxuiSettingsInfo::getImageQualitySettings(RadioButtonListParams &settings)
 
     // get the localized possible strings for each image quality setting
     QString vga = hbTrId("txt_cam_dblist_vga");
-    QString normal = QString("%L1 Mpix");
-    QString imagesLeft = QString("%L1 images left");
-    QString widescreen = QString("%L1 Mpix widescreen");
+    QString normal = hbTrId("txt_cam_dblist_ln_mpix");
+    QString imagesLeft = hbTrId("txt_cam_dblist_hd_720p_val_ln_images_left");
+    QString widescreen = hbTrId("txt_cam_dblist_ln_mpix_widescreen");
 
     foreach(CxeImageDetails quality, list) {
         // mapping the right value for each quality
-        QString index2String;
-        index2String.setNum(index);
 
         QString settingString;
         QString qualityIcon = "";
@@ -245,12 +244,12 @@ void CxuiSettingsInfo::getImageQualitySettings(RadioButtonListParams &settings)
         } else if (quality.mMpxCount == "1.2") {
             qualityIcon = "qtg_mono_1_3mp";
         } else if (quality.mMpxCount == "0.3") {
-            qualityIcon = "qtg_mono_qcif"; //correct icon missing
+            qualityIcon = "qtg_mono_0_3mp";
         }
 
         SettingItem setting;
         setting.mItem = settingString;
-        setting.mValue = qVariantFromValue(index2String);
+        setting.mValue = index;
         setting.mIcon = qualityIcon;
         settings.mSettingPairList.append(setting);
 
@@ -277,7 +276,7 @@ void CxuiSettingsInfo::getVideoQualitySettings(RadioButtonListParams &settings)
     int index = 0;
 
     // get the localized possible strings for each video quality setting
-    QString timeleft = QString("%L1 recording time left");
+    QString timeleft = hbTrId("txt_cam_dblist_hd_720p_val_ln_recording_time_left");
     QString hdString = hbTrId("txt_cam_dblist_hd_720p_169_widescreen");
     QString vga = hbTrId("txt_cam_dblist_vga_43");
     QString wideVga = hbTrId("txt_cam_dblist_vga_169_widescreen"); //VGA 16:9 widescreen
@@ -285,8 +284,6 @@ void CxuiSettingsInfo::getVideoQualitySettings(RadioButtonListParams &settings)
 
     foreach(CxeVideoDetails quality, list) {
         // mapping the right value for each quality
-        QString index2String;
-        index2String.setNum(index);
 
         QString settingString = "";
         QString time = "";
@@ -307,7 +304,7 @@ void CxuiSettingsInfo::getVideoQualitySettings(RadioButtonListParams &settings)
         } else if (quality.mWidth == KResWideVGA.width() &&
                   quality.mHeight == KResWideVGA.height()) {
             settingString.append(wideVga);
-            qualityIcon = "qtg_mono_12mp"; //correct icon missing
+            qualityIcon = "qtg_mono_vga_wide";
         }
 
         settingString.append(",");
@@ -319,7 +316,7 @@ void CxuiSettingsInfo::getVideoQualitySettings(RadioButtonListParams &settings)
         CX_DEBUG(( "video quality setting string: %s", settingString.toAscii().constData()));
         SettingItem setting;
         setting.mItem = settingString;
-        setting.mValue = qVariantFromValue(index2String);
+        setting.mValue = index;
         setting.mIcon = qualityIcon;
         settings.mSettingPairList.append(setting);
 

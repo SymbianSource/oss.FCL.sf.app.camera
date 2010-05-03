@@ -13,7 +13,7 @@
     <access type="R" capabilities="AlwaysPass"/>
   </key>
 
-  <key ref="CxRuntimeFeaturesCrUid/ContrastItemsCr" name="ContrastItemsCr" int="0x4" type="string" readOnly="true">
+  <key ref="CxRuntimeFeaturesCrUid/FreeMemoryLevelsCr" name="FreeMemoryLevelsCr" int="0x4" type="string" readOnly="true">
     <access type="R" capabilities="AlwaysPass"/>
   </key>
 

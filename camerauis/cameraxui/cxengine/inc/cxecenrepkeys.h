@@ -34,9 +34,10 @@ const unsigned long int  CxRuntimeFeaturesCrUid         =  {0x20027018};
 const unsigned long int  PrimaryCameraCaptureKeysCr     = 0x1;
 const unsigned long int  SecondaryCameraCaptureKeysCr   = 0x2;
 const unsigned long int  PrimaryCameraAutofocusKeysCr   = 0x3;
-const unsigned long int  ContrastItemsCr                = 0x4;
+const unsigned long int  FreeMemoryLevelsCr             = 0x4;
 const unsigned long int  StillMaxZoomLimitsCr           = 0x5;
 const unsigned long int  VideoMaxZoomLimitsCr           = 0x6;
 
 #endif // CXECENREPKEYS_H
+
 

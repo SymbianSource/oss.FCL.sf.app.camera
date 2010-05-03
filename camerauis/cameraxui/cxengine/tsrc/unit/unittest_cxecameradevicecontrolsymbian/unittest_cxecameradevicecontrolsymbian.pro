@@ -18,19 +18,18 @@ include(../unittest.pri)
 
 TARGET = unittest_cxecameradevicecontrolsymbian
 
-LIBS += -lplatformenv
-LIBS += -lecamadvsettings
-LIBS += -lecamsnapshot
-LIBS += -lecam
-LIBS += -lecampluginsupport
-LIBS += -lfbscli
-LIBS += -lbitgdi
+LIBS *= -lplatformenv
+LIBS *= -lecamadvsettings
+LIBS *= -lecamsnapshot
+LIBS *= -lecam
+LIBS *= -lecampluginsupport
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
+LIBS *= -lsysutil
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+DEFINES *= CXE_USE_DUMMY_CAMERA
 
-
-SOURCES += unittest_cxecameradevicecontrolsymbian.cpp \
+SOURCES *= unittest_cxecameradevicecontrolsymbian.cpp \
            cxecameradevicecontrolsymbian.cpp \
            cxecameradevicecontrolunit.cpp \
            cxecameradevice.cpp \
@@ -40,9 +39,10 @@ SOURCES += unittest_cxecameradevicecontrolsymbian.cpp \
            cxestatemachine.cpp \
            cxestate.cpp \
            cxestatemachinebase.cpp \
-           cxedummycamera.cpp
+           cxedummycamera.cpp \
+           cxesysutil.cpp
 
-HEADERS += unittest_cxecameradevicecontrolsymbian.h \
+HEADERS *= unittest_cxecameradevicecontrolsymbian.h \
            cxecameradevicecontrolsymbian.h \
            cxecameradevicecontrolunit.h \
            cxecameradevicecontrol.h \
@@ -51,7 +51,8 @@ HEADERS += unittest_cxecameradevicecontrolsymbian.h \
            cxestatemachine.h \
            cxestate.h \
            cxestatemachinebase.h \
-	   cxefilenamegenerator.h
+           cxefilenamegenerator.h \
+           cxesysutil.h
 
 
 

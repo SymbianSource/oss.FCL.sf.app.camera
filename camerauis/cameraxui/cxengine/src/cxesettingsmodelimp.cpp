@@ -178,7 +178,7 @@ CxeError::Id CxeSettingsModelImp::set(const QString &key, const QVariant newValu
 
     // If this is one of scene settings,
     // store it as modification of current scene.
-    CxeError::Id err = setSceneSettingValue(key, newValue.toInt());
+    CxeError::Id err = setSceneSettingValue(key, newValue);
     CX_DEBUG(( "status storing to scene data: %d", err));
 
     // If not scene specific, store the setting value.
@@ -240,14 +240,13 @@ CxeError::Id CxeSettingsModelImp::setImageScene(const QString &newScene)
 
     CxeError::Id err = CxeError::None;
 
-    mCurrentImgScene.clear();
-
     // load the scene setting default values for the new scene id = "newScene"
     CxeScene sceneSettings;
     err = imageScene(newScene, sceneSettings);
 
     // create of copy of the new scene as we use it for accessing the scene settings later.
     if (CxeError::None == err) {
+        mCurrentImgScene.clear();
         loadSceneData(mCurrentImgScene, sceneSettings);
     }
 
@@ -267,14 +266,13 @@ CxeError::Id CxeSettingsModelImp::setVideoScene(const QString &newScene)
 
     CxeError::Id err = CxeError::None;
 
-    mCurrentVidScene.clear();
-
     // load the scene setting default values for the new scene id = "newScene"
     CxeScene sceneSettings;
     err = videoScene(newScene, sceneSettings);
 
     // create of copy of the new scene as we use it for accessing the scene settings later.
     if (CxeError::None == err) {
+        mCurrentVidScene.clear();
         loadSceneData(mCurrentVidScene, sceneSettings);
     }
 
@@ -380,7 +378,7 @@ CxeError::Id CxeSettingsModelImp::sceneSettingValue(const QString &key, QVariant
 /*
 * set scene setting value associated with the key
 */
-CxeError::Id CxeSettingsModelImp::setSceneSettingValue(const QString &key, int newValue)
+CxeError::Id CxeSettingsModelImp::setSceneSettingValue(const QString &key, QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -416,7 +414,7 @@ void CxeSettingsModelImp::supportedKeys(QList<QString>& runtimeKeys)
     runtimeKeys.append(CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS);
     runtimeKeys.append(CxeRuntimeKeys::PRIMARY_CAMERA_AUTOFOCUS_KEYS);
     runtimeKeys.append(CxeRuntimeKeys::SECONDARY_CAMERA_CAPTURE_KEYS);
-    runtimeKeys.append(CxeRuntimeKeys::CONTRAST_ITEMS);
+    runtimeKeys.append(CxeRuntimeKeys::FREE_MEMORY_LEVELS);
     runtimeKeys.append(CxeRuntimeKeys::STILL_MAX_ZOOM_LIMITS);
     runtimeKeys.append(CxeRuntimeKeys::VIDEO_MAX_ZOOM_LIMITS);
 

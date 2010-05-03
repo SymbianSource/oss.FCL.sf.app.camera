@@ -218,18 +218,36 @@ void CxuiPostcaptureView::showDeleteNote()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    QString filename = getCurrentFilename();
-    bool ret = false;
-
     hideControls();
 
     if (mEngine->mode() == Cxe::VideoMode) {
-        ret = HbMessageBox::question(hbTrId("txt_cam_other_delete_video_clip"));
+        HbMessageBox::question(hbTrId("txt_cam_other_delete_video_clip"),
+                               this,
+                               SLOT(handleDeleteDialogClosed(HbAction*)));
     } else {
-        ret = HbMessageBox::question(hbTrId("txt_cam_other_delete_image"));
+        HbMessageBox::question(hbTrId("txt_cam_other_delete_image"),
+                               this,
+                               SLOT(handleDeleteDialogClosed(HbAction*)));
     }
 
-    if (ret) {
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+// ---------------------------------------------------------------------------
+// CxuiPostcaptureView::handleDeleteDialogClosed
+//
+// ---------------------------------------------------------------------------
+//
+void CxuiPostcaptureView::handleDeleteDialogClosed(HbAction *action)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    hideControls();
+
+    HbMessageBox *dlg = qobject_cast<HbMessageBox*>(sender());
+    if(dlg && action == dlg->primaryAction()) {
+        // User confirmed delete
+        QString filename = getCurrentFilename();
         QFileInfo fileInfo(filename);
         if (fileInfo.exists()) {
             //! @todo
@@ -246,9 +264,8 @@ void CxuiPostcaptureView::showDeleteNote()
         }
     }
 
-        CX_DEBUG_EXIT_FUNCTION();
+    CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 
 /*!
@@ -257,21 +274,21 @@ void CxuiPostcaptureView::showDeleteNote()
 void CxuiPostcaptureView::launchShare()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    
+
     stopTimers();
     stopViewfinder();
     releaseCamera();
-        
+
     QString filename = getCurrentFilename();
-    
+
     QVariantList filelist;
     filelist.append(QVariant(filename));
-    
+
     ShareUi dialog;
     dialog.init(filelist, true);
-    
+
     showControls();
-    
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -284,15 +301,15 @@ void CxuiPostcaptureView::goToPrecaptureView()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    // Cannot return to post-capture while stopping in video mode
+    // Cannot return to pre-capture while stopping in video mode
     if (mEngine->mode() != Cxe::VideoMode ||
         mEngine->videoCaptureControl().state() != CxeVideoCaptureControl::Stopping) {
         stopTimers();
+        // Re-enabling starting timers the next time we enter post capture view.
+        mTimersStarted = false;
+
         // Make sure engine prepares for new image/video if necessary
         mEngine->initMode(mEngine->mode());
-
-        // enables starting of timers in postcaptureview
-        mTimersStarted = false;
 
         // Switch to pre-capture view
         emit changeToPrecaptureView();
@@ -414,7 +431,6 @@ void CxuiPostcaptureView::toggleControls()
 bool CxuiPostcaptureView::eventFilter(QObject *object, QEvent *event)
 {
     Q_UNUSED(object)
-
     bool eventWasConsumed = false;
 
     switch (event->type())
@@ -435,16 +451,13 @@ bool CxuiPostcaptureView::eventFilter(QObject *object, QEvent *event)
 }
 
 /*!
-* Paint event.
-* Used for performance tracing (snapshot latency).
+* Paint method.
+* Used for performance tracing purposes.
 */
-bool CxuiPostcaptureView::event(QEvent *event)
+void CxuiPostcaptureView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    bool processed(HbView::event(event));
-    if (event && event->type() == QEvent::Paint) {
         OstTrace0(camerax_performance, CXUIPOSTCAPTUREVIEW_SNAPSHOT_DRAW, "msg: e_CX_SHOT_TO_SNAPSHOT 0");
-    }
-    return processed;
+        QGraphicsWidget::paint(painter, option, widget);
 }
 
 // ---------------------------------------------------------------------------
@@ -500,6 +513,9 @@ void CxuiPostcaptureView::hideEvent(QHideEvent *event)
     if (event->type() == QEvent::Hide) {
         // remove event filter to disable unnecessary actions
         QCoreApplication::instance()->removeEventFilter(this);
+
+        // Clear the snapshot.
+        mImageLabel->setIcon(HbIcon());
 
         stopTimers();
         // Hide controls to make sure title bar reacts to show()
@@ -727,7 +743,13 @@ void CxuiPostcaptureView::stopTimers()
     mPostcaptureTimer.stop();
     mStopViewfinderTimer.stop();
 
-    mTimersStarted = false;
+    // Note: mTimersStarted is intentionally not reset here.
+    // Once the timers are stopped, they are not to be started again until
+    // we come from precapture view again.
+    // E.g. returning from background could otherwise restart the timers and
+    // if post-capture timer would be on, user could be confused: camera
+    // shows up with  post-capture view, after couple  seconds it disappears
+    // and we return to pre-capture view. That's not what we want.
 
     CX_DEBUG_EXIT_FUNCTION();
 }

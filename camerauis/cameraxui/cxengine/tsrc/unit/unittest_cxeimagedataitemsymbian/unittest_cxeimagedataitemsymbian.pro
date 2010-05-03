@@ -18,16 +18,16 @@ include(../unittest.pri)
 
 TARGET = unittest_cxeimagedataitemsymbian
 
-LIBS += -lplatformenv
-LIBS += -lsysutil
-LIBS += -lbitgdi
-LIBS += -lws32
-LIBS += -lsysutil
-LIBS += -lecom
-LIBS += -lecampluginsupport
+LIBS *= -lplatformenv
+LIBS *= -lsysutil
+LIBS *= -lbitgdi
+LIBS *= -lws32
+LIBS *= -lsysutil
+LIBS *= -lecom
+LIBS *= -lecampluginsupport
 
 
-SOURCES += cxeimagedataitemsymbian.cpp \
+SOURCES *= cxeimagedataitemsymbian.cpp \
            cxeerrormappingsymbian.cpp \
            cxestatemachine.cpp \
            cxestate.cpp \
@@ -39,7 +39,7 @@ SOURCES += cxeimagedataitemsymbian.cpp \
 		   cxefakesysutil.cpp  
 
 
-HEADERS += cxeimagedataitemsymbian.h \
+HEADERS *= cxeimagedataitemsymbian.h \
            cxestatemachine.h \
            cxestatemachinebase.h \
            cxestate.h \

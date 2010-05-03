@@ -12,10 +12,12 @@
 include(../unittest.pri)
 
 TARGET = unittest_cxeimagedataqueuesymbian
-LIBS += -lsysutil
 
-SOURCES += unittest_cxeimagedataqueuesymbian.cpp \
-           cxeimagedataqueuesymbian.cpp \           
+LIBS *= -lsysutil
+LIBS *= -lplatformenv
+
+SOURCES *= unittest_cxeimagedataqueuesymbian.cpp \
+           cxeimagedataqueuesymbian.cpp \
            cxeimagedataqueueunit.cpp \
            cxeimagedataitemsymbian.cpp \
            cxefakeimagedataitem.cpp \
@@ -24,8 +26,8 @@ SOURCES += unittest_cxeimagedataqueuesymbian.cpp \
            cxestatemachinebase.cpp \
            cxeerrormappingsymbian.cpp \
            cxesysutil.cpp
-           
-HEADERS += unittest_cxeimagedataqueuesymbian.h \
+
+HEADERS *= unittest_cxeimagedataqueuesymbian.h \
            cxeimagedataqueue.h \
            cxeimagedataqueuesymbian.h \
            cxeimagedataqueueunit.h \

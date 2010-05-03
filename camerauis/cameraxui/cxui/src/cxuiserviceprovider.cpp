@@ -28,14 +28,15 @@
 
 CxuiServiceProvider* CxuiServiceProvider::mInstance = NULL;
 
+// TODO: get these constants from header <xqaiwdecl.h>
+// will be released wk16
+const QString CXUI_SERVICE_NAME = "cxui.com.nokia.symbian.ICameraCapture";
 
-const QString CXUI_SERVICE_NAME = "Camera.com.nokia.ICaptureNew";
-
-const QString CAMERA_INDEX = "camera_index";
-const QString QUALITY = "quality";
-const QString ALLOW_MODE_SWITCH = "allow_mode_switch";
-const QString ALLOW_CAMERA_SWITCH = "allow_camera_switch";
-const QString ALLOW_QUALITY_CHANGE = "allow_quality_change";
+const QString CAMERA_INDEX = "CameraIndex";
+const QString QUALITY = "Quality";
+const QString ALLOW_MODE_SWITCH = "AllowModeSwitch";
+const QString ALLOW_CAMERA_SWITCH = "AllowCameraSwitch";
+const QString ALLOW_QUALITY_CHANGE = "AllowQualityChange";
 
 CxuiServiceProvider::CxuiServiceProvider(CxeEngine *engine)
 :

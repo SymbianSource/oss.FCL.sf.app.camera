@@ -8,26 +8,28 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxevideocapturecontrolsymbian
 
-LIBS += -lecamadvsettings
-LIBS += -lecam
-LIBS += -lecampluginsupport
-LIBS += -lfbscli
-LIBS += -lbitgdi
-LIBS += -lecamdirectviewfinder
-LIBS += -lecamsnapshot
+LIBS *= -lecamadvsettings
+LIBS *= -lecam
+LIBS *= -lecampluginsupport
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
+LIBS *= -lecamdirectviewfinder
+LIBS *= -lecamsnapshot
+LIBS *= -lmediaclientvideo
+LIBS *= -lmediaclientaudio
+LIBS *= -lmmfcontrollerframework
+LIBS *= -lplatformenv
+LIBS *= -lsysutil
 
-LIBS += -lmediaclientvideo
-LIBS += -lmediaclientaudio
-LIBS += -lmmfcontrollerframework
-LIBS += -lplatformenv
 
+DEFINES *= CXE_USE_DUMMY_CAMERA
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
-SOURCES += unittest_cxevideocapturecontrolsymbian.cpp \
+SOURCES *= unittest_cxevideocapturecontrolsymbian.cpp \
     cxevideocapturecontrolsymbian.cpp \
     cxevideocapturecontrolsymbianunit.cpp \
     cxefakevideorecorderutility.cpp \
@@ -50,7 +52,7 @@ SOURCES += unittest_cxevideocapturecontrolsymbian.cpp \
     cxefakequalitypresets.cpp \
     cxesysutil.cpp
 
-HEADERS += unittest_cxevideocapturecontrolsymbian.h \
+HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
     cxevideocapturecontrolsymbian.h \
     cxevideocapturecontrolsymbianunit.h \
     cxevideorecorderutility.h \
@@ -63,6 +65,7 @@ HEADERS += unittest_cxevideocapturecontrolsymbian.h \
     cxecameradevice.h \
     cxefakeviewfindercontrol.h \
     cxeviewfindercontrol.h \
+    cxecameradevicecontrol.h \
     cxefakecameradevicecontrol.h \
     cxesettingsimp.h \
     cxesettings.h \
@@ -72,9 +75,8 @@ HEADERS += unittest_cxevideocapturecontrolsymbian.h \
     cxestate.h \
     cxeerrormappingsymbian.h \
     cxestatemachinebase.h \
-    cxecameradevicecontrol.h \
     cxesettingsmappersymbian.h \
     cxesoundplayersymbian.h \
-    cxutils.h \
     cxefakequalitypresets.h \
+    cxutils.h \
     cxesysutil.h

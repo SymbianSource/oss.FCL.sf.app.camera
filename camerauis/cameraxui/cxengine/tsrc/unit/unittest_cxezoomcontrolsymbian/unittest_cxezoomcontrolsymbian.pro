@@ -8,22 +8,21 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxezoomcontrolsymbian
-#LIBS += -lplatformenv
 
-LIBS += -lecamsnapshot
-LIBS += -lecamadvsettings
-LIBS += -lecam
-LIBS += -lecampluginsupport
-LIBS += -lfbscli
-LIBS += -lbitgdi
+LIBS *= -lecamsnapshot
+LIBS *= -lecamadvsettings
+LIBS *= -lecam
+LIBS *= -lecampluginsupport
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+DEFINES *= CXE_USE_DUMMY_CAMERA
 
-
-SOURCES += unittest_cxezoomcontrolsymbian.cpp \
+SOURCES *= unittest_cxezoomcontrolsymbian.cpp \
     cxezoomcontrolsymbian.cpp \
     cxestate.cpp \
     cxestatemachine.cpp \
@@ -38,7 +37,7 @@ SOURCES += unittest_cxezoomcontrolsymbian.cpp \
     cxefakecameradevicecontrol.cpp \
     cxeerrormappingsymbian.cpp
 
-HEADERS += unittest_cxezoomcontrolsymbian.h \
+HEADERS *= unittest_cxezoomcontrolsymbian.h \
     cxezoomcontrolsymbian.h \
     cxezoomcontrol.h \
     cxestate.h \

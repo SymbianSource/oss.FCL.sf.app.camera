@@ -13,14 +13,14 @@ include(../unittest.pri)
 
 TARGET = unittest_cxetestutils
 
-SOURCES += unittest_cxetestutils.cpp \
+SOURCES *= unittest_cxetestutils.cpp \
            cxedummystatemachine.cpp \
            cxestatemachine.cpp \
            cxestate.cpp \
            cxestatemachinebase.cpp \
            cxeerrormappingsymbian.cpp
 
-HEADERS += unittest_cxetestutils.h \
+HEADERS *= unittest_cxetestutils.h \
            cxedummystatemachine.h \
            cxestatemachine.h \
            cxestate.h \

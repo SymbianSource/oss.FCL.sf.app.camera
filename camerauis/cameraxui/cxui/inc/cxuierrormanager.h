@@ -26,7 +26,7 @@ class CxuiCaptureKeyHandler;
 
 
 /*
-* class which handles errors and reports 
+* class which handles errors and reports
 */
 class CxuiErrorManager : public QObject
 {
@@ -38,26 +38,14 @@ public:
     ~CxuiErrorManager();
 
 signals:
-    
+
     void aboutToRecoverError();
     void errorRecovered();
-    
+
 private slots:
 
-    /*
-	* slot which handles reporting of errors to the client
-	*/
     void analyze(CxeError::Id error);
-
-    /*
-     * slot which handles cases to be considered when we are about to close
-     * the pop-up
-     */
     void aboutToClosePopup();
-    
-    /*
-     * slot to close camera app
-     */
     void closeApp();
 
 private:
@@ -65,23 +53,19 @@ private:
     // error severity
     enum ErrorSeverity
     {
-        Severe     = 0x01, // when error cannot be recovered
-        Critical   = 0x02, // when error can be recovered, but needs actions e.g. camera in use
-        None       = 0x08, // we can ignore the error
+        None = 0,
+        Warning, // Low severity, just warning user needed
+        Severe, // when error cannot be recovered
+        Critical // when error can be recovered, but needs actions e.g. camera in use
     };
 
-    /*
-     * Activates popup which displays the error messages based on the
-     * error severity
-     */
     void launchPopup(QString& errorMsgTxt);
-    
-    /*
-     *  check the error severity and get the error msg
-     */
+    void showHighSeverityNote(QString& errorMsgTxt);
+    void showLowSeverityNote(QString& errorMsgTxt);
     QString getErrorDetails(CxeError::Id error);
 
 private:
+
     //data
     CxuiCaptureKeyHandler &mKeyHandler;
     CxuiDocumentLoader *mDocumentLoader; // not own

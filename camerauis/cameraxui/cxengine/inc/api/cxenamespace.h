@@ -117,6 +117,15 @@ namespace Cxe
         Repository, // repository key
         PublishAndSubscribe // P&S key
     };
+
+    /*!
+    * Index to CxeRuntimeKeys::FREE_MEMORY_LEVELS comma separated values
+    */
+    enum FreeMemoryIndex
+    {
+        FreeMemoryTrigger = 0,
+        FreeMemoryTarget
+    };
 }
 
 namespace CxeSettingIds
@@ -147,24 +156,23 @@ namespace CxeSettingIds
     static const char*  FNAME_VIDEO_COUNTER                    = "video_counter";
 
     // scene mode keys
-    static const char* IMAGE_SCENE                             = "image_scene";
-    static const char* VIDEO_SCENE                             = "video_scene";
+    static const char* IMAGE_SCENE                             = "still_scene_modes";
+    static const char* VIDEO_SCENE                             = "video_scene_modes";
 
     // image scene mode key values
-    static const char*  IMAGE_SCENE_AUTO                       = "ImageSceneAuto";
-    static const char*  IMAGE_SCENE_PORTRAIT                   = "ImageScenePortrait";
-    static const char*  IMAGE_SCENE_SCENERY                    = "ImageSceneScenery";
-    static const char*  IMAGE_SCENE_MACRO                      = "ImageSceneMacro";
-    static const char*  IMAGE_SCENE_SPORTS                     = "ImageSceneSports";
-    static const char*  IMAGE_SCENE_NIGHT                      = "ImageSceneNight";
-    static const char*  IMAGE_SCENE_NIGHTPORTRAIT              = "ImageSceneNightPortrait";
-    static const char*  IMAGE_SCENE_CLOSEUP                    = "ImageSceneCloseUp";
+    static const char*  IMAGE_SCENE_AUTO                       = "image_scene_auto";
+    static const char*  IMAGE_SCENE_PORTRAIT                   = "image_scene_portrait";
+    static const char*  IMAGE_SCENE_SCENERY                    = "image_scene_scenery";
+    static const char*  IMAGE_SCENE_MACRO                      = "image_scene_macro";
+    static const char*  IMAGE_SCENE_SPORTS                     = "image_scene_sports";
+    static const char*  IMAGE_SCENE_NIGHT                      = "image_scene_night";
+    static const char*  IMAGE_SCENE_NIGHTPORTRAIT              = "image_scene_night_portrait";
 
     // video scene setting key values
-    static const char*  VIDEO_SCENE_AUTO                       = "VideoSceneAuto";
-    static const char*  VIDEO_SCENE_NIGHTPORTRAIT              = "VideoSceneNightPortrait";
-    static const char*  VIDEO_SCENE_LOWLIGHT                   = "VideoSceneLowLight";
-    static const char*  VIDEO_SCENE_NIGHT                      = "VideoSceneNight";
+    static const char*  VIDEO_SCENE_AUTO                       = "video_scene_auto";
+    static const char*  VIDEO_SCENE_NIGHTPORTRAIT              = "video_scene_night_portrait";
+    static const char*  VIDEO_SCENE_LOWLIGHT                   = "video_scene_low_light";
+    static const char*  VIDEO_SCENE_NIGHT                      = "video_scene_night";
 
     // setting keys for post capture timeout
     static const char*  STILL_SHOWCAPTURED                     = "still_showcaptured";
@@ -181,7 +189,7 @@ namespace CxeRuntimeKeys
     static const char* PRIMARY_CAMERA_CAPTURE_KEYS   = "primary_camera_capture_keys";
     static const char* PRIMARY_CAMERA_AUTOFOCUS_KEYS = "primary_camera_autofocus_keys";
     static const char* SECONDARY_CAMERA_CAPTURE_KEYS = "secondary_camera_capture_keys";
-    static const char* CONTRAST_ITEMS                = "contrast_items";
+    static const char* FREE_MEMORY_LEVELS            = "free_memory_levels";
     static const char* STILL_MAX_ZOOM_LIMITS         = "still_max_zoom_limits";
     static const char* VIDEO_MAX_ZOOM_LIMITS         = "video_max_zoom_limits";
 }

@@ -29,9 +29,11 @@
 #include <hbdialog.h>
 #include <hbdeviceprofile.h>
 #include <hbnotificationdialog.h>
+#include <hbmessagebox.h>
 #include <hbaction.h>
 #include <hbstyle.h>
 #include <hbframeitem.h>
+#include <hbwidget.h>
 
 #include "cxeengine.h"
 #include "cxeviewfindercontrol.h"
@@ -57,6 +59,7 @@
 #include "cxuiprecaptureviewTraces.h"
 #endif
 #include "cxuiserviceprovider.h"
+#include "cxuizoomslider.h"
 
 
 // CONSTANTS
@@ -93,6 +96,7 @@ CxuiPrecaptureView::CxuiPrecaptureView(QGraphicsItem *parent) :
     mSettingsDialogList(NULL),
     mKeyHandler(NULL),
     mQualityIcon(NULL),
+    mIndicators(NULL),
     mSettingsDialogHeading(NULL),
     mSliderSettingsDialog(NULL),
     mSliderSettingsDialogHeading(NULL),
@@ -249,6 +253,10 @@ void CxuiPrecaptureView::hideControls()
         mHideControlsTimeout.stop();
     }
     hideToolbar();
+
+    // show indicators when controls are hidden
+    showIndicators();
+
     // give the keyboard focus back to the view
     // for the view to receive key events
     setFocus();
@@ -331,6 +339,30 @@ void CxuiPrecaptureView::toggleZoom()
 }
 
 // ---------------------------------------------------------------------------
+// CxuiPrecaptureView::hideIndicators
+//
+// ---------------------------------------------------------------------------
+//
+void CxuiPrecaptureView::hideIndicators()
+{
+    if (mIndicators) {
+        mIndicators->hide();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// CxuiPrecaptureView::showIndicators
+//
+// ---------------------------------------------------------------------------
+//
+void CxuiPrecaptureView::showIndicators()
+{
+    if (mIndicators) {
+        mIndicators->show();
+    }
+}
+
+// ---------------------------------------------------------------------------
 // CxuiPrecaptureView::showControls
 //
 // ---------------------------------------------------------------------------
@@ -348,6 +380,10 @@ void CxuiPrecaptureView::showControls()
             showZoom();
             // show titlepane
             showItems(Hb::AllItems);
+
+            // hide indicators when controls are shown
+            hideIndicators();
+
             mHideControlsTimeout.start();
             mControlsVisible = true;
         }
@@ -901,6 +937,16 @@ void CxuiPrecaptureView::launchNotSupportedNotification()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+* Show "Disk full" notification.
+*/
+void CxuiPrecaptureView::launchDiskFullNotification()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    HbMessageBox::warning(hbTrId("txt_cam_info_memory_full"));
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
 /**
 * Show settings grid.
 */
@@ -967,7 +1013,7 @@ bool CxuiPrecaptureView::isPostcaptureOn() const
 * Adding zoom buttons to the slider
 * \param slider Pointer to the slider object, where the buttons will be added
 */
-void CxuiPrecaptureView::addIncreaseDecreaseButtons(HbSlider* slider)
+void CxuiPrecaptureView::addIncreaseDecreaseButtons(CxuiZoomSlider *slider)
 {
     // get current slider elements
     QList<HbSlider::SliderElement> elements = slider->elements();
@@ -990,15 +1036,17 @@ void CxuiPrecaptureView::createWidgetBackgroundGraphic(HbWidget *widget,
                                                        const QString &graphicName,
                                                        HbFrameDrawer::FrameType frameType)
 {
-    HbFrameDrawer *drawer = new HbFrameDrawer(graphicName, frameType);
-
-    if (drawer && widget) {
-        HbFrameItem *backgroundItem = new HbFrameItem(drawer, widget);
-        if (backgroundItem) {
-            // set item to fill the whole widget
-            backgroundItem->setGeometry(QRectF(QPointF(0, 0), widget->size()));
-            backgroundItem->setZValue(0);
-            widget->setBackgroundItem(backgroundItem);
+    if (widget) {
+        HbFrameDrawer *drawer = new HbFrameDrawer(graphicName, frameType);
+    
+        if (drawer) {
+            HbFrameItem *backgroundItem = new HbFrameItem(drawer, widget);
+            if (backgroundItem) {
+                // set item to fill the whole widget
+                backgroundItem->setGeometry(QRectF(QPointF(0, 0), widget->size()));
+                backgroundItem->setZValue(0);
+                widget->setBackgroundItem(backgroundItem);
+            }
         }
     }
 }
@@ -1034,6 +1082,7 @@ QPointF CxuiPrecaptureView::getDialogPosition()
 */
 QString CxuiPrecaptureView::getSettingItemIcon(const QString &key, QVariant value)
 {
+    CX_DEBUG_ENTER_FUNCTION();
     CxUiSettings::RadioButtonListParams data;
     QString icon = "";
     if (mSettingsInfo && mSettingsInfo->getSettingsContent(key, data)) {
@@ -1045,6 +1094,9 @@ QString CxuiPrecaptureView::getSettingItemIcon(const QString &key, QVariant valu
             }
         }
     }
+
+    CX_DEBUG((("Setting icon name [%s]"), icon.toAscii().constData()));
+    CX_DEBUG_EXIT_FUNCTION();
     return icon;
 }
 

@@ -8,9 +8,12 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxesettingsimp
-HEADERS += unittest_cxesettingsimp.h \
+
+HEADERS *= unittest_cxesettingsimp.h \
     cxefakesettingsmodel.h \
     cxesettings.h \
     cxesettingsimp.h \
@@ -18,7 +21,8 @@ HEADERS += unittest_cxesettingsimp.h \
     cxenamespace.h \
     cxeerror.h \
     cxesettingsmodel.h
-SOURCES += unittest_cxesettingsimp.cpp \
+
+SOURCES *= unittest_cxesettingsimp.cpp \
     cxesettingsimp.cpp \
     cxefakesettingsmodel.cpp
-    
+

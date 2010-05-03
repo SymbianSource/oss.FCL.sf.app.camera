@@ -17,7 +17,7 @@
 
 #include <HbAction>
 #include "cxutils.h"
-#include "CxuiSettingDialog.h"
+#include "cxuisettingdialog.h"
 
 CxuiSettingDialog::CxuiSettingDialog(QGraphicsItem *parent)
     : HbDialog(parent),

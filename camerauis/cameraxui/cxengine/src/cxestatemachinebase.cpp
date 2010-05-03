@@ -20,7 +20,7 @@
 #include "cxestate.h"
 
 CxeStateMachineBase::CxeStateMachineBase( const char* stateMachineName ) :
-    mStateId(0), mName(stateMachineName)
+    mStateBitsUsed(0), mStateId(0), mName(stateMachineName)
 {
 }
 
@@ -32,25 +32,14 @@ CxeStateMachineBase::~CxeStateMachineBase()
 
 bool CxeStateMachineBase::addState( CxeState* state )
 {
-    bool success = true;
-
-    if (!state) {
-        // given parameter is null pointer
-        success = false;
-    } else {
-        // Make sure any of the existing stateId don't have overlapping bits.
-        // We need to be able to use bitwise AND operator for stateIds.
-        QList<int> stateIds = mStates.keys();
-        foreach(int i, stateIds) {
-            if ((i & state->stateId()) != 0) {
-                success = false;
-                break;
-            }
-        }
-    }
+    bool success( state // non-null state object
+               && state->stateId() // state id is not zero
+               && !(mStateBitsUsed & state->stateId()) // no overlapping bits
+                );
 
     // if no errors
     if (success) {
+        mStateBitsUsed |= state->stateId();
         mStates[state->stateId()] = state; // state is now owned by the state machine
     }
 

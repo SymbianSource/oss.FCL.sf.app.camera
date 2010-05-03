@@ -130,7 +130,6 @@ protected:
     HbToolBar *mToolBarIdle; // not own
     HbToolBar *mToolBarRec; // not own
     HbToolBar *mToolBarPaused; // not own
-    HbAction *mToggleLightAction; // not own
     HbDialog *mVideoScenePopup;
     CxeVideoCaptureControl *mVideoCaptureControl;
     HbMenu *mMenu;    // own

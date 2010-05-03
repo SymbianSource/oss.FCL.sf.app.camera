@@ -130,7 +130,7 @@ CxeSettingsMapperSymbian::Map2CameraAutofocus(CxeAutoFocusControl::Mode afMode )
       value = CCamera::CCameraAdvancedSettings::EFocusRangeMacro;
       break;
     case CxeAutoFocusControl::Portrait:
-      value = CCamera::CCameraAdvancedSettings::EFocusRangePortrait;
+      value = CCamera::CCameraAdvancedSettings::EFocusRangeAuto;
       break;
     case CxeAutoFocusControl::Infinity:
       value = CCamera::CCameraAdvancedSettings::EFocusRangeInfinite;

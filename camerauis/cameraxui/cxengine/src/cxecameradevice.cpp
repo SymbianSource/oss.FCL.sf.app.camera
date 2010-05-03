@@ -20,8 +20,14 @@
 #include "cxecameradevice.h"
 #include "cxeerrormappingsymbian.h"
 #include "cxutils.h"
-
 #include "cxedummycamera.h"
+
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cxecameradeviceTraces.h"
+#endif
+
+
 
 CxeCameraDevice::CxeCameraDevice() :
     mCamera(NULL),
@@ -184,6 +190,8 @@ void CxeCameraDevice::releaseResources()
 CxeError::Id CxeCameraDevice::newCamera( Cxe::CameraIndex cameraIndex, MCameraObserver2 *observer )
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXECAMERADEVICE_NEWCAMERA_IN, "msg: e_CX_CAMERADEVICE_CREATE_CCAMERA 1");
+
     CX_DEBUG(("Cxe: using camera index %d", cameraIndex));
 
     CX_DEBUG_ASSERT(cameraIndex == Cxe::PrimaryCameraIndex || cameraIndex == Cxe::SecondaryCameraIndex);
@@ -202,6 +210,7 @@ CxeError::Id CxeCameraDevice::newCamera( Cxe::CameraIndex cameraIndex, MCameraOb
         setCamera(camera);
     }
 
+    OstTrace0(camerax_performance, CXECAMERADEVICE_NEWCAMERA_OUT, "msg: e_CX_CAMERADEVICE_CREATE_CCAMERA 0");
     CX_DEBUG_EXIT_FUNCTION();
     return CxeErrorHandlingSymbian::map(err);
 }

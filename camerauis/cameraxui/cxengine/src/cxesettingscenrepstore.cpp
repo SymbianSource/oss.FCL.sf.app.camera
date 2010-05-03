@@ -331,8 +331,8 @@ void CxeSettingsCenRepStore::mapKeys()
                   XQSettingsManager::TypeString,
                   true);
 
-    addKeyMapping(CxeRuntimeKeys::CONTRAST_ITEMS,
-                  ContrastItemsCr,
+    addKeyMapping(CxeRuntimeKeys::FREE_MEMORY_LEVELS,
+                  FreeMemoryLevelsCr,
                   XQSettingsManager::TypeString,
                   true);
 

@@ -11,20 +11,19 @@
 
 include(../unittest.pri)
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+DEFINES *= CXE_USE_DUMMY_CAMERA
 
 TARGET  = unittest_cxesettingscontrolsymbian
 
-LIBS    += -lbitgdi
-LIBS    += -lfbscli
-LIBS    += -lecam
-LIBS    += -lecamadvsettings
-LIBS    += -lecamsnapshot
-LIBS    += -lecamdirectviewfinder
-LIBS    += -lecampluginsupport
+LIBS    *= -lbitgdi
+LIBS    *= -lfbscli
+LIBS    *= -lecam
+LIBS    *= -lecamadvsettings
+LIBS    *= -lecamsnapshot
+LIBS    *= -lecamdirectviewfinder
+LIBS    *= -lecampluginsupport
 
-HEADERS += unittest_cxesettingscontrolsymbian.h \
+HEADERS *= unittest_cxesettingscontrolsymbian.h \
            cxesettingscontrolsymbian.h \
            cxesettings.h \
            cxefakesettings.h \
@@ -36,7 +35,7 @@ HEADERS += unittest_cxesettingscontrolsymbian.h \
            cxeerrormappingsymbian.h \
            cxedummycamera.h
 
-SOURCES += unittest_cxesettingscontrolsymbian.cpp \
+SOURCES *= unittest_cxesettingscontrolsymbian.cpp \
            cxesettingscontrolsymbian.cpp \
            cxefakesettings.cpp \
            cxecameradevice.cpp \

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -24,30 +24,29 @@
 #include "cxeviewfindercontrol.h"
 #include "cxenamespace.h"
 #include "cxeerror.h"
+#include "cxuiapplicationframeworkmonitor.h"
+
 
 class QGraphicsSceneMouseEvent;
-class CxuiCaptureKeyHandler;
-class XQSettingsManager;
-class XQSettingsKey;
 class HbMainWindow;
-
+class CxuiApplication;
+class CxuiCaptureKeyHandler;
 class CxuiPrecaptureView;
 class CxuiStillPrecaptureView;
-class CxuiStillPrecaptureView2;
 class CxuiVideoPrecaptureView;
-class CxuiVideoPrecaptureView2;
 class CxuiPostcaptureView;
 class CxeEngine;
 class CxuiDocumentLoader;
 class CxuiErrorManager; // class that handles all errors in ui.
 class CxuiStandby;
+class CxuiSceneModeView;
 
 class CxuiViewManager : public QObject
 {
     Q_OBJECT
 
 public:
-    CxuiViewManager(HbMainWindow &mainWindow, CxeEngine &engine, CxuiCaptureKeyHandler &keyHandler);
+    CxuiViewManager(CxuiApplication &application, HbMainWindow &mainWindow, CxeEngine &engine);
     ~CxuiViewManager();
 
     void prepareWindow();
@@ -60,20 +59,14 @@ public:
 public slots:
     void changeToPostcaptureView();
     void changeToPrecaptureView();
-
-    /**
-     * Switch camera from primary to secondary or vise versa.
-     */
     void switchCamera();
-
-    /**
-     * Event monitor can be used to monitor changes in cenrep and PS values.
-     */
-    void eventMonitor(const XQSettingsKey& key, const QVariant& value);
-
     void createPostcaptureView();
+    void showScenesView();
 
 private slots:
+    void toForeground();
+    void handleForegroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState state);
+    void handleBatteryEmpty();
     void aboutToLooseFocus();
     void aboutToGainFocus();
 
@@ -81,17 +74,18 @@ signals:
     void focusGained();
     void focusLost();
     void batteryEmpty();
+    void disableStandbyTimer();
+    void startStandbyTimer();
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);
 
 private:
-    void startEventMonitors();
     void createStillPrecaptureView();
-    void createStillPrecaptureView2();
     void createVideoPrecaptureView();
-    void createVideoPrecaptureView2();
     CxuiPrecaptureView* getPrecaptureView(Cxe::CameraMode mode, Cxe::CameraIndex camera);
+
+    void createSceneModesView();
 
     /*
     * connects all necessary signals for precapture view
@@ -117,25 +111,21 @@ private:
 private:
 
     //data
+    CxuiApplication &mApplication;
     HbMainWindow &mMainWindow;
     CxuiStillPrecaptureView *mStillPrecaptureView;
     CxuiVideoPrecaptureView *mVideoPrecaptureView;
     CxuiPostcaptureView *mPostcaptureView;
 
-    CxuiStillPrecaptureView2 *mStillPrecaptureView2;
-    CxuiVideoPrecaptureView2 *mVideoPrecaptureView2;
-
     CxeEngine &mEngine;
-    CxuiCaptureKeyHandler &mKeyHandler;
+    CxuiCaptureKeyHandler *mKeyHandler;
+    CxuiApplicationFrameworkMonitor *mApplicationMonitor;
 
 private:
-    XQSettingsManager *mSettingsManager;
-    int mKeyLockState; //! @todo: Needed due to Settings manager error: valueChanged is emmitted with same value repeatedly
-    int mBatteryStatus;
-    bool mFocused;
     CxuiDocumentLoader *mCameraDocumentLoader;
     CxuiStandby *mStandbyHandler;
     CxuiErrorManager *mErrorManager;
+    CxuiSceneModeView *mSceneModeView;
 };
 
 #endif // CXUIVIEWMANAGER_H

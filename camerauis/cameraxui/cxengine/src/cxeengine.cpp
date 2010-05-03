@@ -26,7 +26,6 @@ EXPORT_C CxeEngine* CxeEngine::createEngine()
     CX_DEBUG_ENTER_FUNCTION();
 
     CxeEngineSymbian *res = new CxeEngineSymbian();
-    res->construct();
 
     CX_DEBUG_EXIT_FUNCTION();
     return res;

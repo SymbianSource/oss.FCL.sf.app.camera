@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,10 +15,11 @@
 *
 */
 
-#include <hbdialog.h>
-#include <hblabel.h>
-#include <hbpushbutton.h>
 #include <QCoreApplication>
+#include <HbDialog>
+#include <HbMessageBox>
+#include <HbLabel>
+#include <HbPushButton>
 
 #include "cxutils.h"
 #include "cxeerror.h"
@@ -29,8 +30,8 @@
 #include "cxecameradevicecontrol.h"
 
 
-/*
-* CxuiErrorManager::CxuiErrorManager
+/*!
+* Constructor
 */
 CxuiErrorManager::CxuiErrorManager(CxuiCaptureKeyHandler &keyHandler,CxuiDocumentLoader *documentLoader) :
     mKeyHandler(keyHandler),
@@ -42,11 +43,9 @@ CxuiErrorManager::CxuiErrorManager(CxuiCaptureKeyHandler &keyHandler,CxuiDocumen
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiViewManager::~CxuiViewManager
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Destructor
+*/
 CxuiErrorManager::~CxuiErrorManager()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -54,11 +53,10 @@ CxuiErrorManager::~CxuiErrorManager()
 }
 
 
-// ---------------------------------------------------------------------------
-// CxuiErrorManager::reportError
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Analyze the error code and act accordingly.
+* @param error Error code.
+*/
 void CxuiErrorManager::analyze(CxeError::Id error)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -66,25 +64,25 @@ void CxuiErrorManager::analyze(CxeError::Id error)
     mErrorMsgPopup = NULL;
     mErrorSeverity = CxuiErrorManager::None;
 
-    // start evaluating the error.
-    QString errorMsgTxt = getErrorDetails(error);
+    if (error != CxeError::None) {
+        // start evaluating the error.
+        QString errorMsgTxt = getErrorDetails(error);
 
-    if(mErrorSeverity != CxuiErrorManager::None) {
-        // show the error note to the user.
-        launchPopup(errorMsgTxt);
-    } else {
-        // ignore
+        if(mErrorSeverity != CxuiErrorManager::None) {
+            // show the error note to the user.
+            launchPopup(errorMsgTxt);
+        } else {
+            // ignore
+        }
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 
-// ---------------------------------------------------------------------------
-// CxuiErrorManager::aboutToClosePopup
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Slot that gets called when error note is closed.
+*/
 void CxuiErrorManager::aboutToClosePopup()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -94,12 +92,9 @@ void CxuiErrorManager::aboutToClosePopup()
 }
 
 
-
-// ---------------------------------------------------------------------------
-// CxuiErrorManager::closeApp
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Helper method for closing the application.
+*/
 void CxuiErrorManager::closeApp()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -109,10 +104,11 @@ void CxuiErrorManager::closeApp()
 
 
 
-// ---------------------------------------------------------------------------
-// CxuiErrorManager::getErrorDetails
-// evaluates error for error severity and error note
-// ---------------------------------------------------------------------------
+/*!
+* Helper method to get the error message to use for showing note to user,
+* and set the severity level, based on given error code.
+* @param error Error code to be analyzed.
+*/
 QString CxuiErrorManager::getErrorDetails(CxeError::Id error)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -129,6 +125,9 @@ QString CxuiErrorManager::getErrorDetails(CxeError::Id error)
             mErrorSeverity = CxuiErrorManager::Severe;
             msg = hbTrId("txt_cam_info_camera_already_in_use");
             break;
+        case CxeError::DiskFull:
+            mErrorSeverity = CxuiErrorManager::Warning;
+            msg = hbTrId("txt_cam_info_memory_full");
         default:
             break;
     }
@@ -137,14 +136,33 @@ QString CxuiErrorManager::getErrorDetails(CxeError::Id error)
     return msg;
 }
 
-
-// ---------------------------------------------------------------------------
-// CxuiErrorManager::launchPopup
-// ---------------------------------------------------------------------------
+/*!
+*
+*/
 void CxuiErrorManager::launchPopup(QString& errorMsgTxt)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    switch (mErrorSeverity) {
+    case CxuiErrorManager::Warning:
+        showLowSeverityNote(errorMsgTxt);
+        break;
+    case CxuiErrorManager::Severe:
+    case CxuiErrorManager::Critical:
+        showHighSeverityNote(errorMsgTxt);
+        break;
+    default:
+        break;
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Show error note for high severity error.
+*/
+void CxuiErrorManager::showHighSeverityNote(QString& errorMsgTxt)
+{
     // we always prepare the popup for the new message and hence we load the
     // popup everytime from document loader
 
@@ -156,8 +174,15 @@ void CxuiErrorManager::launchPopup(QString& errorMsgTxt)
     CX_DEBUG(("mErrorMsgPopup load ok=%d", ok));
 
     mErrorMsgPopup = qobject_cast<HbDialog*>(mDocumentLoader->findWidget(CxUiLayout::ERROR_POPUP));
-
     CX_ASSERT_ALWAYS(mErrorMsgPopup);
+
+    // HbDialog's default background item is replaced with black rectangle
+    QGraphicsRectItem *backgroundItem = new QGraphicsRectItem();
+    QBrush blackBrush = QBrush(Qt::black);
+    backgroundItem->setBrush(blackBrush);
+    QGraphicsItem *origBgItem = mErrorMsgPopup->backgroundItem();
+    backgroundItem->setRect(origBgItem->boundingRect());
+    mErrorMsgPopup->setBackgroundItem(backgroundItem);
 
     mErrorMsgPopup->setTimeout(HbDialog::NoTimeout);
     mErrorMsgPopup->setBackgroundFaded(false);
@@ -180,5 +205,15 @@ void CxuiErrorManager::launchPopup(QString& errorMsgTxt)
 
     mErrorMsgPopup->show();
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Show error note for low severity error.
+*/
+void CxuiErrorManager::showLowSeverityNote(QString& errorMsgTxt)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    HbMessageBox::warning(errorMsgTxt);
     CX_DEBUG_EXIT_FUNCTION();
 }

@@ -137,20 +137,17 @@ int CxeSysUtil::getCameraDrive(RFs &fs)
 /*!
 * Return space available for Camera to use.
 * @param fs File Server session
+* @param index Index for the drive to be checked.
 * @param settings Camera settings instance
 * @return Amount of bytes free for Camera usage.
 */
-qint64 CxeSysUtil::spaceAvailable(RFs &fs, CxeSettings &settings)
+qint64 CxeSysUtil::spaceAvailable(RFs &fs, int index, CxeSettings &settings)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     qint64 freeSpace(0);
 
     try {
-        // Get drive index
-        int index(getCameraDrive(fs));
-        qt_symbian_throwIfError(index);
-
         // Get volume info
         TVolumeInfo volumeInfo;
         int status(fs.Volume(volumeInfo, index));
@@ -169,7 +166,7 @@ qint64 CxeSysUtil::spaceAvailable(RFs &fs, CxeSettings &settings)
         settings.get(KCRUidDiskLevel.iUid, KDiskCriticalThreshold, Cxe::Repository, criticalThreshold);
 
         // Calculate space that we can still use. A small safety buffer is used above critical value.
-        freeSpace = std::max(volumeInfo.iFree - criticalThreshold.toInt() - KDiskSafetyLimit, (qint64)0);
+        freeSpace = std::max(qint64(0), volumeInfo.iFree - criticalThreshold.toInt() - KDiskSafetyLimit);
 
     } catch(const std::exception& e) {
         Q_UNUSED(e);

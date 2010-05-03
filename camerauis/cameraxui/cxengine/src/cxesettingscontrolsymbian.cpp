@@ -73,6 +73,8 @@ void CxeSettingsControlSymbian::handleSettingValueChanged(const QString& setting
         updateSharpnessSetting(newValue);
     } else if (settingId == CxeSettingIds::CONTRAST) {
         updateContrastSetting(newValue);
+    } else if (settingId == CxeSettingIds::BRIGHTNESS) {
+        updateBrightnessSetting(newValue);
     } else if (settingId == CxeSettingIds::EXPOSURE_MODE) {
         updateExposureModeSetting(newValue);
     } else if (settingId == CxeSettingIds::EV_COMPENSATION_VALUE) {
@@ -189,9 +191,9 @@ void CxeSettingsControlSymbian::updateSharpnessSetting(QVariant newValue)
 
     CX_ASSERT_ALWAYS(mCameraDevice.imageProcessor());
 
-    // Scale UI values of -10..10 to ECAM range -100..100.
+    // Scale UI values of -2..2 to ECAM range -100..100.
     int currentSharpness = mCameraDevice.imageProcessor()->TransformationValue(KUidECamEventImageProcessingAdjustSharpness);
-    int newSharpness     = newValue.toInt()*10;
+    int newSharpness     = newValue.toReal()*50;
 
     CX_DEBUG(("Current sharpness [uid:0x%08x] value is [%d]", KUidECamEventImageProcessingAdjustSharpness, currentSharpness));
     CX_DEBUG(("Setting sharpness [uid:0x%08x] to value [%d]", KUidECamEventImageProcessingAdjustSharpness, newSharpness));
@@ -215,14 +217,37 @@ void CxeSettingsControlSymbian::updateContrastSetting(QVariant newValue)
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(mCameraDevice.imageProcessor());
 
-    // Scale UI values of -10..10 to ECAM range -100..100.
+    // Scale UI values of -2..2 to ECAM range -100..100.
     int currentContrast = mCameraDevice.imageProcessor()->TransformationValue(KUidECamEventImageProcessingAdjustContrast);
-    int newContrast     = newValue.toInt()*10;
+    int newContrast     = newValue.toReal()*50;
 
     CX_DEBUG(("Current contrast [uid:0x%08x] value is [%d]", KUidECamEventImageProcessingAdjustContrast, currentContrast));
     CX_DEBUG(("Setting contrast [uid:0x%08x] to value [%d]", KUidECamEventImageProcessingAdjustContrast, newContrast));
     if (newContrast != currentContrast) {
         mCameraDevice.imageProcessor()->SetTransformationValue(KUidECamEventImageProcessingAdjustContrast, newContrast);
+    } else {
+        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+*
+*/
+void CxeSettingsControlSymbian::updateBrightnessSetting(QVariant newValue)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_ASSERT_ALWAYS(mCameraDevice.imageProcessor());
+
+    // Scale UI values of -10..10 to ECAM range -100..100.
+    int currentBrightness = mCameraDevice.imageProcessor()->TransformationValue(KUidECamEventImageProcessingAdjustBrightness);
+    int newBrightness     = newValue.toInt()*10;
+
+    CX_DEBUG(("Current brightness [uid:0x%08x] value is [%d]", KUidECamEventImageProcessingAdjustBrightness, currentBrightness));
+    CX_DEBUG(("Setting brightness [uid:0x%08x] to value [%d]", KUidECamEventImageProcessingAdjustBrightness, newBrightness));
+    if (newBrightness != currentBrightness) {
+        mCameraDevice.imageProcessor()->SetTransformationValue(KUidECamEventImageProcessingAdjustBrightness, newBrightness);
     } else {
         CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
     }
