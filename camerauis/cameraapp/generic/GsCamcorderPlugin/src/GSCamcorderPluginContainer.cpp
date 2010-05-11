@@ -215,15 +215,15 @@ void CGSCamcorderPluginContainer::LoadIconsL()
         icons, 
         KAknsIIDQgnPropSetCamsImageSub,
         fileName,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_folder_image,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_folder_image_mask );
+        EMbmCamerasettingspluginQgn_prop_set_cams_image_sub,
+        EMbmCamerasettingspluginQgn_prop_set_cams_image_sub_mask );
 
     AppendIconToArrayL(
         icons, 
         KAknsIIDQgnPropSetCamsVideoSub,
         fileName,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_folder_video,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_folder_video_mask );
+        EMbmCamerasettingspluginQgn_prop_set_cams_video_sub,
+        EMbmCamerasettingspluginQgn_prop_set_cams_video_sub_mask );
     
     CleanupStack::Pop( icons ); // icons
 

@@ -267,8 +267,10 @@ void CCamUserSceneSetupViewBase::HandleForegroundEventL( TBool aForeground )
             
                         
             // start viewfinder unless the is activating to standby or scene settings
+            // SwitchToInfoListBoxL( EInfoListBoxModeISO, EFalse ) where FullySkinned is EFalse, it
+            // indicate VF need to start in case of iInfoListBoxActive
             if ( !iStandbyModeActive && !iSceneSettingModeActive && 
-                 !iInfoListBoxActive && !iUserSceneSetupModeActive )
+                 !iUserSceneSetupModeActive )
                 {
                 iVFRequested=ETrue;
                 StartViewFinder();
@@ -286,7 +288,7 @@ void CCamUserSceneSetupViewBase::HandleForegroundEventL( TBool aForeground )
             }
         }        
     // To background
-    else if( !aForeground && appUi->AppInBackground( EFalse ) )
+    else if( !aForeground )
         {
         PRINT( _L("Camera <> CCamUserSceneSetupViewBase::HandleForegroundEventL dec engine count") );
         // Register that we nolonger need the engine

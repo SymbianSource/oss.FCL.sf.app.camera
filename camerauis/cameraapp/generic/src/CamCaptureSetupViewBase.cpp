@@ -341,8 +341,8 @@ void CCamCaptureSetupViewBase::DoDeactivate()
 // ---------------------------------------------------------------------------
 //
 CCamCaptureSetupViewBase::CCamCaptureSetupViewBase( CCamAppController& aController )
-    : CCamViewBase( aController ),iForceAvkonCBA(EFalse),
-      iCaptureSetupModeActive( EFalse )
+    : CCamViewBase( aController ),
+      iForceAvkonCBA(EFalse)
     {
     }
 
@@ -1096,17 +1096,18 @@ void CCamCaptureSetupViewBase::SetInfoListBoxMode( TBool aActive, TBool aFullySk
     // We need to inform the AppUi
     iInfoListBoxActive = aActive;
 
-    CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( AppUi() );
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );
     
     if ( appUi)
         {
         if ( aActive )
             {
+            iPrevCaptureMode = appUi->PreCaptureMode();
             appUi->SetPreCaptureMode(ECamPreCapGenericSetting);
             }
         else
             {
-            appUi->SetPreCaptureMode(ECamPreCapViewfinder);
+            appUi->SetPreCaptureMode( iPrevCaptureMode );
             }        
         }
     }    

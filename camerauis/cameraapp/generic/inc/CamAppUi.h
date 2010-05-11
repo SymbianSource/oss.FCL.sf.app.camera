@@ -86,6 +86,7 @@ class CCamAppUi : public CCamAppUiBase,
                   public MCamFileCheckObserver,
                   public MCamCameraObserver
                   ,public MCamAddToAlbumObserver
+                  ,public MAknServerAppExitObserver
   {
   // =======================================================
   // Data Types
@@ -1430,6 +1431,18 @@ class CCamAppUi : public CCamAppUiBase,
         void CheckAlbumIdOperationCompleteL(
                 TBool aAlbumExists, const TDesC& aAlbumTitle );
 
+    public: // MAknServerAppExitObserver
+        /**
+        * Handle the exit of a connected server app.
+        * This implementation provides Series 60 default behavior
+        * for handling of the EAknCmdExit exit code. Derived classes
+        * should base-call this implementation if they override this
+        * function.
+        * @param aReason The reason that the server application exited.
+        * This will either be an error code, or the command id that caused
+        * the server app to exit.
+        */
+        virtual void HandleServerAppExit(TInt aReason);
 
     private:
 
@@ -1829,6 +1842,8 @@ class CCamAppUi : public CCamAppUiBase,
         TBool iMemoryAvailableForCapturing;
 
         CCamStartupLogoController* iStartupLogoController;
+
+        TBool iVideoClipPlayInProgress;
         };
 
 // ===========================================================================

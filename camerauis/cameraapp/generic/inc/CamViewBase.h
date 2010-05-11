@@ -216,6 +216,18 @@ class CCamViewBase : public CAknView
         */
         void DoDeactivate();
         
+        /**
+        * Prepare deactivation of this view.
+        * Method stores current visible containers to temporary containers.
+        */        
+        void PrepareDeactivate();
+
+        /**
+        * Completes deactivation of this view.
+        * Method method deletes stored temporary containers.
+        */        
+        void PostDeactivate();
+
     protected:  // New functions
 
         /**
@@ -360,6 +372,10 @@ private:
 
         // standby mode container
         CCamStandbyContainer* iStandbyContainer;
+
+        //Used for viewswitching
+        CCamContainerBase* iTempContainer;        
+        CCamStandbyContainer* iTempStandbyContainer;
         
     private: // data
 

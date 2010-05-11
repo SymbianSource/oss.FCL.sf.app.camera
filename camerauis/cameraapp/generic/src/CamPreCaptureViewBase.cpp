@@ -274,8 +274,9 @@ void CCamPreCaptureViewBase::HandleForegroundEventL( TBool aForeground )
     {
     // Ignore foregrounding if view switch to postcapture anyway in progress.
     if( appUi->TargetViewState() == ECamViewStatePostCapture
-     || appUi->TargetViewState() == ECamViewStateBurstThumbnail ) {
-      PRINT( _L( "Camera <= CCamPreCaptureViewBase::HandleForegroundEventL, ignored as going to postcapture") );    
+     || appUi->TargetViewState() == ECamViewStateBurstThumbnail 
+     || ( iStandbyModeActive && !appUi->IsRecoverableStatus() ) ) {
+      PRINT( _L( "Camera <= CCamPreCaptureViewBase::HandleForegroundEventL, ignored states") );    
       return;
     }
     
@@ -677,8 +678,13 @@ void CCamPreCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId,
                 fixedToolbar->SetDimmed( EFalse ); 
                 }
             fixedToolbar->SetToolbarObserver( this );
-            appUi->SetToolbarVisibility( );
-
+            // avoid toolbar flicker when returning from user scene setup 
+            // after adjusting a setting
+            if ( !iSceneSettingModeActive )
+                {
+                appUi->SetToolbarVisibility( );
+                }
+   
             // Make sure toolbar extension button has no background
             CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
             if ( extension )
@@ -1494,6 +1500,12 @@ void CCamPreCaptureViewBase::DynInitSwitchCameraMenuItemL( CEikMenuPane* aMenuPa
 void CCamPreCaptureViewBase::ReleaseResources()
     {
     PRINT( _L("Camera => CCamPreCaptureViewBase::ReleaseResources") );
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );
+    if( iStandbyModeActive && !appUi->IsRecoverableStatus() )
+        {
+        PRINT( _L("Camera <= CCamPreCaptureViewBase::ReleaseResources Standbymode") );
+        return;
+        }
     iContinueInBackground = EFalse;
     StopViewFinder();
   
@@ -1509,7 +1521,6 @@ void CCamPreCaptureViewBase::ReleaseResources()
         if( iController.IsAppUiAvailable() )
             {
             // Ensure AppUi has had self-timer mode disabled
-            CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( AppUi() );
             if ( appUi )
                 {
                 TRAP_IGNORE( appUi->SelfTimerEnableL( ECamSelfTimerDisabled ) );
@@ -1810,7 +1821,8 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
         }
 
     MAknTouchGestureFwPinchEvent *pinch = AknTouchGestureFwEventPinch( aEvent );
-    if ( pinch && (ECamNoOperation == iController.CurrentOperation()) )
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+    if ( pinch && (ECamNoOperation == iController.CurrentOperation()) && appUi && !appUi->ZoomPane()->IsVisible() )
         {
         // Determine the direction of pinch: +ve -> pinch outward / zoom / widen VF
         TInt currMove = pinch->Movement();
@@ -1826,8 +1838,8 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
             container->BlinkResolutionIndicatorOnChange( ETrue );
 
             // Hide the zoom pane in case of pinch
-            CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
-            appUi->ZoomPane()->MakeVisible( EFalse, ETrue );
+           // CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+           // appUi->ZoomPane()->MakeVisible( EFalse, ETrue );
 
             if ( iController.ToggleWideScreenQuality( wide ) )
                 {

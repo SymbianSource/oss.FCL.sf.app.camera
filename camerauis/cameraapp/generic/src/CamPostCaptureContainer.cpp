@@ -305,8 +305,12 @@ void CCamPostCaptureContainer::Draw( const TRect& /*aRect*/ ) const
          lateOperation ) )
          {
          gc.SetFaded( EFalse );
-         gc.SetBrushColor( KRgbBlack );
-         gc.Clear( iProcessingTextLayout.TextRect() );   
+         gc.SetPenStyle( CGraphicsContext::ENullPen );
+         gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+         gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+         gc.SetBrushColor( TRgb::Color16MA( 0 ) );
+         gc.Clear( iProcessingTextLayout.TextRect() );
+         gc.SetBrushStyle( CGraphicsContext::ENullBrush );
          }
                        
     // If snapshot contains a bitmap
@@ -611,10 +615,12 @@ void CCamPostCaptureContainer::Redraw(const TRect& aArea)
             // Mirrored layout is not supported.
             TRect blackRect = outdatedArea; 
             blackRect.iTl.iX += snapshotSize.iWidth - outdatedArea.iTl.iX;
-            gc.SetBrushColor( KRgbBlack );
-	        gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-	        gc.SetPenStyle( CGraphicsContext::ESolidPen );
+            gc.SetPenStyle( CGraphicsContext::ENullPen );
+            gc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+            gc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+            gc.SetBrushColor( TRgb::Color16MA( 0 ) );
             gc.DrawRect( blackRect );
+            gc.SetBrushStyle( CGraphicsContext::ENullBrush );
             }
 
         if ( ssRect.Contains( outdatedArea.iTl ) || !iController.IsTouchScreenSupported() )  

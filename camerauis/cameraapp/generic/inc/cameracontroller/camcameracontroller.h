@@ -62,7 +62,9 @@ class CCamAppController;
 
 class MCameraOrientation;
 class MCameraFaceTracking;
-  class MCameraUIOrientationOverride;
+class MCameraUIOrientationOverride;
+class MCameraUseCaseHint;
+  
 
 #ifdef CAMERAAPP_PERFORMANCE_CONTROLLER
   class CCamPerformanceLogger;
@@ -481,7 +483,13 @@ class CCamCameraController : public CBase,
 
     void SetFaceTrackingL();
 
-
+    /**
+    * Inform CAPI about the UseCase (still or video)
+    * before calling Reserve.
+    *
+    */
+    void HintUseCaseL();
+    
   // =======================================================
   // Data
   private:
@@ -557,6 +565,8 @@ class CCamCameraController : public CBase,
     MCameraFaceTracking*               iCustomInterfaceFaceTracking;   /** Not own. */
     
     MCameraUIOrientationOverride*      iCustomInterfaceUIOrientationOverride; /** Not own. */
+    
+    MCameraUseCaseHint*                iCustomInterfaceUseCaseHint; /** Not own. */
 
   // -------------------------------------------------------
   // CAE 

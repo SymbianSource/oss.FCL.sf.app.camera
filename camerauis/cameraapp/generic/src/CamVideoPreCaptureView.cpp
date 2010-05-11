@@ -657,19 +657,18 @@ void CCamVideoPreCaptureView::UpdateCbaL()
   // if the view is in capture setup mode
   else if ( iCaptureSetupModeActive )
     {
-    SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
+    SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT );
     }
   // if the view is in scene settings mode
   else if ( iSceneSettingModeActive )
     {
-    // R_AVKON_SOFTKEYS_OPTIONS_BACK
     if( !iForceAvkonCBA )
         {
         SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT );    
         }
     else
         {
-    SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE ); //R_CAM_SOFTKEYS_OPTIONS_BACK__CHANGE );
+        SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
         }
     }
   else if ( iStandbyModeActive )

@@ -20,7 +20,7 @@
 // INCLUDE FILES
 #include    <pathinfo.h>
 #include    <driveinfo.h>
-#include    <usbwatcherinternalpskeys.h>
+#include    <UsbWatcherInternalPSKeys.h>
 #include    <usbpersonalityids.h>
 
 #include    "CamDriveChangeNotifier.h"
@@ -30,6 +30,8 @@
 
 _LIT(KDriveE, "E:\\");
 _LIT(KDriveF, "F:\\");
+
+const TInt KUSBTimeout = 1000000;  //1 sec
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -225,6 +227,15 @@ CCamDriveChangeNotifier::~CCamDriveChangeNotifier()
       delete iUsbMSWatcher;
       iUsbMSWatcher = NULL;
       }
+  if ( iUSBTimer )
+      {
+      if( iUSBTimer->IsActive() )
+          {
+          iUSBTimer->Cancel();
+          }
+      delete iUSBTimer;
+      iUSBTimer = NULL;
+      }
   PRINT( _L( "Camera <= CCamDriveChangeNotifier::~CCamDriveChangeNotifier" ) );
   }
 
@@ -304,20 +315,22 @@ void CCamDriveChangeNotifier::SendAllowDismount()
 void CCamDriveChangeNotifier::HandlePropertyChangedL( const TUid& aCategory, const TUint aKey )
     {
     PRINT( _L( "Camera => CCamDriveChangeNotifier::HandlePropertyChangedL" ) );
-    TInt value = 0;
     if(KPSUidUsbWatcher == aCategory && 
        KUsbWatcherSelectedPersonality == aKey)
         {
+        TInt value = 0;
         iUsbMSWatcher->Get( value );
         if( KUsbPersonalityIdMS == value )
             {
-            iMassStorageModeOn = ETrue;
-            iObserver.DriveChangeL( MCamDriveChangeNotifierObserver::EDriveUSBMassStorageModeOn );
+            PRINT( _L( "Camera => CCamDriveChangeNotifier::HandlePropertyChangedL StartTimer" ) );
+            iUSBTimer->Cancel();
+            iUSBTimer->StartTimer();
             }
         else
             {
             if( iMassStorageModeOn )
                 {
+                PRINT( _L("CCamDriveChangeNotifier::HandlePropertyChangedL KUsbPersonalityIdMS Off") );
                 iMassStorageModeOn = EFalse;
                 iObserver.DriveChangeL( MCamDriveChangeNotifierObserver::EDriveUSBMassStorageModeOff );
                 }
@@ -343,10 +356,51 @@ void CCamDriveChangeNotifier::ConstructL()
     iUsbMSWatcher = CCamPropertyWatcher::NewL(*this, KPSUidUsbWatcher, 
                         KUsbWatcherSelectedPersonality );
     
+    iUSBTimer = CCamTimer::NewL( KUSBTimeout, TCallBack(USBTimerCallBack, this));
     CleanupStack::Pop(); // listener
     CleanupStack::Pop(); // listener 2
     
     StartMonitoring();
 
     }
+
+// -----------------------------------------------------------------------------
+// CCamDriveChangeNotifier::USBTimerCallBackL
+// -----------------------------------------------------------------------------
+//
+void CCamDriveChangeNotifier::USBTimerCallBackL()
+    {
+    TInt value = 0;
+    iUsbMSWatcher->Get( value );
+    if( KUsbPersonalityIdMS == value )
+        {
+        PRINT( _L("CCamDriveChangeNotifier::USBTimerCallBackL KUsbPersonalityIdMS On") );
+        iMassStorageModeOn = ETrue;
+        iObserver.DriveChangeL( MCamDriveChangeNotifierObserver::EDriveUSBMassStorageModeOn );
+        }
+    else
+        {
+        if( iMassStorageModeOn )
+            {
+            PRINT( _L("CCamDriveChangeNotifier::USBTimerCallBackL KUsbPersonalityIdMS Off") );
+            iMassStorageModeOn = EFalse;
+            iObserver.DriveChangeL( MCamDriveChangeNotifierObserver::EDriveUSBMassStorageModeOff );
+            }
+        }
+    }
+        
+// -----------------------------------------------------------------------------
+// CCamDriveChangeNotifier::USBTimerCallBack
+// -----------------------------------------------------------------------------
+//
+TInt CCamDriveChangeNotifier::USBTimerCallBack( TAny* aPtr )
+    {
+    CCamDriveChangeNotifier* self = static_cast<CCamDriveChangeNotifier*>(aPtr);
+    if( self )
+        {
+        TRAP_IGNORE( self->USBTimerCallBackL() );
+        }
+    return KErrNone;
+    }
+
 //  End of File

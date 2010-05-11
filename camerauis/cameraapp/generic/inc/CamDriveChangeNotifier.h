@@ -22,8 +22,9 @@
 
 //  INCLUDES
 #include <f32file.h>
-#include "campropertywatcher.h"
-#include "campropertyobserver.h"
+#include "CamPropertyWatcher.h"
+#include "CamPropertyObserver.h"
+#include "CamTimer.h"
 
 // FORWARD DECLARATIONS
 class MCamDriveChangeNotifierObserver;
@@ -137,7 +138,12 @@ class CCamDriveChangeNotifier : public CBase,
         // New functions
 
         void StartMonitoring();
+        
         void CancelMonitoring();
+        
+        void USBTimerCallBackL();
+        
+        static TInt USBTimerCallBack( TAny* aPtr ); 
 
     public: // From MPropertyObserver
         /**
@@ -170,6 +176,8 @@ class CCamDriveChangeNotifier : public CBase,
         CCamPropertyWatcher* iUsbMSWatcher;
         
         TBool iMassStorageModeOn;
+        
+        CCamTimer* iUSBTimer;
 
     };
 

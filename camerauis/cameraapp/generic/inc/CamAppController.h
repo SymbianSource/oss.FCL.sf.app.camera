@@ -2211,6 +2211,11 @@ public:
          * Getter for iIssueModeChangeSequenceSucceeded
          */
         TBool IssueModeChangeSequenceSucceeded();
+		
+        /**
+         * Initiates startup sequence in embedded mode 
+         */
+        void EmbeddedStartupSequence();
         
   private:
 

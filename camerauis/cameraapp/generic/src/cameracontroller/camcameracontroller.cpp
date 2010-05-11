@@ -53,7 +53,7 @@
 // Custom interfaces
 #include <ECamOrientationCustomInterface2.h>
 #include <ECamUIOrientationOverrideCustomAPI.h>
-
+#include <ecamusecasehintcustomapi.h>
 #include <ecamfacetrackingcustomapi.h>
 #include <akntoolbar.h>
 // -------------------------------------
@@ -102,6 +102,15 @@
 const TInt KIveRecoveryCountMax = 2;
 typedef CCamera::CCameraAdvancedSettings CAS;
 typedef CCamera::CCameraImageProcessing  CIP;
+
+//for camusecasehintcustomapi
+_LIT8(KCMRMimeTypeH263, "video/H263-2000");
+_LIT8(KCMRMimeTypeMPEG4VSPL2, "video/mp4v-es; profile-level-id=2");
+_LIT8(KCMRMimeTypeMPEG4VSPL3, "video/mp4v-es; profile-level-id=3");
+_LIT8(KCMRMimeTypeMPEG4VSPL4A, "video/mp4v-es; profile-level-id=4");
+_LIT8(KCMRMimeTypeH264AVCBPL30, "video/H264; profile-level-id=42801E");
+_LIT8(KCMRMimeTypeH264AVCBPL31, "video/H264; profile-level-id=42801F");
+
 
 namespace NCamCameraController
   {
@@ -1515,6 +1524,14 @@ CCamCameraController::CompleteSwitchCameraL()
       static_cast <MCameraOrientation*>(
   	    iCamera->CustomInterface( KCameraOrientationUid ) );
     PRINT1( _L("Camera <> Orientation custom i/f pointer:%d"), iCustomInterfaceOrientation );
+    
+    iCustomInterfaceUseCaseHint =
+      static_cast <MCameraUseCaseHint*>(
+  	    iCamera->CustomInterface( KCameraUseCaseHintUid ) );
+    PRINT1( _L("Camera <> UseCaseHint custom i/f pointer:%d"), iCustomInterfaceUseCaseHint );
+    
+    
+    
 
 #endif // CAMERAAPP_CAPI_V2_ADV
 
@@ -2549,6 +2566,14 @@ CCamCameraController
   if( ECamRequestReserve == aRequestId )
     {
     CheckFlagOffL( iInfo.iState, ECamReserved, KErrInUse );
+
+    // tell CAPI the usecase (still or video), not fatal if fails
+    TRAPD( err, HintUseCaseL() );
+    
+    if( err ) 
+      {
+      PRINT1( _L("Camera <> CCamCameraController::ProcessControlStartupRequestL HintUseCaseL failed:%d"), err)
+      }
 
     CAMERAAPP_PERF_CONTROLLER_START( ECamRequestReserve );
     iCamera->Reserve();
@@ -3723,7 +3748,7 @@ void CCamCameraController::ProcessAutofocusRequestL( const TCamCameraRequestId& 
     }
   else if( ECamRequestCancelAutofocus == aRequestId )
     {
-    if( iAfInProgress )
+    if( iAfInProgress && iInfo.iCurrentCamera == KPrimaryCameraIndex )
       {
       // Autofocus in progress, need to cancel it before setting range to hyperfocal
       PRINT( _L("Camera <> Cancel ongoing autofocus request") );
@@ -4117,6 +4142,12 @@ void
 CCamCameraController::HandleReserveGainEvent( TInt aStatus )
   {
   PRINT1( _L("Camera => CCamCameraController::HandleReserveGainEvent, status:%d"), aStatus );
+  CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+  if( appUi->StandbyStatus() && !appUi->IsRecoverableStatus() )
+      {
+      PRINT( _L("Camera <= CCamCameraController::HandleReserveGainEvent - return, in non recoverable standby state"));
+      return;
+      }
   if( iIdle && iIdle->IsActive() )
     {
     PRINT( _L("Camera => CCamCameraController::HandleReserveGainEvent - return, recovery in progress"));
@@ -4771,6 +4802,18 @@ void
 CCamCameraController::HandleAutoFocusEvent( TInt aStatus, const TUid& aEventUid )
   {
   PRINT1( _L("Camera => CCamCameraController::HandleAutoFocusEvent, status: %d"), aStatus );
+
+ if( IsFlagOn( iInfo.iState, ECamVideoOn ) && ECamCaptureOn == iInfo.iCaptureState )
+    {
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+    if ( appUi && !appUi->AppController().UiConfigManagerPtr()->IsContinuosAutofocusSupported() )
+        {
+        // Autofocus events are not need anymore, if video recording is started already.
+        PRINT( _L("Camera <= CCamCameraController::HandleAutoFocusEvent - ignore") );
+        return;
+        }
+    }
+
   TBool proceed = EFalse;
 
   // -------------------------------------------------------
@@ -6707,6 +6750,9 @@ void CCamCameraController::SetFaceTrackingL()
     if( iCustomInterfaceFaceTracking &&
         KPrimaryCameraIndex == iInfo.iCurrentCamera )
       {
+      // always enable FaceIndicators regardless of FT setting
+      // to get reticule visible  
+      iCustomInterfaceFaceTracking->EnableFaceIndicatorsL( ETrue );
       TBool ftOn( EFalse );
       iSettingProvider.ProvideCameraSettingL( ECameraSettingFacetracking, &ftOn );
       PRINT1( _L("Camera <> Set facetracking: %d"), ftOn )
@@ -6714,10 +6760,89 @@ void CCamCameraController::SetFaceTrackingL()
           ( !ftOn && iCustomInterfaceFaceTracking->FaceTrackingOn() ) )
           {
           iCustomInterfaceFaceTracking->SetFaceTrackingL( ftOn );
-          iCustomInterfaceFaceTracking->EnableFaceIndicatorsL( ETrue );
           DirectRequestL( ECamRequestSetAfRange );
           }
       }
     }
 
+// ---------------------------------------------------------------------------
+// CCamCameraController::HintUseCase
+// ---------------------------------------------------------------------------
+//
+void CCamCameraController::HintUseCaseL()
+    {
+    PRINT( _L("Camera => CCamCameraController::HintUseCaseL"))
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );    
+    //videomode    
+    if ( iCustomInterfaceUseCaseHint && appUi && 
+       ( ( appUi->IsEmbedded() && appUi->TargetMode() == ECamControllerVideo ) || 
+       ( !appUi->IsEmbedded() && iAppController.TargetMode() == ECamControllerVideo ) ) )
+        {
+        PRINT( _L("Camera <> HintUseCaseL VideoMode") );
+        MCameraUseCaseHint::TVideoCodec codec = MCameraUseCaseHint::ECodecUnknown;
+        MCameraUseCaseHint::TVideoProfile profile = MCameraUseCaseHint::EProfileUnknown;
+        TPckgBuf<TCamParamsVideoCae> params;
+        iSettingProvider.ProvideCameraParamL( ECameraParamVideoCae, &params );
+        if( params().iVideoType == KCMRMimeTypeH264AVCBPL31 )
+            {
+            PRINT( _L("Camera <> HintUseCaseL VideoMode KCMRMimeTypeH264AVCBPL31") );    
+            codec = MCameraUseCaseHint::ECodecH264;
+            profile = MCameraUseCaseHint::EProfileH264BpL3_1;
+            }
+        else if( params().iVideoType == KCMRMimeTypeH263 )
+            {
+            PRINT( _L("Camera <> HintUseCaseL VideoMode KCMRMimeTypeH263") );    
+            codec = MCameraUseCaseHint::ECodecH263;
+            profile = MCameraUseCaseHint::EProfileH263P0L10;
+            }
+        else if( params().iVideoType == KCMRMimeTypeH264AVCBPL30 )
+            {
+            PRINT( _L("Camera <> HintUseCaseL VideoMode KCMRMimeTypeH264AVCBPL30") );    
+            codec = MCameraUseCaseHint::ECodecH264;
+            profile = MCameraUseCaseHint::EProfileH264BpL3;
+            }            
+        else if( params().iVideoType == KCMRMimeTypeMPEG4VSPL4A )
+            {
+            PRINT( _L("Camera <> HintUseCaseL VideoMode KCMRMimeTypeMPEG4VSPL4A") );    
+            codec = MCameraUseCaseHint::ECodecMpeg4;
+            profile = MCameraUseCaseHint::EProfileMPEG4SpL4a;     
+            }
+        else if( params().iVideoType == KCMRMimeTypeMPEG4VSPL3 )
+            {
+            PRINT( _L("Camera <> HintUseCaseL VideoMode KCMRMimeTypeMPEG4VSPL3") );    
+            codec = MCameraUseCaseHint::ECodecMpeg4;
+            profile = MCameraUseCaseHint::EProfileMPEG4SpL3;                        
+            }
+        else if( params().iVideoType == KCMRMimeTypeMPEG4VSPL2 )
+            {
+            PRINT( _L("Camera <> HintUseCaseL VideoMode KCMRMimeTypeMPEG4VSPL2") );    
+            codec = MCameraUseCaseHint::ECodecMpeg4;
+            profile = MCameraUseCaseHint::EProfileMPEG4SpL2;                        
+            }                        
+        else
+            {
+            PRINT( _L("Camera <> HintUseCaseL VideoMode not supported") );        
+            //leave if type not supported
+            User::Leave( KErrNotSupported );
+            }    
+        iCustomInterfaceUseCaseHint->HintDirectVideoCaptureL( codec, 
+                                                              profile, 
+                                                              params().iFrameSize );
+            
+        }
+    //stillmode    
+    else if ( iCustomInterfaceUseCaseHint && appUi && 
+            ( ( appUi->IsEmbedded() && appUi->TargetMode() == ECamControllerImage ) || 
+              ( !appUi->IsEmbedded() && iAppController.TargetMode() == ECamControllerImage ) ) )
+        {
+        PRINT( _L("Camera <> HintUseCaseL ImageMode") );    
+        TPckgBuf<TCamParamsImage> params;
+        iSettingProvider.ProvideCameraParamL( ECameraParamImage, &params );
+        CCamera::TFormat format( params().iFormat );
+        TInt index ( GetResolutionIndexL( format, params().iSize ) );    
+        iCustomInterfaceUseCaseHint->HintStillCaptureL( format, index );
+        }
+
+    PRINT( _L("Camera <= CCamCameraController::HintUseCaseL"))    
+    }
 // End of file

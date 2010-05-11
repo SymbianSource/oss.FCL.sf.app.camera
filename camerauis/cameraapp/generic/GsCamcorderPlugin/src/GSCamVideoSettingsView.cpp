@@ -240,8 +240,8 @@ CGulIcon* CGSCamVideoSettingsView::CreateTabIconL()
         AknsUtils::SkinInstance(),  
         KAknsIIDDefault, 
         fileName,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_tab_video,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_tab_video );
+        EMbmCamerasettingspluginQgn_prop_set_mp_video_tab2,
+        EMbmCamerasettingspluginQgn_prop_set_mp_video_tab2 );
     
     return icon;
     }       

@@ -744,7 +744,8 @@ CCamStillPreCaptureContainer::HandleShutterKeyEventL( const TKeyEvent& aKeyEvent
         }
 
       CAknToolbar* fixedToolbar = appui->CurrentFixedToolbar();
-      if ( appui->SelfTimerEnabled() && fixedToolbar )
+
+      if ( fixedToolbar )
         {
         CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
         if ( extension )
@@ -752,6 +753,7 @@ CCamStillPreCaptureContainer::HandleShutterKeyEventL( const TKeyEvent& aKeyEvent
             extension->SetShown( EFalse );
             }
         }
+      iZoomPane->MakeVisible( EFalse, ETrue );
 
       return EKeyWasConsumed;
       }

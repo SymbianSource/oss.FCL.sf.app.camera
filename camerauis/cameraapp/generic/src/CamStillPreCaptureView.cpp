@@ -698,7 +698,7 @@ void CCamStillPreCaptureView::UpdateCbaL()
   // if the view is in capture setup mode
   else if ( iCaptureSetupModeActive )
       {
-      SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
+      SetSoftKeysL( R_CAM_SOFTKEYS_SETTINGS_SELECT_BACK__CHANGE_TRANSPARENT );
       }
   // if the view is in scene settings mode
   else if ( iSceneSettingModeActive )
@@ -2104,7 +2104,7 @@ void CCamStillPreCaptureView::UpdateVFGridIconsL()
             TFileName iconFileName;
             CamUtility::ResourceFileName( iconFileName );     
 
-            if ( grid == ECamViewfinderGridOn )
+            if ( grid == ECamViewfinderGridOff )
                 {
                 SetIconL(
                     button,
@@ -2211,7 +2211,7 @@ void CCamStillPreCaptureView::UpdateFaceTracKingIconsL()
                 MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
                 TFileName iconFileName;
                 CamUtility::ResourceFileName( iconFileName );  
-                  if ( face == ECamSettOn )
+                  if ( face == ECamSettOff )
                       {
                       PRINT( _L( "Camera => UpdateFaceTrackingIconL on" ) ); 
                       SetIconL (

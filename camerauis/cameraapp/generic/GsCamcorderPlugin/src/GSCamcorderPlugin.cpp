@@ -424,8 +424,8 @@ CGulIcon* CGSCamcorderPlugin::CreateIconL( const TUid /*aIconType*/ )
         AknsUtils::SkinInstance(), 
         KAknsIIDQgnPropSetAppsCams,
         fileName,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_list,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_list_mask );
+        EMbmCamerasettingspluginQgn_prop_set_apps_cams,
+        EMbmCamerasettingspluginQgn_prop_set_apps_cams_mask );
     
     return icon;
     }

@@ -197,7 +197,7 @@ CCamViewBase::DoActivateL( const TVwsViewId& /*aPostvViewId*/,
     PRINT( _L("CCamViewBase::DoActivateL call deactivate"));    
     TBool wasCameraUser = IsCameraUser();    
 
-    DoDeactivate();
+    PrepareDeactivate();
     // since we still use it
     if( wasCameraUser )
       {
@@ -212,9 +212,15 @@ CCamViewBase::DoActivateL( const TVwsViewId& /*aPostvViewId*/,
   if ( !iContainer )
     {
     CreateContainerL();
+    
+    if( iTempContainer )
+        {
+        AppUi()->RemoveFromStack( iTempContainer );
+        }
     AppUi()->AddToStackL( *this, iContainer );
     iContainer->ActivateL();
     }
+  PostDeactivate();
   
   SetTitlePaneTextL();
   
@@ -276,6 +282,57 @@ void CCamViewBase::DoDeactivate()
     	
 	PRINT( _L("Camera <= CCamViewBase::DoDeactivate" ))
 	}
+
+// ---------------------------------------------------------------------------
+// CCamViewBase::PrepareDeactivate
+// Prepare deactivation of this view
+// ---------------------------------------------------------------------------
+//
+void CCamViewBase::PrepareDeactivate()
+    {
+    PRINT( _L("Camera => CCamViewBase::PrepareDeactivate" ));
+      // Both standard container and standby container should be deactivated
+      // Store them for temporal variables until new containers have been
+      // created.
+      if ( iStandbyContainer ) // implies IsInStandbyMode
+          {
+          AppUi()->RemoveFromStack( iStandbyContainer );
+          iTempStandbyContainer=iStandbyContainer;
+          iStandbyContainer = NULL;
+          SetStandbyModeActive( EFalse );
+          }
+
+      if ( iContainer )
+          {
+          iTempContainer=iContainer;
+          iContainer = NULL;
+          }          
+    PRINT( _L("Camera <= CCamViewBase::PrepareDeactivate" ));    
+    }
+
+
+// ---------------------------------------------------------------------------
+// CCamViewBase::PostDeactivate
+// Completed prepared deactivation of this view
+// ---------------------------------------------------------------------------
+//
+void CCamViewBase::PostDeactivate()
+    {
+    PRINT( _L("Camera => CCamViewBase::PostDeactivate" ));    
+    // Both standard container and standby container should be deactivated
+    if ( iTempStandbyContainer ) // implies IsInStandbyMode
+        {
+        delete iTempStandbyContainer;
+        iTempStandbyContainer = NULL;
+        }
+
+    if ( iTempContainer )
+        {
+        delete iTempContainer;
+        iTempContainer = NULL;
+        }              
+    PRINT( _L("Camera <= CCamViewBase::PostDeactivate" ));    
+    }
 
 // ---------------------------------------------------------------------------
 // CCamViewBase::CCamViewBase

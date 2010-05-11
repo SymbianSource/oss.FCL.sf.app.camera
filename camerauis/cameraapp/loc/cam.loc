@@ -1134,19 +1134,19 @@ CHARACTER_SET UTF8
 //d:Visible in image quality slider control.
 //l:main_cam5_pane_t4/opt1
 //
-#define qtn_lcam_descr_quality_print9m "Capture images with 16:9 aspect ratio"
+#define qtn_lcam_descr_quality_print9m "Use for large sized prints up to 20x12 in (50x30 cm)"
 
 //d:Image quality setting description
 //d:Visible in image quality slider control.
 //l:main_cam5_pane_t4/opt1
 //
-#define qtn_lcam_descr_quality_print8m "Use for large sized prints up to 16 x 12 in (41x31 cm)"
+#define qtn_lcam_descr_quality_print8m "Use for large sized prints up to 16x12 in (40x30 cm)"
 
 //d:Image quality setting description
 //d:Visible in image quality slider control.
 //l:main_cam5_pane_t4/opt1
 //
-#define qtn_lcam_descr_quality_print6m "Capture images with 16:9 aspect ratio"
+#define qtn_lcam_descr_quality_print6m "Use for large sized prints up to 16x 9 in (40x23 cm)"
 
 //d:Image quality setting description
 //d:Visible in image quality slider control.
@@ -3330,19 +3330,20 @@ CHARACTER_SET UTF8
 //d:Visible in image quality slider control.
 //l:main_cset_text_pane
 //
-#define qtn_lcam_descr_quality_print9m_v2 "Capture images with 16:9 aspect ratio"
+#define qtn_lcam_descr_quality_print9m_v2 "Use for large sized prints up to 20x12 in (50x30 cm)"
 
 //d:Image quality setting description
 //d:Visible in image quality slider control.
 //l:main_cset_text_pane
 //
-#define qtn_lcam_descr_quality_print8m_v2 "Use for large sized prints up to 16 x 12 in (41x31 cm)"
+#define qtn_lcam_descr_quality_print8m_v2 "Use for large sized prints up to 16x12 in (40x30 cm)"
+
 
 //d:Image quality setting description
 //d:Visible in image quality slider control.
 //l:main_cset_text_pane
 //
-#define qtn_lcam_descr_quality_print6m_v2 "Capture images with 16:9 aspect ratio"
+#define qtn_lcam_descr_quality_print6m_v2 "Use for large sized prints up to 16x9 in (40x23 cm)"
 
 //d:Image quality setting description
 //d:Visible in image quality slider control.
@@ -4171,13 +4172,13 @@ CHARACTER_SET UTF8
 //d:Visible in image quality slider control.
 //l:main_cam5_pane_t4/opt1
 //
-#define qtn_lcam_descr_quality_print12m "Use for large sized prints up to 20x15 in (50x38 cm)"
+#define qtn_lcam_descr_quality_print12m "Use for large sized prints up to 20x16 in (50x40 cm)"
 
 //d:Image quality setting description
 //d:Visible in image quality slider control.
 //l:main_cset_text_pane
 //
-#define qtn_lcam_descr_quality_print12m_v2 "Use for large sized prints up to 20x15 in (50x38 cm)"
+#define qtn_lcam_descr_quality_print12m_v2 "Use for large sized prints up to 20x16 in (50x40 cm)"
 
 //d: Tooltip text for mark mode button 
 //d: in touch toolbar in sequence post capture view

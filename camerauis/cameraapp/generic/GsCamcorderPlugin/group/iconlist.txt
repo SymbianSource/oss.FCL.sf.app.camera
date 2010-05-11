@@ -3,5 +3,9 @@
 -c8,8 qgn_lcam_gen_sett_camera_folder_video.svg
 -1    qgn_lcam_gen_sett_camera_tab_image.svg
 -1    qgn_lcam_gen_sett_camera_tab_video.svg
+-c8,8 qgn_prop_set_apps_cams.svg
+-c8,8 qgn_prop_set_cams_image_sub.svg
+-c8,8 qgn_prop_set_cams_video_sub.svg
+-1    qgn_prop_set_mp_video_tab2.svg
 
 

@@ -1130,7 +1130,7 @@ void CCamShootingModeContainer::HandleListBoxEventL( CEikListBox* aListBox, TLis
               }
               break;  
         
-        case EEventItemClicked:
+        case EEventPenDownOnItem:
             {
             ShowTooltipL();
             }

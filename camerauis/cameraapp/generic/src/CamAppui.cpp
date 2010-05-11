@@ -95,7 +95,7 @@
 #include "CameraVariant.hrh"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
-#include "CamAppUiTraces.h"
+#include "CamAppuiTraces.h"
 #endif
 #include "camactivepalettehandler.h"
 #include "CamContainerBase.h"
@@ -593,6 +593,7 @@ OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP7_CCAMAPPUI_CONSTRUCTL, "e_ReadUiOri
     {  
     PRINT( _L("Camera => CCamAppUi::ConstructL create doc handler") );
     iDocHandler = CDocumentHandler::NewL( CEikonEnv::Static()->Process() );
+    iDocHandler->SetExitObserver(this);
   iController.CheckMemoryToUseL();
   
     // create navi-pane and navi-porgress bar for use in camcorder mode 
@@ -1234,6 +1235,16 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
     case EEikCmdExit: // fallthrough
     case EAknSoftkeyExit:
       {
+      CAknToolbar* fixedToolbar = CurrentFixedToolbar();
+      if ( fixedToolbar )
+        {
+        CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
+        if ( extension )
+            {
+            extension->SetShown( EFalse );
+            }
+        fixedToolbar->SetToolbarVisibility( EFalse );
+        } 
       OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP3_CCAMAPPUI_HANDLECOMMANDL, "e_ExternalExit 1" );
       PRINT( _L("Camera CCamAppUi external exit call") );
       if ( iEikonEnv->StartedAsServerApp() )
@@ -1684,10 +1695,24 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
     // -----------------------------------------------------
     case ECamCmdPlay:   
       {
-      TDataType dataType;
-      SetEmbedding( ETrue );
-      iDocHandler->OpenFileEmbeddedL( iController.CurrentFullFileName(),
-                                      dataType );
+      PRINT1(_L("Camera <=> CCamAppUi::HandleCommandL. case ECamCmdPlay, iVideoClipPlayInProgress:%d"), iVideoClipPlayInProgress);
+      
+      if ( !iVideoClipPlayInProgress)
+        {
+        TDataType dataType;
+        TInt           err;
+         
+        SetEmbedding( ETrue );
+        
+        err = iDocHandler->OpenFileEmbeddedL( iController.CurrentFullFileName(),  dataType );
+        PRINT1(_L("Camera <=> CCamAppUi::HandleCommandL. iDocHandler ->OpenFileEmbeddedL err:%d"), err);
+        
+        if ( KErrNone == err)
+            {
+            iVideoClipPlayInProgress = ETrue;
+            }
+        }  
+      
       }
       break;
      // -----------------------------------------------------
@@ -1973,13 +1998,17 @@ CCamAppUi::HandleCameraEventL( TInt              /*aStatus*/,
       if( iFirstBoot )
           {	
           PRINT( _L( "Camera <> CCamAppUi::HandleCameraEventL ECamCameraEventReserveRequested/ECamCameraEventPowerOnRequested" ) )	
-          if ( iWaitTimer->IsActive() )
+          // in embedded mode appui construct timer started already
+          if ( !IsEmbedded() )
               {
-              PRINT( _L( "Camera <> timer already active" ) )
-              iWaitTimer->Cancel();
+              if ( iWaitTimer->IsActive() )
+                  {
+                  PRINT( _L( "Camera <> timer already active" ) )
+                  iWaitTimer->Cancel();
+                  }
+              PRINT( _L( "Camera <> start the appui construct timer" ) )
+              iWaitTimer->Start( 0, 0,  TCallBack( AppUIConstructCallbackL, this ) );  
               }
-          PRINT( _L( "Camera <> start the appui construct timer" ) )
-          iWaitTimer->Start( 0, 0,  TCallBack( AppUIConstructCallbackL, this ) );  
           }
       else
           {
@@ -3207,10 +3236,25 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
               }
   
           // Free the needed ram memory if not enough available
-          iMemoryMonitor->CheckAndRequestMemoryL(
+          TInt memError = iMemoryMonitor->CheckAndRequestMemoryL(
                            iController.UiConfigManagerPtr()->CriticalLevelRamMemoryFocusGained(),
                            iController.UiConfigManagerPtr()->RequiredRamMemoryFocusGained(),
                            EFalse );
+
+          TInt freeMemory = 0;
+          TInt halerror=HAL::Get( HALData::EMemoryRAMFree, freeMemory );
+          if( halerror != KErrNone )
+              {
+              User::Leave( halerror );          
+              }
+          
+          if ( memError && freeMemory < iController.UiConfigManagerPtr()->CriticalLevelRamMemoryFocusGained() )
+              {
+              PRINT( _L("Camera <> CCamAppUi::HandleWsEvent ECamEventFocusGained memory too low. Exiting") );
+              CloseAppL();
+              PRINT( _L("Camera <= CCamAppUi::HandleWsEvent ECamEventFocusGained memory too low. Exiting") );
+              return;
+              }
 
 
           iController.SetEndKeyExitWaiting( EFalse );
@@ -3329,6 +3373,14 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
               RaisePreCaptureCourtesyUI( ETrue );
               }
           
+          //We hiden toolbar when keylock was set to on in pre-capture view and camera lost focus, 
+          //so we need to display toolbar when keylock is set to off and camera gain focus again.
+          if ( ECamViewStatePreCapture == iViewState &&
+               ECamPreCapViewfinder == iPreCaptureMode )  
+            {
+            SetToolbarVisibility(); 
+            }          
+          
           // If keylock is set on when recording is starting up but not yet 
           // started, display toolbar when keylock is set off since we are 
           // returning to precapture view, unless capturing is still going on.
@@ -3371,6 +3423,15 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
               {
               SubmergeToolbar();
               }
+              
+          //We need hiding the toolbar if keylock is set to on in pre-catpure view, 
+          //otherwise the toolbar will be displayed when press volume key in keylock on status.
+          if ( iController.IsKeyLockOn() &&
+               ECamViewStatePreCapture == iViewState && 
+               ECamPreCapViewfinder == iPreCaptureMode ) 
+            {
+            SubmergeToolbar(); 
+            }
 
           // focus lost event while videocall active and camera in standby,
           // no notification to views
@@ -6134,10 +6195,22 @@ void
 CCamAppUi::StartAsServerAppL( MCamEmbeddedObserver* aEmbeddedObserver, 
                               TInt                  aMode )
     {       
-    PRINT( _L("Camera => CCamAppUi::StartAsServerAppL") );  
+    PRINT1( _L("Camera => CCamAppUi::StartAsServerAppL mode:%d"), aMode );  
 
     __ASSERT_ALWAYS( aMode == ECamControllerVideo || aMode == ECamControllerImage, 
             CamPanic( ECamPanicNotSupported ) );
+
+    // start the ui construct timer to speed up the starting in embedded mode
+    if ( iController.UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )
+        {
+        if ( iWaitTimer->IsActive() )
+            {
+            PRINT( _L( "Camera <> timer already active" ) )
+            iWaitTimer->Cancel();
+            }
+        PRINT( _L( "Camera <> start the appui construct timer" ) )
+        iWaitTimer->Start( 0, 0,  TCallBack( AppUIConstructCallbackL, this ) );
+        }
 
     // Load Embedded Settings
     iController.LoadStaticSettingsL( ETrue );
@@ -6149,10 +6222,12 @@ CCamAppUi::StartAsServerAppL( MCamEmbeddedObserver* aEmbeddedObserver,
     if ( aMode == ECamControllerVideo )
         {
         iTargetMode = ECamControllerVideo;
+        iMode = ECamControllerVideo;
         }
     else if ( aMode == ECamControllerImage )
         {
         iTargetMode = ECamControllerImage;
+        iMode = ECamControllerImage;
         }
 
     // Find the parent app's name:
@@ -6244,7 +6319,9 @@ CCamAppUi::StartAsServerAppL( MCamEmbeddedObserver* aEmbeddedObserver,
     iViewState = ECamViewStatePreCapture;    
   iTargetViewState = ECamViewStatePreCapture;   	
     TrySwitchViewL();                                      
-
+    
+    // Start reserve-poweron sequence
+    iController.EmbeddedStartupSequence();
 
     PRINT( _L("Camera <= CCamAppUi::StartAsServerAppL") );
     }
@@ -7523,6 +7600,7 @@ void CCamAppUi::SetPreCaptureModeL(TCamPreCaptureMode aMode)
             if ( iController.IsTouchScreenSupported() )
                 {
                 precapView->CreateAndSetToolbarL( R_CAM_EMPTY_FIXED_TOOLBAR );
+                SetToolbarVisibility();
                 }
             EikSoftkeyPostingTransparency::MakeTransparent(
                 *precapView->ViewCba(), EFalse );
@@ -8441,9 +8519,19 @@ void CCamAppUi::CompleteAppUIConstructionL()
   
     ConstructNaviPaneL();
     
-    //always start in stillmode
-    SetDefaultViewL( *iStillCaptureView );
-        
+
+    //embedded camera may start straight in videomode
+    if( IsEmbedded() && iTargetMode == ECamControllerVideo )
+        {
+        SetDefaultViewL( *iVideoCaptureView );
+        PRINT( _L("Camera <> CCamAppUi::CompleteAppUIConstructionL SetDefaultView Video") );
+        }
+    else
+        {
+        SetDefaultViewL( *iStillCaptureView );
+        PRINT( _L("Camera <> CCamAppUi::CompleteAppUIConstructionL SetDefaultView Still") );
+        }
+                
     // pre-construct side-pane & zoom pane
     // get whether we overlay sidepane over view-finder
     TBool overlayViewFinder;
@@ -8458,6 +8546,7 @@ void CCamAppUi::CompleteAppUIConstructionL()
   
     PRINT( _L("Camera <> CCamAppUi::CompleteAppUIConstructionL create doc handler") );
     iDocHandler = CDocumentHandler::NewL( CEikonEnv::Static()->Process() );
+    iDocHandler->SetExitObserver(this);    
 
     // Check to see if we are set to use mmc storage but the card has
     // been removed.  
@@ -8495,8 +8584,15 @@ void CCamAppUi::CompleteAppUIConstructionL()
     iCollectionManager = new (ELeave) CCamCollectionManagerAO( *this );
     
     //iStillCaptureView->Container()->MakeVisible( ETrue );
-    ActivateLocalViewL( iStillCaptureView->Id() );
-    
+
+    if( IsEmbedded() && iTargetMode == ECamControllerVideo )
+        {
+        ActivateLocalViewL( iVideoCaptureView->Id() );    
+        }
+    else        
+        {
+        ActivateLocalViewL( iStillCaptureView->Id() );
+        }    
     StartCheckingDefaultAlbumIdL();
     PRINT( _L("Camera <= CCamAppUi::CompleteAppUIConstructionL") )
     }
@@ -8674,5 +8770,18 @@ TCamPreCaptureMode CCamAppUi::PreCaptureMode()
     PRINT1( _L("Camera <> CCamAppUi::PreCaptureMode %d"), iPreCaptureMode);
     return iPreCaptureMode;
     }
+
+void CCamAppUi::HandleServerAppExit(TInt aReason)
+    {
+    PRINT1(_L("Camera => CCamAppUi::HandleServerAppExit. aReason:%d"), aReason);
+
+    MAknServerAppExitObserver::HandleServerAppExit(aReason);
+
+    iVideoClipPlayInProgress = EFalse;
+    
+    PRINT(_L("Camera <= CCamAppUi::HandleServerAppExit."));
+    }
+
+
 
 //  End of File

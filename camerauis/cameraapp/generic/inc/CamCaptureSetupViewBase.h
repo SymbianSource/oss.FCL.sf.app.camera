@@ -289,6 +289,9 @@ class CCamCaptureSetupViewBase : public CCamViewBase
         
         // A second container that the view uses when in capture setup mode
         CCamCaptureSetupContainer* iCaptureSetupContainer;
+        
+        // Stores the previous capture mode of camera before entering Infolistbox mode 
+        TCamPreCaptureMode iPrevCaptureMode;
 
     };
 

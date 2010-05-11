@@ -599,12 +599,17 @@ void CCamInfoListBoxContainer::HandleListBoxEventL( CEikListBox* aListBox, TList
               }
               break;  
         
+        case EEventPenDownOnItem:
+            {            
+            ShowTooltipL();
+            }
+            break;
+                    
         case EEventItemClicked:
         case EEventItemSingleClicked:
             {
             TInt settingValue = CurrentSettingItemValue();
             iController.PreviewSettingChangeL( ECamSettingItemDynamicPhotoLightSensitivity, settingValue );
-            ShowTooltipL();
             }
             break;
         default:

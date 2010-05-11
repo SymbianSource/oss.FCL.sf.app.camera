@@ -98,6 +98,7 @@
 #include "camuidconstants.h"
 #include "camconfiguration.h"
 #include "CamPreCaptureViewBase.h"
+#include "CamPostCaptureViewBase.h"
 
 #include <cfclient.h>
 #include <cfcontextobject.h>
@@ -895,6 +896,7 @@ CCamAppController::CameraState() const
 TCamCameraMode
 CCamAppController::CurrentMode() const
   {
+  PRINT1( _L("Camera <> CCamAppController::CurrentMode:%d"), iInfo.iMode );
   return iInfo.iMode;
   }
 
@@ -2983,11 +2985,6 @@ CCamAppController::IssueModeChangeSequenceL( TBool aStartup )
 
   if( !aStartup )
     {
-    TBool usbPersonality = 0;
-    User::LeaveIfError ( RProperty::Get (KPSUidUsbWatcher, 
-                          KUsbWatcherSelectedPersonality, usbPersonality));
-    TInt mmcInserted = 0;
-    User::LeaveIfError( RProperty::Get( KPSUidUikon, KUikMMCInserted, mmcInserted ) );
     CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
     
     if(IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage) &&
@@ -2996,6 +2993,14 @@ CCamAppController::IssueModeChangeSequenceL( TBool aStartup )
             ( appUi->PreCaptureMode() == ECamPreCapViewfinder ||
               appUi->PreCaptureMode() == ECamPreCapGenericSetting ) )
         {
+        TBool usbPersonality = 0;
+        #ifndef __WINSCW__
+        User::LeaveIfError ( RProperty::Get (KPSUidUsbWatcher, 
+                          KUsbWatcherSelectedPersonality, usbPersonality));
+        #endif // __WINSCW__     
+        TInt mmcInserted = 0;
+        User::LeaveIfError( RProperty::Get( KPSUidUikon, KUikMMCInserted, mmcInserted ) );
+
         if( KUsbPersonalityIdMS == usbPersonality )
             {
             SwitchToStandbyL( ECamErrMassStorageMode );
@@ -7880,7 +7885,7 @@ void CCamAppController::HandlePropertyChangedL( const TUid& aCategory, const TUi
               appUi->GetActiveViewId( activeView );
               CCamPreCaptureViewBase* view = static_cast<CCamPreCaptureViewBase*>( appUi->View( activeView.iViewUid ) );
               if ( iInfo.iOperation == ECamStandby ||
-                   ( view && view->IsInStandbyMode() ) )
+                   ( view && view->IsInStandbyMode() ) && appUi->IsRecoverableStatus() )
                   {
                    PRINT( _L("Camera HandleSlideOpenedL => Exit Standby view") );
                    view->HandleCommandL( ECamCmdExitStandby );
@@ -8857,12 +8862,14 @@ CCamAppController::Version()
 TBool 
 CCamAppController::Busy() const
   {
+  PRINT1(_L("Camera <> CCamAppController::Busy:%d"), iBusyFlags );
   return (EBusyNone != iBusyFlags || CameraControllerBusy() );
   }
 
 TBool 
 CCamAppController::CameraControllerBusy() const
   {
+  PRINT1(_L("Camera <> CCamAppController::CameraControllerBusy:%d"), iCameraController->ControllerInfo().iBusy );  
   return (iCameraController && ECamBusyOff != iCameraController->ControllerInfo().iBusy );
   }
 
@@ -10462,7 +10469,8 @@ TBool CCamAppController::ExistMassStorage() const
         
     if ( (driveStatus & KMassStorageBits) == KMassStorageBits &&
 		 !(driveStatus & DriveInfo::EDriveCorrupt) &&
-    	((KErrNone == ret) && (KUsbPersonalityIdMS != usbPersonality) ) )
+    	(  KErrNotFound == ret || // USB watcher is not loaded
+    	        ( (KErrNone == ret) && (KUsbPersonalityIdMS != usbPersonality) ) ) )
         {
         return ETrue;
         }
@@ -10632,7 +10640,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
     {
     PRINT( _L("Camera <> Phone memory is the preferred storage location. Nothing to be done here. Return KErrNone.") )
     PRINT( _L("Camera <= CCamAppController::DriveChangeL" ) );
-
+    return KErrNone;
     }
    
   if  ( ( !IsMemoryAvailable( ECamMediaStorageCard, EFalse ) || 
@@ -10687,7 +10695,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
       iDismountPending = ETrue;    
       // Mass memory may be the forced storage location. Then it's necessary 
       // to switch to (forced) phone memory
-      ForceUsePhoneMemoryL( ETrue ); 
+      TRAP_IGNORE( ForceUsePhoneMemoryL( ETrue ) );
       PRINT( _L("Camera <= CCamAppController::DriveChangeL dismount pending" ) );  	
 
       }
@@ -10695,7 +10703,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
       {    	           
       // Mass memory may be the forced storage location. Then it's necessary 
       // to switch to (forced) phone memory
-      ForceUsePhoneMemoryL( ETrue );
+      TRAP_IGNORE( ForceUsePhoneMemoryL( ETrue ) );
       PRINT( _L("Camera <= CCamAppController::DriveChangeL dismount ok" ) );  	    
 
       }        
@@ -10710,7 +10718,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
     if ( iForceUseOfPhoneMemory )
       {
       PRINT( _L("Camera <> Phone memory is forced, switch back to user selected storage location.") )
-      ForceUsePhoneMemoryL( EFalse );
+      TRAP_IGNORE( ForceUsePhoneMemoryL( EFalse ) );
       }
     else
       {
@@ -10729,19 +10737,21 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
                   appUi->IsRecoverableStatus() )
               {
               TInt mmcInserted = 0;
+              TInt usbPersonality = 0;
               User::LeaveIfError( RProperty::Get( KPSUidUikon, KUikMMCInserted, mmcInserted ) );
+              User::LeaveIfError(RProperty::Get(KPSUidUsbWatcher, 
+                                            KUsbWatcherSelectedPersonality,
+                                            usbPersonality) );
               if( !IsMemoryAvailable(ECamMediaStorageMassStorage) &&
                    !IsMemoryAvailable(ECamMediaStorageCard) )
                   {
-                  if( mmcInserted )
+                  if( KUsbPersonalityIdMS == usbPersonality )
                       {
                       SwitchToStandbyL( ECamErrMassStorageMode );
-
                       }
-                  else
+                  else if ( !mmcInserted )
                       {
                       SwitchToStandbyL( ECamErrMemoryCardNotInserted );
-
                       }
                   }
               }
@@ -10756,6 +10766,26 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
               }
         }
     
+  if( appUi->CurrentViewState() == ECamViewStatePostCapture  )
+      {
+      if( aType == EDriveDismount && !IsMemoryAvailable( currentStorage, EFalse ))
+          {
+          TVwsViewId activeView;
+          if ( appUi->GetActiveViewId( activeView ) == KErrNone )
+              {
+              if( ECamViewIdStillPostCapture == activeView.iViewUid.iUid  ||
+                  ECamViewIdVideoPostCapture == activeView.iViewUid.iUid   )
+                  {
+                  CCamPostCaptureViewBase* view = 
+                          static_cast<CCamPostCaptureViewBase*>( appUi->View( activeView.iViewUid ) );
+                  if( view )
+                      {
+                      view->HandleCommandL( EAknSoftkeyBack );
+                      }
+                  }
+              }
+          }
+      }
 
   PRINT( _L("Camera <= CCamAppController::DriveChangeL" ) );  	
   return KErrNone;
@@ -10955,8 +10985,12 @@ void CCamAppController::CompleteCameraConstructionL()
     {
     PRINT( _L( "Camera => CCamAppController::CompleteCameraConstructionL" ) );    	
     iCameraController->CompleteSwitchCameraL();
-    // start reserve and poweron already here
-    IssueModeChangeSequenceL( ETrue );
+    // start reserve and poweron already here unless embedded mode used
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+    if( appUi && !appUi->IsEmbedded() )
+        {
+        IssueModeChangeSequenceL( ETrue );
+        }
     PRINT( _L( "Camera <= CCamAppController::CompleteCameraConstructionL" ) );    	    
     }
 
@@ -11013,6 +11047,8 @@ void CCamAppController::RotateSnapshotL()
         {
         iRotationArray->Reset();
         }
+    if( BurstCaptureArray()->Snapshot( iCurrentImageIndex ) ) 
+        {
     // copy snapshot to preserve the original snapshot bitmap
     // first get the handle for the original snapshot bitmap
     CFbsBitmap* snapshot = new (ELeave)CFbsBitmap();
@@ -11039,6 +11075,7 @@ void CCamAppController::RotateSnapshotL()
     iRotatorAo->RotateL( iRotatedSnapshot, MapCamOrientation2RotationAngle( iCaptureOrientation ) );
         
     CleanupStack::PopAndDestroy(snapshot);
+        } 
     PRINT( _L( "Camera <= CCamAppController::RotateSnapshotL" ) );    
     } 
     
@@ -11287,5 +11324,17 @@ TBool CCamAppController::IssueModeChangeSequenceSucceeded()
     {
     return iIssueModeChangeSequenceSucceeded;
     }
+	
+// ---------------------------------------------------------------------------
+// CCamAppController::EmbeddedStartupSequence
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::EmbeddedStartupSequence()
+    {
+    // If startup sequence fails at this point, it will be tried again later
+    TRAP_IGNORE( IssueModeChangeSequenceL( ETrue ) );
+    }
+
 //  End of File  
 
