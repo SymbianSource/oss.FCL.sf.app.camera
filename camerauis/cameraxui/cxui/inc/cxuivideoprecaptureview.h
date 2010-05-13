@@ -106,6 +106,9 @@ protected slots:
 
     void updateTimeLabels();
 
+    // from CxuiPrecaptureView
+    void hideControls();
+
 protected:
 
     void setVideoTime(HbLabel* label, int time);
@@ -118,6 +121,8 @@ protected:
     void initializeSettingsGrid();
     void setRecordingItemsVisibility(bool visible);
 
+    // from QObject
+    bool eventFilter(QObject *object, QEvent *event);
 protected:
     QTimer mElapsedTimer;
     int mTimeElapsed;
@@ -130,13 +135,13 @@ protected:
     HbToolBar *mToolBarIdle; // not own
     HbToolBar *mToolBarRec; // not own
     HbToolBar *mToolBarPaused; // not own
-    HbAction *mToggleLightAction; // not own
     HbDialog *mVideoScenePopup;
     CxeVideoCaptureControl *mVideoCaptureControl;
     HbMenu *mMenu;    // own
     QPropertyAnimation* mRecordingAnimation; //For recording indicator
 
     bool mCapturePending;
+    QTimer mPauseTimer;
     };
 
 #endif // CXUIVIDEOPRECAPTUREVIEW_H

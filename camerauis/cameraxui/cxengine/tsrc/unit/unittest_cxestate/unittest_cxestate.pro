@@ -8,10 +8,15 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxestate
-LIBS += -lplatformenv
-SOURCES += unittest_cxestate.cpp \
+
+LIBS *= -lplatformenv
+
+SOURCES *= unittest_cxestate.cpp \
             cxestate.cpp
-HEADERS += unittest_cxestate.h \
+
+HEADERS *= unittest_cxestate.h \
             cxestate.h

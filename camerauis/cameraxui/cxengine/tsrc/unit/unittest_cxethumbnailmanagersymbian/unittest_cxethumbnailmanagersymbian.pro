@@ -9,20 +9,20 @@
 # Contributors:
 # Description:
 
-CONFIG += cxeunit_no_system_paths
+CONFIG *= cxeunit_no_system_paths
 
 include(../unittest.pri)
 
 TARGET = unittest_cxethumbnailmanagersymbian
 
-INCLUDEPATH += ../system_include
-DEPENDPATH  += ../system_include
+INCLUDEPATH *= ../system_include
+DEPENDPATH  *= ../system_include
 
-HEADERS += unittest_cxethumbnailmanagersymbian.h \
+HEADERS *= unittest_cxethumbnailmanagersymbian.h \
            cxethumbnailmanagersymbian.h \
            thumbnailmanager_qt.h \
            cxutils.h
 
-SOURCES += unittest_cxethumbnailmanagersymbian.cpp \
+SOURCES *= unittest_cxethumbnailmanagersymbian.cpp \
            thumbnailmanager_qt.cpp \
            cxethumbnailmanagersymbian.cpp

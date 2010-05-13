@@ -34,6 +34,10 @@
 #include "cxenamespace.h"
 #include "cxeerror.h"
 
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cxesettingsimpTraces.h"
+#endif
 
 
 
@@ -44,6 +48,8 @@
 void CxeSettingsImp::loadSettings(Cxe::CameraMode mode)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXESETTINGSIMP_LOADSETTINGS_IN, "msg: e_CX_SETTINGS_LOADSETTINGS 1");
+
 
     // inform the settings model for the change in mode.
     mSettingsModel.cameraModeChanged(mode);
@@ -54,6 +60,7 @@ void CxeSettingsImp::loadSettings(Cxe::CameraMode mode)
         emit sceneChanged(mSettingsModel.currentVideoScene());
     }
 
+    OstTrace0(camerax_performance, CXESETTINGSIMP_LOADSETTINGS_OUT, "msg: e_CX_SETTINGS_LOADSETTINGS 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -123,7 +130,7 @@ CxeError::Id CxeSettingsImp::get(
 
     QVariant value;
     CxeError::Id err = getSceneMode(key, stringValue);
-    
+
     if (err == CxeError::NotFound) {
         // read from settings store
         err = mSettingsModel.getSettingValue(key, value);
@@ -180,14 +187,14 @@ CxeError::Id CxeSettingsImp::getSceneMode(
     } else {
         err = CxeError::NotFound;
     }
-    
-    if (err == CxeError::None) {    
+
+    if (err == CxeError::None) {
         stringValue = scene["sceneId"].toString();
     }
 
     CX_DEBUG(("CxeSettingsImp::get - key: %s value: %s",
               key.toAscii().data(), stringValue.toAscii().data()));
-    
+
     CX_DEBUG_EXIT_FUNCTION();
 
     return err;
@@ -244,7 +251,7 @@ CxeError::Id CxeSettingsImp::set(const QString& key,const QString& newValue)
               key.toAscii().data(), newValue.toAscii().data()));
 
     CxeError::Id err = setSceneMode(key, newValue);
-    
+
     if (err == CxeError::NotFound) {
         // not scene mode setting, try setting value to settings store
         mSettingsModel.set(key, newValue);
@@ -281,12 +288,12 @@ CxeError::Id CxeSettingsImp::setSceneMode(
     } else {
         err = CxeError::NotFound;
     }
-    
+
     if (err == CxeError::None) {
         // scene mode set, inform clients about scene mode change
         emit sceneChanged(scene);
     }
-        
+
     CX_DEBUG_EXIT_FUNCTION();
 
     return err;

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -26,13 +26,16 @@ symbian {
     TARGET.EPOCHEAPSIZE = 0x020000 0x1000000
     ICON                = ./icons/cxui.svg
     RSS_RULES           = "group_name=\"Qt Camera\";"
+    # Fix for QMake translating INCLUDEPATH to SYSTEMINCLUDE
+    # and TraceCompiler needing USERINCLUDE.
+    MMP_RULES           += "USERINCLUDE traces"
 }
 
 DEPENDPATH += ../cxengine/inc/api
 VPATH += src \
     inc
 INCLUDEPATH += inc \
-               ../traces
+               traces
 
 LIBS += -lecam  \
     -lecamsnapshot \
@@ -44,10 +47,14 @@ LIBS += -lecam  \
     -lcommonui \
     -lxqsettingsmanager \
     -lxqutils \
-    -lalfclient \
     -lxqservice \
     -lxqserviceutil \
-    -lshareui
+    -lshareui \
+    -lcone \
+    -lefsrv \
+    -lws32 \
+    -lgdi \
+    -lapgrfx
 
 CONFIG += hb
 CONFIG += service
@@ -55,61 +62,71 @@ QT += xml
 SERVICE.FILE = cxui_service_conf.xml
 SERVICE.OPTIONS = embeddable
 
-HB += hbcore hbwidgets hbutils hbtools hbfeedback
+HB += hbcore hbwidgets hbfeedback hbutils
 
 # Input
-HEADERS += cxuiprecaptureview.h \
+HEADERS += cxuiapplication.h \
+    cxuiapplicationframeworkmonitor.h \
+    cxuiapplicationframeworkmonitorprivate.h \
+    cxuiprecaptureview.h \
     cxuistillprecaptureview.h \
-    cxuistillprecaptureview2.h \
     cxuivideoprecaptureview.h \
-    cxuivideoprecaptureview2.h \
     cxuipostcaptureview.h \
     cxestillcapturecontrol.h \
     cxuicapturekeyhandler.h \
     cxuiviewmanager.h \
-    ../traces/OstTraceDefinitions.h \
     cxuidocumentloader.h \
     cxuidisplaypropertyhandler.h \
     cxuisettingdialog.h \
-    cxuisettingbutton.h \
     cxuisettingslider.h \
     cxuiselftimer.h \
     cxuisettingradiobuttonlist.h \
     cxuiscenelabel.h \
-    cxuisettingbuttoncontainer.h \
     cxuierrormanager.h \
     cxuistandby.h \
     cxuisettingradiobuttonlistmodel.h \
     cxuisettingsinfo.h \
     cxuisettingxmlreader.h \
-    cxuiserviceprovider.h
+    cxuiserviceprovider.h \
+    cxuiscenemodeview.h \
+    cxuizoomslider.h \
+    traces/OstTraceDefinitions.h
 
 SOURCES += main.cpp \
+    cxuiapplication.cpp \
+    cxuiapplicationframeworkmonitor.cpp \
+    cxuiapplicationframeworkmonitorprivate.cpp \
     cxuiprecaptureview.cpp \
     cxuivideoprecaptureview.cpp \
-    cxuivideoprecaptureview2.cpp \
     cxuistillprecaptureview.cpp \
-    cxuistillprecaptureview2.cpp \
     cxuipostcaptureview.cpp \
     cxuicapturekeyhandler.cpp \
     cxuiviewmanager.cpp \
     cxuidocumentloader.cpp \
     cxuidisplaypropertyhandler.cpp \
     cxuisettingdialog.cpp \
-    cxuisettingbutton.cpp \
     cxuisettingslider.cpp \
     cxuiselftimer.cpp \
     cxuisettingradiobuttonlist.cpp \
     cxuiscenelabel.cpp \
-    cxuisettingbuttoncontainer.cpp \
     cxuierrormanager.cpp \
     cxuistandby.cpp \
     cxuisettingradiobuttonlistmodel.cpp \
     cxuisettingsinfo.cpp \
     cxuisettingxmlreader.cpp \
-    cxuiserviceprovider.cpp
-
+    cxuiserviceprovider.cpp \
+    cxuiscenemodeview.cpp \
+    cxuizoomslider.cpp
 
 RESOURCES += cxui.qrc
+
+# Variating internal and external icons for scene selection view
+SCENEICONDIR = ../internal/icons
+exists($$SCENEICONDIR) {
+    RESOURCES += cxuiinternalsceneimages.qrc
+}
+else {
+    RESOURCES += cxuiexternalsceneimages.qrc
+}
 
 TRANSLATIONS = camera.ts

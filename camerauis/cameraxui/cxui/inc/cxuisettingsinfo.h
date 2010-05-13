@@ -76,7 +76,8 @@ namespace CxUiSettings
         QString mHeadingIcon;
         QStringList mSettingStrings;
         QPair<int, int> mRange;
-        qreal mStep;
+        qreal mMinorStep;
+        qreal mMajorStep;
     };
 }
 

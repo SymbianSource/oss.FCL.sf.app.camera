@@ -29,9 +29,11 @@
 #include <hbdialog.h>
 #include <hbdeviceprofile.h>
 #include <hbnotificationdialog.h>
+#include <hbmessagebox.h>
 #include <hbaction.h>
 #include <hbstyle.h>
 #include <hbframeitem.h>
+#include <hbwidget.h>
 
 #include "cxeengine.h"
 #include "cxeviewfindercontrol.h"
@@ -57,6 +59,7 @@
 #include "cxuiprecaptureviewTraces.h"
 #endif
 #include "cxuiserviceprovider.h"
+#include "cxuizoomslider.h"
 
 
 // CONSTANTS
@@ -93,11 +96,14 @@ CxuiPrecaptureView::CxuiPrecaptureView(QGraphicsItem *parent) :
     mSettingsDialogList(NULL),
     mKeyHandler(NULL),
     mQualityIcon(NULL),
+    mIndicators(NULL),
     mSettingsDialogHeading(NULL),
     mSliderSettingsDialog(NULL),
     mSliderSettingsDialogHeading(NULL),
     mSettingsSlider(NULL),
-    mSettingsInfo(NULL)
+    mSettingsInfo(NULL),
+    mSettingsDialogOkAction(NULL),
+    mSliderSettingsDialogOkAction(NULL)
 {
     CX_DEBUG_ENTER_FUNCTION();
     mDisplayHandler = new CxuiDisplayPropertyHandler();
@@ -249,6 +255,10 @@ void CxuiPrecaptureView::hideControls()
         mHideControlsTimeout.stop();
     }
     hideToolbar();
+
+    // show indicators when controls are hidden
+    showIndicators();
+
     // give the keyboard focus back to the view
     // for the view to receive key events
     setFocus();
@@ -331,6 +341,30 @@ void CxuiPrecaptureView::toggleZoom()
 }
 
 // ---------------------------------------------------------------------------
+// CxuiPrecaptureView::hideIndicators
+//
+// ---------------------------------------------------------------------------
+//
+void CxuiPrecaptureView::hideIndicators()
+{
+    if (mIndicators) {
+        mIndicators->hide();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// CxuiPrecaptureView::showIndicators
+//
+// ---------------------------------------------------------------------------
+//
+void CxuiPrecaptureView::showIndicators()
+{
+    if (mIndicators) {
+        mIndicators->show();
+    }
+}
+
+// ---------------------------------------------------------------------------
 // CxuiPrecaptureView::showControls
 //
 // ---------------------------------------------------------------------------
@@ -348,6 +382,10 @@ void CxuiPrecaptureView::showControls()
             showZoom();
             // show titlepane
             showItems(Hb::AllItems);
+
+            // hide indicators when controls are shown
+            hideIndicators();
+
             mHideControlsTimeout.start();
             mControlsVisible = true;
         }
@@ -430,7 +468,8 @@ void CxuiPrecaptureView::toggleControls()
 //
 void CxuiPrecaptureView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->type() == QEvent::GraphicsSceneMousePress) {
+    //! @todo temporary workaround for title bar mouse event handling bug
+    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70) {
         toggleControls();
         event->accept();
     }
@@ -684,6 +723,9 @@ CxuiSettingDialog* CxuiPrecaptureView::createSettingsDialog()
                                     documentLoader->findWidget(SETTINGS_DIALOG_CONTENT_WIDGET));
     CX_ASSERT_ALWAYS(mSettingsDialogList);
 
+    QObject *object = documentLoader->findObject(SETTINGS_DIALOG_OK_ACTION);
+    mSettingsDialogOkAction = qobject_cast<HbAction *>(object);
+    CX_DEBUG_ASSERT(mSettingsDialogOkAction);
 
     CX_DEBUG_EXIT_FUNCTION();
 
@@ -737,13 +779,12 @@ void CxuiPrecaptureView::launchSettingsDialog(QObject* action)
             // so we can easily decide if we show grid again or not.
             mSettingsDialog->setStarterAction(qobject_cast<HbAction *>(action));
 
-            HbAction *okAction = mSettingsDialog->primaryAction();
-            if (okAction) {
-                // disconnect primary action from dialog so that dialog won't be closed
+            if (mSettingsDialogOkAction) {
+                // disconnect ok action from dialog so that dialog won't be closed
                 // automatically when action is triggered. handleSelectionAccepted
                 // is called instead
-                okAction->disconnect(mSettingsDialog);
-                connect(okAction, SIGNAL(triggered()), mSettingsDialogList, SLOT(handleSelectionAccepted()));
+                mSettingsDialogOkAction->disconnect(mSettingsDialog);
+                connect(mSettingsDialogOkAction, SIGNAL(triggered()), mSettingsDialogList, SLOT(handleSelectionAccepted()));
 
                 // Close the dialog when new setting value is committed
                 connect(mSettingsDialogList, SIGNAL(selectionCommitted()), mSettingsDialog, SLOT(close()));
@@ -792,6 +833,9 @@ CxuiSettingDialog* CxuiPrecaptureView::createSliderSettingsDialog()
                                     documentLoader->findWidget(SETTINGS_SLIDER_DIALOG_CONTENT_WIDGET));
     CX_ASSERT_ALWAYS(mSettingsSlider);
 
+    QObject *object = documentLoader->findObject(SETTINGS_DIALOG_OK_ACTION);
+    mSliderSettingsDialogOkAction = qobject_cast<HbAction *>(object);
+    CX_DEBUG_ASSERT(mSliderSettingsDialogOkAction);
 
     CX_DEBUG_EXIT_FUNCTION();
 
@@ -843,13 +887,12 @@ void CxuiPrecaptureView::launchSliderSetting()
             // so we can easily decide if we show grid again or not.
             mSliderSettingsDialog->setStarterAction(qobject_cast<HbAction *>(action));
 
-            HbAction *okAction = mSliderSettingsDialog->primaryAction();
-            if (okAction) {
-                // disconnect primary action from dialog so that dialog won't be closed
+            if (mSliderSettingsDialogOkAction) {
+                // disconnect ok action from dialog so that dialog won't be closed
                 // automatically when action is triggered. handleSelectionAccepted
                 // is called instead
-                okAction->disconnect(mSliderSettingsDialog);
-                connect(okAction, SIGNAL(triggered()), mSettingsSlider, SLOT(handleSelectionAccepted()));
+                mSliderSettingsDialogOkAction->disconnect(mSliderSettingsDialog);
+                connect(mSliderSettingsDialogOkAction, SIGNAL(triggered()), mSettingsSlider, SLOT(handleSelectionAccepted()));
 
                 // Close the dialog when new setting value is committed
                 connect(mSettingsSlider, SIGNAL(selectionCommitted()), mSliderSettingsDialog, SLOT(close()));
@@ -891,13 +934,17 @@ void CxuiPrecaptureView::launchVideosApp()
 void CxuiPrecaptureView::launchNotSupportedNotification()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    HbNotificationDialog::launchDialog("Notification", "Not supported yet");
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
-    // Instantiate a popup
-    HbNotificationDialog note;
-    note.setTitle("Notification");
-    note.setText("Not supported yet");
-    note.exec();
-
+/*!
+* Show "Disk full" notification.
+*/
+void CxuiPrecaptureView::launchDiskFullNotification()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    HbMessageBox::warning(hbTrId("txt_cam_info_memory_full"));
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -967,16 +1014,18 @@ bool CxuiPrecaptureView::isPostcaptureOn() const
 * Adding zoom buttons to the slider
 * \param slider Pointer to the slider object, where the buttons will be added
 */
-void CxuiPrecaptureView::addIncreaseDecreaseButtons(HbSlider* slider)
+void CxuiPrecaptureView::addIncreaseDecreaseButtons(CxuiZoomSlider *slider)
 {
     // get current slider elements
-    QList<HbSlider::SliderElement> elements = slider->elements();
+    QList<QVariant> elements = slider->sliderElements();
+
     // add increase and decrease elements to the slider
     elements << HbSlider::IncreaseElement << HbSlider::DecreaseElement;
-    slider->setElements(elements);
+    slider->setSliderElements(elements);
+
     // set icons for the increase and decrease element
-    slider->setIcon(HbSlider::DecreaseElement , HbIcon("qtg_mono_minus"));
-    slider->setIcon(HbSlider::IncreaseElement , HbIcon("qtg_mono_plus"));
+    slider->setElementIcon(HbSlider::DecreaseElement , HbIcon("qtg_mono_minus"));
+    slider->setElementIcon(HbSlider::IncreaseElement , HbIcon("qtg_mono_plus"));
 }
 
 
@@ -990,15 +1039,17 @@ void CxuiPrecaptureView::createWidgetBackgroundGraphic(HbWidget *widget,
                                                        const QString &graphicName,
                                                        HbFrameDrawer::FrameType frameType)
 {
-    HbFrameDrawer *drawer = new HbFrameDrawer(graphicName, frameType);
+    if (widget) {
+        HbFrameDrawer *drawer = new HbFrameDrawer(graphicName, frameType);
 
-    if (drawer && widget) {
-        HbFrameItem *backgroundItem = new HbFrameItem(drawer, widget);
-        if (backgroundItem) {
-            // set item to fill the whole widget
-            backgroundItem->setGeometry(QRectF(QPointF(0, 0), widget->size()));
-            backgroundItem->setZValue(0);
-            widget->setBackgroundItem(backgroundItem);
+        if (drawer) {
+            HbFrameItem *backgroundItem = new HbFrameItem(drawer, widget);
+            if (backgroundItem) {
+                // set item to fill the whole widget
+                backgroundItem->setGeometry(QRectF(QPointF(0, 0), widget->size()));
+                backgroundItem->setZValue(0);
+                widget->setBackgroundItem(backgroundItem);
+            }
         }
     }
 }
@@ -1034,6 +1085,7 @@ QPointF CxuiPrecaptureView::getDialogPosition()
 */
 QString CxuiPrecaptureView::getSettingItemIcon(const QString &key, QVariant value)
 {
+    CX_DEBUG_ENTER_FUNCTION();
     CxUiSettings::RadioButtonListParams data;
     QString icon = "";
     if (mSettingsInfo && mSettingsInfo->getSettingsContent(key, data)) {
@@ -1045,6 +1097,9 @@ QString CxuiPrecaptureView::getSettingItemIcon(const QString &key, QVariant valu
             }
         }
     }
+
+    CX_DEBUG((("Setting icon name [%s]"), icon.toAscii().constData()));
+    CX_DEBUG_EXIT_FUNCTION();
     return icon;
 }
 

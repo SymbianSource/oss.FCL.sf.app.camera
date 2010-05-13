@@ -52,6 +52,7 @@ CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDe
 
     initializeStates();
 
+    OstTrace0(camerax_performance, CXEAUTOFOCUSCONTROLSYMBIAN_CREATE_MID1, "msg: e_CX_ENGINE_CONNECT_SIGNALS 1");
     // connect signals from cameraDevice, so we recieve events when camera reference changes
     QObject::connect( &cameraDevice,
                       SIGNAL(prepareForCameraDelete()),
@@ -64,6 +65,7 @@ CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDe
     QObject::connect( &cameraDevice,
                       SIGNAL(prepareForRelease()),
                       this,SLOT(prepareForRelease()) );
+    OstTrace0(camerax_performance, CXEAUTOFOCUSCONTROLSYMBIAN_CREATE_MID2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     initializeResources();
 
@@ -84,11 +86,14 @@ CxeAutoFocusControlSymbian::~CxeAutoFocusControlSymbian()
 
 /*
 * Start Autofocus
+* \param soundEnabled False if the auto focus sound don't need to be played
+* Default value for soundEnabled is true
 */
-CxeError::Id CxeAutoFocusControlSymbian::start()
+CxeError::Id CxeAutoFocusControlSymbian::start(bool soundEnabled)
 {
-    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <> state: %d", state() ) );
-
+    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <> state: %d, sound enabled: %d",
+               state(), soundEnabled ) );
+    mSoundEnabled = soundEnabled;
     int err = KErrNone;
 
     CX_ASSERT_ALWAYS(mAdvancedSettings);
@@ -104,7 +109,6 @@ CxeError::Id CxeAutoFocusControlSymbian::start()
     }
 
     CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <= err : %d", err ) );
-
     return CxeErrorHandlingSymbian::map(err);
 }
 
@@ -199,7 +203,8 @@ void CxeAutoFocusControlSymbian::handleCameraEvent(int eventUid, int error)
 
     // We're only interested in autofocus events
     if ( eventUid == KUidECamEventCameraSettingsOptimalFocusUidValue ||
-         eventUid == KUidECamEventCameraSettingAutoFocusType2UidValue ) {
+         eventUid == KUidECamEventCameraSettingAutoFocusType2UidValue ||
+         eventUid == KUidECamEventCameraSettingFocusRangeUidValue) {
          // Autofocus Event handle it.
          handleAfEvent(eventUid, error);
     }
@@ -410,6 +415,13 @@ void CxeAutoFocusControlSymbian::handleAfEvent(int eventUid, int error)
             } else {
                 setState(CxeAutoFocusControl::Failed, error);
             }
+         } else if (eventUid == KUidECamEventCameraSettingFocusRangeUidValue) {
+             // check for error, we don't need this event for anything else
+             if (error != KErrNone) {
+                 CX_DEBUG(("CxeAutofocusControlSymbian::handleAfEvent <> "
+                         "KUidECamEventCameraSettingFocusRangeUidValue: autofocus failed %d", error));
+                 setState(CxeAutoFocusControl::Failed, error);
+             }
          }
          break;
         }
@@ -433,6 +445,16 @@ void CxeAutoFocusControlSymbian::handleAfEvent(int eventUid, int error)
         break;
     } // end switch
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+  * Public method for checking if auto focus sound is enabled
+  * \return true if enabled
+  */
+bool CxeAutoFocusControlSymbian::isSoundEnabled() const
+{
+    return mSoundEnabled;
 }
 
 // end of file

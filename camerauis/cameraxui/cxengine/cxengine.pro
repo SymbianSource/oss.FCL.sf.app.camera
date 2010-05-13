@@ -23,15 +23,20 @@ INCLUDEPATH += inc \
                inc/sensor \
                inc/api \
                src/dummyengine \
-               ../traces  \
+               traces  \
                ../extensions/inc
 
 VPATH += src
 CONFIG += dll
 MOC_DIR = tmp
 
-TARGET.CAPABILITY = ALL -TCB -DRM
-TARGET.UID3 = 0x20027016
+symbian {
+    TARGET.CAPABILITY = ALL -TCB -DRM
+    TARGET.UID3 = 0x20027016
+    # Fix for QMake translating INCLUDEPATH to SYSTEMINCLUDE
+    # and TraceCompiler needing USERINCLUDE.
+    MMP_RULES           += "USERINCLUDE traces"
+}
 
 # Libs
 LIBS += -lecam
@@ -59,6 +64,8 @@ LIBS += -limagingconfigmanager
 LIBS += -lharvesterclient
 LIBS += -lthumbnailmanagerqt
 LIBS += -lxqserviceutil
+LIBS += -loommonitor
+LIBS += -lhal
 
 symbian {
    TARGET.EPOCALLOWDLLDATA = 1 // TODO: check this out??
@@ -145,13 +152,17 @@ HEADERS += cxecameradevicecontrol.h \
            cxequalitypresetssymbian.h \
            cxeharvestercontrolsymbian.h \
            cxethumbnailmanagersymbian.h \
+           cxememorymonitor.h \
+           cxememorymonitorprivate.h \
+           cxediskmonitor.h \
+           cxediskmonitorprivate.h \
            sensor/xqsensor.h \
            sensor/xqaccsensor.h \
            sensor/xqdeviceorientation.h \
            sensor/xqdeviceorientation_p.h \
            sensor/xqsensor_p.h \
            sensor/xqaccsensor_p.h \
-           ../traces/OstTraceDefinitions.h
+           traces/OstTraceDefinitions.h
 
 SOURCES += cxecameradevicecontrolsymbian.cpp \
            cxeengine.cpp \
@@ -187,12 +198,17 @@ SOURCES += cxecameradevicecontrolsymbian.cpp \
            cxequalitypresetssymbian.cpp \
            cxeharvestercontrolsymbian.cpp \
            cxethumbnailmanagersymbian.cpp \
+           cxememorymonitor.cpp \
+           cxememorymonitorprivate.cpp \
+           cxediskmonitor.cpp \
+           cxediskmonitorprivate.cpp \
            sensor/xqsensor.cpp \
            sensor/xqaccsensor.cpp \
            sensor/xqdeviceorientation.cpp \
            sensor/xqdeviceorientation_p.cpp \
            sensor/xqsensor_p.cpp \
            sensor/xqaccsensor_p.cpp
+
 
 
 

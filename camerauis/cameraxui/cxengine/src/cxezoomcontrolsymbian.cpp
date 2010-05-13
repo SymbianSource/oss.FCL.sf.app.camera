@@ -23,7 +23,15 @@
 #include "cxenamespace.h"
 #include "cxestate.h"
 
-const int NOT_DEFINED = -1;
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cxezoomcontrolsymbianTraces.h"
+#endif
+
+namespace
+{
+    const int NOT_DEFINED = -1;
+}
 
 // ---------------------------------------------------------------------------
 // CxeZoomControlSymbian::CxeZoomControlSymbian
@@ -156,6 +164,7 @@ void CxeZoomControlSymbian::handleSettingValueChanged(const QString& settingId, 
 void CxeZoomControlSymbian::prepareZoomForStill(int ecamStillResolutionIndex)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEZOOMCONTROLSYMBIAN_PREPARESTILL_IN, "msg: e_CX_PREPARE_ZOOM 1");
 
     if (mCameraDeviceControl.state() == CxeCameraDeviceControl::Ready) {
         init();
@@ -184,6 +193,7 @@ void CxeZoomControlSymbian::prepareZoomForStill(int ecamStillResolutionIndex)
         finalizeZoomPreparation(error);
     }
 
+    OstTrace0(camerax_performance, CXEZOOMCONTROLSYMBIAN_PREPARESTILL_OUT, "msg: e_CX_PREPARE_ZOOM 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -194,6 +204,7 @@ void CxeZoomControlSymbian::prepareZoomForStill(int ecamStillResolutionIndex)
 void CxeZoomControlSymbian::prepareZoomForVideo()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEZOOMCONTROLSYMBIAN_PREPAREVIDEO_IN, "msg: e_CX_PREPARE_ZOOM 1");
 
     if (mCameraDeviceControl.state() == CxeCameraDeviceControl::Ready) {
         init();
@@ -214,7 +225,7 @@ void CxeZoomControlSymbian::prepareZoomForVideo()
         finalizeZoomPreparation(error);
     }
 
-
+    OstTrace0(camerax_performance, CXEZOOMCONTROLSYMBIAN_PREPAREVIDEO_OUT, "msg: e_CX_PREPARE_ZOOM 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 

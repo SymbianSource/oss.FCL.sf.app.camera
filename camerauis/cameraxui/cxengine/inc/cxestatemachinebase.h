@@ -118,6 +118,9 @@ private:
     //! Hash table of all states. stateId as key
     QHash<int, CxeState*> mStates;
 
+    //! All states ORed together
+    int mStateBitsUsed;
+
     //! Current state
     int mStateId;
 

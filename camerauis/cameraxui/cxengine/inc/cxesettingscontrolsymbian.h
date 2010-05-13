@@ -48,6 +48,7 @@ private:
     void updateLightSensitivitySetting(QVariant newValue);
     void updateSharpnessSetting(QVariant newValue);
     void updateContrastSetting(QVariant newValue);
+    void updateBrightnessSetting(QVariant newValue);
     void updateExposureModeSetting(QVariant newValue);
     void updateExposureCompensationSetting(QVariant newValue);
 

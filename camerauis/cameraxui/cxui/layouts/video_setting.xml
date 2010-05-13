@@ -40,20 +40,20 @@
             <item string="txt_cam_list_negative" value="2" icon="" />
         </setting_list>
 
-        <!-- Video scene mode(setting list) -->
-        <setting_list id="video_scene"
+        <!-- Video scene modes -->
+        <setting_list id="video_scene_modes"
                       heading="txt_cam_title_scene_mode"
-                      preview="1"
-                      type="SingleLineListBox"
-                      setting_icon="">
-            <item string="txt_cam_list_automatic_scene"   value="0" icon=":/camerax/scene_automatic.png" />
-            <item string="txt_cam_list_low_light"    value="1" icon=":/camerax/scene_lowlight.png" />
-            <item string="txt_cam_list_night"    value="2" icon=":/camerax/scene_night.png" />
-        </setting_list>
+                      preview="0"
+                      type="SingleLineListBox">
 
+            <item string="txt_cam_list_automatic_scene" value="video_scene_auto"           icon="qtg_mono_automatic" />
+            <item string="txt_cam_list_low_light"         value="video_scene_low_light"          icon="qtg_mono_low_light" />
+            <item string="txt_cam_list_night"       value="video_scene_night"        icon="qtg_mono_night" />
+        </setting_list>
+        
         <!-- Exposure compensation (setting slider) -->
         <setting_slider id="ev_compensation_value" heading="txt_cam_title_exposure_compensation" setting_icon="">
-            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" lnValue="2" step="0.5" />
+            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" lnValue="2" minorStep="0.5" majorStep="1"/>
         </setting_slider>
 
     </settings>

@@ -18,17 +18,18 @@ include(../unittest.pri)
 
 TARGET = unittest_cxefilenamegeneratorsymbian
 
-LIBS += -lplatformenv
+LIBS *= -lplatformenv
+LIBS *= -lsysutil
 
-SOURCES += unittest_cxefilenamegeneratorsymbian.cpp \
+SOURCES *= unittest_cxefilenamegeneratorsymbian.cpp \
            cxefakesettings.cpp \
+           cxesysutil.cpp \
            cxeerrormappingsymbian.cpp \
-           cxefilenamegeneratorsymbian.cpp \
-           cxesysutil.cpp
+           cxefilenamegeneratorsymbian.cpp
 
-HEADERS += unittest_cxefilenamegeneratorsymbian.h \
+HEADERS *= unittest_cxefilenamegeneratorsymbian.h \
            cxefakesettings.h \
-           cxesettings.h \
-           cxesysutil.h
+           cxesysutil.h \
+           cxesettings.h
 
 

@@ -64,7 +64,7 @@ private:
 
     void loadSceneData(CxeScene &currentScene, CxeScene &sceneDefaultSettings);
     CxeError::Id sceneSettingValue(const QString &key, QVariant &value);
-    CxeError::Id setSceneSettingValue(const QString &key, int newValue);
+    CxeError::Id setSceneSettingValue(const QString &key, QVariant newValue);
 
     void supportedKeys(QList<QString> &runtimeKeys);
 

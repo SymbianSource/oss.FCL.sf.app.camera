@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -29,7 +29,6 @@
 #include <hbmenu.h>
 #include <hbdialog.h>
 #include <hbnotificationdialog.h>
-#include <hbfeedbackplayer.h>
 #include <hbfeedbacksettings.h>
 #include <hbfeedbacknamespace.h>
 
@@ -42,6 +41,7 @@
 #include "cxesettings.h"
 #include "cxuienums.h"
 #include "cxutils.h"
+#include "cxuizoomslider.h"
 #include "cxuicapturekeyhandler.h"
 #include "cxuidocumentloader.h"
 #include "OstTraceDefinitions.h"
@@ -59,6 +59,7 @@ namespace
 {
     static const int CXUI_ELAPSED_TIME_TIMEOUT = 1000; // 1 second
     static const int CXUI_RECORD_ANIMATION_DURATION = 3000; // milliseconds
+    static const int CXUI_PAUSE_TIMEOUT = 60*1000;   // 60 seconds
 
     //!@todo Localization?
     static const char* VIDEO_TIME_FORMAT = "%02d:%02d";
@@ -77,7 +78,6 @@ CxuiVideoPrecaptureView::CxuiVideoPrecaptureView(QGraphicsItem *parent) :
     mToolBarIdle(NULL),
     mToolBarRec(NULL),
     mToolBarPaused(NULL),
-    mToggleLightAction(NULL),
     mVideoScenePopup(NULL),
     mVideoCaptureControl(NULL),
     mMenu(NULL),
@@ -110,6 +110,12 @@ void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
             this, SLOT(handleSnapshot(CxeError::Id)));
     connect(mVideoCaptureControl, SIGNAL(stateChanged(CxeVideoCaptureControl::State, CxeError::Id)),
             this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
+    connect(mVideoCaptureControl, SIGNAL(remainingTimeChanged()),
+            this, SLOT(updateTimeLabels()));
+
+    mPauseTimer.setSingleShot(true);
+    connect(&mPauseTimer, SIGNAL(timeout()), this, SLOT(stop()));
+    mPauseTimer.setInterval(CXUI_PAUSE_TIMEOUT);
 
     HbAction *quitAction = new HbAction(Hb::QuitNaviAction, this);
     setNavigationAction(quitAction);
@@ -138,13 +144,11 @@ void CxuiVideoPrecaptureView::loadDefaultWidgets()
     mQualityIcon = qobject_cast<HbLabel *> (widget);
     CX_DEBUG_ASSERT(mQualityIcon);
 
-    // Create background graphics for indicator containers
-    HbWidget *indicatorContainer;
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_INDICATOR_CONTAINER_TOP);
-    indicatorContainer = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(indicatorContainer);
-    createWidgetBackgroundGraphic(indicatorContainer, TRANSPARENT_BACKGROUND_GRAPHIC);
-    indicatorContainer->show();
+    mIndicators = qobject_cast<HbWidget *>(widget);
+    CX_DEBUG_ASSERT(mIndicators);
+    // Create background graphics for indicator container
+    createWidgetBackgroundGraphic(mIndicators, TRANSPARENT_BACKGROUND_GRAPHIC);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -177,7 +181,7 @@ void CxuiVideoPrecaptureView::loadWidgets()
     Q_ASSERT_X(ok, "camerax ui", "error in xml file parsing");
     // get needed pointers to some of the widgets
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_ZOOM_SLIDER);
-    mSlider = qobject_cast<HbSlider *> (widget);
+    mSlider = qobject_cast<CxuiZoomSlider *> (widget);
     CX_DEBUG_ASSERT(mSlider);
 
     //Let's add a plus and minus buttons to the slider
@@ -196,10 +200,6 @@ void CxuiVideoPrecaptureView::loadWidgets()
     CX_DEBUG_ASSERT(mToolBarIdle);
     CX_DEBUG_ASSERT(mToolBarRec);
     CX_DEBUG_ASSERT(mToolBarPaused);
-
-    QObject* object = mDocumentLoader->findObject(VIDEO_PRE_CAPTURE_TOGGLE_LIGHT_ACTION);
-    mToggleLightAction = qobject_cast<HbAction *>(object);
-    CX_DEBUG_ASSERT(mToggleLightAction);
 
     hideControls();
 
@@ -227,21 +227,13 @@ void CxuiVideoPrecaptureView::loadWidgets()
         if (!CxuiServiceProvider::instance()->allowCameraSwitching()) {
             CX_DEBUG(("EMBEDDED: don't allow camera switching"));
 
-            HbAction *goto_2nd_cam = qobject_cast<HbAction*> (mDocumentLoader->findObject(VIDEO_PRE_CAPTURE_GOTO_2ND_CAMERA_ACTION));
-            if (goto_2nd_cam) {
-                CX_DEBUG(("EMBEDDED: setting camera switch to disabled"));
-                goto_2nd_cam->setEnabled(false);
-
-            }
         }
 
     }
 
 
-    // Create background graphics for indicator containers
+    // Create background graphic for indicator container
     HbWidget *indicatorContainer;
-
-
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_INDICATOR_CONTAINER_BOTTOM);
     indicatorContainer = qobject_cast<HbWidget *>(widget);
     CX_DEBUG_ASSERT(indicatorContainer);
@@ -263,12 +255,12 @@ void CxuiVideoPrecaptureView::loadWidgets()
 
     // Initializing recording indicator animation
     mRecordingAnimation = new QPropertyAnimation(mRecordingIcon, "opacity");
-    mRecordingAnimation->setStartValue(0.0);
+    mRecordingAnimation->setStartValue(0.2);
     mRecordingAnimation->setKeyValueAt(0.5, 1.0);
-    mRecordingAnimation->setEndValue(0.0);
+    mRecordingAnimation->setEndValue(0.2);
     mRecordingAnimation->setDuration(CXUI_RECORD_ANIMATION_DURATION);
     mRecordingAnimation->setLoopCount(-1);
-    mRecordingAnimation->setEasingCurve(QEasingCurve::InCubic);
+    mRecordingAnimation->setEasingCurve(QEasingCurve::OutInQuad);
 
     // Initialize the video time counters.
     updateTimeLabels();
@@ -313,10 +305,16 @@ void CxuiVideoPrecaptureView::record()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    mMenu = takeMenu();
-    hideControls();
-    mVideoCaptureControl->record();
-    //mRecordingAnimation->start();
+    int time(0);
+    mVideoCaptureControl->remainingTime(time);
+
+    if (time) {
+        mMenu = takeMenu();
+        mVideoCaptureControl->record();
+    } else {
+        launchDiskFullNotification();
+    }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -326,16 +324,9 @@ void CxuiVideoPrecaptureView::pause()
 
     CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
     if (state == CxeVideoCaptureControl::Recording) {
-        if (mRecordingAnimation && mRecordingIcon) {
-            mVideoCaptureControl->pause();
-            mRecordingAnimation->stop();
-            }
-
-        // force update of toolbar
-        showToolbar();
+        mVideoCaptureControl->pause();
     } else if (state == CxeVideoCaptureControl::Paused) {
         mVideoCaptureControl->record();
-        //mRecordingAnimation->start();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -413,10 +404,10 @@ void CxuiVideoPrecaptureView::disableFeedback()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    HbFeedbackPlayer* feedback = HbFeedbackPlayer::instance();
-    if (feedback) {
-        feedback->settings().disableFeedback();
-    }
+    HbFeedbackSettings settings;
+    settings.disableFeedback();
+
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -424,10 +415,9 @@ void CxuiVideoPrecaptureView::enableFeedback()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    HbFeedbackPlayer* feedback = HbFeedbackPlayer::instance();
-    if (feedback) {
-        feedback->settings().disableFeedback();
-    }
+    HbFeedbackSettings settings;
+    settings.enableFeedback();
+
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -463,31 +453,15 @@ void CxuiVideoPrecaptureView::updateTimeLabels()
     CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
     switch (state) {
         case CxeVideoCaptureControl::Ready:
-            // Update remaining time label
             getRemainingTime();
-            setVideoTime(mRemainingTimeText, mTimeRemaining);
-            // Update elapsed time label
             // Not recording => elapsed time is zero
             mTimeElapsed = 0;
-            setVideoTime(mElapsedTimeText, mTimeElapsed);
-
-            // Adjust labels' visibility
-            mRemainingTimeText->show();
-            mElapsedTimeText->show();
             break;
 
         case CxeVideoCaptureControl::Recording:
         case CxeVideoCaptureControl::Paused:
-            // Update remaining time label
             getRemainingTime();
-            setVideoTime(mRemainingTimeText, mTimeRemaining);
-            // Update elapsed time label
             getElapsedTime();
-            setVideoTime(mElapsedTimeText, mTimeElapsed);
-
-            // Adjust labels' visibility
-            mRemainingTimeText->show();
-            mElapsedTimeText->show();
             break;
 
         case CxeVideoCaptureControl::Idle:
@@ -495,20 +469,32 @@ void CxuiVideoPrecaptureView::updateTimeLabels()
         case CxeVideoCaptureControl::Preparing:
         default:
             // Minimize processing during initialization phase.
-            // Calculating remaining time involves checking disk space,
+            // Calculating remaining time involves checking disk space, avoiding that.
             // which
             mTimeRemaining = 0;
-            setVideoTime(mRemainingTimeText, mTimeRemaining);
             mTimeElapsed = 0;
-            setVideoTime(mElapsedTimeText, mTimeElapsed);
-
-            // Adjust labels' visibility
-            mRemainingTimeText->hide();
-            mElapsedTimeText->hide();
             break;
     }
 
+    setVideoTime(mRemainingTimeText, mTimeRemaining);
+    setVideoTime(mElapsedTimeText, mTimeElapsed);
+
     CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+  Overridded version of hideControls() that doesn't hide the controls when video recording
+  is paused.
+ */
+void CxuiVideoPrecaptureView::hideControls()
+{
+    if (mVideoCaptureControl && mVideoCaptureControl->state() == CxeVideoCaptureControl::Paused) {
+        // never hide controls in paused state
+        return;
+    }
+
+    CxuiPrecaptureView::hideControls();
+
 }
 
 /*!
@@ -559,6 +545,10 @@ void CxuiVideoPrecaptureView::showEvent(QShowEvent *event)
     }
 }
 
+/*!
+* Slot to handle video capture control state change.
+* Update visible items and stop / start timers.
+*/
 void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::State newState,
         CxeError::Id error)
 {
@@ -567,31 +557,51 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
 
     updateTimeLabels();
 
+    mPauseTimer.stop();
+
     switch (newState) {
     case CxeVideoCaptureControl::Ready:
-        setRecordingItemsVisibility(false);
+        if (mDocumentLoader){
+            mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_IDLE);
+        }
         if (mCapturePending) {
             mCapturePending = false;
             record();
         }
         break;
     case CxeVideoCaptureControl::Recording:
-        setRecordingItemsVisibility(true);
+        hideControls();
+        if (mDocumentLoader){
+            mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_RECORDING);
+        }
         mElapsedTimer.start(CXUI_ELAPSED_TIME_TIMEOUT);
         disableFeedback();
+        if (mRecordingAnimation && mRecordingIcon) {
+            mRecordingAnimation->start();
+        }
         break;
     case CxeVideoCaptureControl::Paused:
         mElapsedTimer.stop();
-        if (mRecordingIcon) {
-            mRecordingIcon->hide();
+
+        if (mDocumentLoader){
+            mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_PAUSED);
         }
-        if (mElapsedTimeText) {
-            mElapsedTimeText->show();
+
+        if (mRecordingAnimation && mRecordingIcon) {
+            mRecordingAnimation->stop();
         }
+        showControls();
         enableFeedback();
+        mPauseTimer.start();
         break;
     case CxeVideoCaptureControl::Stopping:
-        setRecordingItemsVisibility(false);
+        if (mDocumentLoader){
+            mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_PAUSED);
+        }
+
+        if (mRecordingAnimation && mRecordingIcon) {
+            mRecordingAnimation->stop();
+        }
         enableFeedback();
 
         if (isPostcaptureOn()) {
@@ -644,10 +654,10 @@ void CxuiVideoPrecaptureView::handleCaptureKeyPressed()
 
     switch (state) {
         case CxeVideoCaptureControl::Ready:
-        case CxeVideoCaptureControl::Paused:
             record();
             break;
         case CxeVideoCaptureControl::Recording:
+        case CxeVideoCaptureControl::Paused:
             stop();
             break;
         case CxeVideoCaptureControl::Idle:
@@ -685,7 +695,8 @@ void CxuiVideoPrecaptureView::handleQuitClicked()
     CX_DEBUG_ENTER_FUNCTION();
 
     CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
-    if (state == CxeVideoCaptureControl::Recording){
+    if (state == CxeVideoCaptureControl::Recording ||
+        state == CxeVideoCaptureControl::Paused) {
         // Disable going to post-capture when video capture control goes to stopping state.
         disconnect(mVideoCaptureControl, SIGNAL(stateChanged(CxeVideoCaptureControl::State, CxeError::Id)),
                    this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
@@ -701,14 +712,8 @@ void CxuiVideoPrecaptureView::handleQuitClicked()
 void CxuiVideoPrecaptureView::handleFocusLost()
 {
     CX_DEBUG_IN_FUNCTION();
-
-    CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
-    if (state == CxeVideoCaptureControl::Recording){
-        stop(); // delete recording icon
-    } else {
-        releaseCamera();
-    }
-
+    // Release camera. Stopping possibly ongoing recording is handled by engine.
+    releaseCamera();
 }
 
 void CxuiVideoPrecaptureView::handleBatteryEmpty()
@@ -726,31 +731,8 @@ void CxuiVideoPrecaptureView::handleBatteryEmpty()
 void CxuiVideoPrecaptureView::launchVideoScenePopup()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    if (mVideoScenePopup) {
-        CX_DEBUG(("mVideoScenePopup already exists, showing..."));
-        mVideoScenePopup->show();
-    } else {
-        CX_DEBUG(("Loading popup DocML"));
-        CxuiDocumentLoader* documentLoader = new CxuiDocumentLoader(mEngine);
-        bool ok = false;
-
-        // Use document loader to create popup
-        documentLoader->load(SCENEMODE_VIDEO_SETTING_XML, &ok);
-
-        CX_DEBUG(("load ok=%d", ok));
-
-        mVideoScenePopup = qobject_cast<HbDialog*>(documentLoader->findWidget("video_scenemode_popup"));
-        CX_DEBUG_ASSERT(mVideoScenePopup);
-        mVideoScenePopup->setTimeout(HbDialog::NoTimeout);
-        mVideoScenePopup->setBackgroundFaded(false);
-
-        delete documentLoader;
-        documentLoader = NULL;
-    }
-
-    connect(mKeyHandler, SIGNAL(autofocusKeyPressed()), mVideoScenePopup, SLOT(close()));
-
+    hideControls();
+    emit showScenesView();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -809,6 +791,29 @@ void CxuiVideoPrecaptureView::setRecordingItemsVisibility(bool visible) {
     if (mElapsedTimeText) {
         mElapsedTimeText->setVisible(visible);
     }
+}
+
+/*!
+ * Overridden eventFilter() to restart the pause timer.
+ */
+bool CxuiVideoPrecaptureView::eventFilter(QObject *object, QEvent *event)
+{
+
+    if (mVideoCaptureControl && mVideoCaptureControl->state() == CxeVideoCaptureControl::Paused) {
+        // restart the timer if the screen is touched and we are in paused state
+        switch (event->type())
+        {
+        case QEvent::GraphicsSceneMouseRelease:
+            mPauseTimer.start();
+            break;
+        case QEvent::GraphicsSceneMousePress:
+            mPauseTimer.stop();
+            break;
+        default:
+            break;
+        }
+    }
+    return CxuiPrecaptureView::eventFilter(object, event);
 }
 
 

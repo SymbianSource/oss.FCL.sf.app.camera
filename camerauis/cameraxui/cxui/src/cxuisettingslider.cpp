@@ -51,8 +51,8 @@ void CxuiSettingSlider::init(CxUiSettings::SliderParams *data)
         // labels correctly if step is something else than 1
         int step = 1;
         mSliderScaleValue = 1;
-        if (data->mStep != 0) {
-            mSliderScaleValue = step / data->mStep;
+        if (data->mMinorStep != 0) {
+            mSliderScaleValue = step / data->mMinorStep;
         }
 
         // scale min and max values as step has been set to 1
@@ -61,17 +61,13 @@ void CxuiSettingSlider::init(CxUiSettings::SliderParams *data)
         CX_DEBUG(("Setting slider range [%d..%d]", minvalue, maxvalue));
         setRange(minvalue,maxvalue);
         setSingleStep(step);
+         
+        setSnappingMode(HbSlider::MinorTickSnapping);
 
-        setSnappingMode(HbSlider::MajorTickSnapping);
-
-        // don't show labels and tickmarks if there are no strings to be shown
-        if (!data->mSettingStrings.isEmpty()) {
-            setMajorTickLabels(data->mSettingStrings);
-            setMajorTickInterval(step);
-            setTickPosition(Hb::SliderTicksLeft);
-        } else {
-            setTickPosition(Hb::NoSliderTicks);
-        }
+        setMajorTickLabels(data->mSettingStrings);
+        setMajorTickInterval(mSliderScaleValue * data->mMajorStep);
+        setMinorTickInterval(mSliderScaleValue * data->mMinorStep);
+        setTickPosition(Hb::SliderTicksAbove);
 
         setSettingId(data->mSettingId);
 

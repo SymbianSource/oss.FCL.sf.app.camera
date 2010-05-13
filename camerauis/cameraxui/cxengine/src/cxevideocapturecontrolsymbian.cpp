@@ -30,57 +30,87 @@
 #include "cxestillimagesymbian.h"
 #include "cxecameradevice.h"
 #include "cxutils.h"
-#include "cxesysutil.h"
 #include "cxestate.h"
 #include "cxesettings.h"
 #include "cxenamespace.h"
-#include "OstTraceDefinitions.h"
 #include "cxesoundplayersymbian.h"
 #include "cxequalitypresetssymbian.h"
 #include "cxeviewfindercontrolsymbian.h"
+#include "cxediskmonitor.h"
+
+#include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxevideocapturecontrolsymbianTraces.h"
 #endif
 
 
 // constants
-const TInt64  KMinRequiredSpaceVideo       = 4000000;
-const uint    KOneMillion                 = 1000000;
-const qreal   KMetaDataCoeff              = 1.03;      // Coefficient to estimate metadata amount
-const uint    KCamCMaxClipDurationInSecs  = 5400;      // Maximun video clip duration in seconds
-const qreal   KCMRAvgVideoBitRateScaler   = 0.9;       // avg video bit rate scaler
+namespace
+{
+    // Controller UId, can be used by the client to identify the controller, e.g. if the custom command can be used
+    const TUid KCamCControllerImplementationUid = {0x101F8503};
+    // TMMFEvent UIDs for Async stop
+    const TUid KCamCControllerCCVideoRecordStopped = {0x2000E546};
+    const TUid KCamCControllerCCVideoFileComposed = {0x2000E547};
+
+    // Custom command for setting a new filename without closing & reopening the controller
+    enum TCamCControllerCustomCommands
+        {
+        ECamCControllerCCNewFilename = 0,
+        ECamCControllerCCVideoStopAsync
+        };
+
+    const TInt    KOneSecond                  = 1000000;
+    const int     KMaintainAspectRatio        = false;
+    const TInt64  KMinRequiredSpaceVideo      = 4000000;
+    const uint    KOneMillion                 = 1000000;
+    const qreal   KMetaDataCoeff              = 1.03;      // Coefficient to estimate metadata amount
+    const uint    KCamCMaxClipDurationInSecs  = 5400;      // Maximun video clip duration in seconds
+    const qreal   KCMRAvgVideoBitRateScaler   = 0.9;       // avg video bit rate scaler
+}
 
 
 /*!
 * CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian
 */
-CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(CxeCameraDevice &cameraDevice,
-                                                             CxeViewfinderControl &viewfinderControl,
-                                                             CxeCameraDeviceControl &cameraDeviceControl,
-                                                             CxeFilenameGenerator &nameGenerator,
-                                                             CxeSettings &settings,
-                                                             CxeQualityPresets &qualityPresets) :
-    CxeStateMachine("CxeVideoCaptureControlSymbian"),
-    mVideoRecorder(NULL),
-    mCameraDevice(cameraDevice),
-    mCameraDeviceControl(cameraDeviceControl),
-    mViewfinderControl(viewfinderControl),
-    mFilenameGenerator(nameGenerator),
-    mSettings(settings),
-    mQualityPresets(qualityPresets),
-    mSnapshot(),
-    mNewFileName(""),
-    mCurrentFilename("")
+CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
+    CxeCameraDevice &cameraDevice,
+    CxeViewfinderControl &viewfinderControl,
+    CxeCameraDeviceControl &cameraDeviceControl,
+    CxeFilenameGenerator &nameGenerator,
+    CxeSettings &settings,
+    CxeQualityPresets &qualityPresets,
+    CxeDiskMonitor &diskMonitor)
+    : CxeStateMachine("CxeVideoCaptureControlSymbian"),
+      mVideoRecorder(NULL),
+      mCameraDevice(cameraDevice),
+      mCameraDeviceControl(cameraDeviceControl),
+      mViewfinderControl(viewfinderControl),
+      mFilenameGenerator(nameGenerator),
+      mSettings(settings),
+      mQualityPresets(qualityPresets),
+      mDiskMonitor(diskMonitor),
+      mSnapshot(),
+      mNewFileName(""),
+      mCurrentFilename("")
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_IN, "msg: e_CX_VIDEOCAPTURECONTROL_NEW 1");
 
     qRegisterMetaType<CxeVideoCaptureControl::State> ();
     initializeStates();
+
     mVideoStopSoundPlayer = new
              CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::VideoCaptureStop);
     mVideoStartSoundPlayer = new
              CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::VideoCaptureStart);
 
+    // If camera is already allocated, call the slot ourselves.
+    if (mCameraDevice.camera()) {
+        handleCameraAllocated(CxeError::None);
+    }
+
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_M1, "msg: e_CX_ENGINE_CONNECT_SIGNALS 1");
     // connect signals from cameraDevice, so we recieve events when camera reference changes
     connect(&cameraDevice, SIGNAL(prepareForCameraDelete()),
             this, SLOT(prepareForCameraDelete()));
@@ -96,6 +126,11 @@ CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(CxeCameraDevice &ca
     connect(&mSettings, SIGNAL(settingValueChanged(const QString&,QVariant)),
             this, SLOT(handleSettingValueChanged(const QString&,QVariant)));
 
+    connect(&mSettings, SIGNAL(sceneChanged(CxeScene&)), this, SLOT(handleSceneChanged(CxeScene&)));
+
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_M2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
+
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_OUT, "msg: e_CX_VIDEOCAPTURECONTROL_NEW 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -144,12 +179,13 @@ void CxeVideoCaptureControlSymbian::init()
 void CxeVideoCaptureControlSymbian::deinit()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_VIDEO_CAPCONT_DEINIT 1" );
 
     if(state() == Idle) {
         // nothing to do
         return;
     }
+
+    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_VIDEO_CAPCONT_DEINIT 1" );
 
     // first stop viewfinder
     mViewfinderControl.stop();
@@ -338,7 +374,6 @@ void CxeVideoCaptureControlSymbian::prepare()
     CX_DEBUG(("Video resoulution (%d,%d)", mCurrentVideoDetails.mWidth,
                                            mCurrentVideoDetails.mHeight));
     CX_DEBUG(("Video bitrate = %d)", mCurrentVideoDetails.mVideoBitRate));
-    CX_DEBUG(("Video frame rate = %f)", mCurrentVideoDetails.mVideoFrameRate));
 
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_VIDCAPCONT_PREPARE 1");
     TSize frameSize;
@@ -347,10 +382,20 @@ void CxeVideoCaptureControlSymbian::prepare()
     int muteSetting = 0; // audio enabled
     mSettings.get(CxeSettingIds::VIDEO_MUTE_SETTING, muteSetting);
 
+    // Check if scene defines frame rate.
+    // Use generic frame rate defined in video details, if no value is set in scene.
+    int frameRate = 0;
+    mSettings.get(CxeSettingIds::FRAME_RATE, frameRate);
+    if (frameRate <= 0) {
+        frameRate = mCurrentVideoDetails.mVideoFrameRate;
+    }
+
+    CX_DEBUG(("Video frame rate = %d)", frameRate));
+
     TRAPD(err,
               {
               mVideoRecorder->SetVideoFrameSizeL(frameSize);
-              mVideoRecorder->SetVideoFrameRateL(mCurrentVideoDetails.mVideoFrameRate);
+              mVideoRecorder->SetVideoFrameRateL(frameRate);
               mVideoRecorder->SetVideoBitRateL(mCurrentVideoDetails.mVideoBitRate);
               mVideoRecorder->SetAudioEnabledL(muteSetting == 0);
               // "No limit" value is handled in video recorder wrapper.
@@ -631,6 +676,8 @@ void CxeVideoCaptureControlSymbian::pause()
 
     setState(CxeVideoCaptureControl::Paused);
     TRAPD(pauseErr, mVideoRecorder->PauseL());
+    // play the sound, but not changing the state
+    mVideoStopSoundPlayer->play();
     if (pauseErr) {
         CX_DEBUG(("[WARNING] Error %d pausing!", pauseErr));
         //pause operation failed, report it
@@ -718,6 +765,7 @@ void CxeVideoCaptureControlSymbian::MvruoPrepareComplete(TInt aError)
         if (!aError) {
             setState(CxeVideoCaptureControl::Ready);
             mViewfinderControl.start();
+            OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_GOTOVIDEO, "msg: e_CX_GO_TO_VIDEO_MODE 0" );
         } else {
             deinit();
             // report error to interested parties
@@ -980,6 +1028,22 @@ CxeVideoCaptureControl::State CxeVideoCaptureControlSymbian::state() const
 */
 void CxeVideoCaptureControlSymbian::handleStateChanged(int newStateId, CxeError::Id error)
 {
+    switch (newStateId) {
+    case Ready:
+        if (error == CxeError::None && !mDiskMonitor.isMonitoring()) {
+            mDiskMonitor.start();
+            connect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
+        }
+        break;
+    default:
+        // Stop monitoring when video mode is released.
+        // Same goes during recording, as video times come from recorder.
+        if (mDiskMonitor.isMonitoring()) {
+            mDiskMonitor.stop();
+            disconnect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
+        }
+        break;
+    }
     emit stateChanged(static_cast<State> (newStateId), error);
 }
 
@@ -1027,13 +1091,18 @@ void CxeVideoCaptureControlSymbian::remainingTime(int &time)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (state() == CxeVideoCaptureControl::Recording) {
+    if (state() == CxeVideoCaptureControl::Recording ||
+        state() == CxeVideoCaptureControl::Paused) {
         TTimeIntervalMicroSeconds remaining = 0;
         remaining = mVideoRecorder->RecordTimeAvailable();
         time = remaining.Int64() * 1.0 / KOneSecond;
         CX_DEBUG(( "timeRemaining2: %d", time ));
     } else {
-        calculateRemainingTime(mCurrentVideoDetails, time);
+        // Check if we need to recalculate the remaining time.
+        if (mCurrentVideoDetails.mRemainingTime == CxeVideoDetails::UNKNOWN) {
+            calculateRemainingTime(mCurrentVideoDetails, mCurrentVideoDetails.mRemainingTime);
+        }
+        time = mCurrentVideoDetails.mRemainingTime;
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -1054,7 +1123,7 @@ void CxeVideoCaptureControlSymbian::calculateRemainingTime(CxeVideoDetails video
 
     // get available space in the drive selected in the settings
     // for storing videos
-    qint64 availableSpace = CxeSysUtil::spaceAvailable(CCoeEnv::Static()->FsSession(), mSettings);
+    qint64 availableSpace = mDiskMonitor.free();
 
     availableSpace = availableSpace - KMinRequiredSpaceVideo;
 
@@ -1120,7 +1189,8 @@ bool CxeVideoCaptureControlSymbian::elapsedTime(int &time)
 
     TTimeIntervalMicroSeconds timeElapsed = 0;
     bool ok = false;
-    if (state() == CxeVideoCaptureControl::Recording) {
+    if (state() == CxeVideoCaptureControl::Recording ||
+        state() == CxeVideoCaptureControl::Paused) {
         TRAPD( err, timeElapsed = mVideoRecorder->DurationL() );
         if (!err) {
             time = timeElapsed.Int64() * 1.0 / KOneSecond;
@@ -1144,6 +1214,7 @@ void CxeVideoCaptureControlSymbian::handleSoundPlayed()
     // start recording, if we were playing capture sound
     if (state() == CxeVideoCaptureControl::PlayingStartSound) {
         setState(CxeVideoCaptureControl::Recording);
+
         mVideoRecorder->Record();
     }
 
@@ -1168,14 +1239,21 @@ void CxeVideoCaptureControlSymbian::handleSettingValueChanged(const QString& set
             // re-prepare for video
             if (state() == Ready) {
                 // release resources
-         	    deinit();
+                deinit();
                 // initialize video recording again
-           	    init();
-           	}
+                init();
+            }
         } else if (settingId == CxeSettingIds::VIDEO_MUTE_SETTING) {
             // mute setting changed, apply the new setting and re-prepare.
             setState(Preparing);
             prepare();
+        } else if (settingId == CxeSettingIds::FRAME_RATE){
+            // Frame rate setting changed. Need to re-prepare if we are prepared already.
+            // Otherwise can wait for next init call.
+            if (state() == Ready) {
+                setState(Preparing);
+                prepare();
+            }
         } else {
             // Setting not relevant to video mode
         }
@@ -1184,6 +1262,48 @@ void CxeVideoCaptureControlSymbian::handleSettingValueChanged(const QString& set
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Scene mode changed. We need to know about it because frame rate
+ * might have changed.
+ */
+void CxeVideoCaptureControlSymbian::handleSceneChanged(CxeScene& scene)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // make sure we are in video mode
+    if (mCameraDeviceControl.mode() == Cxe::VideoMode) {
+        // Frame rate setting might have changed so re-prepare.
+        if (state() == Ready) {
+            setState(Preparing);
+            prepare();
+        }
+
+    }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Disk space changed.
+* Emit remaining time changed signal, if space change affects it.
+*/
+void CxeVideoCaptureControlSymbian::handleDiskSpaceChanged()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // Ignore updates on preparing phase.
+    if (state() == CxeVideoCaptureControl::Ready) {
+
+        int time(0);
+        calculateRemainingTime(mCurrentVideoDetails, time);
+
+        if (time !=  mCurrentVideoDetails.mRemainingTime) {
+            mCurrentVideoDetails.mRemainingTime = time;
+            emit remainingTimeChanged();
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
 /*!
 * Returns QList of all supported video quality details based on the camera index

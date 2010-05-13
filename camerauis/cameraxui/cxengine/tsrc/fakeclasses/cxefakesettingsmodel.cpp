@@ -98,29 +98,26 @@ CxeError::Id CxeFakeSettingsModel::setImageScene(const QString &newScene)
     mDummyScene.clear();
 
     // image scene mode key values
-    if(newScene == "ImageSceneAuto") {
+    if(newScene == CxeSettingIds::IMAGE_SCENE_AUTO) {
         mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_AUTO);
     }
-    else if(newScene == "ImageScenePortrait") {
+    else if(newScene == CxeSettingIds::IMAGE_SCENE_PORTRAIT) {
         mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_PORTRAIT);
     }
-    else if(newScene == "ImageSceneScenery") {
+    else if(newScene == CxeSettingIds::IMAGE_SCENE_SCENERY) {
         mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_SCENERY);
     }
-    else if(newScene == "ImageSceneMacro") {
+    else if(newScene == CxeSettingIds::IMAGE_SCENE_MACRO) {
         mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_MACRO);
     }
-    else if(newScene == "ImageSceneSports") {
+    else if(newScene == CxeSettingIds::IMAGE_SCENE_SPORTS) {
         mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_SPORTS);
     }
-    else if(newScene == "ImageSceneNight") {
+    else if(newScene == CxeSettingIds::IMAGE_SCENE_NIGHT) {
         mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_NIGHT);
     }
-    else if(newScene == "ImageSceneNightPortrait") {
+    else if(newScene == CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT) {
         mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT);
-    }
-    else if(newScene == "ImageSceneCloseUp") {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_CLOSEUP);
     }
     else {
         return CxeError::NotFound;
@@ -134,16 +131,16 @@ CxeError::Id CxeFakeSettingsModel::setVideoScene(const QString &newScene)
     mDummyScene.clear();
 
     // image scene mode key values
-    if(newScene == "VideoSceneAuto") {
+    if(newScene == CxeSettingIds::VIDEO_SCENE_AUTO) {
         mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_AUTO);
     }
-    else if(newScene == "VideoSceneNightPortrait") {
+    else if(newScene == CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT) {
         mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT);
     }
-    else if(newScene == "VideoSceneLowLight") {
+    else if(newScene == CxeSettingIds::VIDEO_SCENE_LOWLIGHT) {
         mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_LOWLIGHT);
     }
-    else if(newScene == "VideoSceneNight") {
+    else if(newScene == CxeSettingIds::VIDEO_SCENE_NIGHT) {
         mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_NIGHT);
     }
     else {
@@ -159,13 +156,14 @@ CxeError::Id CxeFakeSettingsModel::setVideoScene(const QString &newScene)
 void CxeFakeSettingsModel::initDefaultCameraSettings()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mSettingStore.insert(CxeSettingIds::BRIGHTNESS,   QVariant(1));
     mSettingStore.insert(CxeSettingIds::FNAME_FOLDER_SUFFIX, QVariant(1));
     mSettingStore.insert(CxeSettingIds::FNAME_MONTH_FOLDER,  QVariant(1));
     mSettingStore.insert(CxeSettingIds::FNAME_IMAGE_COUNTER, QVariant(1));
     mSettingStore.insert(CxeSettingIds::FNAME_VIDEO_COUNTER, QVariant(1));
     mSettingStore.insert(CxeSettingIds::COLOR_TONE, QVariant(1));
+    mSettingStore.insert(CxeSettingIds::SHARPNESS, QVariant(1));
     mSettingStore.insert(CxeSettingIds::CONTRAST, QVariant(1));
+    mSettingStore.insert(CxeSettingIds::BRIGHTNESS,   QVariant(1));
     mSettingStore.insert(CxeSettingIds::EV_COMPENSATION_VALUE, QVariant(1));
     mSettingStore.insert(CxeSettingIds::EXPOSURE_MODE, QVariant(1));
     mSettingStore.insert(CxeSettingIds::FLASH_MODE, QVariant(1));
@@ -174,7 +172,6 @@ void CxeFakeSettingsModel::initDefaultCameraSettings()
     mSettingStore.insert(CxeSettingIds::IMAGE_QUALITY, QVariant(1));
     mSettingStore.insert(CxeSettingIds::IMAGE_SCENE, QVariant(1));
     mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_AUTO, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_CLOSEUP, QVariant(1));
     mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_MACRO, QVariant(1));
     mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_NIGHT, QVariant(1));
     mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, QVariant(1));
@@ -185,7 +182,6 @@ void CxeFakeSettingsModel::initDefaultCameraSettings()
     mSettingStore.insert(CxeSettingIds::SCENE_ID, QVariant(1));
     mSettingStore.insert(CxeSettingIds::SECONDARY_CAMERA, QVariant(1));
     mSettingStore.insert(CxeSettingIds::SELF_TIMER, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::SHARPNESS, QVariant(1));
     mSettingStore.insert(CxeSettingIds::VIDEO_SCENE, QVariant(1));
     mSettingStore.insert(CxeSettingIds::VIDEO_SCENE_AUTO, QVariant(1));
     mSettingStore.insert(CxeSettingIds::VIDEO_SCENE_LOWLIGHT, QVariant(1));

@@ -14,33 +14,35 @@
 * Description:
 *
 */
-#include <QApplication>
-#include <QGraphicsProxyWidget>
-#include <hbapplication.h>
-#include <hbmainwindow.h>
+
 #include <coemain.h>
 #include <eikenv.h>
+#include <QApplication>
+#include <QGraphicsProxyWidget>
+// needed for localization
+#include <QTranslator>
+#include <QLocale>
+#include <hbmainwindow.h>
+#include <xqserviceutil.h>
 
 #include "cxeengine.h"
 #include "cxecameradevicecontrol.h"
-#include "cxuistillprecaptureview.h"
-#include "cxuivideoprecaptureview.h"
-#include "cxuicapturekeyhandler.h"
+#include "cxuiapplication.h"
 #include "cxuiviewmanager.h"
 #include "cxutils.h"
+#include "cxuiserviceprovider.h"
+
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "mainTraces.h"
 #endif
 
-// needed for localization
-#include <QTranslator>
-#include <QLocale>
-
-#include "cxuiserviceprovider.h"
-#include <xqserviceutil.h>
-
 using namespace Cxe;
+
+// CONSTANTS
+const QString TRANSLATIONS_PATH = "z:/resource/qt/translations/";
+const QString TRANSLATIONS_FILE_NAME = "camera_";
+const QString COMMON_TRANSLATIONS_FILE_NAME = "common_";
 
 int main(int argc, char *argv[])
 {
@@ -49,37 +51,16 @@ int main(int argc, char *argv[])
 
     Q_INIT_RESOURCE(cxui);
 
-    OstTrace0( camerax_performance, DUP7__MAIN, "msg: e_CX_HBAPP_CREATION 1" );
-    HbApplication app(argc, argv);
-    OstTrace0( camerax_performance, DUP8__MAIN, "msg: e_CX_HBAPP_CREATION 0" );
-
-    // Load the language specific localization files: application + common
-    QTranslator translator;
-    QString lang = QLocale::system().name();
-    QString path = "z:/resource/qt/translations/";
-
-    CX_DEBUG(("CxUI: loading translation"));
-    bool ret = false;
-    ret = translator.load(path + "camera_" + lang);
-    CX_DEBUG(("load ok=%d", ret));
-    app.installTranslator( &translator );
-
-    QTranslator commonTranslator;
-    commonTranslator.load(path + "common_" + lang);
-    app.installTranslator(&commonTranslator);
-
-    OstTrace0( camerax_performance, DUP11__MAIN, "msg: e_CX_HBMAINWINDOW_CREATION 1" );
-    HbMainWindow mainWindow(0, Hb::WindowFlagTransparent |
-                               Hb::WindowFlagNoBackground);
-    mainWindow.setAttribute(Qt::WA_NoBackground);
-    OstTrace0( camerax_performance, DUP12__MAIN, "msg: e_CX_HBMAINWINDOW_CREATION 0" );
+    OstTrace0( camerax_performance, DUP1__MAIN, "msg: e_CX_HBAPP_CREATION 1" );
+    CxuiApplication app(argc, argv);
+    OstTrace0( camerax_performance, DUP2__MAIN, "msg: e_CX_HBAPP_CREATION 0" );
 
     // Creating and initializing engine as early as possible.
     // Reserve and power on can then proceed in parallel with
     // ui construction.
-    OstTrace0( camerax_performance, DUP1__MAIN, "msg: e_CX_CREATE_ENGINE 1" );
+    OstTrace0( camerax_performance, DUP7__MAIN, "msg: e_CX_CREATE_ENGINE 1" );
     CxeEngine *eng = CxeEngine::createEngine();
-    OstTrace0( camerax_performance, DUP2__MAIN, "msg: e_CX_CREATE_ENGINE 0" );
+    OstTrace0( camerax_performance, DUP8__MAIN, "msg: e_CX_CREATE_ENGINE 0" );
 
     if (XQServiceUtil::isService()) {
         // Embedded mode.  Engine is inited to correct mode
@@ -89,42 +70,65 @@ int main(int argc, char *argv[])
         CX_DEBUG(("CxUI: done"));
     } else {
         // Normal mode. Init engine now.
-        OstTrace0( camerax_performance, DUP5__MAIN, "msg: e_CX_INIT_ENGINE 1" );
-        eng->initMode(Cxe::ImageMode);
-        OstTrace0( camerax_performance, DUP6__MAIN, "msg: e_CX_INIT_ENGINE 0" );
+        OstTrace0( camerax_performance, DUP9__MAIN, "msg: e_CX_INIT_ENGINE 1" );
+		 //! @todo temporarily commented as part of a hack to change the startup sequence
+         // to avoid GOOM issues
+        //eng->initMode(Cxe::ImageMode);
+        OstTrace0( camerax_performance, DUP10__MAIN, "msg: e_CX_INIT_ENGINE 0" );
     }
 
-    // If the parent of the engine is set to be the
-    // HbApplication, then for some reason the engine won't be deleted
-    // on shutdown (or at least there will be no traces visible of it)
-    //eng->setParent(&app); // HbApplication will now own the engine
+    // Load the language specific localization files: application + common
+    OstTrace0( camerax_performance, DUP3__MAIN, "msg: e_CX_LOAD_TRANSLATIONS 1" );
+    QTranslator translator;
+    QString lang = QLocale::system().name();
 
-    CxuiCaptureKeyHandler keyHandler(*eng);
+    CX_DEBUG(("CxUI: loading translation"));
+    bool ret = false;
+    ret = translator.load(TRANSLATIONS_PATH + TRANSLATIONS_FILE_NAME + lang);
+    CX_DEBUG(("load ok=%d", ret));
+    app.installTranslator( &translator );
 
-    OstTrace0( camerax_performance, DUP3__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 1" );
-    CxuiViewManager viewManager(mainWindow, *eng, keyHandler);
-    OstTrace0( camerax_performance, DUP4__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 0" );
+    QTranslator commonTranslator;
+    CX_DEBUG(("CxUI: loading common translation"));
+    ret = false;
+    ret = commonTranslator.load(TRANSLATIONS_PATH + COMMON_TRANSLATIONS_FILE_NAME + lang);
+    CX_DEBUG(("load ok=%d", ret));
+    app.installTranslator(&commonTranslator);
+    OstTrace0( camerax_performance, DUP4__MAIN, "msg: e_CX_LOAD_TRANSLATIONS 0" );
 
-    // Setting the viewmanager as the parent of the engine fixes the deletion issue
-    eng->setParent(&viewManager);
+    OstTrace0( camerax_performance, DUP5__MAIN, "msg: e_CX_MAINWINDOW_CREATION 1" );
+    HbMainWindow *mainWindow = new HbMainWindow(0, Hb::WindowFlagTransparent |
+                                                   Hb::WindowFlagNoBackground);
+    mainWindow->setAttribute(Qt::WA_NoBackground);
+    OstTrace0( camerax_performance, DUP6__MAIN, "msg: e_CX_MAINWINDOW_CREATION 0" );
 
-    OstTrace0( camerax_performance, DUP17__MAIN, "msg: e_CX_HBMAINWINDOWORIENT 1" );
-    mainWindow.setOrientation(Qt::Horizontal);
-    OstTrace0( camerax_performance, DUP18__MAIN, "msg: e_CX_HBMAINWINDOWORIENT 0" );
+    OstTrace0( camerax_performance, DUP11__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 1" );
+    CxuiViewManager *viewManager = new CxuiViewManager(app, *mainWindow, *eng);
+    OstTrace0( camerax_performance, DUP12__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 0" );
 
-    OstTrace0( camerax_performance, DUP13__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 1" );
-    mainWindow.showFullScreen();
-    OstTrace0( camerax_performance, DUP14__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 0" );
+    OstTrace0( camerax_performance, DUP13__MAIN, "msg: e_CX_MAINWINDOW_SETORIENTATION 1" );
+    mainWindow->setOrientation(Qt::Horizontal);
+    OstTrace0( camerax_performance, DUP14__MAIN, "msg: e_CX_MAINWINDOW_SETORIENTATION 0" );
 
-    OstTrace0( camerax_performance, DUP15__MAIN, "msg: e_CX_PREPAREWINDOW 1" );
-    viewManager.prepareWindow();
+    OstTrace0( camerax_performance, DUP15__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 1" );
+    mainWindow->showFullScreen();
+    OstTrace0( camerax_performance, DUP16__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 0" );
 
-    OstTrace0( camerax_performance, DUP16__MAIN, "msg: e_CX_PREPAREWINDOW 0" );
-
+    OstTrace0( camerax_performance, DUP17__MAIN, "msg: e_CX_PREPAREWINDOW 1" );
+    viewManager->prepareWindow();
+    OstTrace0( camerax_performance, DUP18__MAIN, "msg: e_CX_PREPAREWINDOW 0" );
+    //! @todo initMode call added here as a temporary hack to change the startup sequence
+	// in order to avoid GOOM issues
+	  User::After(2000000);
+    eng->initMode(Cxe::ImageMode);
     int returnValue = app.exec();
 
     // delete service provider instance
     CxuiServiceProvider::destroy();
+
+    delete viewManager;
+    delete mainWindow;
+    delete eng;
 
     return returnValue;
 }

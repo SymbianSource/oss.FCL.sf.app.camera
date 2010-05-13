@@ -8,11 +8,15 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxestillimagesymbian
-LIBS += -lplatformenv
-LIBS += -lsysutil
-SOURCES += unittest_cxestillimagesymbian.cpp \
+
+LIBS *= -lplatformenv
+LIBS *= -lsysutil
+
+SOURCES *= unittest_cxestillimagesymbian.cpp \
     cxeimagedataitemsymbian.cpp \
     cxestatemachine.cpp \
     cxestatemachinebase.cpp \
@@ -20,7 +24,8 @@ SOURCES += unittest_cxestillimagesymbian.cpp \
     cxeerrormappingsymbian.cpp \
     cxestillimagesymbian.cpp \
     cxesysutil.cpp
-HEADERS += unittest_cxestillimagesymbian.h \
+
+HEADERS *= unittest_cxestillimagesymbian.h \
     cxestillimagesymbian.h \
     cxeimagedataitemsymbian.h \
     cxeimagedataitem.h \
@@ -30,4 +35,4 @@ HEADERS += unittest_cxestillimagesymbian.h \
     cxeerrormappingsymbian.h \
     cxutils.h \
     cxesysutil.h
-    
+

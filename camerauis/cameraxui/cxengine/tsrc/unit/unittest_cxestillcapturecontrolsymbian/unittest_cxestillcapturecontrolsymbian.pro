@@ -10,30 +10,30 @@
 # Description:
 
 include(../unittest.pri)
+
 TARGET = unittest_cxestillcapturecontrolsymbian
 
-LIBS += -lecamadvsettings
-LIBS += -lecamsnapshot
-LIBS += -lecamdirectviewfinder
-LIBS += -lfbscli
-LIBS += -lbitgdi
-LIBS += -lsysutil
-LIBS += -lbafl
-LIBS += -lmediaclientaudio
-LIBS += -lecom
-LIBS += -lecam
-LIBS += -lecamsnapshot
-LIBS += -lecampluginsupport
-LIBS += -lmmfcontrollerframework
-LIBS += -lxqsettingsmanager
-LIBS += -lsensrvclient
-LIBS += -lsensrvutil
-LIBS += -lplatformenv
+LIBS *= -lecamadvsettings
+LIBS *= -lecamsnapshot
+LIBS *= -lecamdirectviewfinder
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
+LIBS *= -lsysutil
+LIBS *= -lbafl
+LIBS *= -lmediaclientaudio
+LIBS *= -lecom
+LIBS *= -lecam
+LIBS *= -lecamsnapshot
+LIBS *= -lecampluginsupport
+LIBS *= -lmmfcontrollerframework
+LIBS *= -lxqsettingsmanager
+LIBS *= -lsensrvclient
+LIBS *= -lsensrvutil
+LIBS *= -lplatformenv
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+DEFINES *= CXE_USE_DUMMY_CAMERA
 
-SOURCES += unittest_cxestillcapturecontrolsymbian.cpp \
+SOURCES *= unittest_cxestillcapturecontrolsymbian.cpp \
     cxestillcapturecontrolsymbian.cpp \
     cxestatemachine.cpp \
     cxestate.cpp \
@@ -66,9 +66,11 @@ SOURCES += unittest_cxestillcapturecontrolsymbian.cpp \
     cxefakeautofocuscontrol.cpp \
     cxefakesettings.cpp \
     cxefilesavethread.cpp \
+    cxediskmonitor.cpp \
+    cxediskmonitorprivate.cpp \
     cxefakefilesavethread.cpp
 
-HEADERS += unittest_cxestillcapturecontrolsymbian.h \
+HEADERS *= unittest_cxestillcapturecontrolsymbian.h \
     cxestillcapturecontrolsymbian.h \
     cxestate.h \
     cxestatemachine.h \
@@ -84,6 +86,7 @@ HEADERS += unittest_cxestillcapturecontrolsymbian.h \
     cxutils.h \
     cxeimagedataitem.h \
     cxeimagedataitemsymbian.h \
+    cxeimagedataqueue.h \
     cxeimagedataqueuesymbian.h \
     cxestillcapturecontrol.h \
     cxefakefilenamegenerator.h \
@@ -91,9 +94,6 @@ HEADERS += unittest_cxestillcapturecontrolsymbian.h \
     cxestillimagesymbian.h \
     cxesensoreventhandler.h \
     cxesensoreventhandlersymbian.h \
-    cxeimagedataqueue.h \
-    cxeimagedataitem.h \
-    cxeimagedataitemsymbian.h \
     sensor/xqdeviceorientation.h \
     sensor/xqdeviceorientation_p.h \
     sensor/xqaccsensor.h \
@@ -114,4 +114,6 @@ HEADERS += unittest_cxestillcapturecontrolsymbian.h \
     cxefakequalitypresets.h \
     cxefakefilesavethread.h \
     cxefilesavethread.h \
+    cxediskmonitor.h \
+    cxediskmonitorprivate.h \
     cxequalitypresets.h

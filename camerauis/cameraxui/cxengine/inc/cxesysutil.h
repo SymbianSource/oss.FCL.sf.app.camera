@@ -39,7 +39,7 @@ public:
 
     static int getCameraDrive(RFs &fs);
 
-    static qint64 spaceAvailable(RFs &fs, CxeSettings &settings);
+    static qint64 spaceAvailable(RFs &fs, int index, CxeSettings &settings);
     };
 
 #endif // CXESYSUTIL_H

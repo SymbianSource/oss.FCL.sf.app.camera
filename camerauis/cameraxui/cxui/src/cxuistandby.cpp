@@ -103,12 +103,10 @@ void CxuiStandby::startTimer()
 */
 bool CxuiStandby::handleMouseEvent()
 {
-    CX_DEBUG_ENTER_FUNCTION();
-
     bool keyHandled = false;
 
     // close the dialog if it's visible
-    if(mStandbyDialogVisible && mStandbyPopup) {
+    if (mStandbyDialogVisible && mStandbyPopup) {
         CX_DEBUG(( "closing the popup mStandbyDialogVisible = : %d", mStandbyDialogVisible ));
         mStandbyPopup->close();
         keyHandled = true;
@@ -116,8 +114,6 @@ bool CxuiStandby::handleMouseEvent()
         // restart the timer only if it's running
         startTimer();
     }
-
-    CX_DEBUG_EXIT_FUNCTION();
 
     return keyHandled;
 }
@@ -233,7 +229,6 @@ bool CxuiStandby::eventFilter(QObject *object, QEvent *event)
         case QEvent::GraphicsSceneMouseMove:
         case QEvent::GraphicsSceneMousePress:
         case QEvent::GraphicsSceneMouseRelease:
-            CX_DEBUG(("CxuiStandby::eventFilter -> mouse event"));
             eventWasConsumed = handleMouseEvent();
             break;
         default:

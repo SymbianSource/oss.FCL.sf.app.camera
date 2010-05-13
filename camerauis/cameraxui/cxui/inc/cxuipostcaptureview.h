@@ -21,6 +21,7 @@
 #include <QList>
 #include <QTimer>
 #include <hbview.h>
+#include <xqappmgr.h>
 
 class QGraphicsRectItem;
 class HbMainWindow;
@@ -43,6 +44,8 @@ public:
     virtual ~CxuiPostcaptureView();
     void construct(HbMainWindow *mainwindow, CxeEngine *engine, CxuiDocumentLoader *documentLoader);
 
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
 signals:
     void changeToPrecaptureView();
 
@@ -52,7 +55,6 @@ public slots:
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);
-    bool event(QEvent *event);
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
@@ -78,6 +80,8 @@ protected slots:
     void playVideo();
     void showDeleteNote();
     void launchVideosApp();
+
+    void handleDeleteDialogClosed(HbAction *action);
 
 private:
     void launchNotSupportedNotification();
@@ -124,6 +128,8 @@ private: // data
     bool mControlsVisible;
 
     bool mTimersStarted;
+    
+    XQApplicationManager mAppManager;
 
 };
 

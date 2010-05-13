@@ -53,6 +53,7 @@ void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
 
         CxUiSettings::SettingItem setting;
         foreach (setting, data->mSettingPairList) {
+            CX_DEBUG(("CxuiSettingRadioButtonList - appending setting value: %s", setting.mValue.toString().toAscii().data()));
             settingStrings.append(setting.mItem); // setting string
             mSettingValues.append(setting.mValue); // engine value for setting
         }
@@ -121,11 +122,13 @@ void CxuiSettingRadioButtonList::initOriginalSelectedItem()
 
     QString value;
     int err = mEngine->settings().get(mSettingId, value);
+    CX_DEBUG(("CxuiSettingRadioButtonList - original value: [%s]", value.toAscii().data()));
 
     int index = 0;
 
     if (err == CxeError::None) {
         index = mSettingValues.indexOf(QVariant(value));
+        CX_DEBUG(("CxuiSettingRadioButtonList - got original index of: %d", index));
     }
 
     mOriginalIndex = index;
@@ -180,7 +183,7 @@ void CxuiSettingRadioButtonList::commit(int index)
 
     if (!mSettingId.isEmpty() && !mSettingValues.isEmpty()) {
         QVariant value = mSettingValues.at(index);
-        if (value.canConvert<int>()) {
+        if (value.type() == QVariant::Int) {
             CX_DEBUG(("index:%d value:%d", index, value.toInt()));
 
             // Don't set the value again, if it is the current value.
@@ -193,9 +196,17 @@ void CxuiSettingRadioButtonList::commit(int index)
             }
             // inform interested clients about value changed event
             emit valueSelected(value.toInt());
-        } else if(value.canConvert<QString>()) {
+
+        } else if (value.type() == QVariant::String) {
             CX_DEBUG(("index:%d value:[%s]", index, value.toString().toAscii().constData()));
-            mEngine->settings().set(mSettingId, value.toString());
+
+            QString current;
+            CxeError::Id status(mEngine->settings().get(mSettingId, current));
+            CX_DEBUG(("settings model value:[%s]", current.toAscii().constData()));
+
+            if (status != CxeError::None || current != value.toString()) {
+                mEngine->settings().set(mSettingId, value.toString());
+            }
         }
     }
 

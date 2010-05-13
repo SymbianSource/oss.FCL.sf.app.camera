@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,16 +23,13 @@
 #include "cxuidocumentloader.h"
 #include "cxuistillprecaptureview.h"
 #include "cxuipostcaptureview.h"
-#include "cxuistillprecaptureview2.h"
 #include "cxuivideoprecaptureview.h"
-#include "cxuivideoprecaptureview2.h"
+#include "cxuiscenemodeview.h"
 #include "cxutils.h" //CX_DEBUG_ASSERT
 #include "cxuisettingdialog.h"
-#include "cxuisettingbutton.h"
 #include "cxuisettingslider.h"
 #include "cxuisettingradiobuttonlist.h"
-#include "cxuiscenelabel.h"
-#include "cxuisettingbuttoncontainer.h"
+#include "cxuizoomslider.h"
 #include "cxeengine.h"
 #include "cxuienums.h"
 
@@ -58,33 +55,26 @@ QObject *CxuiDocumentLoader::createObject(const QString& type, const QString &na
             object = new CxuiVideoPrecaptureView();
         } else if (name == CxUiLayout::POSTCAPTURE_VIEW) {
             object = new CxuiPostcaptureView();
+        } else if (name == CxUiLayout::STILL_SCENES_VIEW) {
+            object = new CxuiSceneModeView(NULL);
         }
-    } else if (type == "CxuiStillPrecaptureView2") {
-        object = new CxuiStillPrecaptureView2();
-
-    } else if (type == "CxuiVideoPrecaptureView2") {
-        object = new CxuiVideoPrecaptureView2;
-
     } else if (type == "HbDialog") {
         if (name == CxUiLayout::SETTINGS_DIALOG_WIDGET
          || name == CxUiLayout::SETTINGS_SLIDER_DIALOG_WIDGET) {
             object = new CxuiSettingDialog();
         }
-    } else if (type == "CxuiSettingButton") {
-        object = new CxuiSettingButton(NULL, mEngine);
-
-    } else if (type == "CxuiSettingSlider") {
-        object = new CxuiSettingSlider(NULL, mEngine);
-
-    } else if (type == "CxuiSettingRadioButtonList") {
-        object = new CxuiSettingRadioButtonList(NULL, mEngine);
-
-    } else if (type == "CxuiSceneLabel") {
-        object = new CxuiSceneLabel(NULL, mEngine);
-
-    } else if (type == "CxuiSettingButtonContainer") {
-        object = new CxuiSettingButtonContainer(NULL);
-
+    } else if (type == "HbSlider") {
+        if (name == CxUiLayout::SETTINGS_SLIDER_DIALOG_CONTENT_WIDGET) {
+            object = new CxuiSettingSlider(NULL, mEngine);
+        } else if (name == CxUiLayout::STILL_PRE_CAPTURE_ZOOM_SLIDER 
+         || name == CxUiLayout::VIDEO_PRE_CAPTURE_ZOOM_SLIDER) {
+            object = new CxuiZoomSlider();
+        }
+    } else if (type == "HbRadioButtonList") {
+        if (name == CxUiLayout::SETTINGS_DIALOG_CONTENT_WIDGET
+         || name == CxUiLayout::SCENE_VIEW_RADIOBUTTONS) {
+            object = new CxuiSettingRadioButtonList(NULL, mEngine);
+        }
     }
 
     if (object) {

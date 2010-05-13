@@ -33,6 +33,8 @@ public:
     virtual ~CxuiCaptureKeyHandler();
 
 public:
+    void listenKeys(bool listen);
+
     bool isAutofocusKeyPressed();
     bool isCaptureKeyPressed();
 
@@ -45,6 +47,9 @@ signals:
     void autofocusKeyReleased();
     void captureKeyPressed();
     void captureKeyReleased();
+
+private:
+    void listenKey(int key);
 
 private:
     bool mAutofocusKeyPressed;

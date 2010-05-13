@@ -66,8 +66,7 @@ private:
     int mOldPostCaptureTimeOut;
 
     // UI widgets, not own
-    HbWidget *mIndicatorContainer;
-    HbWidget *mButtonContainer;
+    HbWidget *mWidgetContainer;
     HbLabel *mTimerLabel;
     HbPushButton *mCancelButton;
     HbPushButton *mStartButton;

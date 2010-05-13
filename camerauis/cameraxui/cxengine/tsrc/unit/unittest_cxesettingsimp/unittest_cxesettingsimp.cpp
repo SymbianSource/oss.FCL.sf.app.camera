@@ -172,11 +172,6 @@ void UnitTestCxeSettingsImp::testGet()
     mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_AUTO, testValue);
     QCOMPARE(stringValue, QString(testValue.toString()));
 
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_CLOSEUP, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_CLOSEUP, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
     err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_MACRO, stringValue);
     QCOMPARE(err, CxeError::None);
     mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_MACRO, testValue);
@@ -425,11 +420,6 @@ void UnitTestCxeSettingsImp::testSet()
     error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_AUTO,  range);
     QCOMPARE(error, CxeError::None);
     mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_AUTO, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_CLOSEUP,  range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_CLOSEUP, checkValue);
     QCOMPARE(int(checkValue.toInt()), range);
 
     error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_MACRO,  range);

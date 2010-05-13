@@ -44,7 +44,7 @@ public:
     /*!
     * We retrieve all the configured values for the given key
     */
-    virtual CxeError::Id configuredValues(const QString& key,QList<int>& values) = 0;
+    virtual CxeError::Id configuredValues(const QString& key, QList<int>& values) = 0;
 
 protected:
     CxeFeatureManager() {}

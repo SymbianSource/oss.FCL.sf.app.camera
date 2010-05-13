@@ -44,37 +44,52 @@ CxuiCaptureKeyHandler::CxuiCaptureKeyHandler(CxeEngine &aEngine) :
     mEngine.featureManager().configuredValues(CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS,
                                               mPrimaryCameraCaptureKeys);
 
-    int scanCode = 0;
-    int handle = 0;
-    foreach (scanCode, mPrimaryCameraAutofocusKeys) {
-        handle = mWindowGroup.CaptureKeyUpAndDowns(scanCode, 0, 0, CXUI_KEY_PRIORITY);
-        mCapturedKeyUpDownHandles.append(handle);
-    }
-    foreach (scanCode, mPrimaryCameraCaptureKeys) {
-        handle = mWindowGroup.CaptureKeyUpAndDowns(scanCode, 0, 0, CXUI_KEY_PRIORITY);
-        mCapturedKeyUpDownHandles.append(handle);
-    }
-
-    // Capture key press events... this is done only to make sure other
-    // applications do not react to camera key events.
-    handle = mWindowGroup.CaptureKey(EKeyCamera, 0, 0, CXUI_KEY_PRIORITY);
-    mCapturedKeyHandles.append(handle);
-
+    listenKeys(true);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 CxuiCaptureKeyHandler::~CxuiCaptureKeyHandler()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    listenKeys(false);
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
-    int handle = 0;
-    foreach (handle, mCapturedKeyUpDownHandles) {
-        mWindowGroup.CancelCaptureKeyUpAndDowns(handle);
-    }
-    foreach (handle, mCapturedKeyHandles) {
-        mWindowGroup.CancelCaptureKey(handle);
-    }
+/*!
+* Start or stop listening key events.
+* @param listen Should we start (true) or stop (false) listening key events.
+*/
+void CxuiCaptureKeyHandler::listenKeys(bool listen)
+{
+    CX_DEBUG_ENTER_FUNCTION();
 
+    if (listen) {
+        // Protect from multiple calls
+        if (mCapturedKeyUpDownHandles.empty() && mCapturedKeyHandles.empty()) {
+
+            int key(0);
+            foreach (key, mPrimaryCameraAutofocusKeys) {
+                CX_DEBUG(("CxuiCaptureKeyHandler - hooking autofocus key with scan / key code: %d", key));
+                listenKey(key);
+            }
+            foreach (key, mPrimaryCameraCaptureKeys) {
+                CX_DEBUG(("CxuiCaptureKeyHandler - hooking capture key with scan / key code: %d", key));
+                listenKey(key);
+            }
+        }
+    } else {
+
+        int handle(0);
+        foreach (handle, mCapturedKeyUpDownHandles) {
+            mWindowGroup.CancelCaptureKeyUpAndDowns(handle);
+        }
+        mCapturedKeyUpDownHandles.clear();
+
+        foreach (handle, mCapturedKeyHandles) {
+            mWindowGroup.CancelCaptureKey(handle);
+        }
+        mCapturedKeyHandles.clear();
+    }
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -95,6 +110,9 @@ bool CxuiCaptureKeyHandler::handleKeyEvent(QEvent *event)
 
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*> (event);
+        CX_DEBUG(("CxuiCaptureKeyHandler - key press with nativeVirtualKey(): %d", keyEvent->nativeVirtualKey()));
+        CX_DEBUG(("CxuiCaptureKeyHandler - key press with nativeScanCode(): %d", keyEvent->nativeScanCode()));
+
         if ( mPrimaryCameraAutofocusKeys.contains(keyEvent->nativeScanCode())
             && !mAutofocusKeyPressed ) {
 
@@ -110,6 +128,8 @@ bool CxuiCaptureKeyHandler::handleKeyEvent(QEvent *event)
         }
     } else if (event->type() == QEvent::KeyRelease) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*> (event);
+        CX_DEBUG(("CxuiCaptureKeyHandler - key press with nativeVirtualKey(): %d", keyEvent->nativeVirtualKey()));
+        CX_DEBUG(("CxuiCaptureKeyHandler - key press with nativeScanCode(): %d", keyEvent->nativeScanCode()));
 
         if ( mPrimaryCameraAutofocusKeys.contains(keyEvent->nativeScanCode())
             && mAutofocusKeyPressed ) {
@@ -129,3 +149,36 @@ bool CxuiCaptureKeyHandler::handleKeyEvent(QEvent *event)
     CX_DEBUG_EXIT_FUNCTION();
     return eventWasConsumed;
 }
+
+/*!
+* Helper method to listen to given key (key code or scan code).
+* We need to listen to both "key up", "key down" and "key pressed" events to
+* get all the necessary events to handleKeyEvent(). If we e.g. just listen
+* to up/down events, the way native events are translated to QKeyEvents,
+* we only get QEvent::KeyRelease event when partially in background.
+* @param key Keycode or scancode for the key to listen. Both should be listened.
+*/
+void CxuiCaptureKeyHandler::listenKey(int key)
+{
+    // Capture key down and up events
+    int handle = mWindowGroup.CaptureKeyUpAndDowns(key, 0, 0, CXUI_KEY_PRIORITY);
+
+    // Handle < 0 means error.
+    if (handle >= 0) {
+        mCapturedKeyUpDownHandles.append(handle);
+    } else {
+        CX_DEBUG(("[WARNING] CxuiCaptureKeyHandler - Problem hooking to key-up/key-down with code: %d", key));
+    }
+
+    // Capture key press events
+    handle = mWindowGroup.CaptureKey(key, 0, 0, CXUI_KEY_PRIORITY);
+
+    if (handle >= 0) {
+        mCapturedKeyHandles.append(handle);
+    } else {
+        CX_DEBUG(("[WARNING] CxuiCaptureKeyHandler - Problem hooking to key-press with code: %d", key));
+    }
+}
+
+
+// end of file

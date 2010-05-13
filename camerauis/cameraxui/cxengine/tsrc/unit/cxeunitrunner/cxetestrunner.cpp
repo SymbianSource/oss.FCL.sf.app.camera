@@ -62,11 +62,11 @@ void CxeTestRunner::runTests()
           << "unittest_cxezoomcontrolsymbian"
           << "unittest_cxestillcapturecontrolsymbian"
           << "unittest_cxefeaturemanagerimp"
-          << "unittest_cxeenginesymbian"
           << "unittest_cxesettingsimp"
           << "unittest_cxethumbnailmanagersymbian"
           << "unittest_cxeharvestercontrolsymbian"
-          << "unittest_cxesettingscontrolsymbian";
+          << "unittest_cxesettingscontrolsymbian"
+          << "unittest_cxeenginesymbian";
 
     QDir dir;
     dir.mkpath(logFileFolder);

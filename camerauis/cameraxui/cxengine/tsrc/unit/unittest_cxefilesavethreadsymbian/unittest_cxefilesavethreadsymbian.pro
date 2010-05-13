@@ -10,18 +10,20 @@
 # Description:
 
 # This unit test doesn't want to include system include path of real xqsettingsmanager api
-CONFIG += cxeunit_no_system_paths
+CONFIG *= cxeunit_no_system_paths
 
 include(../unittest.pri)
 
-INCLUDEPATH += ../system_include
-DEPENDPATH  += ../system_include
+INCLUDEPATH *= ../system_include
+DEPENDPATH  *= ../system_include
 
 TARGET = unittest_cxefilesavethreadsymbian
 
-LIBS += -lsysutil
+LIBS *= -lsysutil
+LIBS *= -lplatformenv
 
-SOURCES += unittest_cxefilesavethreadsymbian.cpp \
+
+SOURCES *= unittest_cxefilesavethreadsymbian.cpp \
            thumbnailmanager_qt.cpp \
            harvesterclient.cpp \
            cxefilesavethread.cpp \
@@ -36,7 +38,7 @@ SOURCES += unittest_cxefilesavethreadsymbian.cpp \
            cxestate.cpp \
            cxeerrormappingsymbian.cpp
 
-HEADERS += unittest_cxefilesavethreadsymbian.h \
+HEADERS *= unittest_cxefilesavethreadsymbian.h \
            thumbnailmanager_qt.h \
            harvesterclient.h \
            cxefilesavethread.h \

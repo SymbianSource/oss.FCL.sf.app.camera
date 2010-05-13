@@ -14,7 +14,7 @@ include(../unittest.pri)
 TARGET = unittest_cxequalitypresetssymbian
 
 
-HEADERS += unittest_cxequalitypresetssymbian.h \
+HEADERS *= unittest_cxequalitypresetssymbian.h \
            cxequalitypresetssymbian.h \
            imagingconfigmanager.h \
            cxenamespace.h \
@@ -22,7 +22,7 @@ HEADERS += unittest_cxequalitypresetssymbian.h \
            cxefakesettings.h \
            cxequalitydetails.h
 
-SOURCES += unittest_cxequalitypresetssymbian.cpp \
+SOURCES *= unittest_cxequalitypresetssymbian.cpp \
            cxequalitypresetssymbian.cpp \
            imagingconfigmanager.cpp \
            cxefakesettings.cpp

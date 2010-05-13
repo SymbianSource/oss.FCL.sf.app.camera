@@ -8,23 +8,25 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxeviewfindercontrolsymbian
-LIBS += -lecamadvsettings
-LIBS += -lecam
-LIBS += -lecamsnapshot
-LIBS += -lecampluginsupport
-LIBS += -lecamdirectviewfinder
-LIBS += -lfbscli
-LIBS += -lbitgdi
-LIBS += -lcone
-LIBS += -lalfclient
-LIBS += -lalfdecoderserverclient
 
-DEFINES += CXE_USE_DUMMY_CAMERA
-DEFINES = $$unique(DEFINES)
+LIBS *= -lecamadvsettings
+LIBS *= -lecam
+LIBS *= -lecamsnapshot
+LIBS *= -lecampluginsupport
+LIBS *= -lecamdirectviewfinder
+LIBS *= -lfbscli
+LIBS *= -lbitgdi
+LIBS *= -lcone
+LIBS *= -lalfclient
+LIBS *= -lalfdecoderserverclient
 
-SOURCES += unittest_cxeviewfindercontrolsymbian.cpp \
+DEFINES *= CXE_USE_DUMMY_CAMERA
+
+SOURCES *= unittest_cxeviewfindercontrolsymbian.cpp \
            cxeviewfindercontrolsymbian.cpp \
            cxestatemachine.cpp \
            cxestate.cpp \
@@ -38,7 +40,8 @@ SOURCES += unittest_cxeviewfindercontrolsymbian.cpp \
            cxefakecameradevicecontrol.cpp \
            cxefakecontainer.cpp \
            cxevideocontainer.cpp
-HEADERS += unittest_cxeviewfindercontrolsymbian.h \
+
+HEADERS *= unittest_cxeviewfindercontrolsymbian.h \
            cxeviewfindercontrol.h \
            cxeviewfindercontrolsymbian.h \
            cxestatemachine.h \

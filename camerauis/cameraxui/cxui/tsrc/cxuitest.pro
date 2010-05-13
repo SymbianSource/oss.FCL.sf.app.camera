@@ -30,7 +30,7 @@ INCLUDEPATH += . \
                ./cxui \
                ../traces
 QT += testlib
-HB += hbcore hbwidgets hbtools hbfeedback hbutils
+HB += hbcore hbwidgets hbutils hbfeedback
 CONFIG += qtestlib hb symbian_test
 LIBS += -lcxengine \
         -lcommonui \

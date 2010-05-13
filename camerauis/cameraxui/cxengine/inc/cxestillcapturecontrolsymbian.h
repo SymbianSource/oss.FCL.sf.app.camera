@@ -21,7 +21,6 @@
 #include <ecam.h>
 #include <QPixmap>
 #include <QVariant>
-#include <driveinfo.h>
 
 #include "cxestillcapturecontrol.h"
 #include "cxeautofocuscontrol.h"
@@ -44,7 +43,7 @@ class CxeCameraDeviceControl;
 class CxeAutoFocusControl;
 class CxeSettings;
 class CxeQualityPresets;
-
+class CxeDiskMonitor;
 
 
 /**
@@ -66,7 +65,8 @@ public:  // constructors
                                   CxeAutoFocusControl &autoFocusControl,
                                   CxeSettings &settings,
                                   CxeQualityPresets &qualityPresets,
-                                  CxeFileSaveThread &fileSaveThread);
+                                  CxeFileSaveThread &fileSaveThread,
+                                  CxeDiskMonitor &diskMonitor);
 
     virtual ~CxeStillCaptureControlSymbian();
 
@@ -111,6 +111,9 @@ protected slots:
     // settings call back
     void handleSettingValueChanged(const QString& settingId,QVariant newValue);
 
+    // Disk space change
+    void handleDiskSpaceChanged();
+
     // Autofocus events
     void handleAutofocusStateChanged(CxeAutoFocusControl::State newState, CxeError::Id error);
 
@@ -131,7 +134,7 @@ private: // helper functions
     void initializeStates();
     void prepare();
     void updateRemainingImagesCounter();
-    int calculateRemainingImages(int estimatedImagesize) ;
+    int calculateRemainingImages(int estimatedImagesize);
 
 private: // private data
 
@@ -145,6 +148,7 @@ private: // private data
     CxeSettings &mSettings;
     CxeQualityPresets &mQualityPresets;
     CxeFileSaveThread &mFileSaveThread;
+    CxeDiskMonitor &mDiskMonitor;
     CxeSoundPlayerSymbian *mCaptureSoundPlayer;
     CxeSoundPlayerSymbian *mAutoFocusSoundPlayer;
     CaptureMode mMode;

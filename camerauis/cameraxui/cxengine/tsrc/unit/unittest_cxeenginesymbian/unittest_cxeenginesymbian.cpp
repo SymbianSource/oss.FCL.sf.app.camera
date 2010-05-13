@@ -42,7 +42,7 @@ void UnitTestCxeEngineSymbian::init()
     delete mEngine;
     mEngine = NULL;
     mEngine = new CxeEngineSymbianUnit();
-    mEngine->construct();
+    mEngine->initMode(Cxe::ImageMode);
 
     mCameraDeviceControl = qobject_cast<CxeFakeCameraDeviceControl*>(
             &mEngine->cameraDeviceControl());

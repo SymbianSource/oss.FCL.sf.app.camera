@@ -127,7 +127,7 @@ void UnitTestCxeSettingsCenrepStore::testloadSettings()
     keys.append(CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS);
     keys.append(CxeRuntimeKeys::PRIMARY_CAMERA_AUTOFOCUS_KEYS);
     keys.append(CxeRuntimeKeys::SECONDARY_CAMERA_CAPTURE_KEYS);
-    keys.append(CxeRuntimeKeys::CONTRAST_ITEMS);
+    keys.append(CxeRuntimeKeys::FREE_MEMORY_LEVELS);
     QHash<QString, QVariantList> runtimesettings =  mSettingsCenrepStore->loadRuntimeSettings(keys);
     
     foreach(QString runtimekey, keys) {

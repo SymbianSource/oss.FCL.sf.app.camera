@@ -37,7 +37,8 @@ public:
                                    CxeCameraDeviceControl &cameraDeviceControl,
                                    CxeFilenameGenerator &nameGenerator,
                                    CxeSettings &settings,
-                                   CxeQualityPresets &qualityPresets);
+                                   CxeQualityPresets &qualityPresets,
+                                   CxeDiskMonitor &diskMonitor);
     virtual ~CxeVideoCaptureControlSymbianUnit();
     void createVideoRecorder();
 

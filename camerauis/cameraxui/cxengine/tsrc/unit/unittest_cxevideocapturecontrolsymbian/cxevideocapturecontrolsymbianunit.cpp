@@ -21,6 +21,7 @@
 #include "cxevideocapturecontrolsymbianunit.h"
 #include "cxefakeVideorecorderutility.h"
 #include "cxutils.h"
+#include "cxediskmonitor.h"
 
 CxeVideoCaptureControlSymbianUnit::CxeVideoCaptureControlSymbianUnit( 
                                    CxeCameraDevice &cameraDevice,
@@ -28,10 +29,11 @@ CxeVideoCaptureControlSymbianUnit::CxeVideoCaptureControlSymbianUnit(
                                    CxeCameraDeviceControl &cameraDeviceControl,
                                    CxeFilenameGenerator &nameGenerator,
                                    CxeSettings &settings,
-                                   CxeQualityPresets &qualityPresets)
+                                   CxeQualityPresets &qualityPresets,
+                                   CxeDiskMonitor &diskMonitor)
     : CxeVideoCaptureControlSymbian(cameraDevice, viewfinderControl, 
                                     cameraDeviceControl, nameGenerator,
-                                    settings, qualityPresets)
+                                    settings, qualityPresets, diskMonitor)
 {
     CX_DEBUG_IN_FUNCTION();
 }

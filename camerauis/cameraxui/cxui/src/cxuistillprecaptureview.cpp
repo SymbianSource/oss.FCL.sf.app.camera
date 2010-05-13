@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -30,6 +30,7 @@
 #include <hbtoolbutton.h>
 #include <hbdeviceprofile.h> // HbDeviceProfile
 #include <hbmenu.h>
+#include <hbicon.h>
 
 #include "cxuiselftimer.h"
 #include "cxeengine.h"
@@ -52,6 +53,7 @@
 #include "cxuiserviceprovider.h"
 #include "cxuisettingdialog.h"
 #include "cxuisettingradiobuttonlist.h"
+#include "cxuizoomslider.h"
 
 using namespace Cxe;
 using namespace CxUiLayout;
@@ -100,6 +102,8 @@ void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
             this, SLOT(handleViewfinderStateChanged(CxeViewfinderControl::State, CxeError::Id)));
     connect(&(mEngine->settings()), SIGNAL(sceneChanged(CxeScene&)),
             this, SLOT(handleSceneChanged(CxeScene&)));
+    connect(&mEngine->stillCaptureControl(), SIGNAL(availableImagesChanged()),
+            this, SLOT(updateImagesLeftLabel()));
 
     loadDefaultWidgets();
     hideControls();
@@ -126,13 +130,11 @@ void CxuiStillPrecaptureView::loadDefaultWidgets()
     mQualityIcon = qobject_cast<HbLabel *>(widget);
     CX_DEBUG_ASSERT(mQualityIcon);
 
-    // create background for indicator container
-    HbWidget *container = NULL;
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_INDICATOR_CONTAINER);
-    container = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(container);
-    createWidgetBackgroundGraphic(container, TRANSPARENT_BACKGROUND_GRAPHIC);
-    container->show();
+    mIndicators = qobject_cast<HbWidget *>(widget);
+    CX_DEBUG_ASSERT(mIndicators);
+    // create background for indicator container
+    createWidgetBackgroundGraphic(mIndicators, TRANSPARENT_BACKGROUND_GRAPHIC);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -169,7 +171,7 @@ void CxuiStillPrecaptureView::loadWidgets()
     QObject *object = NULL;
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_ZOOM_SLIDER);
-    mSlider = qobject_cast<HbSlider *>(widget);
+    mSlider = qobject_cast<CxuiZoomSlider *>(widget);
     CX_DEBUG_ASSERT(mSlider);
     addIncreaseDecreaseButtons(mSlider);
     createWidgetBackgroundGraphic(mSlider, TRANSPARENT_BACKGROUND_GRAPHIC);
@@ -186,12 +188,6 @@ void CxuiStillPrecaptureView::loadWidgets()
     container = qobject_cast<HbWidget *>(widget);
     CX_DEBUG_ASSERT(container);
     createWidgetBackgroundGraphic(container, TRANSPARENT_BACKGROUND_GRAPHIC);
-
-    widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_SELFTIMER_BUTTON_CONTAINER);
-    container = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(container);
-    createWidgetBackgroundGraphic(container, TRANSPARENT_BACKGROUND_GRAPHIC);
-
 
     // connect selftimer start button to hide controls
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_SELFTIMER_START_BUTTON);
@@ -239,17 +235,21 @@ void CxuiStillPrecaptureView::loadWidgets()
             }
         }
         if (!CxuiServiceProvider::instance()->allowCameraSwitching()) {
-
             CX_DEBUG(("EMBEDDED: don't allow camera switching"));
-
-            HbAction *goto_2nd_cam = qobject_cast<HbAction*> (mDocumentLoader->findObject(STILL_PRE_CAPTURE_GOTO_2ND_CAMERA_ACTION));
-            if (goto_2nd_cam) {
-                CX_DEBUG(("EMBEDDED: setting camera switch to disabled"));
-                goto_2nd_cam->setEnabled(false);
-
-            }
         }
 
+    }
+
+    // update toolbar flash icon
+    int flash;
+    if (mEngine->settings().get(CxeSettingIds::FLASH_MODE, flash) == CxeError::None) {
+        handleSettingValueChanged(CxeSettingIds::FLASH_MODE, flash);
+    }
+
+    // update toolbar scene mode
+    QString scene;
+    if (mEngine->settings().get(CxeSettingIds::IMAGE_SCENE, scene) == CxeError::None) {
+        handleSettingValueChanged(CxeSettingIds::IMAGE_SCENE, scene);
     }
 
     hideControls();
@@ -305,31 +305,8 @@ void CxuiStillPrecaptureView::initializeSettingsGrid()
 void CxuiStillPrecaptureView::launchSceneModesPopup()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    if(mSceneModePopup) {
-        CX_DEBUG(("mSceneModePopup exists, showing.."));
-        mSceneModePopup->show();
-    } else {
-        CX_DEBUG(("Loading scene mode popup DocML"));
-        CxuiDocumentLoader* documentLoader = new CxuiDocumentLoader(mEngine);
-        bool ok = false;
-
-        // Use document loader to create popup
-        documentLoader->load(SCENEMODE_SETTING_XML, &ok);
-
-        CX_DEBUG(("load ok=%d", ok));
-
-        mSceneModePopup = qobject_cast<HbDialog*>(documentLoader->findWidget("still_scenemode_popup"));
-        CX_DEBUG_ASSERT(mSceneModePopup);
-        mSceneModePopup->setTimeout(HbDialog::NoTimeout);
-        mSceneModePopup->setBackgroundFaded(false);
-
-        delete documentLoader;
-        documentLoader = NULL;
-    }
-
-    connect(mKeyHandler, SIGNAL(autofocusKeyPressed()), mSceneModePopup, SLOT(close()));
-
+    hideControls();
+    emit showScenesView();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -379,7 +356,10 @@ void CxuiStillPrecaptureView::focusAndCapture()
         capture();
     } else {
         // start focusing
-        handleAutofocusKeyPressed();
+        // Auto-focus can only work if viewfinder is running
+        if (mEngine->viewfinderControl().state() == CxeViewfinderControl::Running) {
+            mEngine->autoFocusControl().start(false);
+        }
         setCapturePending();
     }
 
@@ -393,7 +373,7 @@ void CxuiStillPrecaptureView::capture()
 
     if (mEngine->mode() == Cxe::ImageMode) {
         // do not start capturing, if it is already ongoing
-        // the user might be repeatly triggering capture key
+        // the user might be repeatedly triggering capture key
         if (mEngine->stillCaptureControl().state() == CxeStillCaptureControl::Ready) {
             // If focusing in progress, cancel it now.
             // Set capture pending and continue once focusing is cancelled.
@@ -401,8 +381,14 @@ void CxuiStillPrecaptureView::capture()
                 mEngine->autoFocusControl().cancel();
                 setCapturePending();
             } else {
-                mEngine->stillCaptureControl().reset();  //! @todo: Do not delete snapshots before images are really saved
-                mEngine->stillCaptureControl().capture();
+                // Engine uses disk space *estimate* for imagesLeft() so it
+                // should not cause significant delay / additional shutter lag.
+                if (mEngine->stillCaptureControl().imagesLeft()) {
+                    mEngine->stillCaptureControl().reset();  //! @todo: Do not delete snapshots before images are really saved
+                    mEngine->stillCaptureControl().capture();
+                } else {
+                    launchDiskFullNotification();
+                }
             }
         } else {
             setCapturePending();
@@ -411,7 +397,6 @@ void CxuiStillPrecaptureView::capture()
 
     // after capturing check what is the new amount for images left
     updateImagesLeftLabel();
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -544,6 +529,13 @@ void CxuiStillPrecaptureView::handleAutofocusKeyPressed()
         return;
     }
 
+    // in case of selftimer being enabled, autofocuskey does not start focusing
+    if (mSelfTimer && mSelfTimer->isEnabled()){
+        CX_DEBUG(("Selftimer enabled, ignoring autofocus key press"));
+        CX_DEBUG_EXIT_FUNCTION();
+        return;
+    }
+
     // Auto-focus can only work if viewfinder is running
     if (mEngine->viewfinderControl().state() == CxeViewfinderControl::Running) {
 
@@ -556,6 +548,13 @@ void CxuiStillPrecaptureView::handleAutofocusKeyPressed()
 void CxuiStillPrecaptureView::handleAutofocusKeyReleased()
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    // in case of selftimer being enabled, autofocuskey should not do anything
+    if (mSelfTimer && mSelfTimer->isEnabled()){
+        CX_DEBUG(("Selftimer enabled, ignoring autofocus key release"));
+        CX_DEBUG_EXIT_FUNCTION();
+        return;
+    }
 
     if (mEngine->autoFocusControl().supported()) {
         // Check that capture is not in progress, or pending.
@@ -638,7 +637,7 @@ void CxuiStillPrecaptureView::handleStillCaptureStateChanged(
     CxeStillCaptureControl::State newState, CxeError::Id /*error*/)
 {
     if (newState == CxeStillCaptureControl::Ready) {
-        OstTrace0(camerax_performance, CXUISTILLPRECAPTUREVIEW_SHOT_TO_SHOT_DUP2, "msg: e_CX_SHOT_TO_SHOT 0");
+        OstTrace0(camerax_performance, DUP1_CXUISTILLPRECAPTUREVIEW_SHOT_TO_SHOT, "msg: e_CX_SHOT_TO_SHOT 0");
 
         if (mCapturePending) {
             CX_DEBUG(("mCapturePending is true, starting capture now"));
@@ -665,19 +664,23 @@ void CxuiStillPrecaptureView::showControls()
 
 }
 
+/*!
+* Slot to handle application being sent to background.
+*/
 void CxuiStillPrecaptureView::handleFocusLost()
 {
-    CX_DEBUG_IN_FUNCTION();
-    bool captureInProgress = mEngine->stillCaptureControl().state() == CxeStillCaptureControl::Capturing;
-    if (!captureInProgress) {
-        if (mSelfTimer && mSelfTimer->isOngoing()) {
-            // If self-timer is running, stop and reset the delay now.
-            mSelfTimer->reset();
-        }
+    CX_DEBUG_ENTER_FUNCTION();
 
-        // Release camera as we are going to background.
-        releaseCamera();
+    if (mSelfTimer && mSelfTimer->isOngoing()) {
+        // If self-timer is running, stop and reset the delay now.
+        mSelfTimer->reset();
     }
+
+    // Release camera as we are going to background.
+    // If taking image is just ongoing, it will be cancelled by engine.
+    releaseCamera();
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 void CxuiStillPrecaptureView::handleFocusGained()
@@ -687,10 +690,24 @@ void CxuiStillPrecaptureView::handleFocusGained()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*
+    Slot for handling scene mode change
+    \param scene QVariantMap containing settings related to the new scene mode
+ */
 void CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
 {
     CX_DEBUG_ENTER_FUNCTION();
     if (mEngine->mode() == Cxe::ImageMode) {
+
+        // update toolbar scene mode icon
+        QString icon = getSettingItemIcon(CxeSettingIds::IMAGE_SCENE, scene[CxeSettingIds::SCENE_ID]);
+        CX_DEBUG((("New scene mode icon: %s"), icon.toAscii().constData()));
+        if (mDocumentLoader) {
+            QObject *obj = mDocumentLoader->findObject(STILL_PRE_CAPTURE_SCENE_MODE_ACTION);
+            CX_DEBUG_ASSERT(obj);
+            qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
+        }
+
         // for now, we are only interested in flashmode change
         if (scene.contains(CxeSettingIds::FLASH_MODE)) {
             CX_DEBUG(("updating flash to: %d", scene[CxeSettingIds::FLASH_MODE].value<int>()));
@@ -707,25 +724,36 @@ void CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*
+    Slot for handling setting value changes. Notice that changing the scene mode
+    does not emit settingValueChanged signal.
+    \param key      CxSettingIds key defining the changed setting
+    \param newValue QVariant containing the new setting value
+
+    \sa CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
+ */
 void CxuiStillPrecaptureView::handleSettingValueChanged(const QString& key, QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     if (mEngine->mode() == Cxe::ImageMode) {
-        if (key == CxeSettingIds::IMAGE_QUALITY) {
 
+        // update images left and image quality icons
+        if (key == CxeSettingIds::IMAGE_QUALITY) {
             // update the quality indicator on screen
             updateQualityIcon();
-
             // update images left when quality values are changed
             updateImagesLeftLabel();
         }
 
+        // update toolbar flash icon
         if (mFlashSetting && key == CxeSettingIds::FLASH_MODE) {
-            CX_DEBUG((("flash mode: %d"),newValue.toInt()))
+            CX_DEBUG((("flash mode: %d"), newValue.toInt()));
             QString icon = getSettingItemIcon(key, newValue);
+            CX_DEBUG((("flash mode icon: %s"), icon.toAscii().constData()))
             mFlashSetting->setIcon(HbIcon(icon));
         }
+
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -794,7 +822,7 @@ void CxuiStillPrecaptureView::updateImagesLeftLabel()
         }
 
         CX_DEBUG(("Images left %d", images));
-        mImagesLeft->setPlainText(hbTrId("%L1").arg(images));
+        mImagesLeft->setPlainText(hbTrId("txt_cam_fullscreen_imagesleft").arg(images));
     }
 
     CX_DEBUG_EXIT_FUNCTION();

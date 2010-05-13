@@ -8,15 +8,20 @@
 # Nokia Corporation - initial contribution.
 # Contributors:
 # Description:
+
 include(../unittest.pri)
+
 TARGET = unittest_cxestatemachine
-LIBS += -lplatformenv
-SOURCES += unittest_cxestatemachine.cpp \
+
+LIBS *= -lplatformenv
+
+SOURCES *= unittest_cxestatemachine.cpp \
             cxestatemachineunit.cpp \
             cxestatemachinebase.cpp \
             cxeerrormappingsymbian.cpp \
             cxestate.cpp
-HEADERS += unittest_cxestatemachine.h \
+
+HEADERS *= unittest_cxestatemachine.h \
             cxestatemachineunit.h \
             cxestatemachinebase.h \
             cxeerrormappingsymbian.h \
