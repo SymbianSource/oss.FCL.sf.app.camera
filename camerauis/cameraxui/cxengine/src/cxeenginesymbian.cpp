@@ -67,7 +67,9 @@ CxeEngineSymbian::CxeEngineSymbian()
     CX_DEBUG_ENTER_FUNCTION();
 
     // Do secondary construction during reserve call.
-    connect(this, SIGNAL(reserveStarted()), this, SLOT(construct()));
+    //! @todo temporarily commented as part of a hack to change the startup sequence
+    // to avoid GOOM issues
+   // connect(this, SIGNAL(reserveStarted()), this, SLOT(construct()));
 
     CxeCameraDeviceControlSymbian *deviceControl = new CxeCameraDeviceControlSymbian();
     mCameraDeviceControl = deviceControl;
@@ -76,7 +78,10 @@ CxeEngineSymbian::CxeEngineSymbian()
     CX_ASSERT_ALWAYS(mCameraDevice);
 
     mCameraDeviceControl->init();
-
+    //! @todo calling construct here is a hack to change the startup sequence
+    // to avoid GOOM issues
+    construct();
+    
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -119,6 +124,11 @@ void CxeEngineSymbian::createControls()
         CX_DEBUG_ASSERT(mSettingsModel);
 
         mSettings = new CxeSettingsImp(*mSettingsModel);
+        
+        //! @todo a temporary hack to change the startup sequence to avoid GOOM problems
+        static_cast<CxeSettingsImp*>(mSettings)->loadSettings(mode());
+        
+        
         // Connect P&S key updates to settings signal.
         connect(settingsStore, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
                 mSettings, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)));

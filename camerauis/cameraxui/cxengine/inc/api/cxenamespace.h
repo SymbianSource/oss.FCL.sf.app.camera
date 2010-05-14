@@ -84,9 +84,9 @@ namespace Cxe
 
     enum Sharpness
     {
-        SharpnessHard = 100,
+        SharpnessHard = 2,
         SharpnessNormal = 0,
-        SharpnessSoft = -100
+        SharpnessSoft = -2
     };
 
     enum LightSensitivity

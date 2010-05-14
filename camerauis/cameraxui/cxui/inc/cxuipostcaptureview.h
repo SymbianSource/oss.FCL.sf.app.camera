@@ -21,6 +21,7 @@
 #include <QList>
 #include <QTimer>
 #include <hbview.h>
+#include <xqappmgr.h>
 
 class QGraphicsRectItem;
 class HbMainWindow;
@@ -127,6 +128,8 @@ private: // data
     bool mControlsVisible;
 
     bool mTimersStarted;
+    
+    XQApplicationManager mAppManager;
 
 };
 

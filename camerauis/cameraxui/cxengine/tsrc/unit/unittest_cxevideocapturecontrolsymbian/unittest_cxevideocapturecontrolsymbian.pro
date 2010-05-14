@@ -50,6 +50,8 @@ SOURCES *= unittest_cxevideocapturecontrolsymbian.cpp \
     cxesoundplayersymbian.cpp \
     cxeerrormappingsymbian.cpp \
     cxefakequalitypresets.cpp \
+    cxediskmonitor.cpp \
+    cxediskmonitorprivate.cpp \
     cxesysutil.cpp
 
 HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
@@ -79,4 +81,6 @@ HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
     cxesoundplayersymbian.h \
     cxefakequalitypresets.h \
     cxutils.h \
+    cxediskmonitor.h \
+    cxediskmonitorprivate.h \
     cxesysutil.h

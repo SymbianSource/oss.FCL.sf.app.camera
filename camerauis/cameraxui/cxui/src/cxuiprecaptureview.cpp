@@ -101,7 +101,9 @@ CxuiPrecaptureView::CxuiPrecaptureView(QGraphicsItem *parent) :
     mSliderSettingsDialog(NULL),
     mSliderSettingsDialogHeading(NULL),
     mSettingsSlider(NULL),
-    mSettingsInfo(NULL)
+    mSettingsInfo(NULL),
+    mSettingsDialogOkAction(NULL),
+    mSliderSettingsDialogOkAction(NULL)
 {
     CX_DEBUG_ENTER_FUNCTION();
     mDisplayHandler = new CxuiDisplayPropertyHandler();
@@ -466,7 +468,8 @@ void CxuiPrecaptureView::toggleControls()
 //
 void CxuiPrecaptureView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (event->type() == QEvent::GraphicsSceneMousePress) {
+    //! @todo temporary workaround for title bar mouse event handling bug
+    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70) {
         toggleControls();
         event->accept();
     }
@@ -720,6 +723,9 @@ CxuiSettingDialog* CxuiPrecaptureView::createSettingsDialog()
                                     documentLoader->findWidget(SETTINGS_DIALOG_CONTENT_WIDGET));
     CX_ASSERT_ALWAYS(mSettingsDialogList);
 
+    QObject *object = documentLoader->findObject(SETTINGS_DIALOG_OK_ACTION);
+    mSettingsDialogOkAction = qobject_cast<HbAction *>(object);
+    CX_DEBUG_ASSERT(mSettingsDialogOkAction);
 
     CX_DEBUG_EXIT_FUNCTION();
 
@@ -773,13 +779,12 @@ void CxuiPrecaptureView::launchSettingsDialog(QObject* action)
             // so we can easily decide if we show grid again or not.
             mSettingsDialog->setStarterAction(qobject_cast<HbAction *>(action));
 
-            HbAction *okAction = mSettingsDialog->primaryAction();
-            if (okAction) {
-                // disconnect primary action from dialog so that dialog won't be closed
+            if (mSettingsDialogOkAction) {
+                // disconnect ok action from dialog so that dialog won't be closed
                 // automatically when action is triggered. handleSelectionAccepted
                 // is called instead
-                okAction->disconnect(mSettingsDialog);
-                connect(okAction, SIGNAL(triggered()), mSettingsDialogList, SLOT(handleSelectionAccepted()));
+                mSettingsDialogOkAction->disconnect(mSettingsDialog);
+                connect(mSettingsDialogOkAction, SIGNAL(triggered()), mSettingsDialogList, SLOT(handleSelectionAccepted()));
 
                 // Close the dialog when new setting value is committed
                 connect(mSettingsDialogList, SIGNAL(selectionCommitted()), mSettingsDialog, SLOT(close()));
@@ -828,6 +833,9 @@ CxuiSettingDialog* CxuiPrecaptureView::createSliderSettingsDialog()
                                     documentLoader->findWidget(SETTINGS_SLIDER_DIALOG_CONTENT_WIDGET));
     CX_ASSERT_ALWAYS(mSettingsSlider);
 
+    QObject *object = documentLoader->findObject(SETTINGS_DIALOG_OK_ACTION);
+    mSliderSettingsDialogOkAction = qobject_cast<HbAction *>(object);
+    CX_DEBUG_ASSERT(mSliderSettingsDialogOkAction);
 
     CX_DEBUG_EXIT_FUNCTION();
 
@@ -879,13 +887,12 @@ void CxuiPrecaptureView::launchSliderSetting()
             // so we can easily decide if we show grid again or not.
             mSliderSettingsDialog->setStarterAction(qobject_cast<HbAction *>(action));
 
-            HbAction *okAction = mSliderSettingsDialog->primaryAction();
-            if (okAction) {
-                // disconnect primary action from dialog so that dialog won't be closed
+            if (mSliderSettingsDialogOkAction) {
+                // disconnect ok action from dialog so that dialog won't be closed
                 // automatically when action is triggered. handleSelectionAccepted
                 // is called instead
-                okAction->disconnect(mSliderSettingsDialog);
-                connect(okAction, SIGNAL(triggered()), mSettingsSlider, SLOT(handleSelectionAccepted()));
+                mSliderSettingsDialogOkAction->disconnect(mSliderSettingsDialog);
+                connect(mSliderSettingsDialogOkAction, SIGNAL(triggered()), mSettingsSlider, SLOT(handleSelectionAccepted()));
 
                 // Close the dialog when new setting value is committed
                 connect(mSettingsSlider, SIGNAL(selectionCommitted()), mSliderSettingsDialog, SLOT(close()));
@@ -927,13 +934,7 @@ void CxuiPrecaptureView::launchVideosApp()
 void CxuiPrecaptureView::launchNotSupportedNotification()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    // Instantiate a popup
-    HbNotificationDialog note;
-    note.setTitle("Notification");
-    note.setText("Not supported yet");
-    note.exec();
-
+    HbNotificationDialog::launchDialog("Notification", "Not supported yet");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -1016,13 +1017,15 @@ bool CxuiPrecaptureView::isPostcaptureOn() const
 void CxuiPrecaptureView::addIncreaseDecreaseButtons(CxuiZoomSlider *slider)
 {
     // get current slider elements
-    QList<HbSlider::SliderElement> elements = slider->elements();
+    QList<QVariant> elements = slider->sliderElements();
+
     // add increase and decrease elements to the slider
     elements << HbSlider::IncreaseElement << HbSlider::DecreaseElement;
-    slider->setElements(elements);
+    slider->setSliderElements(elements);
+
     // set icons for the increase and decrease element
-    slider->setIcon(HbSlider::DecreaseElement , HbIcon("qtg_mono_minus"));
-    slider->setIcon(HbSlider::IncreaseElement , HbIcon("qtg_mono_plus"));
+    slider->setElementIcon(HbSlider::DecreaseElement , HbIcon("qtg_mono_minus"));
+    slider->setElementIcon(HbSlider::IncreaseElement , HbIcon("qtg_mono_plus"));
 }
 
 
@@ -1038,7 +1041,7 @@ void CxuiPrecaptureView::createWidgetBackgroundGraphic(HbWidget *widget,
 {
     if (widget) {
         HbFrameDrawer *drawer = new HbFrameDrawer(graphicName, frameType);
-    
+
         if (drawer) {
             HbFrameItem *backgroundItem = new HbFrameItem(drawer, widget);
             if (backgroundItem) {

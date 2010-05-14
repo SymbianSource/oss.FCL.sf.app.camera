@@ -106,6 +106,9 @@ protected slots:
 
     void updateTimeLabels();
 
+    // from CxuiPrecaptureView
+    void hideControls();
+
 protected:
 
     void setVideoTime(HbLabel* label, int time);
@@ -118,6 +121,8 @@ protected:
     void initializeSettingsGrid();
     void setRecordingItemsVisibility(bool visible);
 
+    // from QObject
+    bool eventFilter(QObject *object, QEvent *event);
 protected:
     QTimer mElapsedTimer;
     int mTimeElapsed;
@@ -136,6 +141,7 @@ protected:
     QPropertyAnimation* mRecordingAnimation; //For recording indicator
 
     bool mCapturePending;
+    QTimer mPauseTimer;
     };
 
 #endif // CXUIVIDEOPRECAPTUREVIEW_H

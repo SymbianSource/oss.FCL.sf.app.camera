@@ -464,7 +464,7 @@ void CxeSettingsModelImp::loadVideoScenes()
     vidSceneLowLight.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::VIDEO_SCENE_LOWLIGHT);
     vidSceneLowLight.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Hyperfocal);
     vidSceneLowLight.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
-    vidSceneLowLight.insert(CxeSettingIds::EXPOSURE_MODE, ExposureNight);
+    vidSceneLowLight.insert(CxeSettingIds::EXPOSURE_MODE, ExposureAuto);
     vidSceneLowLight.insert(CxeSettingIds::COLOR_TONE, ColortoneNormal);
     vidSceneLowLight.insert(CxeSettingIds::CONTRAST, 0);
     vidSceneLowLight.insert(CxeSettingIds::FRAME_RATE, 15); //fps

@@ -77,8 +77,9 @@ public:
     
     /**
      * Starts Autofocus.
+     * \param soundEnabled indicates if the auto focus sound should be played
      */
-    virtual CxeError::Id start() = 0;
+    virtual CxeError::Id start(bool soundEnabled = true) = 0;
     
     /**
      * Cancels Autofocus.
@@ -105,6 +106,11 @@ public:
      * Check if Autofocus is Supported or Not.
      */
     virtual bool supported() const = 0;             // true when AF is supported
+    
+    /**
+    * Check if auto focus sound is enabled
+    */
+    virtual bool isSoundEnabled() const = 0;
 
 signals:
     void stateChanged( CxeAutoFocusControl::State newState, CxeError::Id error );

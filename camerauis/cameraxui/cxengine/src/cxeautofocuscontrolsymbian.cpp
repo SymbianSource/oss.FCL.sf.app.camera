@@ -86,11 +86,14 @@ CxeAutoFocusControlSymbian::~CxeAutoFocusControlSymbian()
 
 /*
 * Start Autofocus
+* \param soundEnabled False if the auto focus sound don't need to be played
+* Default value for soundEnabled is true
 */
-CxeError::Id CxeAutoFocusControlSymbian::start()
+CxeError::Id CxeAutoFocusControlSymbian::start(bool soundEnabled)
 {
-    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <> state: %d", state() ) );
-
+    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <> state: %d, sound enabled: %d",
+               state(), soundEnabled ) );
+    mSoundEnabled = soundEnabled;
     int err = KErrNone;
 
     CX_ASSERT_ALWAYS(mAdvancedSettings);
@@ -106,7 +109,6 @@ CxeError::Id CxeAutoFocusControlSymbian::start()
     }
 
     CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <= err : %d", err ) );
-
     return CxeErrorHandlingSymbian::map(err);
 }
 
@@ -444,6 +446,15 @@ void CxeAutoFocusControlSymbian::handleAfEvent(int eventUid, int error)
     } // end switch
 
     CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+  * Public method for checking if auto focus sound is enabled
+  * \return true if enabled
+  */
+bool CxeAutoFocusControlSymbian::isSoundEnabled() const
+{
+    return mSoundEnabled;
 }
 
 // end of file

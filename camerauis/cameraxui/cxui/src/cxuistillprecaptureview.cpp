@@ -356,7 +356,10 @@ void CxuiStillPrecaptureView::focusAndCapture()
         capture();
     } else {
         // start focusing
-        handleAutofocusKeyPressed();
+        // Auto-focus can only work if viewfinder is running
+        if (mEngine->viewfinderControl().state() == CxeViewfinderControl::Running) {
+            mEngine->autoFocusControl().start(false);
+        }
         setCapturePending();
     }
 
@@ -370,7 +373,7 @@ void CxuiStillPrecaptureView::capture()
 
     if (mEngine->mode() == Cxe::ImageMode) {
         // do not start capturing, if it is already ongoing
-        // the user might be repeatly triggering capture key
+        // the user might be repeatedly triggering capture key
         if (mEngine->stillCaptureControl().state() == CxeStillCaptureControl::Ready) {
             // If focusing in progress, cancel it now.
             // Set capture pending and continue once focusing is cancelled.
@@ -394,7 +397,6 @@ void CxuiStillPrecaptureView::capture()
 
     // after capturing check what is the new amount for images left
     updateImagesLeftLabel();
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 

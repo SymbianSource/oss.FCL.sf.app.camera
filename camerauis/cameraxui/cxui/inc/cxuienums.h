@@ -91,8 +91,10 @@ namespace CxUiLayout
     static const char *STILL_PRE_CAPTURE_SELFTIMER_START_BUTTON = "still_selftimer_start_button";
     static const char *STILL_PRE_CAPTURE_SELFTIMER_CANCEL_BUTTON = "still_selftimer_cancel_button";
 
-    static const char *VIDEO_PRE_CAPTURE_VIEW  = "video_capture_view";
-
+    static const char *VIDEO_PRE_CAPTURE_VIEW = "video_capture_view";
+    
+    static const char *SETTINGS_DIALOG_OK_ACTION = "action_ok";
+    
     // video
     // In order to be able to refer to a widget, we need to know its object name.
     static const char *VIDEO_PRE_CAPTURE_TOOLBAR = "video_toolbar";

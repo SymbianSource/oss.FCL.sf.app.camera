@@ -36,6 +36,7 @@
 #include "cxefakesettings.h"
 #include "cxefakequalitypresets.h"
 #include "cxefakefilesavethread.h"
+#include "cxediskmonitor.h"
 
 UnitTestCxeStillCaptureControlSymbian::UnitTestCxeStillCaptureControlSymbian()
     : mFakeCameraDeviceControl(0)
@@ -70,6 +71,9 @@ void UnitTestCxeStillCaptureControlSymbian::initTestCase()
     mFakeAutoFocusControl = new CxeFakeAutoFocusControl();
     mFakeQualityPresets = new CxeFakeQualityPresets();
     mFakeFileSaveThread = new CxeFakeFileSaveThread();
+    
+    mDiskMonitor = new CxeDiskMonitor(*mFakeSettings);
+
 
     mStillCaptureControl = new CxeStillCaptureControlSymbian(
             *mFakeCameraDevice,
@@ -80,7 +84,8 @@ void UnitTestCxeStillCaptureControlSymbian::initTestCase()
             *mFakeAutoFocusControl,
             *mFakeSettings,
             *mFakeQualityPresets,
-            *mFakeFileSaveThread);
+            *mFakeFileSaveThread,
+            *mDiskMonitor);
 
     // init supported qualities.
     mStillCaptureControl->supportedImageQualities();
@@ -111,6 +116,8 @@ void UnitTestCxeStillCaptureControlSymbian::cleanupTestCase()
     mSpyState = 0;
     delete mFakeQualityPresets;
     mFakeQualityPresets = 0;
+    delete mDiskMonitor;
+    mDiskMonitor = 0;
     delete mFakeFileSaveThread;
     mFakeFileSaveThread = 0;
 }

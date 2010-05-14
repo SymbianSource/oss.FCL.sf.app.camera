@@ -271,6 +271,7 @@ void CxuiSceneModeView::finishScenesTransition()
 void CxuiSceneModeView::handleOkButtonPress()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    mScenesList->handleSelectionAccepted();
     closeView();
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -326,7 +327,6 @@ void CxuiSceneModeView::handleAutofocusKeyPressed()
 void CxuiSceneModeView::closeView()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mScenesList->handleSelectionAccepted();
     mScenesList->handleClose();
     mScenesBackground->setIcon(HbIcon());
     // Make sure engine prepares for new image/video if necessary

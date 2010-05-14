@@ -29,6 +29,8 @@
 #include "cxefakequalitypresets.h"
 #include "cxefakesettings.h"
 #include "cxutils.h"
+#include "cxediskmonitor.h"
+
 
 // Enums
 
@@ -68,12 +70,14 @@ void UnitTestCxeVideoCaptureControlSymbian::initTestCase()
     mFilenameGeneratorSymbian = new CxeFakeFilenameGenerator();
     mFilenameGeneratorSymbian->init(Cxe::VideoMode);
     mFakeQualityPresets = new CxeFakeQualityPresets();
+    mDiskMonitor = new CxeDiskMonitor(*mSettings);
     mCxeVideoCaptureControlSymbian = new CxeVideoCaptureControlSymbianUnit(*mCameraDevice,
                                                                        *mViewfinderControl,
                                                                        *mCameraDeviceControl,
                                                                        *mFilenameGeneratorSymbian,
                                                                        *mSettings,
-                                                                       *mFakeQualityPresets);
+                                                                       *mFakeQualityPresets,
+                                                                       *mDiskMonitor);
     mCameraDevice->newCamera(mCameraDeviceControl->cameraIndex(), mCameraDeviceControl);
 
     mSpyState = new QSignalSpy(mCxeVideoCaptureControlSymbian,
@@ -104,6 +108,8 @@ void UnitTestCxeVideoCaptureControlSymbian::cleanupTestCase()
     mCameraDevice = 0;
     delete mFakeQualityPresets;
     mFakeQualityPresets = 0;
+    delete mDiskMonitor;
+    mDiskMonitor = 0;
     delete mSettings;
     mSettings = 0;
     delete mSpyState;

@@ -29,7 +29,6 @@
 #include <hbmenu.h>
 #include <hbdialog.h>
 #include <hbnotificationdialog.h>
-#include <hbfeedbackplayer.h>
 #include <hbfeedbacksettings.h>
 #include <hbfeedbacknamespace.h>
 
@@ -60,6 +59,7 @@ namespace
 {
     static const int CXUI_ELAPSED_TIME_TIMEOUT = 1000; // 1 second
     static const int CXUI_RECORD_ANIMATION_DURATION = 3000; // milliseconds
+    static const int CXUI_PAUSE_TIMEOUT = 60*1000;   // 60 seconds
 
     //!@todo Localization?
     static const char* VIDEO_TIME_FORMAT = "%02d:%02d";
@@ -112,6 +112,10 @@ void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
             this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
     connect(mVideoCaptureControl, SIGNAL(remainingTimeChanged()),
             this, SLOT(updateTimeLabels()));
+
+    mPauseTimer.setSingleShot(true);
+    connect(&mPauseTimer, SIGNAL(timeout()), this, SLOT(stop()));
+    mPauseTimer.setInterval(CXUI_PAUSE_TIMEOUT);
 
     HbAction *quitAction = new HbAction(Hb::QuitNaviAction, this);
     setNavigationAction(quitAction);
@@ -251,12 +255,12 @@ void CxuiVideoPrecaptureView::loadWidgets()
 
     // Initializing recording indicator animation
     mRecordingAnimation = new QPropertyAnimation(mRecordingIcon, "opacity");
-    mRecordingAnimation->setStartValue(0.0);
+    mRecordingAnimation->setStartValue(0.2);
     mRecordingAnimation->setKeyValueAt(0.5, 1.0);
-    mRecordingAnimation->setEndValue(0.0);
+    mRecordingAnimation->setEndValue(0.2);
     mRecordingAnimation->setDuration(CXUI_RECORD_ANIMATION_DURATION);
     mRecordingAnimation->setLoopCount(-1);
-    mRecordingAnimation->setEasingCurve(QEasingCurve::InCubic);
+    mRecordingAnimation->setEasingCurve(QEasingCurve::OutInQuad);
 
     // Initialize the video time counters.
     updateTimeLabels();
@@ -306,7 +310,6 @@ void CxuiVideoPrecaptureView::record()
 
     if (time) {
         mMenu = takeMenu();
-        hideControls();
         mVideoCaptureControl->record();
     } else {
         launchDiskFullNotification();
@@ -321,16 +324,9 @@ void CxuiVideoPrecaptureView::pause()
 
     CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
     if (state == CxeVideoCaptureControl::Recording) {
-        if (mRecordingAnimation && mRecordingIcon) {
-            mVideoCaptureControl->pause();
-            mRecordingAnimation->stop();
-            }
-
-        // force update of toolbar
-        showToolbar();
+        mVideoCaptureControl->pause();
     } else if (state == CxeVideoCaptureControl::Paused) {
         mVideoCaptureControl->record();
-        //mRecordingAnimation->start();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -408,10 +404,10 @@ void CxuiVideoPrecaptureView::disableFeedback()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    HbFeedbackPlayer* feedback = HbFeedbackPlayer::instance();
-    if (feedback) {
-        feedback->settings().disableFeedback();
-    }
+    HbFeedbackSettings settings;
+    settings.disableFeedback();
+
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -419,10 +415,9 @@ void CxuiVideoPrecaptureView::enableFeedback()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    HbFeedbackPlayer* feedback = HbFeedbackPlayer::instance();
-    if (feedback) {
-        feedback->settings().disableFeedback();
-    }
+    HbFeedbackSettings settings;
+    settings.enableFeedback();
+
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -488,6 +483,21 @@ void CxuiVideoPrecaptureView::updateTimeLabels()
 }
 
 /*!
+  Overridded version of hideControls() that doesn't hide the controls when video recording
+  is paused.
+ */
+void CxuiVideoPrecaptureView::hideControls()
+{
+    if (mVideoCaptureControl && mVideoCaptureControl->state() == CxeVideoCaptureControl::Paused) {
+        // never hide controls in paused state
+        return;
+    }
+
+    CxuiPrecaptureView::hideControls();
+
+}
+
+/*!
 * Helper method for formatting video time to requested label.
 * @param label Text label to show the time.
 * @param time Time in seconds to be formatted to the label text.
@@ -547,6 +557,8 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
 
     updateTimeLabels();
 
+    mPauseTimer.stop();
+
     switch (newState) {
     case CxeVideoCaptureControl::Ready:
         if (mDocumentLoader){
@@ -558,11 +570,15 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         }
         break;
     case CxeVideoCaptureControl::Recording:
+        hideControls();
         if (mDocumentLoader){
             mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_RECORDING);
         }
         mElapsedTimer.start(CXUI_ELAPSED_TIME_TIMEOUT);
         disableFeedback();
+        if (mRecordingAnimation && mRecordingIcon) {
+            mRecordingAnimation->start();
+        }
         break;
     case CxeVideoCaptureControl::Paused:
         mElapsedTimer.stop();
@@ -571,13 +587,21 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
             mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_PAUSED);
         }
 
+        if (mRecordingAnimation && mRecordingIcon) {
+            mRecordingAnimation->stop();
+        }
+        showControls();
         enableFeedback();
+        mPauseTimer.start();
         break;
     case CxeVideoCaptureControl::Stopping:
         if (mDocumentLoader){
             mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_PAUSED);
         }
 
+        if (mRecordingAnimation && mRecordingIcon) {
+            mRecordingAnimation->stop();
+        }
         enableFeedback();
 
         if (isPostcaptureOn()) {
@@ -630,10 +654,10 @@ void CxuiVideoPrecaptureView::handleCaptureKeyPressed()
 
     switch (state) {
         case CxeVideoCaptureControl::Ready:
-        case CxeVideoCaptureControl::Paused:
             record();
             break;
         case CxeVideoCaptureControl::Recording:
+        case CxeVideoCaptureControl::Paused:
             stop();
             break;
         case CxeVideoCaptureControl::Idle:
@@ -671,7 +695,8 @@ void CxuiVideoPrecaptureView::handleQuitClicked()
     CX_DEBUG_ENTER_FUNCTION();
 
     CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
-    if (state == CxeVideoCaptureControl::Recording){
+    if (state == CxeVideoCaptureControl::Recording ||
+        state == CxeVideoCaptureControl::Paused) {
         // Disable going to post-capture when video capture control goes to stopping state.
         disconnect(mVideoCaptureControl, SIGNAL(stateChanged(CxeVideoCaptureControl::State, CxeError::Id)),
                    this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
@@ -766,6 +791,29 @@ void CxuiVideoPrecaptureView::setRecordingItemsVisibility(bool visible) {
     if (mElapsedTimeText) {
         mElapsedTimeText->setVisible(visible);
     }
+}
+
+/*!
+ * Overridden eventFilter() to restart the pause timer.
+ */
+bool CxuiVideoPrecaptureView::eventFilter(QObject *object, QEvent *event)
+{
+
+    if (mVideoCaptureControl && mVideoCaptureControl->state() == CxeVideoCaptureControl::Paused) {
+        // restart the timer if the screen is touched and we are in paused state
+        switch (event->type())
+        {
+        case QEvent::GraphicsSceneMouseRelease:
+            mPauseTimer.start();
+            break;
+        case QEvent::GraphicsSceneMousePress:
+            mPauseTimer.stop();
+            break;
+        default:
+            break;
+        }
+    }
+    return CxuiPrecaptureView::eventFilter(object, event);
 }
 
 

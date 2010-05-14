@@ -28,6 +28,7 @@ class CxeFakeSettings;
 class CxeFakeFilenameGenerator;
 class QSignalSpy;
 class CxeFakeQualityPresets;
+class CxeDiskMonitor;
 
 class UnitTestCxeVideoCaptureControlSymbian : public QObject
 {
@@ -74,6 +75,7 @@ private:
     CxeFakeFilenameGenerator *mFilenameGeneratorSymbian;
     QSignalSpy *mSpyState;
     CxeFakeQualityPresets *mFakeQualityPresets;
+    CxeDiskMonitor *mDiskMonitor;
 };
 
 #endif // UNITTEST_CXESTILLIMAGESYMBIAN_H

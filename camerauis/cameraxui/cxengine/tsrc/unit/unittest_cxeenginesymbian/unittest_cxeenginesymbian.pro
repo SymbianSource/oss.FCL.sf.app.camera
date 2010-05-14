@@ -44,6 +44,7 @@ LIBS *= -limagingconfigmanager
 LIBS *= -lalfclient
 LIBS *= -lalfdecoderserverclient
 LIBS *= -lxqserviceutil
+LIBS *= -loommonitor
 
 
 SOURCES *= unittest_cxeenginesymbian.cpp \
@@ -98,6 +99,10 @@ SOURCES *= unittest_cxeenginesymbian.cpp \
            sensor/xqaccsensor_p.cpp \
            cxefakequalitypresets.cpp \
            cxequalitypresetssymbian.cpp \
+           cxediskmonitor.cpp \
+           cxediskmonitorprivate.cpp \
+           cxememorymonitor.cpp \
+           cxememorymonitorprivate.cpp
 
 
 
@@ -165,4 +170,8 @@ HEADERS *= unittest_cxeenginesymbian.h \
            sensor/xqaccsensor_p.h \
            cxequalitypresets.h \
            cxefakequalitypresets.h \
-           cxequalitypresetssymbian.h
+           cxequalitypresetssymbian.h \
+           cxediskmonitor.h \
+           cxediskmonitorprivate.h \
+           cxememorymonitor.h \
+           cxememorymonitorprivate.h

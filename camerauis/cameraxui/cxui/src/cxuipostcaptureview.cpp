@@ -32,7 +32,7 @@
 #include <hbmessagebox.h>
 #include <hbnotificationdialog.h>
 
-#include <shareuidialog.h>
+#include <shareui.h>
 
 #include "cxeviewfindercontrol.h"
 #include "cxuienums.h"
@@ -136,14 +136,20 @@ void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
 
     // get toolbar pointers from the documentloader
     widget = mDocumentLoader->findWidget(STILL_POST_CAPTURE_TOOLBAR);
+    // This resize is a workaround to get toolbar shown correctly.
+    widget->resize(60, 300);
     mStillToolbar = qobject_cast<HbToolBar *> (widget);
     CX_DEBUG_ASSERT(mStillToolbar);
 
     widget = mDocumentLoader->findWidget(VIDEO_POST_CAPTURE_TOOLBAR);
+    // This resize is a workaround to get toolbar shown correctly.
+    widget->resize(60, 300);
     mVideoToolbar = qobject_cast<HbToolBar *> (widget);
     CX_DEBUG_ASSERT(mVideoToolbar);
 
     widget = mDocumentLoader->findWidget(EMBEDDED_POST_CAPTURE_TOOLBAR);
+    // This resize is a workaround to get toolbar shown correctly.
+    widget->resize(60, 300);
     mEmbeddedToolbar = qobject_cast<HbToolBar *> (widget);
     CX_DEBUG_ASSERT(mEmbeddedToolbar);
 
@@ -204,9 +210,11 @@ void CxuiPostcaptureView::handleAutofocusKeyPressed()
  */
 void CxuiPostcaptureView::playVideo()
 {
+
     launchNotSupportedNotification();
     //! @todo needs an implementation
     CX_DEBUG_IN_FUNCTION();
+
 }
 
 // ---------------------------------------------------------------------------
@@ -245,7 +253,9 @@ void CxuiPostcaptureView::handleDeleteDialogClosed(HbAction *action)
     hideControls();
 
     HbMessageBox *dlg = qobject_cast<HbMessageBox*>(sender());
-    if(dlg && action == dlg->primaryAction()) {
+
+    // check that it was "primary action" that closed the dialog
+    if (dlg && dlg->actions().at(0) == action) {
         // User confirmed delete
         QString filename = getCurrentFilename();
         QFileInfo fileInfo(filename);
@@ -276,16 +286,15 @@ void CxuiPostcaptureView::launchShare()
     CX_DEBUG_ENTER_FUNCTION();
 
     stopTimers();
-    stopViewfinder();
     releaseCamera();
 
     QString filename = getCurrentFilename();
 
-    QVariantList filelist;
-    filelist.append(QVariant(filename));
+    QStringList filelist;
+    filelist.append(filename);
 
     ShareUi dialog;
-    dialog.init(filelist, true);
+    dialog.send(filelist, true);
 
     showControls();
 
@@ -467,8 +476,8 @@ void CxuiPostcaptureView::paint(QPainter *painter, const QStyleOptionGraphicsIte
 //
 void CxuiPostcaptureView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-
-    if (event->type() == QEvent::GraphicsSceneMousePress) {
+    //! @todo temporary workaround for title bar mouse event handling bug
+    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70) {
         mPostcaptureTimer.stop();
         toggleControls();
         event->accept();
@@ -606,13 +615,7 @@ void CxuiPostcaptureView::updateSnapshotImage()
 void CxuiPostcaptureView::launchNotSupportedNotification()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    // Instantiate a popup
-    HbNotificationDialog note;
-    note.setTitle("Notification");
-    note.setText("Not supported yet");
-    note.exec();
-
+    HbNotificationDialog::launchDialog("Notification", "Not supported yet");
     CX_DEBUG_EXIT_FUNCTION();
 }
 

@@ -105,7 +105,7 @@ protected slots:
     void zoomTo(int value);
 
     // Control visibility of all UI items at the same time: toolbar, zoom and titlepane items
-    void hideControls();
+    virtual void hideControls();
     virtual void showControls();
     void toggleControls();
 
@@ -197,7 +197,9 @@ private:
     CxuiSettingSlider *mSettingsSlider;
 
     CxuiSettingsInfo *mSettingsInfo;
-
+    
+    HbAction *mSettingsDialogOkAction;
+    HbAction *mSliderSettingsDialogOkAction;
 };
 
 #endif // CXUIPRECAPTUREVIEW_H

@@ -44,13 +44,15 @@ public:
     CxeAutoFocusControlSymbian( CxeCameraDevice &cameraDevice );
     virtual ~CxeAutoFocusControlSymbian();
 
-    CxeError::Id  start();
+    CxeError::Id  start(bool soundEnabled = true);
     void cancel();
     void setMode( CxeAutoFocusControl::Mode newMode );
     CxeAutoFocusControl::Mode mode() const;
 
     CxeAutoFocusControl::State state() const;
     bool supported() const;
+
+    bool isSoundEnabled() const;
 
 protected: // from CxeStateMachine
     void handleStateChanged( int newStateId, CxeError::Id error );
@@ -91,6 +93,7 @@ protected:
     CxeAutoFocusControl::Mode mAfMode;
     CCamera::CCameraAdvancedSettings::TFocusRange mAFRange;
     bool mCancelled;
+    bool mSoundEnabled;
     };
 
 #endif // CXEAUTOFOCUSCONTROLSYMBIAN_H

@@ -907,19 +907,23 @@ CxeStillImageSymbian* CxeStillCaptureControlSymbian::getImageForIndex(int index)
 
 /*!
 * Slot to handle Autofocus events.
+* \param newState Indicates current state of the auto focus
+* \param error Contains possible error code
 */
 void CxeStillCaptureControlSymbian::handleAutofocusStateChanged(
                                          CxeAutoFocusControl::State newState,
-                                         CxeError::Id /*error*/ )
+                                         CxeError::Id error )
 {
     CX_DEBUG_ENTER_FUNCTION();
+    Q_UNUSED(error);
     mAfState = newState;
     CxeAutoFocusControl::Mode mode = mAutoFocusControl.mode();
 
     // if focused and in correct mode, play sound
     if  (newState == CxeAutoFocusControl::Ready &&
          mode != CxeAutoFocusControl::Hyperfocal &&
-         mode != CxeAutoFocusControl::Infinity) {
+         mode != CxeAutoFocusControl::Infinity &&
+         mAutoFocusControl.isSoundEnabled()) {
         mAutoFocusSoundPlayer->play();
     }
     CX_DEBUG_EXIT_FUNCTION();

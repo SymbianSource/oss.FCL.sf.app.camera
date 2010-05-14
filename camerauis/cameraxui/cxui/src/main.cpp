@@ -71,7 +71,9 @@ int main(int argc, char *argv[])
     } else {
         // Normal mode. Init engine now.
         OstTrace0( camerax_performance, DUP9__MAIN, "msg: e_CX_INIT_ENGINE 1" );
-        eng->initMode(Cxe::ImageMode);
+		 //! @todo temporarily commented as part of a hack to change the startup sequence
+         // to avoid GOOM issues
+        //eng->initMode(Cxe::ImageMode);
         OstTrace0( camerax_performance, DUP10__MAIN, "msg: e_CX_INIT_ENGINE 0" );
     }
 
@@ -94,40 +96,39 @@ int main(int argc, char *argv[])
     app.installTranslator(&commonTranslator);
     OstTrace0( camerax_performance, DUP4__MAIN, "msg: e_CX_LOAD_TRANSLATIONS 0" );
 
-    // If the parent of the engine is set to be the
-    // HbApplication, then for some reason the engine won't be deleted
-    // on shutdown (or at least there will be no traces visible of it)
-    //eng->setParent(&app); // HbApplication will now own the engine
-
     OstTrace0( camerax_performance, DUP5__MAIN, "msg: e_CX_MAINWINDOW_CREATION 1" );
-    HbMainWindow mainWindow(0, Hb::WindowFlagTransparent |
-                               Hb::WindowFlagNoBackground);
-    mainWindow.setAttribute(Qt::WA_NoBackground);
+    HbMainWindow *mainWindow = new HbMainWindow(0, Hb::WindowFlagTransparent |
+                                                   Hb::WindowFlagNoBackground);
+    mainWindow->setAttribute(Qt::WA_NoBackground);
     OstTrace0( camerax_performance, DUP6__MAIN, "msg: e_CX_MAINWINDOW_CREATION 0" );
 
     OstTrace0( camerax_performance, DUP11__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 1" );
-    CxuiViewManager viewManager(app, mainWindow, *eng);
+    CxuiViewManager *viewManager = new CxuiViewManager(app, *mainWindow, *eng);
     OstTrace0( camerax_performance, DUP12__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 0" );
 
-    // Setting the viewmanager as the parent of the engine fixes the deletion issue
-    eng->setParent(&viewManager);
-
     OstTrace0( camerax_performance, DUP13__MAIN, "msg: e_CX_MAINWINDOW_SETORIENTATION 1" );
-    mainWindow.setOrientation(Qt::Horizontal);
+    mainWindow->setOrientation(Qt::Horizontal);
     OstTrace0( camerax_performance, DUP14__MAIN, "msg: e_CX_MAINWINDOW_SETORIENTATION 0" );
 
     OstTrace0( camerax_performance, DUP15__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 1" );
-    mainWindow.showFullScreen();
+    mainWindow->showFullScreen();
     OstTrace0( camerax_performance, DUP16__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 0" );
 
     OstTrace0( camerax_performance, DUP17__MAIN, "msg: e_CX_PREPAREWINDOW 1" );
-    viewManager.prepareWindow();
+    viewManager->prepareWindow();
     OstTrace0( camerax_performance, DUP18__MAIN, "msg: e_CX_PREPAREWINDOW 0" );
-
+    //! @todo initMode call added here as a temporary hack to change the startup sequence
+	// in order to avoid GOOM issues
+	  User::After(2000000);
+    eng->initMode(Cxe::ImageMode);
     int returnValue = app.exec();
 
     // delete service provider instance
     CxuiServiceProvider::destroy();
+
+    delete viewManager;
+    delete mainWindow;
+    delete eng;
 
     return returnValue;
 }

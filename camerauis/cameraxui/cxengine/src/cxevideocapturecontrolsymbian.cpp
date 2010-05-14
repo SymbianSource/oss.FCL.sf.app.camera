@@ -126,6 +126,8 @@ CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
     connect(&mSettings, SIGNAL(settingValueChanged(const QString&,QVariant)),
             this, SLOT(handleSettingValueChanged(const QString&,QVariant)));
 
+    connect(&mSettings, SIGNAL(sceneChanged(CxeScene&)), this, SLOT(handleSceneChanged(CxeScene&)));
+
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_M2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_OUT, "msg: e_CX_VIDEOCAPTURECONTROL_NEW 0");
@@ -372,7 +374,6 @@ void CxeVideoCaptureControlSymbian::prepare()
     CX_DEBUG(("Video resoulution (%d,%d)", mCurrentVideoDetails.mWidth,
                                            mCurrentVideoDetails.mHeight));
     CX_DEBUG(("Video bitrate = %d)", mCurrentVideoDetails.mVideoBitRate));
-    CX_DEBUG(("Video frame rate = %f)", mCurrentVideoDetails.mVideoFrameRate));
 
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_VIDCAPCONT_PREPARE 1");
     TSize frameSize;
@@ -381,10 +382,20 @@ void CxeVideoCaptureControlSymbian::prepare()
     int muteSetting = 0; // audio enabled
     mSettings.get(CxeSettingIds::VIDEO_MUTE_SETTING, muteSetting);
 
+    // Check if scene defines frame rate.
+    // Use generic frame rate defined in video details, if no value is set in scene.
+    int frameRate = 0;
+    mSettings.get(CxeSettingIds::FRAME_RATE, frameRate);
+    if (frameRate <= 0) {
+        frameRate = mCurrentVideoDetails.mVideoFrameRate;
+    }
+
+    CX_DEBUG(("Video frame rate = %d)", frameRate));
+
     TRAPD(err,
               {
               mVideoRecorder->SetVideoFrameSizeL(frameSize);
-              mVideoRecorder->SetVideoFrameRateL(mCurrentVideoDetails.mVideoFrameRate);
+              mVideoRecorder->SetVideoFrameRateL(frameRate);
               mVideoRecorder->SetVideoBitRateL(mCurrentVideoDetails.mVideoBitRate);
               mVideoRecorder->SetAudioEnabledL(muteSetting == 0);
               // "No limit" value is handled in video recorder wrapper.
@@ -665,6 +676,8 @@ void CxeVideoCaptureControlSymbian::pause()
 
     setState(CxeVideoCaptureControl::Paused);
     TRAPD(pauseErr, mVideoRecorder->PauseL());
+    // play the sound, but not changing the state
+    mVideoStopSoundPlayer->play();
     if (pauseErr) {
         CX_DEBUG(("[WARNING] Error %d pausing!", pauseErr));
         //pause operation failed, report it
@@ -1078,7 +1091,8 @@ void CxeVideoCaptureControlSymbian::remainingTime(int &time)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (state() == CxeVideoCaptureControl::Recording) {
+    if (state() == CxeVideoCaptureControl::Recording ||
+        state() == CxeVideoCaptureControl::Paused) {
         TTimeIntervalMicroSeconds remaining = 0;
         remaining = mVideoRecorder->RecordTimeAvailable();
         time = remaining.Int64() * 1.0 / KOneSecond;
@@ -1175,7 +1189,8 @@ bool CxeVideoCaptureControlSymbian::elapsedTime(int &time)
 
     TTimeIntervalMicroSeconds timeElapsed = 0;
     bool ok = false;
-    if (state() == CxeVideoCaptureControl::Recording) {
+    if (state() == CxeVideoCaptureControl::Recording ||
+        state() == CxeVideoCaptureControl::Paused) {
         TRAPD( err, timeElapsed = mVideoRecorder->DurationL() );
         if (!err) {
             time = timeElapsed.Int64() * 1.0 / KOneSecond;
@@ -1232,11 +1247,38 @@ void CxeVideoCaptureControlSymbian::handleSettingValueChanged(const QString& set
             // mute setting changed, apply the new setting and re-prepare.
             setState(Preparing);
             prepare();
+        } else if (settingId == CxeSettingIds::FRAME_RATE){
+            // Frame rate setting changed. Need to re-prepare if we are prepared already.
+            // Otherwise can wait for next init call.
+            if (state() == Ready) {
+                setState(Preparing);
+                prepare();
+            }
         } else {
             // Setting not relevant to video mode
         }
     }
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Scene mode changed. We need to know about it because frame rate
+ * might have changed.
+ */
+void CxeVideoCaptureControlSymbian::handleSceneChanged(CxeScene& scene)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // make sure we are in video mode
+    if (mCameraDeviceControl.mode() == Cxe::VideoMode) {
+        // Frame rate setting might have changed so re-prepare.
+        if (state() == Ready) {
+            setState(Preparing);
+            prepare();
+        }
+
+    }
     CX_DEBUG_EXIT_FUNCTION();
 }
 

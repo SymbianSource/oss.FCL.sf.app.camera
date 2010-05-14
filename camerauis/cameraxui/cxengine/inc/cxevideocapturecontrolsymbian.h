@@ -108,6 +108,8 @@ protected slots:
     void handleCameraEvent(int eventUid, int error);
     // settings call back
     void handleSettingValueChanged(const QString& settingId,QVariant newValue);
+    // scene mode change
+    void handleSceneChanged(CxeScene& scene);
     // Disk space change
     void handleDiskSpaceChanged();
 

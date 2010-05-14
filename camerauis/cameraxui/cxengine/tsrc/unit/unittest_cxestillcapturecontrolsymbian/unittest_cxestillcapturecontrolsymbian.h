@@ -36,6 +36,7 @@ class CxeFakeAutoFocusControl;
 class CxeFakeSettings;
 class CxeFakeQualityPresets;
 class CxeFakeFileSaveThread;
+class CxeDiskMonitor;
 
 class UnitTestCxeStillCaptureControlSymbian : public QObject
 {
@@ -75,6 +76,7 @@ private:
     QSignalSpy *mSpyState;
     CxeFakeQualityPresets *mFakeQualityPresets;
     CxeFakeFileSaveThread *mFakeFileSaveThread;
+    CxeDiskMonitor *mDiskMonitor;
 };
 
 #endif // UNITTEST_CXESTILLCAPTURECONTROLSYMBIAN_H
