@@ -104,6 +104,7 @@ CCamContainerBase::CCamContainerBase( CCamAppController& aController,
 void CCamContainerBase::BaseConstructL( const TRect& aRect )
   {
   CreateWindowL();
+  Window().SetBackgroundColor( KRgbBlack );
   SetRect( aRect );
   EnableDragEvents(); 
 
@@ -835,10 +836,11 @@ TBool CCamContainerBase::IsPrimaryCameraCaptureKey( const TKeyEvent& aKeyEvent )
     if ( appUi 
          && ( !appUi->IsToolBarVisible() || !appUi->DrawPreCaptureCourtesyUI() )
          && ( aKeyEvent.iScanCode == EStdKeyDevice3
-              || aKeyEvent.iScanCode == EStdKeyEnter )
-         && !static_cast<CCamViewBase*>(&iView)->IsPostCapture() ) {
+              || aKeyEvent.iScanCode == EStdKeyEnter
+              || aKeyEvent.iScanCode == EStdKeyNkpEnter ) )
+        {
         isCapturekey = ETrue;
-    }
+        }
     return isCapturekey;
     }
 
@@ -853,10 +855,11 @@ TBool CCamContainerBase::IsSecondaryCameraCaptureKey( const TKeyEvent& aKeyEvent
     if ( appUi 
          && !appUi->IsToolBarVisible()
          && ( aKeyEvent.iScanCode == EStdKeyDevice3
-              || aKeyEvent.iScanCode == EStdKeyEnter )
-         && !static_cast<CCamViewBase*>(&iView)->IsPostCapture() ) {
+              || aKeyEvent.iScanCode == EStdKeyEnter
+              || aKeyEvent.iScanCode == EStdKeyNkpEnter ))
+        {
         isCapturekey = ETrue;
-    }
+        }
     return isCapturekey;            
     }
 

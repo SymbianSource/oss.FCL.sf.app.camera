@@ -134,6 +134,27 @@ class CCamSidePane : public CBase,
      */
     void UpdateLayout();    
 
+    /**
+     * Draw's/Clear's mode indicator. Used for blinking mode indicator.
+     * @since S60 5.1
+     * @param aGc Graphics context to draw the indicator
+     * @param aDrawIcon Whether the indicator should be drawn or cleared
+     */
+    void DrawModeIndicator( CWindowGc& aGc, TBool aDrawIcon );
+    
+    /**
+     * Returns mode indicator layout rect. Used for blinking mode indicator.
+     * @since S60 5.1
+     */
+    TRect ModeIndicatorLayoutRect();
+    
+    /**
+     * Updates scene indicator with the provided bitmap.
+     * @since S60 5.1
+     * @param aBitmapId, aMask  Id of the indicator bitmap and mask 
+     */
+    void UpdateSceneIndicatorL( TInt32 aBitmapId, TInt32 aMaskId );    
+    
   protected: // Functions from base classes
 
     /**

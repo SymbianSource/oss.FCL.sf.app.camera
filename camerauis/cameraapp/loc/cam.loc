@@ -1496,7 +1496,7 @@ CHARACTER_SET UTF8
 //d:In video scene settings list
 //l:popup_preview_text_window/opt5
 //
-#define qtn_lcam_scene_vid_night_ex     "Ideal for filming in low light"
+#define qtn_lcam_scene_vid_night_ex     "Ideal for filming in dark"
 
 //d:Sport scene descriptive text
 //d:In image scene settings list
@@ -3798,7 +3798,7 @@ CHARACTER_SET UTF8
 //d:In video scene settings list
 //l:main_cset_text2_pane_t1_copy1
 //
-#define qtn_lcam_scene_vid_night_ex_v2     "Ideal for filming in low light"
+#define qtn_lcam_scene_vid_night_ex_v2     "Ideal for filming in dark"
 
 //d:Sport scene descriptive text
 //d:In image scene settings list
@@ -4252,6 +4252,32 @@ CHARACTER_SET UTF8
 //d: USB is connected in mass torage mode
 //l: popup_note_window
 #define qtn_lcam_storage_inaccessible_note "All storage inaccessible at the moment. Please try again later"
+
+//d: This popup note is displayed when HDMI cable is plugged to the device
+//d: while video recording is ongoing. Video recording is not allowed
+//d: with HDMI connection.
+//l: popup_note_window
+#define qtn_lcam_hdmi_cable_detected "Recording finished, because HDMI cable detected" 
+
+//d: This popup note is displayed when user tries to start 
+//d: video recording while HDMI cable is plugged. 
+//d: Video recording is not allowed with HDMI connection.
+//l: popup_note_window
+#define qtn_lcam_hdmi_remove_cable "Remove HDMI cable before recording video"
+
+//d: Icon text for 'Grid' button in touch toolbar extension in still mode
+//d: pre-capture view. Pressing the button will enable or disable
+//d: a 3x3 grid layout on top of the viewfinder image to help the user
+//d: to compose the image.
+//l: cell_tb_ext_pane_t1/opt1
+#define qtn_lcam_tb_grid "Grid"
+
+//d: Icon text for 'switching to secondary camera' button in touch toolbar 
+//d: toolbar extension in video and still mode. Pressing the button will 
+//d: switch to secondary camera video or still mode.
+//l: cell_tb_ext_pane_t1/opt1
+#define qtn_lcam_tb_switch "Switch"
+
 
 // end of file
 

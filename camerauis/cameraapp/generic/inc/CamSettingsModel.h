@@ -88,6 +88,28 @@ class CCamSettingsModel : public CBase,
     * @return None
     */
     void StoreFaceTrackingValue(); 
+    
+    
+    /**
+    * Returns the face tracking state as it was before the latest scene mode change
+    */  
+    TCamSettingsOnOff GetPreviousFaceTrack();
+    
+    /**
+    * Sets the face tracking state as it was before the latest scene mode change
+    */  
+    void SetPreviousFaceTrack( TCamSettingsOnOff aPreviousFaceTrack );
+    
+    /**
+    * Returns the scene mode that was in use before the current scene mode was selected
+    */ 
+    TCamSceneId GetPreviousSceneMode();
+
+    /**
+    * Sets the scene mode that was in use before the current scene mode was selected
+    */  
+    void SetPreviousSceneMode( TCamSceneId aPreviousSceneMode );
+    
 
   // -------------------------------------------------------------------------
   // From base class MCamSettingsModel

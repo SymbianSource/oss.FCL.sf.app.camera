@@ -1221,6 +1221,7 @@ void CCamSettingsModel::UserSceneHasChangedL( TInt aSceneId, TBool aActivate )
 //
 void CCamSettingsModel::PhotoSceneHasChangedL( TInt aSceneId )
     {
+    PRINT( _L("Camera => CCamSettingsModel::PhotoSceneHasChangedL") )
     // If the scene has changed to a scene other than the "User" scene
     // set capture setup values to defaults and the flash to scene flash.
     if ( aSceneId != ECamSceneUser )
@@ -1255,32 +1256,6 @@ void CCamSettingsModel::PhotoSceneHasChangedL( TInt aSceneId )
         // Set the user setup contrast to that of the new scene
         TInt contrast = DefaultSettingValueForScene( aSceneId, ECamSettingItemSceneContrast );
         SetIntegerSettingValueL( ECamSettingItemDynamicPhotoBrightness, contrast );
-                 
-	    if ( iUiConfigManager->IsFaceTrackingSupported() ) // FT supported
-         {      
-         if ( ECamSceneScenery == aSceneId ||
-              ECamSceneSports == aSceneId ||
-              ECamSceneMacro == aSceneId)
-            {
-            if ( ECamSceneScenery != iPreviousSceneMode && 
-                 ECamSceneSports != iPreviousSceneMode &&
-                 ECamSceneMacro != iPreviousSceneMode )
-               {	
-               iPreviousFaceTrack = TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) );	
-               }
-            SetIntegerSettingValueL( ECamSettingItemFaceTracking, ECamSettOff );	
-            }
-         else if ( ( ECamSceneScenery == iPreviousSceneMode ||
-                     ECamSceneSports == iPreviousSceneMode ||
-                     ECamSceneMacro == iPreviousSceneMode ) &&
-                   ( ECamSettOff == TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) ) ) )
-             {
-             SetIntegerSettingValueL( ECamSettingItemFaceTracking, iPreviousFaceTrack );
-             iPreviousFaceTrack = TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) );
-             CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( iEnv->AppUi() );
-             TRAP_IGNORE( appUi->APHandler()->UpdateActivePaletteL() );
-             }
-         }              
 
         // Update the engine with the scene settings.
         //UpdateEngineWithSceneSettingsL( iPhotoScenes, aSceneId );
@@ -1291,7 +1266,44 @@ void CCamSettingsModel::PhotoSceneHasChangedL( TInt aSceneId )
         {
         ActivateUserSceneSettingsL();
         }
+        
+      
+	  if ( iUiConfigManager->IsFaceTrackingSupported() ) // FT supported
+        {
+        PRINT( _L("Camera <> Face tracking supported") ) 
+        if ( ECamSceneScenery == aSceneId ||
+             ECamSceneSports == aSceneId ||
+             ECamSceneMacro == aSceneId)
+            {
+            PRINT( _L("Camera <> New scene mode is scenery, sports or macro") )
+            if ( ECamSceneScenery != iPreviousSceneMode && 
+                 ECamSceneSports != iPreviousSceneMode &&
+                 ECamSceneMacro != iPreviousSceneMode )
+                {	
+                PRINT( _L("Camera <> Previous scene mode is not scenery, sports or macro -> Set iPreviousFaceTrack to current value") )
+                iPreviousFaceTrack = TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) );	
+                }
+            PRINT( _L("Camera <> Switch face tracking OFF") )
+            SetIntegerSettingValueL( ECamSettingItemFaceTracking, ECamSettOff );	
+            }
+        else if ( ( ECamSceneScenery == iPreviousSceneMode ||
+                     ECamSceneSports == iPreviousSceneMode ||
+                     ECamSceneMacro == iPreviousSceneMode ) &&
+                   ( ECamSettOff == TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) ) ) )
+            {
+            PRINT( _L("Camera <> Previous scene mode was scenery, sports or macro AND face tracking is OFF") )
+            PRINT( _L("Camera <> Set face tracking to iPreviousFaceTrack") )
+            SetIntegerSettingValueL( ECamSettingItemFaceTracking, iPreviousFaceTrack );
+            PRINT( _L("Camera <> Set iPreviousFaceTrack to current face tracking state") )
+            iPreviousFaceTrack = TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) );
+            CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( iEnv->AppUi() );
+            TRAP_IGNORE( appUi->APHandler()->UpdateActivePaletteL() );
+            }
+        }              
+          
+
     iPreviousSceneMode = TCamSceneId( aSceneId ); // store scene mode setting
+    PRINT( _L("Camera <= CCamSettingsModel::PhotoSceneHasChangedL()") )
     }
 
 // ---------------------------------------------------------------------------
@@ -1603,6 +1615,7 @@ void CCamSettingsModel::StorePrimaryCameraSettingsL()
     iStaticModel->StorePrimaryCameraSettingsL();
     CopySettingsL(iDynamicPhotoIntSettings, iDynamicPhotoIntSettingsBackup);
     CopySettingsL(iDynamicVideoIntSettings, iDynamicVideoIntSettingsBackup);
+    PRINT( _L("Camera <= CCamSettingsModel::StorePrimaryCameraSettingsL"))
     }
 
 // ---------------------------------------------------------------------------
@@ -2284,12 +2297,11 @@ void CCamSettingsModel::StoreFaceTrackingValue()
         ECamSceneMacro == activeScene) 	
       {
       PRINT( _L("Camera <> CCamSettingsModel::StoreFaceTrackingValue(), Scenery or Sports mode" ) )		      	      	
-      if ( iPreviousFaceTrack != TCamSettingsOnOff( IntegerSettingValue( ECamSettingItemFaceTracking ) ) )
-         {	
-         PRINT1( _L("Camera <> CCamSettingsModel::StoreFaceTrackingValue(), iPreviousFaceTrack [%d]" ), iPreviousFaceTrack )		      	      		
-         SetIntegerSettingValueL( ECamSettingItemFaceTracking, iPreviousFaceTrack );
-         }      	      	      
+      SetIntegerSettingValueL( ECamSettingItemFaceTracking, iPreviousFaceTrack );   
       }
+      
+      
+      
    PRINT( _L("Camera <= CamSettingsModel::StoreFaceTrackingValue()" ) )	
    }
 
@@ -2385,5 +2397,47 @@ void CCamSettingsModel::SetUserSceneDefault()
     
     PRINT( _L("Camera <= CCamSettingsModel::SetUserSceneDefault ") );
     }
+
+// ---------------------------------------------------------------------------
+// CCamSettingsModel::GetPreviousFaceTrack
+//
+// Returns the face tracking state as it was before the latest scene mode change
+// ---------------------------------------------------------------------------
+//
+TCamSettingsOnOff CCamSettingsModel::GetPreviousFaceTrack()
+    {
+    return iPreviousFaceTrack;
+    }
+    
+// ---------------------------------------------------------------------------
+// CCamSettingsModel::SetPreviousFaceTrack
+// ---------------------------------------------------------------------------    
+//
+void CCamSettingsModel::SetPreviousFaceTrack( TCamSettingsOnOff aPreviousFaceTrack )
+    {
+    iPreviousFaceTrack = aPreviousFaceTrack;
+    }  
+    
+// ---------------------------------------------------------------------------
+// CCamSettingsModel::GetPreviousSceneMode
+//
+// Returns the scene mode that was in use before the current scene mode was selected
+// ---------------------------------------------------------------------------    
+//
+TCamSceneId CCamSettingsModel::GetPreviousSceneMode()
+    {
+    return iPreviousSceneMode;
+    }
+    
+// ---------------------------------------------------------------------------
+// CCamSettingsModel::SetPreviousSceneMode
+// ---------------------------------------------------------------------------    
+//
+void CCamSettingsModel::SetPreviousSceneMode( TCamSceneId aPreviousSceneMode )
+    {
+    iPreviousSceneMode = aPreviousSceneMode;
+    }      
+    
+    
 // ===========================================================================
 // end of File  

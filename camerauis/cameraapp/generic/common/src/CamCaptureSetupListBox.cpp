@@ -126,30 +126,34 @@ void CCamCaptureSetupListBox::InitializeL( TInt aCurrentValueId )
 TKeyResponse CCamCaptureSetupListBox::OfferKeyEventL( const TKeyEvent& aKeyEvent,TEventCode aType )
     {
     PRINT( _L("Camera => CCamCaptureSetupListBox::OfferKeyEventL" ))
-    // If the Select or navi key select button is pressed, select the current item
-    if ( ( aKeyEvent.iCode == EKeyOK && aKeyEvent.iRepeats == 0 && aType == EEventKey )
-        || aKeyEvent.iScanCode == EStdKeyDevice0 ) 
+
+    if ( !IsHighlightEnabled() &&
+            aKeyEvent.iCode != EKeyUpArrow &&
+            aKeyEvent.iCode != EKeyDownArrow )
         {
-        iView->ClearSelection();
-	    iView->SelectItemL( iView->CurrentItemIndex() );
-        }
-    //TInt oldCurrentItem = CurrentItemIndex();
-    //TKeyResponse response = CEikListBox::OfferKeyEventL( aKeyEvent, aType );
-    TKeyResponse response = EKeyWasConsumed;
-    /*TInt newCurrentItem = CurrentItemIndex();
+        PRINT( _L("Camera <= CCamCaptureSetupListBox::OfferKeyEventL highlight not visible" ))
+        return EKeyWasNotConsumed;
+        } 
+
+    TInt oldCurrentItem = CurrentItemIndex();
+    TKeyResponse response = CEikListBox::OfferKeyEventL( aKeyEvent, aType );
+    TInt newCurrentItem = CurrentItemIndex();
+    
     if ( newCurrentItem != oldCurrentItem )
         {
-        PRINT( _L("Camera => CCamCaptureSetupListBox::OfferKeyEventL set obs" ))
+        PRINT( _L("Camera <> CCamCaptureSetupListBox::OfferKeyEventL set obs" ))
         MCamListboxModel* model = static_cast<MCamListboxModel*>( iModel );
         iSettingObserver->HandleSettingValueUpdateL( model->ItemValue( newCurrentItem ) );
-        }*/
+        }
+    else
+        {
+        PRINT( _L("Camera <= CCamCaptureSetupListBox::OfferKeyEventL EKeyWasConsumed" ))
+        response = EKeyWasConsumed;
+        }
+    
+    PRINT( _L("Camera <= CCamCaptureSetupListBox::OfferKeyEventL" ))
     return response;
     }
-
-
-
-
-
 
 // ---------------------------------------------------------------------------
 // CCamCaptureSetupListBox::HandlePointerEventL

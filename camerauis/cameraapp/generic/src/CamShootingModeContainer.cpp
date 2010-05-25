@@ -592,7 +592,7 @@ TKeyResponse CCamShootingModeContainer::OfferKeyEventL(
             TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );
             if( UserSceneHighlighted() )
                 {
-                iView.HandleCommandL( ECamCmdSelect );
+                iView.HandleCommandL( ECamCmdUserSceneSelected );
                 }
                 else
                 {
@@ -606,7 +606,7 @@ TKeyResponse CCamShootingModeContainer::OfferKeyEventL(
         TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );
         if( UserSceneHighlighted() )
             {
-            iView.HandleCommandL( ECamCmdSelect );
+            iView.HandleCommandL( ECamCmdUserSceneSelected );
             }
             else
             {
@@ -1114,7 +1114,6 @@ void CCamShootingModeContainer::HandleListBoxEventL( CEikListBox* aListBox, TLis
     {
     switch( aEventType )
         {
-        case EEventEnterKeyPressed:
         case EEventItemDoubleClicked:
         case EEventItemSingleClicked:
               {

@@ -45,11 +45,13 @@
 #include <AknsUtils.h>
 #include <cameraapp.mbg>
 #include <AknIconUtils.h>
+#include <gulicon.h>
 
 
 #include "StringLoader.h"
 #include "camactivepalettehandler.h"
 #include "CameraUiConfigManager.h"
+#include "CamSidePane.h"
 
 #include "CamLocalViewIds.h"
 #include "OstTraceDefinitions.h"
@@ -119,6 +121,7 @@ void CCamStillPreCaptureView::DoDeactivate()
 //
 void CCamStillPreCaptureView::HandleCommandL( TInt aCommand )
     {
+    PRINT( _L("Camera => CCamStillPreCaptureView::HandleCommandL") );
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
     TCamOrientation orientation = appUi->CamOrientation();
     switch ( aCommand )
@@ -286,6 +289,7 @@ void CCamStillPreCaptureView::HandleCommandL( TInt aCommand )
             CCamPreCaptureViewBase::HandleCommandL( aCommand ); 
             }
         }
+    PRINT( _L("Camera <= CCamStillPreCaptureView::HandleCommandL") );
     }   
 
 // -----------------------------------------------------------------------------
@@ -429,7 +433,7 @@ void CCamStillPreCaptureView::HandleFocusLossL()
             }
         }
     CCamPreCaptureViewBase::HandleFocusLossL();
-    PRINT( _L( "Camera <= CCamVideoPreCaptureView::HandleFocusLossL" ) );    
+    PRINT( _L( "Camera <= CCamStillPreCaptureView::HandleFocusLossL" ) );    
     }    
 
 // -----------------------------------------------------------------------------
@@ -747,7 +751,6 @@ void CCamStillPreCaptureView::UpdateCbaL()
     {
     
     SetSoftKeysL( R_CAM_SOFTKEYS_BLANK_STOP );
-    
     }
   // If "Burst" capture is completing
   else if ( burstEnabled && operation == ECamCompleting )   
@@ -1987,7 +1990,11 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
         MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
         TFileName iconFileName;
         CamUtility::ResourceFileName( iconFileName );     
-  
+
+        // For use with scene indicator
+        TInt32 iconId = EMbmCameraappQgn_indi_cam4_mode_auto;
+        TInt32 maskId = EMbmCameraappQgn_indi_cam4_mode_auto_mask;
+
         switch ( scene )
             {
             case ECamSceneAuto:
@@ -1999,6 +2006,8 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_auto_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModeAuto );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_auto;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_auto_mask;
                 break;
                 }
             case ECamSceneUser:
@@ -2010,6 +2019,8 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_userscene_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModeUserscene );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_userscene;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_userscene_mask;
                 break;
                 }                    
             case ECamSceneMacro:
@@ -2021,6 +2032,8 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_closeup_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModeCloseup );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_closeup;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_closeup_mask;
                 break;
                 }          
             case ECamScenePortrait:
@@ -2032,6 +2045,8 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_portrait_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModePortrait );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_portrait;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_portrait_mask;
                 break;
                 }
             case ECamSceneScenery:
@@ -2043,6 +2058,8 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_landscape_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModeLandscape );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_landscape;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_landscape_mask;
                 break;
                 }
             case ECamSceneNight:
@@ -2054,6 +2071,8 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_night_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModeNight );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_night;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_night_mask;
                 break;
                 }
             case ECamSceneSports:
@@ -2065,6 +2084,8 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_sport_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModeSport );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_sport;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_sport_mask;
                 break;
                 }
             case ECamSceneNightScenery:
@@ -2077,14 +2098,28 @@ void CCamStillPreCaptureView::UpdateSceneModeIconsL()
                     EMbmCameraappQgn_indi_cam4_mode_portrait_night_mask, 
                     skinInstance,
                     KAknsIIDQgnIndiCam4ModePortraitNight );
+                iconId = EMbmCameraappQgn_indi_cam4_mode_portrait_night;
+                maskId = EMbmCameraappQgn_indi_cam4_mode_portrait_night_mask;
                 break;
                 }
             case ECamSceneCandlelight:
             default:
                 break;
             }
-        }
+        
+        // Update the icon in the side pane
+        if ( iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() )
+            {
+            CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+            CCamSidePane* sidePane = appUi->SidePane();
     
+            if ( sidePane )
+                {
+                PRINT( _L("Camera <> CCamStillPreCaptureView::UpdateSceneModeIconsL - Updating side pane indicator") );
+                sidePane->UpdateSceneIndicatorL( iconId, maskId );
+                }
+            }
+        }
     }
 
 // ---------------------------------------------------------------------------

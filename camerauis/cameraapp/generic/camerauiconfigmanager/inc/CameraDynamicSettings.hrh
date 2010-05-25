@@ -62,6 +62,8 @@ enum TCamDynamicSettings
     ECamDynamicSettingThumbnailManagerAPI,
     ECamDynamicSettingBurstMode,
     ECamDynamicSettingContinuousAF, 
+    ECamDynamicSettingCustomCaptureButton,
+
     // Primary/secondary camera capture keys
     ECamDynamicSettingPCCaptureKeys,
     ECamDynamicSettingSCCaptureKeys,

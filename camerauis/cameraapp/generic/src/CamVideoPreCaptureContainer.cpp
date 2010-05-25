@@ -48,6 +48,11 @@
 #endif
 
 
+// CONSTANTS
+_LIT(KCamBitmapFile, "z:\\resource\\apps\\cameraapp.mif");
+const TSize KIconSize(35, 35);
+
+
 // ================= MEMBER FUNCTIONS =======================
 
 // ---------------------------------------------------------------------------
@@ -79,6 +84,12 @@ CCamVideoPreCaptureContainer::~CCamVideoPreCaptureContainer()
       iFeedback->RemoveFeedbackForControl( this );
       }
   delete iFileTypeIndicator;
+  
+  if ( iCaptureIcon )
+      {
+      delete iCaptureIcon;
+      delete iCaptureMask;
+      }
   PRINT( _L("Camera <= ~CCamVideoPreCaptureContainer") );
   }
 
@@ -150,6 +161,16 @@ void CCamVideoPreCaptureContainer::ConstructL( const TRect& aRect )
         if ( !iFeedback )
             iFeedback = MTouchFeedback::CreateInstanceL();
         }
+    
+    // Load record icon
+    AknIconUtils::CreateIconL(
+             iCaptureIcon,
+             iCaptureMask,
+             KCamBitmapFile(),
+             EMbmCameraappQgn_indi_cam4_video,
+             EMbmCameraappQgn_indi_cam4_video_mask );
+    AknIconUtils::SetSize( iCaptureIcon, KIconSize, EAspectRatioPreserved );
+    AknIconUtils::SetSize( iCaptureMask, KIconSize, EAspectRatioPreserved );
     }
 
 // ---------------------------------------------------------------------------
@@ -187,7 +208,7 @@ CCamVideoPreCaptureContainer
             {
             if ( iController.IsTouchScreenSupported() && iFeedback )
                 {
-                iFeedback->EnableFeedbackForControl( this, EFalse );
+                iFeedback->SetFeedbackEnabledForThisApp( EFalse );              
                 }
             iRecordState = ECamRecording;
             iResolutionIndicators[iCurrentIndicator]->SetRect(iResolutionIndicatorVidcapPosition);
@@ -240,7 +261,7 @@ CCamVideoPreCaptureContainer
         iFileTypeIndicator->SetRect( iFileTypeIndicatorPosition );
         if ( iController.IsTouchScreenSupported() && iFeedback )
             {
-            iFeedback->EnableFeedbackForControl( this, ETrue );
+            iFeedback->SetFeedbackEnabledForThisApp( ETrue, ETrue );
             }
         break;
         }
@@ -415,12 +436,6 @@ CCamVideoPreCaptureContainer::HandleCaptureKeyEventL( const TKeyEvent& aKeyEvent
     }
   else
     {
-    // Blank out the softkeys if we are capturing
-    if ( EKeyWasConsumed == keyResponse )
-      {
-      BlankSoftkeysL();
-      }
-
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
     
     // neither recording nor paused
@@ -430,12 +445,16 @@ CCamVideoPreCaptureContainer::HandleCaptureKeyEventL( const TKeyEvent& aKeyEvent
 
     // Hide the toolbar if we are capturing
     if( EKeyWasConsumed == keyResponse )
-      {
-      // Repeated key events (MSK) are ignored.
-      iController.SetDemandKeyRelease( ETrue );  
+        {
+        // Hide capture button if we are capturing
+        iCaptureButtonShown = CaptureButtonActive();    
+        DrawNow( iCaptureRect );
 
-      // fixed toolbar is used only with touch devices
-      if ( iController.IsTouchScreenSupported() )
+        // Repeated key events (MSK) are ignored.
+        iController.SetDemandKeyRelease( ETrue );  
+        
+        // fixed toolbar is used only with touch devices
+        if ( iController.IsTouchScreenSupported() )
           {
           CAknToolbar* fixedToolbar = appUi->CurrentFixedToolbar();
           if ( fixedToolbar )
@@ -443,8 +462,8 @@ CCamVideoPreCaptureContainer::HandleCaptureKeyEventL( const TKeyEvent& aKeyEvent
             fixedToolbar->SetToolbarVisibility( EFalse );
             }
           }
-      }
-     } 
+        }
+    } 
   PRINT( _L("Camera <= CCamVideoPreCaptureContainer::HandleCaptureKeyEventL") );
   return keyResponse;
   }

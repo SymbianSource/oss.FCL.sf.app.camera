@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -894,6 +894,12 @@ class CCamAppUi : public CCamAppUiBase,
         * Hide the toolbar.
         */
         void SubmergeToolbar(); 
+        
+        /**
+        * Returns ETrue if the toolbar extension is visible,
+        * otherwise EFalse.
+        */
+        TBool IsToolBarExtensionVisible() const;
  
     public: // Functions from base classes
         /**
@@ -947,6 +953,13 @@ class CCamAppUi : public CCamAppUiBase,
         */
         void StartAsServerAppL( MCamEmbeddedObserver *aEmbeddedObserver, 
         	               TInt aMode );
+        
+        /**
+        * Set application file server observer  
+        * @since 9.2
+        * @param aEmbeddedObserver service observer
+        */
+        void SetEmbeddedObserver( MCamEmbeddedObserver* aEmbeddedObserver );
 
         /**
         * Closes the application

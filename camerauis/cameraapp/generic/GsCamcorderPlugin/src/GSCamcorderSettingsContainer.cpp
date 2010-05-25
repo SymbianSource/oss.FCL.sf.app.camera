@@ -208,31 +208,13 @@ TKeyResponse CGSCamcorderSettingsContainer::OfferKeyEventL(
             }        
         return EKeyWasNotConsumed;
         }
-
-    TKeyEvent newKeyEvent = aKeyEvent;
-    if ( !iLauchedFromGS )
+    if ( aKeyEvent.iCode == EKeyLeftArrow ||
+            aKeyEvent.iCode == EKeyRightArrow )
         {
-        if ( aKeyEvent.iCode == EKeyLeftArrow )
-    	    {
-    	    newKeyEvent.iCode = EKeyDownArrow;
-    	    }
-        else if ( aKeyEvent.iCode == EKeyRightArrow )
-            {
-            // Listbox takes all events even if it doesn't use them
-            //return EKeyWasNotConsumed; 
-            newKeyEvent.iCode = EKeyUpArrow;
-            }
+        // Listbox takes all events even if it doesn't use them
+        return EKeyWasNotConsumed; 
         }
-    else
-        {
-        if ( aKeyEvent.iCode == EKeyLeftArrow ||
-             aKeyEvent.iCode == EKeyRightArrow )
-            {
-            // Listbox takes all events even if it doesn't use them
-            return EKeyWasNotConsumed; 
-            }
-        }
-    return iSettingsList->OfferKeyEventL( newKeyEvent, aType );
+    return iSettingsList->OfferKeyEventL( aKeyEvent, aType );
     }
 
     

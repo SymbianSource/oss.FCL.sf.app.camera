@@ -255,7 +255,7 @@ void CCamUserSceneSetupViewBase::HandleForegroundEventL( TBool aForeground )
             appUi->HandleCommandL( ECamCmdGoToStandby );
             return;
             }
-        else if ( !appUi->IsInPretendExit() )
+        else if ( !appUi->IsInPretendExit()  && !iNotifierPopupShowing )
             {
             // Register that we want to use the engine
             IncrementCameraUsers();
@@ -290,9 +290,11 @@ void CCamUserSceneSetupViewBase::HandleForegroundEventL( TBool aForeground )
     // To background
     else if( !aForeground )
         {
+        iNotifierPopupShowing = appUi->AppInBackground( ETrue );
         PRINT( _L("Camera <> CCamUserSceneSetupViewBase::HandleForegroundEventL dec engine count") );
         // Register that we nolonger need the engine
-        DecrementCameraUsers();
+        if( !iNotifierPopupShowing )
+            DecrementCameraUsers();
         }
     PRINT( _L("Camera <= CCamUserSceneSetupViewBase::HandleForegroundEventL ") );
     }
@@ -593,6 +595,8 @@ void CCamUserSceneSetupViewBase::ExitSceneSettingModeL()
 void CCamUserSceneSetupViewBase::ExitInfoListBoxL()
 	{
 	PRINT( _L("Camera => CCamUserSceneSetupViewBase::ExitInfoListBoxL()") );  	   				
+	StopViewFinder(); 
+		   				
 	CCamCaptureSetupViewBase::ExitInfoListBoxL();
 	SwitchToUserSceneSetupModeL();
 	

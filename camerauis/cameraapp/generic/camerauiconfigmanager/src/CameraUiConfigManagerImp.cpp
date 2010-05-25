@@ -258,6 +258,7 @@ void CCameraUiConfigManagerImp::LoadAllDynamicSettingsL()
             case ECamDynamicSettingBurstMode:
 			case ECamDynamicSettingContinuousAF: 
             case ECamDynamicSettingBurstFileSizeEstimateFactor:
+            case ECamDynamicSettingCustomCaptureButton:
                 {
                 PRINT1( _L("Camera <> CCameraUiConfigManagerImp::LoadAllDynamicSettingsL() append %d" ), settingId )
                 AppendToSettingsArrayL( settingId,
@@ -681,7 +682,10 @@ TUint32 CCameraUiConfigManagerImp::MapSettingItemToCrFeatureKeyL(
                 break;  
 	    case ECamDynamicSettingContinuousAF:
                 crKey = KCamCrFeatureContinuousAF;   
-                break;			        
+                break;
+	    case ECamDynamicSettingCustomCaptureButton:
+                crKey = KCamCrFeatureCustomCaptureButton;
+                break;
         default:
             PRINT( _L("Camera <> CCameraUiConfigManagerImp::MapSettingItemToCrFeatureKeyL, leave!!!" ) )	
             User::Leave( KErrNotSupported );

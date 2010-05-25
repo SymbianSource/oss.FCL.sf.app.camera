@@ -64,4 +64,5 @@ EXPORTS
 	_ZTV22CCameraUiConfigManager @ 63 NONAME
 	_ZTV25CCameraUiConfigManagerImp @ 64 NONAME
 	_ZN22CCameraUiConfigManager21SupportedScreenModesLER6RArrayIiE @ 65 NONAME
+	_ZNK22CCameraUiConfigManager30IsCustomCaptureButtonSupportedEv @ 66 NONAME
 

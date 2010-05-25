@@ -758,4 +758,13 @@ EXPORT_C void CCameraUiConfigManager::SupportedScreenModesL(
     iConfigManagerImp->SupportedSettingItemsL( ECamDynamicSettingScreenModes,
                                                aSupportedValues );
     }	
+
+// ----------------------------------------------------------------------------------
+// CCameraUiConfigManager::IsCustomCaptureButtonSupported
+// ----------------------------------------------------------------------------------
+//
+EXPORT_C TBool CCameraUiConfigManager::IsCustomCaptureButtonSupported() const
+    {
+    return iConfigManagerImp->IsFeatureSupported( ECamDynamicSettingCustomCaptureButton );
+    }
 //End of File

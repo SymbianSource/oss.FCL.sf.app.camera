@@ -1636,11 +1636,11 @@ void CCamAppController::Capture()
        iAutoFocusRequested || IsAfNeeded() )
     {
     PRINT( _L("Camera <> Focusing going on, cannot start capture - setting iCaptureRequested" ) );
+    iCaptureRequested = ETrue;
     if( !IsAfNeeded() )
         {
         CancelAFNow();
-        }
-    iCaptureRequested = ETrue;    
+        }        
     } 
   // -------------------------------------------------------
   //Quick pressed capture key after backing to precapture from postcapture in burst mode
@@ -2231,7 +2231,7 @@ void CCamAppController::CancelFocusAndCapture()
    && ECamCompleting  != CurrentOperation() )
     {  
     // If we are currently focused, cancel autofocus
-    if ( IsViewFinding() && CurrentOperation() != ECamCapturing && !InCallOrRinging() ) // Cannot do AF operations if VF not on. AF is anyway cancelled on VF start event.
+    if ( IsViewFinding() && CurrentOperation() != ECamCapturing ) // Cannot do AF operations if VF not on. AF is anyway cancelled on VF start event.
       {
       if( ECamFocusing == CurrentOperation() )
         {
@@ -2266,18 +2266,22 @@ void CCamAppController::CancelFocusAndCapture()
 // ---------------------------------------------------------------------------
 //
 const CFbsBitmap* 
-CCamAppController::SnapshotImage() const
+CCamAppController::SnapshotImage()
   {
   PRINT ( _L("Camera => CCamAppController::SnapshotImage") ); 
   PRINT1( _L("Camera <> CCamAppController::SnapshotImage .. current image index: %d"), iCurrentImageIndex ); 
   PRINT1( _L("Camera => CCamAppController::SnapshotImage .. saved current image: %d"), SavedCurrentImage() ); 
 
+  PRINT1( _L("Camera <> CCamAppController::SnapshotImage - iSnapshotRedrawNeeded:%d"), iSnapshotRedrawNeeded );
   if ( iSnapShotRotator->IsActive() )
     {
     // Avoid flickering. Do not show original snapshot, if it needs to be rotated
+    // Snapshot might need a separate draw if rotation takes long time 
+    iSnapshotRedrawNeeded = ETrue;
     PRINT( _L("Camera <= CCamAppController::SnapshotImage - return null") );
     return NULL;
     }
+  iSnapshotRedrawNeeded = EFalse;
 
   //Sometime burst capture array includes more than one image in single capture mode, 
   //so just display the latest image here.
@@ -2800,14 +2804,8 @@ void CCamAppController::ReleaseCamera()
         appUi->SetAssumePostCaptureView( EFalse ); 
         } 
       }
-      
-    TBool cancelingAutoFocus = ( ECamControllerImage == CurrentMode() && 
-                                           iInfo.iActiveCamera == ECamActiveCameraPrimary &&
-                                           iConfigManager && 
-                                           iConfigManager->IsAutoFocusSupported() && 
-                                           iAFCancelInProgress );                                           
-                                                                                      
-    if ( Busy() || cancelingAutoFocus )
+                                                                                         
+    if ( Busy() )
       {
       PRINT( _L("Camera <> CCamAppController::ReleaseCamera: set release pending") );
       iPendingRelease = ETrue;
@@ -2986,12 +2984,15 @@ CCamAppController::IssueModeChangeSequenceL( TBool aStartup )
   if( !aStartup )
     {
     CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+    TVwsViewId activeView;
+    (void) appUi->GetActiveViewId( activeView ); // ignore error
     
     if(IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage) &&
             !IsMemoryAvailable(ECamMediaStorageMassStorage) &&
             !IsMemoryAvailable(ECamMediaStorageCard) &&
             ( appUi->PreCaptureMode() == ECamPreCapViewfinder ||
-              appUi->PreCaptureMode() == ECamPreCapGenericSetting ) )
+              appUi->PreCaptureMode() == ECamPreCapGenericSetting ) &&
+              activeView.iViewUid.iUid != ECamViewIdPhotoUserSceneSetup )
         {
         TBool usbPersonality = 0;
         #ifndef __WINSCW__
@@ -3015,6 +3016,7 @@ CCamAppController::IssueModeChangeSequenceL( TBool aStartup )
             }
         
         iIssueModeChangeSequenceSucceeded = EFalse;
+        ClearSequenceBusyFlag( &iBusyFlags );
         }
     else
         {
@@ -5102,7 +5104,6 @@ CCamAppController::StartViewFinder()
   if( !Busy() )
     {
     OstTrace0( CAMERAAPP_PERFORMANCE, CCAMAPPCONTROLLER_STARTVIEWFINDER, "e_CAM_APP_VF_INIT 0" );   //CCORAPP_APP_VF_INIT_END
-    OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMAPPCONTROLLER_STARTVIEWFINDER, "e_CAM_APP_OVERLAY_INIT 0" ); //CCORAPP_APP_OVERLAY_INIT_END
     
     TRAPD( error, IssueDirectRequestL( ECamRequestVfStart ) );
     if ( KErrNone    != error
@@ -7413,11 +7414,26 @@ void CCamAppController::LoadSecondaryCameraSettingsL()
   SetIntegerSettingValueL( ECamSettingItemVideoQuality,
                            iConfiguration->SecondaryCameraVideoQuality() );  
 
-    
 
+  // Remember the previous state of face tracking,
+  // current state of face tracking and
+  // the previous scene mode
+  TCamSettingsOnOff previousFaceTrack = iSettingsModel->GetPreviousFaceTrack();
+  TCamSettingsOnOff faceTracking = static_cast<TCamSettingsOnOff>( IntegerSettingValue( ECamSettingItemFaceTracking ) );
+  TCamSceneId previousSceneMode = iSettingsModel->GetPreviousSceneMode();
+  
   PRINT( _L("Camera <> CCamAppController::LoadSecondaryCameraSettingsL E" ))
   SetIntegerSettingValueL( ECamSettingItemDynamicPhotoScene, ECamSceneAuto );
   SetIntegerSettingValueL( ECamSettingItemDynamicVideoScene, ECamSceneNormal );
+  
+
+  // Restore the previous state of face tracking,
+  // current state of face tracking and
+  // the previous scene mode
+  iSettingsModel->SetPreviousFaceTrack( previousFaceTrack );
+  SetIntegerSettingValueL( ECamSettingItemFaceTracking, faceTracking );
+  iSettingsModel->SetPreviousSceneMode( previousSceneMode );
+  
   PRINT( _L("Camera <> CCamAppController::LoadSecondaryCameraSettingsL F" ))
 
   PRINT( _L("Camera <= CCamAppController::LoadSecondaryCameraSettingsL" ))
@@ -9582,9 +9598,9 @@ CCamAppController::ProceedPendingOrNotifyReadyL()
 
   if( iInfo.iMode != iInfo.iTargetMode )
     {
-    if ( !IsInShutdownMode() && !iSaving && iInfo.iOperation != ECamCapturing ) 
+    if ( !IsInShutdownMode() && !iSaving && iInfo.iOperation != ECamCapturing && iInfo.iOperation != ECamStandby ) 
         {
-        PRINT( _L("Camera <> CCamAppController: not in target mode, need to issue requests") );
+        PRINT1( _L("Camera <> CCamAppController: not in target mode, need to issue requests iInfo.iOperation=%d"), iInfo.iOperation );
         IssueModeChangeSequenceL();
         }
     }
@@ -11154,13 +11170,6 @@ CCamAppController::HandleVideoQualitySettingChangeL()
     PRINT( _L("Camera <> CCamAppController - viewfinder on, stop vf / re-prepare / start vf..") );
     TRAPD( status, 
       {
-      // Synchronous items
-      // IssueDirectRequestL( ECamRequestVfStop    );
-      // IssueDirectRequestL( ECamRequestSsRelease );
-      // IssueRequestL( ECamRequestVideoInit );
-      // IssueDirectRequestL( ECamRequestSsStart   );
-      // IssueDirectRequestL( ECamRequestVfStart   );
-
       // Generate the request sequence and issue to Camera Controller.
       RCamRequestArray sequence;
       CleanupClosePushL( sequence );
@@ -11336,5 +11345,24 @@ void CCamAppController::EmbeddedStartupSequence()
     TRAP_IGNORE( IssueModeChangeSequenceL( ETrue ) );
     }
 
+// ---------------------------------------------------------------------------
+// CCamAppController::SnapshotRotationComplete
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::SnapshotRotationComplete()
+    {
+    PRINT( _L( "Camera => CCamAppController::SnapshotRotationComplete" ) );          
+    // If snapshot rotation takes too long, it might not be drawn
+    // unless specifically requested
+    if( iSnapshotRedrawNeeded )
+        {
+        iSnapshotRedrawNeeded = EFalse;
+        NotifyControllerObservers( ECamEventSnapshotRotated );    
+        }
+    PRINT( _L( "Camera <= CCamAppController::SnapshotRotationComplete" ) );    
+    }
+
+ 
 //  End of File  
 

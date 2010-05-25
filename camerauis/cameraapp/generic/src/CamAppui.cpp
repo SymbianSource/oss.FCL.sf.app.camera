@@ -135,6 +135,9 @@ const TTimeIntervalMicroSeconds KMemoryFullVideoRemaining = 1000*1000;
 // events saying Eikon Server has gained focus.
 _LIT( KEikonServer, "EikonServer" );
 
+_LIT8(K3gpVideoMimeType, "video/3gpp");
+_LIT8(KMp4VideoMimeType, "video/mp4");
+
 //const TCamMediaStorage KCamInternalStorage = ECamMediaStoragePhone;
 
 const TUint KCameraEventInterest = ( ECamCameraEventClassBasicControl
@@ -1699,9 +1702,18 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
       
       if ( !iVideoClipPlayInProgress)
         {
-        TDataType dataType;
         TInt           err;
-         
+        TDataType dataType( K3gpVideoMimeType );
+#ifndef __WINS__
+        TCamVideoFileType fileType = static_cast< TCamVideoFileType > 
+            ( iController.IntegerSettingValue( ECamSettingItemVideoFileType ) );
+        if ( fileType == ECamVideoMpeg4 )
+            {
+            PRINT(_L("Camera <> CCamAppUi::HandleCommandL. case ECamCmdPlay D"));
+            dataType=TDataType( KMp4VideoMimeType );
+            }
+#endif                
+
         SetEmbedding( ETrue );
         
         err = iDocHandler->OpenFileEmbeddedL( iController.CurrentFullFileName(),  dataType );
@@ -2014,7 +2026,12 @@ CCamAppUi::HandleCameraEventL( TInt              /*aStatus*/,
           {
           //load settings in case they were changed via GS	
           iController.LoadStaticSettingsL( IsEmbedded() );
-          iStillCaptureView->UpdateToolbarIconsL(); 
+          if ( iController.CurrentMode() == ECamControllerImage 
+                  || iController.TargetMode() == ECamControllerImage )
+              {
+              iStillCaptureView->UpdateToolbarIconsL();
+              }
+     
           // and check the availability of the memory to be used
           iController.CheckMemoryToUseL();
           }    
@@ -2827,7 +2844,7 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
   PRINT1( _L("Camera => CCamAppUi::HandleWsEventL (type: %d)"), type )
   // In case we receive an enter key event, we should map it to MSK
   if ( aEvent.Type() == EEventKey && aEvent.Key()->iRepeats == 0 && 
-       aEvent.Key()->iScanCode == EStdKeyEnter &&
+       aEvent.Key()->iScanCode == EStdKeyEnter && iViewState != ECamViewStateUserSceneSetup &&
        !( iMode == ECamControllerVideo && iViewState == ECamViewStatePreCapture && iController.IsDemandKeyRelease() ) ) 
     {
     PRINT( _L("Camera <> CCamAppUi::HandleWsEventL: mapping enter to MSK") );
@@ -3376,7 +3393,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
           //We hiden toolbar when keylock was set to on in pre-capture view and camera lost focus, 
           //so we need to display toolbar when keylock is set to off and camera gain focus again.
           if ( ECamViewStatePreCapture == iViewState &&
-               ECamPreCapViewfinder == iPreCaptureMode )  
+               ECamPreCapViewfinder == iPreCaptureMode && 
+               iController.CurrentOperation() != ECamCapturing )  
             {
             SetToolbarVisibility(); 
             }          
@@ -6326,6 +6344,17 @@ CCamAppUi::StartAsServerAppL( MCamEmbeddedObserver* aEmbeddedObserver,
     PRINT( _L("Camera <= CCamAppUi::StartAsServerAppL") );
     }
            
+// ---------------------------------------------------------
+// CCamAppUi::SetEmbeddedObserver
+// ---------------------------------------------------------
+//
+void CCamAppUi::SetEmbeddedObserver( MCamEmbeddedObserver* aEmbeddedObserver )
+    {       
+    PRINT1( _L("Camera <> CCamAppUi::SetEmbeddedObserver %x"), aEmbeddedObserver );  
+    iEmbeddedObserver = aEmbeddedObserver;
+    }
+
+
 
 // ---------------------------------------------------------------------------
 // CCamAppUi::CamOrientation
@@ -8373,6 +8402,31 @@ TBool CCamAppUi::IsToolBarVisible() const
     return iToolbarVisibility;
     }
 
+// -----------------------------------------------------------------------------
+// CCamAppUi::IsToolBarExtensionVisible
+// Returns ETrue if the toolbar extension is visible,
+// otherwise EFalse.
+// -----------------------------------------------------------------------------
+//
+TBool CCamAppUi::IsToolBarExtensionVisible() const
+    {
+    if ( iController.IsTouchScreenSupported() )
+        {
+        CAknToolbar* toolbar = CurrentFixedToolbar();
+        if ( toolbar )
+            {
+            CAknToolbarExtension* toolbarextension =
+                toolbar->ToolbarExtension();
+            if ( toolbarextension && toolbarextension->IsShown() )
+                {
+                PRINT( _L("Camera <> CCamAppUi::IsToolBarExtensionVisible ETrue" ) )
+                return ETrue;
+                }
+            }
+        }
+    PRINT( _L("Camera <> CCamAppUi::IsToolBarExtensionVisible EFalse" ) )
+    return EFalse;
+    }
 
 // -----------------------------------------------------------------------------
 // CCamAppUi::SetAssumePostCaptureView

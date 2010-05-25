@@ -399,7 +399,7 @@ TKeyResponse CCamCaptureSetupContainer::OfferKeyEventL(
          ( IsCaptureKeyL( aKeyEvent, aType ) || IsShutterKeyL( aKeyEvent, aType ) ) ) )  
         {
         TKeyResponse response = iCaptureSetupControl->OfferKeyEventL( aKeyEvent, aType );
-        if ( aType == EEventKeyDown && IsShutterKeyL( aKeyEvent, aType ) && 
+        if ( aType == EEventKeyDown && response == EKeyWasNotConsumed &&
             ( ECamSettingItemDynamicPhotoFlash == iControlHandler.SettingType() ||
             ECamSettingItemDynamicSelfTimer == iControlHandler.SettingType() ) )
             {
@@ -409,8 +409,7 @@ TKeyResponse CCamCaptureSetupContainer::OfferKeyEventL(
             {
             iView.HandleCommandL( EAknSoftkeyOk );
             }
-        
-        return response;
+        return EKeyWasConsumed;
         }
     return iCaptureSetupControl->OfferKeyEventL( aKeyEvent, aType );
     }
@@ -713,7 +712,6 @@ void CCamCaptureSetupContainer::HandleListBoxEventL( CEikListBox* aListBox,
     switch( aEventType )
         {
         
-        case EEventEnterKeyPressed:
         case EEventItemDoubleClicked:
               {
               iView.HandleCommandL(EAknSoftkeyOk);

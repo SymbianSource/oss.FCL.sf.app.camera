@@ -217,6 +217,9 @@ class CCamUserSceneSetupViewBase :  public CCamCaptureSetupViewBase,
         // Indicates that Viewfinder start has been requested. View switch
         // should not occur until viewfinder start has completed.
         TBool iVFRequested;
+        
+        //Boolean to check if a popup is whats generating a background event
+        TBool iNotifierPopupShowing;
     };
 
 #endif      // CAMUSERSCENESETUPVIEWBASE_H 

@@ -706,7 +706,7 @@ public:
     * @since 2.8
     * @return the current snapshot image
     */
-    const CFbsBitmap* SnapshotImage() const;
+    const CFbsBitmap* SnapshotImage();
 
     /**
     * Sets the specified burst mode item as the current image, in 
@@ -2217,6 +2217,12 @@ public:
          */
         void EmbeddedStartupSequence();
         
+        /**
+         * Called by the snapshotrotator to indicate when snapshot
+         * is rotated and ready for drawing
+         */
+        void SnapshotRotationComplete();
+
   private:
 
     // -----------------------------------------------------
@@ -2602,6 +2608,7 @@ public:
     TCamImageOrientation  iCaptureOrientation;
     
     TBool iIssueModeChangeSequenceSucceeded;
+    TBool iSnapshotRedrawNeeded;
     
     };
 

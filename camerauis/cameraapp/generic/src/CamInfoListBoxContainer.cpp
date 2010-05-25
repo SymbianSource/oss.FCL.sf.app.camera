@@ -300,8 +300,9 @@ CCamInfoListBoxContainer::IndexForValueId( TInt aValueId ) const
 // Handles a change to the setting value of the slider
 // -----------------------------------------------------------------------------
 //
-void CCamInfoListBoxContainer::HandleSettingValueUpdateL( TInt /*aNewValue*/ )
-    {   
+void CCamInfoListBoxContainer::HandleSettingValueUpdateL( TInt aNewValue )
+    {
+    iController.PreviewSettingChangeL( ECamSettingItemDynamicPhotoLightSensitivity, aNewValue );
     }
     
 // ---------------------------------------------------------
@@ -420,16 +421,10 @@ TKeyResponse CCamInfoListBoxContainer::OfferKeyEventL(
     
     TKeyResponse returnvalue = iListBox->OfferKeyEventL( aKeyEvent, aType );
 
-    if ( CamUtility::IsNhdDevice() )
+    if ( EStdKeyUpArrow == aKeyEvent.iScanCode ||
+           EStdKeyDownArrow == aKeyEvent.iScanCode )
         {
-        // for non touch, we use key presses to scroll thru the scene modes
-        // for touch with keyboard, key pressing can also scroll thru the scene modes            
-        // after every up and down key presses we display the tool tip
-        if ( EStdKeyUpArrow == aKeyEvent.iScanCode ||
-             EStdKeyDownArrow == aKeyEvent.iScanCode )
-            {
-            ShowTooltipL();
-            }
+        ShowTooltipL();
         }
     else // No tooltip
         {
@@ -592,7 +587,6 @@ void CCamInfoListBoxContainer::HandleListBoxEventL( CEikListBox* aListBox, TList
     {
     switch( aEventType )
         {
-        case EEventEnterKeyPressed:
         case EEventItemDoubleClicked:
               {
               iView.HandleCommandL( EAknSoftkeySelect ); 

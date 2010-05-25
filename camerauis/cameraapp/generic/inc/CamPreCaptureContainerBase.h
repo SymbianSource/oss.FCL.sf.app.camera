@@ -270,6 +270,13 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
      * calling the function with EFalse. 
      */
     void BlinkResolutionIndicatorOnChange( TBool aBlink=ETrue );
+    
+    /**
+     * From CCoeControl.
+	 * @since 5.1
+	 * @param aDrawNow Flag to indicate if the container should be drawn
+     */
+    void FocusChanged( TDrawNow aDrawNow );
 
   protected: 
 
@@ -381,14 +388,21 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     * @param aFrame pointer to the bitmap. 
     */
     void DrawFrameNow( CBitmapContext& aGc, const CFbsBitmap* aFrame ) const;
-        
+
   protected:
     /**
     * Autofocus indication layout from LAF
     *
     * @since S60 S60 v5.0
     */    
-    void SizeChanged();  
+    void SizeChanged();
+    
+    /**
+     * Checks whether the custom capture button should be shown 
+     * @since 5.1
+     * @return ETrue if capture button should be active, EFalse otherwise
+     */
+    TBool CaptureButtonActive() const;
     
   private:
     /**
@@ -586,14 +600,24 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     void TouchLayout();
 
     /**
-     * Callback to blink resolution indicator 
+     * Callback used by timer to blink resolution indicator
+     * @since 5.1
+     * @param aSelf Pointer to self (container)
      */
     static TInt IndicatorVisible( TAny *aSelf );
     
     /**
      * Draw resolution indicator (for blinking).
+     * @since 5.1
      */
     void DrawResolutionIndicator();
+    
+    /**
+     * Draws Capture/Record button
+     * @since 5.1
+     * @param aGc The context to draw with
+     */
+    void DrawCaptureButton( CBitmapContext& aGc ) const;
 
   // =========================================================================
   // Data
@@ -603,7 +627,7 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     CCamSidePane* iSidePane;
     
     // Pointer to the instance of the zoom pane
-    CCamZoomPane* iZoomPane;  
+    CCamZoomPane* iZoomPane;
     
     // Array of pointer to the resolution indicators
     RPointerArray<CCamIndicator> iResolutionIndicators;
@@ -642,6 +666,13 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
 
     // Reticule location and size
     TRect iReticuleRect;
+
+    // Icons and rect for capturing image
+    CFbsBitmap *iCaptureIcon;
+    CFbsBitmap *iCaptureMask;
+    TRect iCaptureRect;
+    TBool iCaptureButtonShown;
+    TBool iCaptureIconPressed;
 
     /**
      * Autofocus indication icons array.  
@@ -728,6 +759,7 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     
     // For blinking of resolution indicator
     TBool iBlinkResolutionIndicator;
+    TBool iBlinkModeIndicator;
     CPeriodic* iIndBlinkTimer;
     TBool iDrawIndicator;
     TInt iToggleCountdown;

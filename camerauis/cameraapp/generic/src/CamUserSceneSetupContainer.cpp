@@ -445,24 +445,22 @@ TKeyResponse CCamUserSceneSetupContainer::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
     TEventCode aType )
     {
-    if ( iController.UiConfigManagerPtr()
-         && iController.UiConfigManagerPtr()->IsAutoFocusSupported() )
+    if ( aType == EEventKeyDown &&
+           ( aKeyEvent.iScanCode == EStdKeyEnter || 
+               aKeyEvent.iScanCode == EStdKeyNkpEnter ) )
         {
-        if( aType == EEventKeyDown && IsShutterKeyL( aKeyEvent, aType ) )
-            {
-            TKeyResponse response = iUserSceneSetupList->OfferKeyEventL( aKeyEvent, aType );
-            iView.HandleCommandL( EAknSoftkeyBack );
-            return response;
-            }
+        HandleSelectionL();
+        return EKeyWasConsumed;
         }
-    else if( aType == EEventKeyDown && IsCaptureKeyL( aKeyEvent, aType ) )
+    else if ( aKeyEvent.iScanCode == EStdKeyUpArrow || 
+                aKeyEvent.iScanCode == EStdKeyDownArrow )
         {
-        TKeyResponse response = iUserSceneSetupList->OfferKeyEventL( aKeyEvent, aType );
-        iView.HandleCommandL( EAknSoftkeyBack );
-        return response;
+        return iUserSceneSetupList->OfferKeyEventL( aKeyEvent, aType );
         }
-       
-	return iUserSceneSetupList->OfferKeyEventL( aKeyEvent, aType );
+    else
+        {
+        return EKeyWasConsumed;    
+        }
     }
 
 // ---------------------------------------------------------------------------

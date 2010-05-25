@@ -359,6 +359,14 @@ void CCamDriveChangeNotifier::ConstructL()
     iUSBTimer = CCamTimer::NewL( KUSBTimeout, TCallBack(USBTimerCallBack, this));
     CleanupStack::Pop(); // listener
     CleanupStack::Pop(); // listener 2
+    //if USB has been inserted as Mass Storage, USB timer need to start
+    TInt value = 0;
+    iUsbMSWatcher->Get( value );
+    if( iUSBTimer && KUsbPersonalityIdMS == value ) 
+        {
+        iUSBTimer->Cancel();
+        iUSBTimer->StartTimer();
+        }
     
     StartMonitoring();
 

@@ -1033,7 +1033,9 @@ CCamPreCaptureViewBase::ExitAllModesL()
         PRINT( _L("Camera <> CCamPreCaptureViewBase::ExitAllModesL ##" )) 
         ExitCaptureSetupMenuModeL();
         }
-	  if(Id() == TUid::Uid(ECamViewIdVideoPreCapture))
+	  if( Id() == TUid::Uid( ECamViewIdVideoPreCapture ) &&
+          iController.UiConfigManagerPtr() &&
+          iController.UiConfigManagerPtr()->IsXenonFlashSupported() )
 		{
 		iToolbarExtensionInvisible = ETrue;
 		}
@@ -1086,14 +1088,13 @@ CCamPreCaptureViewBase::ExitAllModesL()
       CAknToolbar* fixedToolbar = Toolbar();
       CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
       
-      //Only active view will set toolbar extension visibility.
-
-      if(this->IsForeground())
+      // Only active view will set toolbar extension visibility.
+      if( this->IsForeground() )
           {
           if ( extension && iToolbarExtensionInvisible == EFalse )
               {
               extension->SetShown( ETrue );
-              } 
+              }
           else if( extension )
               {
               extension->SetShown( EFalse );
@@ -1822,7 +1823,8 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
 
     MAknTouchGestureFwPinchEvent *pinch = AknTouchGestureFwEventPinch( aEvent );
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
-    if ( pinch && (ECamNoOperation == iController.CurrentOperation()) && appUi && !appUi->ZoomPane()->IsVisible() )
+    if ( pinch && (ECamNoOperation == iController.CurrentOperation()) && appUi 
+               && !appUi->ZoomPane()->IsCurrentlyZooming() )
         {
         // Determine the direction of pinch: +ve -> pinch outward / zoom / widen VF
         TInt currMove = pinch->Movement();
@@ -1852,25 +1854,28 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
                 }
             }
         }
-    else if ( EAknTouchGestureFwDoubleTap == aEvent.Type() )
+    else if ( EAknTouchGestureFwDoubleTap == aEvent.Type() 
+              && ( ECamNoOperation == iController.CurrentOperation() 
+                   || ( ECamCapturing   == iController.CurrentOperation() 
+                        && iController.CurrentMode() == ECamControllerVideo ) ) )
         {
-        PRINT( _L("Camera <> *** double tap event") );
+        PRINT( _L("Camera <> double tap event") );
         CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
         CCamZoomPane *zoomPane = appUi->ZoomPane();
         
         CCamPreCaptureContainerBase* container = static_cast<CCamPreCaptureContainerBase*>( iContainer );
         container->ShowZoomPaneWithTimer();
 
-        // Zoom to max (if not already at max) zoom level, otherwise zoom out to min level
-        if ( !zoomPane->IsZoomAtMaximum() )
-            {
-            PRINT( _L("Camera <> Zooming to max level") );
-            zoomPane->ZoomToMaximum();
-            }
-        else
+        // Zoom to min (if not already at min) zoom level, otherwise zoom in to max level
+        if ( !zoomPane->IsZoomAtMinimum() )
             {
             PRINT( _L("Camera <> Zooming out to min level") );
             zoomPane->ZoomToMinimum();
+            }
+        else
+            {
+            PRINT( _L("Camera <> Zooming to max level") );
+            zoomPane->ZoomToMaximum();
             }
         }
     else

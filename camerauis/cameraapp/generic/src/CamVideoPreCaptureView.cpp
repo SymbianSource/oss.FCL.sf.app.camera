@@ -40,6 +40,7 @@
 #include <cameraapp.mbg>
 #include "CamCaptureSetupMenu.h"
 #include "CamPanic.h"
+#include "CamSidePane.h"
 
 #include "CamShootingModeContainer.h"
 #include "CamVideoPreCaptureContainer.h"
@@ -668,7 +669,7 @@ void CCamVideoPreCaptureView::UpdateCbaL()
         }
     else
         {
-        SetSoftKeysL( R_CAM_SOFTKEYS_SELECT_CANCEL );
+        SetSoftKeysL( R_AVKON_SOFTKEYS_SELECT_CANCEL  );
         }
     }
   else if ( iStandbyModeActive )
@@ -1243,6 +1244,7 @@ void CCamVideoPreCaptureView::DynInitToolbarL( TInt aResourceId,
 //
 void CCamVideoPreCaptureView::UpdateToolbarIconsL()
     {
+    PRINT( _L("Camera => CCamVideoPreCaptureView::UpdateToolbarIconsL") );
     // fixed toolbar is used only with touch devices
     if (!iController.IsTouchScreenSupported() )
         return;
@@ -1251,6 +1253,7 @@ void CCamVideoPreCaptureView::UpdateToolbarIconsL()
      UpdateVideoColorToneIconsL();
      UpdateVideoWhitebalanceIconsL();
 	 RedrawToolBar();
+	PRINT( _L("Camera <= CCamVideoPreCaptureView::UpdateToolbarIconsL") );
     }
 
 // ---------------------------------------------------------------------------
@@ -1407,6 +1410,11 @@ TBool CCamVideoPreCaptureView::StartMskCaptureL()
      CamUtility::ResourceFileName( iconFileName );
      TCamSceneId scene = static_cast< TCamSceneId > ( 
          iController.IntegerSettingValue( ECamSettingItemDynamicVideoScene ) );
+     
+     // For use with scene indicator
+     TInt32 iconId = EMbmCameraappQgn_indi_cam4_mode_auto;
+     TInt32 maskId = EMbmCameraappQgn_indi_cam4_mode_auto_mask;
+
      switch ( scene )
          {
          case ECamSceneAuto:
@@ -1419,6 +1427,8 @@ TBool CCamVideoPreCaptureView::StartMskCaptureL()
                  EMbmCameraappQgn_indi_cam4_mode_auto_mask,
                  skinInstance,
                  KAknsIIDQgnIndiCam4ModeAuto );
+             iconId = EMbmCameraappQgn_indi_cam4_mode_auto;
+             maskId = EMbmCameraappQgn_indi_cam4_mode_auto_mask;
              break;
              }
          case ECamSceneNight:
@@ -1430,6 +1440,8 @@ TBool CCamVideoPreCaptureView::StartMskCaptureL()
                  EMbmCameraappQgn_indi_cam4_mode_night_mask,
                  skinInstance,
                  KAknsIIDQgnIndiCam4ModeNight );
+             iconId = EMbmCameraappQgn_indi_cam4_mode_night;
+             maskId = EMbmCameraappQgn_indi_cam4_mode_night_mask;
              break;
              }
          case ECamSceneLowLight: 
@@ -1441,6 +1453,8 @@ TBool CCamVideoPreCaptureView::StartMskCaptureL()
                  EMbmCameraappQgn_indi_cam4_wb_tungsten_mask,
                  skinInstance,
                  KAknsIIDQgnIndiCam4WbTungsten );
+             iconId = EMbmCameraappQgn_indi_cam4_wb_tungsten;
+             maskId = EMbmCameraappQgn_indi_cam4_wb_tungsten_mask;
              break;
              }
          default:
@@ -1448,6 +1462,19 @@ TBool CCamVideoPreCaptureView::StartMskCaptureL()
              //Do Nothing
              }
              break;
+         }
+
+     // Update the icon in the side pane
+     if ( iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() )
+         {
+         CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+         CCamSidePane* sidePane = appUi->SidePane();
+    
+         if ( sidePane )
+             {
+             PRINT( _L("Camera <> CCamVideoPreCaptureView::UpdateVideoSceneModeIconsL - Updating side pane indicator") );
+             sidePane->UpdateSceneIndicatorL( iconId, maskId );
+             }
          }
      }
 

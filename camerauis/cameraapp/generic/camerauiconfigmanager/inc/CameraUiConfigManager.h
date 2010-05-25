@@ -460,6 +460,12 @@ class CCameraUiConfigManager : public CBase
         */
         IMPORT_C void SupportedScreenModesL( 
                                     RArray<TInt>& aSupportedValues );
+        
+		/*
+        * Custom capture button. 
+        * @return ETrue if custom capture button is enabled
+		*/
+        IMPORT_C TBool IsCustomCaptureButtonSupported() const;        
 
  private:
         void ConstructL();

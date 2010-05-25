@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -69,6 +69,12 @@ CCamNewFileService::~CCamNewFileService()
   if ( !iCompleted && iObserver )
     {	    
     TRAP_IGNORE( iObserver->HandleCompletedNewServiceL( EFalse ) );
+    CCamAppUi* appUi = static_cast< CCamAppUi* >( CEikonEnv::Static()->EikAppUi() );
+    if ( appUi )
+        {
+        // Tell appui 'this' is not valid MCamEmbeddedObserver pointer anymore
+        appUi->SetEmbeddedObserver( NULL );
+        }
     }
   PRINT( _L("Camera <= ~CCamNewFileService") );
   }
@@ -153,7 +159,7 @@ void CCamNewFileService::HandleNewFileL( MNewFileServiceObserver* aObserver,
   CCamAppUi * appUi =
       static_cast< CCamAppUi* >( CEikonEnv::Static()->EikAppUi() );
   appUi->SetRequestedNewFileResolution(requestedResolution);
-  appUi->StartAsServerAppL( this, mode );          
+  appUi->StartAsServerAppL( this, mode ); // 'this' is used for MCamEmbeddedObserver pointer          
   }
     	
 // ---------------------------------------------------------------------------

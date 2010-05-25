@@ -737,7 +737,12 @@ CCamImageSaveActive::DoSaveL()
   
   TPtrC filename = iSaveArray->MdcaPoint( 0 );
 
-  PRINT1( _L( "Camera <> CCamImageSaveActive: trying to save file:[%S]"), &filename );     
+  PRINT1( _L( "Camera <> CCamImageSaveActive: trying to save file:[%S]"), &filename );
+  if( filename.Length() == 0 )
+      {
+      PRINT( _L( "Camera <= CCamImageSaveActive: DoSaveL Leaving...not a valid filename") );
+      User::Leave( KErrNotReady );
+      }
 
   // Check disk space
   TInt drive = 0;

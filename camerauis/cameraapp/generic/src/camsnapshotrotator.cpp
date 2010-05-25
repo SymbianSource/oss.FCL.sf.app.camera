@@ -107,6 +107,7 @@ void CCamSnapShotRotator::RotationCompleteL( TInt aErr )
         PRINT( _L( "Camera => CCamSnapShotRotator::RotationCompleteL - delete iRotatedSnapshot" ) );
         delete iRotatedSnapshot;
         iRotatedSnapshot = NULL;
+        iController.SnapshotRotationComplete();
         }
             
     PRINT( _L( "Camera <= CCamSnapShotRotator::RotationCompleteL" ) );         

@@ -59,6 +59,7 @@ const TUint32 KCamCrFeatureUIOrientationOverride            = 0x027;
 const TUint32 KCamCrFeatureThumbnailManagerAPI              = 0x028;
 const TUint32 KCamCrFeatureBurstMode                        = 0x029;
 const TUint32 KCamCrFeatureContinuousAF                     = 0x01E;  
+const TUint32 KCamCrFeatureCustomCaptureButton              = 0x01F;
 // Cr keys reserved for future use 0x020 -- 0x029
 
 // Cr key for Settings which only have configured setting items

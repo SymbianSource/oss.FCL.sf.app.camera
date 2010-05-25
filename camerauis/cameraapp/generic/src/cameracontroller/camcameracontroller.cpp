@@ -2913,7 +2913,6 @@ CCamCameraController
               CEikonEnv* env = CEikonEnv::Static();
 
               OstTrace0( CAMERAAPP_PERFORMANCE, CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" ); //CCORAPP_APP_VF_INIT_END
-              OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_OVERLAY_INIT 0" ); //CCORAPP_APP_OVERLAY_INIT_END
 
               TInt orgPos = SetVfWindowOrdinal(); // Set visible
               iCamera->StartViewFinderDirectL(
@@ -2970,16 +2969,14 @@ CCamCameraController
             {
             PRINT( _L("Camera <> Call CCaeEngine::StartViewFinderBitmapsL..") );
 
-            OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" ); //CCORAPP_APP_VF_INIT_END
-            OstTrace0( CAMERAAPP_PERFORMANCE, DUP3_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_OVERLAY_INIT 0" ); //CCORAPP_APP_OVERLAY_INIT_END
+            OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" ); //CCORAPP_APP_VF_INIT_END
             iCaeEngine->StartViewFinderBitmapsL( iInfo.iViewfinderSize );
             }
           else
 #endif // CAMERAAPP_CAE_FIX
             {
             PRINT( _L("Camera <> Call CCamera::StartViewFinderBitmapsL..") );
-            OstTrace0( CAMERAAPP_PERFORMANCE, DUP4_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" );  //CCORAPP_APP_VF_INIT_END
-            OstTrace0( CAMERAAPP_PERFORMANCE, DUP5_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_OVERLAY_INIT 0" ); //CCORAPP_APP_OVERLAY_INIT_END
+            OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" );  //CCORAPP_APP_VF_INIT_END
             iCamera->StartViewFinderBitmapsL( iInfo.iViewfinderSize );
 
   		  if ( params().iMirrorImage )
@@ -3233,7 +3230,6 @@ CCamCameraController
       OstTrace0( CAMERAAPP_PERFORMANCE, CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_CONFIGURATIONS 0" );  //CCORAPP_APP_CONFIGS_END
       iCamera->PrepareImageCaptureL( format, index );
       OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_STILL_INIT 0" ); //CCORAPP_APP_STILL_INIT_END
-      OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_OVERLAY_INIT 1" );   //CCORAPP_APP_OVERLAY_INIT_START
 
       iCamera->SetJpegQuality( params().iQualityFactor );
 
@@ -3257,7 +3253,7 @@ CCamCameraController
       {
       CheckFlagOnL( iInfo.iState,        ECamImageOn,    KErrNotReady );
       CheckEqualsL( iInfo.iCaptureState, ECamCaptureOff, KErrInUse    );
-      OstTrace0( CAMERAAPP_PERFORMANCE, DUP3_CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_CAPTURE_START 0" );  //CCORAPP_CAPTURE_START_END
+      OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_PROCESSIMAGEREQUESTL, "e_CAM_APP_CAPTURE_START 0" );  //CCORAPP_CAPTURE_START_END
 
       // New capture starts, reset capture and snapshot counters.
       iInfo.iCaptureCount  = 0;
@@ -3588,6 +3584,7 @@ CCamCameraController
           {
           PRINT( _L("Camera <> ECamTriInactive") );
           iSnapshotProvider->StartSnapshot();
+          OstTrace0( CAMERAAPP_PERFORMANCE, DUP2_CCAMCAMERACONTROLLER_PROCESSSNAPSHOTREQUESTL, "e_CAM_APP_OVERLAY_INIT 0" );   //CCORAPP_APP_OVERLAY_INIT_END
           break;
           }
         case ECamTriActive: // Already active, no action
@@ -3611,6 +3608,7 @@ CCamCameraController
     case ECamRequestSsRelease:
       {
       PRINT( _L("Camera <> case ECamRequestSsRelease") );
+      OstTrace0( CAMERAAPP_PERFORMANCE, DUP3_CCAMCAMERACONTROLLER_PROCESSSNAPSHOTREQUESTL, "e_CAM_APP_OVERLAY_INIT 1" );   //CCORAPP_APP_OVERLAY_INIT_START
       ProcessSsReleaseRequest();
       break;
       }

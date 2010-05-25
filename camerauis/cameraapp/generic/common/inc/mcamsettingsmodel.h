@@ -293,6 +293,25 @@ class MCamSettingsModel
     virtual void StoreFaceTrackingValue() = 0;
     
     /**
+    * Returns the face tracking state as it was before the latest scene mode change
+    */     
+    virtual TCamSettingsOnOff GetPreviousFaceTrack() = 0;
+    
+    /**
+    * Sets the face tracking state as it was before the latest scene mode change
+    */       
+    virtual void SetPreviousFaceTrack( TCamSettingsOnOff aPreviousFaceTrack ) = 0;
+  
+    /**
+    * Returns the scene mode that was in use before the current scene mode was selected
+    */       
+    virtual TCamSceneId GetPreviousSceneMode() = 0;
+    /**
+    * Sets the scene mode that was in use before the current scene mode was selected
+    */         
+    virtual void SetPreviousSceneMode( TCamSceneId aPreviousSceneMode ) = 0;
+    
+    /**
     * Store UserScene settings
     * @since 5.1
     */

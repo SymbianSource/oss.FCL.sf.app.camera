@@ -98,6 +98,7 @@ void CCamTextItem::Draw( CBitmapContext& aBitmapContext ) const
     if ( iText )
         {
         aBitmapContext.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+        aBitmapContext.SetBrushColor( KRgbWhite );
         iLayout.DrawText(
                 aBitmapContext,
                 *iText,

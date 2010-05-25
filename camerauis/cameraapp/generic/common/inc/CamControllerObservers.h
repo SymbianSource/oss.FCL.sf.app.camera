@@ -73,6 +73,7 @@ enum TCamControllerEvent
     ECamEventImageData,
     ECamEventFaceTrackingStateChanged,
     ECamEventInitReady,
+    ECamEventSnapshotRotated
     };
 
 // FORWARD DECLARATIONS

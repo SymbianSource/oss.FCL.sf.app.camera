@@ -529,15 +529,13 @@ void CCamPostCaptureContainer::HandleControllerEventL( TCamControllerEvent aEven
                                        TInt /*aError*/ )
   {
   PRINT( _L("Camera => CCamPostCaptureContainer::HandleControllerEventL") );
-  // If this is a capture complete event
-  if ( aEvent == ECamEventCaptureComplete )
+  // If this is a capture complete event, or snapshot needs to be drawn
+  if ( aEvent == ECamEventCaptureComplete ||
+       aEvent == ECamEventSnapshotReady ||
+       aEvent == ECamEventSnapshotRotated )
     {
     DrawNow();
     }
-  else if ( aEvent == ECamEventSnapshotReady )
-    {
-    DrawNow();
-    }    
   PRINT( _L("Camera <= CCamPostCaptureContainer::HandleControllerEventL") );
   }
 

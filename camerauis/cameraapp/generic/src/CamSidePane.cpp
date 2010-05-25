@@ -83,6 +83,7 @@ CCamSidePane::~CCamSidePane()
 //
 void CCamSidePane::ConstructL()
     {
+    PRINT( _L("Camera => CCamSidePane::ConstructL") );
     LoadResourceDataL();
 
     // side pane is a controller, self timer and burst mode observer
@@ -90,6 +91,7 @@ void CCamSidePane::ConstructL()
     iVisible = ETrue;
 
     UpdateLayout();
+    PRINT( _L("Camera <= CCamSidePane::ConstructL") );
     }
 
 // -----------------------------------------------------------------------------
@@ -546,18 +548,32 @@ void CCamSidePane::SetInitialState()
           {
           if( appUi && !appUi->IsSecondCameraEnabled() || 
               appUi &&  appUi->IsQwerty2ndCamera() )  
-            {
-            if ( ECamControllerVideo == iMode ) 
-                {
-                iIndicators[ECamIndicatorCaptureMode]->SetIcon( 2 );
-                }
-            else
-              iIndicators[ECamIndicatorCaptureMode]->SetIcon( 0 );
-            }
+              {
+              if ( ECamControllerVideo == iMode ) 
+                  {
+                  iIndicators[ECamIndicatorCaptureMode]->SetIcon( 2 );
+                  }
+              else
+                  iIndicators[ECamIndicatorCaptureMode]->SetIcon( 0 );
+              }
           else
             iIndicators[ECamIndicatorCaptureMode]->ClearIcon();
+			
+          if ( iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() )
+              {
+              iIndicators[ECamIndicatorCaptureMode]->ClearIcon();
+              }
           break;
           }
+        // -------------------------------------------------
+        case ECamIndicatorTotal:
+            {
+            if ( iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() )
+                {
+                iIndicators[ECamIndicatorTotal]->DisplayIcon();
+                }
+            break;
+            }
         // -------------------------------------------------
         // other indicators
         default:
@@ -998,6 +1014,7 @@ void CCamSidePane::TouchLayout() const
             switch ( i )
                 {
                 case ECamIndicatorCaptureMode:
+                case ECamIndicatorTotal:
                     {
                     if ( ECamControllerVideo == iMode )
                         {
@@ -1010,6 +1027,11 @@ void CCamSidePane::TouchLayout() const
                            AknLayoutScalable_Apps::main_camera4_pane_g1( variant ) );
                         }
                     iIndicators[i]->SetRect( l.Rect() );
+                    if ( i == ECamIndicatorCaptureMode 
+					     && iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() )
+                        {
+                        iIndicators[i]->ClearIcon();
+                        }
                     break;
                     }
                 case ECamIndicatorBurstMode:
@@ -1048,5 +1070,85 @@ void CCamSidePane::TouchLayout() const
             }
         }
     }
-   
+
+// ---------------------------------------------------------------------------
+// CCamSidePane::ModeIndicatorLayoutRect
+// ---------------------------------------------------------------------------
+//
+TRect CCamSidePane::ModeIndicatorLayoutRect()
+    {
+    // Mode and scene indicators use the same layout rect. 
+    // Only one of these can be used at a give time.  
+    return iIndicators[ECamIndicatorCaptureMode]->LayoutRect();
+    }
+
+// ---------------------------------------------------------------------------
+// CCamSidePane::DrawModeIndicator
+// ---------------------------------------------------------------------------
+//
+void CCamSidePane::DrawModeIndicator( CWindowGc& aGc, TBool aDrawIcon )
+    {
+    PRINT( _L("Camera => CCamSidePane::DrawModeIndicator") );
+
+    if ( iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() )
+        {
+        PRINT( _L("Camera <= CCamSidePane::DrawSceneIndicator - mode indicator not used") );
+        return;
+        }
+
+    CCamIndicator *indicator = iIndicators[ECamIndicatorCaptureMode];
+    if ( indicator )
+        {
+        if( aDrawIcon )
+            {
+            indicator->DisplayIcon();
+            }
+        else
+            {
+            indicator->ClearIcon();
+            }
+        indicator->Draw( aGc );
+        }
+    PRINT( _L("Camera <= CCamSidePane::DrawModeIndicator") );
+    }
+
+// ---------------------------------------------------------------------------
+// CCamSidePane::UpdateSceneIndicatorL
+// ---------------------------------------------------------------------------
+//
+void CCamSidePane::UpdateSceneIndicatorL( TInt32 aBitmapId, TInt32 aMaskId )
+    {
+    PRINT1( _L("Camera => CCamSidePane::UpdateSceneIndicatorL - count:%d"), iIndicators.Count() );
+
+    if ( !iIndicators.Count() )
+        {
+        PRINT( _L("Camera <= CCamSidePane::UpdateSceneIndicatorL - indi not initialized") );
+        return;    
+        }
+
+    // Remove previous scene icon, if present
+    if ( iIndicators.Count() == ECamIndicatorTotal + 1 )
+        {
+        CCamIndicator *indi = iIndicators[ECamIndicatorTotal];
+        iIndicators.Remove( ECamIndicatorTotal );
+        delete indi;
+        }
+
+    // Construct and append new indicator to the indicator list
+    TRect rect( iIndicators[ECamIndicatorCaptureMode]->LayoutRect() );
+    CCamIndicator *indicator = CCamIndicator::NewL( rect );
+
+    CleanupStack::PushL( indicator );
+    indicator->AddIconL( aBitmapId, aMaskId );
+    indicator->SetRect( rect );
+    iIndicators.Append( indicator );
+    CleanupStack::Pop( indicator );
+    
+    // Mode indicator disabled and 
+    iIndicators[ECamIndicatorCaptureMode]->ClearIcon();
+    iIndicators[ECamIndicatorTotal]->DisplayIcon();
+
+    PRINT( _L("Camera <= CCamSidePane::UpdateSceneIndicatorL") );
+    }
+
 // End of File

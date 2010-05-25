@@ -133,10 +133,7 @@ const TDesC& CCamBurstCaptureArray::CCamBurstCaptureItem::FileName() const
       {
       return KNullDesC;
       }
-    else
-      {  
-      return *iFileName;
-      }
+    return *iFileName;
     }
 
 // ---------------------------------------------------------------------------
@@ -146,6 +143,10 @@ const TDesC& CCamBurstCaptureArray::CCamBurstCaptureItem::FileName() const
 //
 const TDesC& CCamBurstCaptureArray::CCamBurstCaptureItem::ImageName() const
     {
+    if( !iImageName )
+        {
+        return KNullDesC;
+        }
     return *iImageName;
     }
 

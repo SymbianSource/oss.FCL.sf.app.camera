@@ -862,6 +862,8 @@ CCamContainerBase* CCamViewBase::Container()
 //
 void CCamViewBase::SetSoftKeysL(TInt aResource)
 	{
+    PRINT1( _L("Camera => CCamViewBase::SetSoftKeysL SoftKeys:0x%x"), aResource );
+
     CCamAppUi* appUi = static_cast<CCamAppUi*>( AppUi() );	  
     // If courtesy softkeys are enabled, check whether the UI can be drawn without being explicitly raised
     // (rare, but possible: e.g. when video recording starts
@@ -902,6 +904,8 @@ void CCamViewBase::SetSoftKeysL(TInt aResource)
         Cba()->DrawDeferred();
 
         }
+
+    PRINT( _L("Camera <= CCamViewBase::SetSoftKeysL") );
 	}
 
 
