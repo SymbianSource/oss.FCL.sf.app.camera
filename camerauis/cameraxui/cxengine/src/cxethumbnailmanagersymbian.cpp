@@ -21,7 +21,7 @@
 #include "cxutils.h"
 #include "cxethumbnailmanagersymbian.h"
 
-//#define CXE_USE_THUMBNAIL_MANAGER
+
 
 
 /*!
@@ -31,14 +31,11 @@ CxeThumbnailManagerSymbian::CxeThumbnailManagerSymbian()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-#ifdef CXE_USE_THUMBNAIL_MANAGER
-
     mThumbnailManager = new ThumbnailManager();
 
     // connect thumbnail ready signal from thumbnailmanager
     connect(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
             this, SLOT(thumbnailReady(QPixmap, void *, int, int)));
-#endif
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -51,10 +48,8 @@ CxeThumbnailManagerSymbian::~CxeThumbnailManagerSymbian()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-#ifdef CXE_USE_THUMBNAIL_MANAGER
     mThumbnailRequests.clear();
     delete mThumbnailManager;
-#endif
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -71,7 +66,6 @@ void CxeThumbnailManagerSymbian::createThumbnail(const QString& filename,
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-#ifdef CXE_USE_THUMBNAIL_MANAGER
     TPtrC16 fName(reinterpret_cast<const TUint16*>(filename.utf16()));
     CX_DEBUG(("Create thumbnail! filename = %s", filename.toAscii().constData()));
 
@@ -87,9 +81,6 @@ void CxeThumbnailManagerSymbian::createThumbnail(const QString& filename,
             CX_DEBUG(("error initializing data to thumbnail manager"));
         }
     }
-#else
-    Q_UNUSED(filename);
-#endif
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -103,7 +94,6 @@ void CxeThumbnailManagerSymbian::cancelThumbnail(const QString& filename)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-#ifdef CXE_USE_THUMBNAIL_MANAGER
     if (mThumbnailRequests.contains(filename)) {
         int thumbnailId = mThumbnailRequests.value(filename);
         if (mThumbnailManager &&
@@ -112,9 +102,7 @@ void CxeThumbnailManagerSymbian::cancelThumbnail(const QString& filename)
             mThumbnailRequests.remove(filename);
         }
     }
-#else
-    Q_UNUSED(filename);
-#endif
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -132,7 +120,7 @@ void CxeThumbnailManagerSymbian::thumbnailReady(QPixmap thumbnail, void * data, 
     CX_DEBUG_ENTER_FUNCTION();
 
     Q_UNUSED(data);
-#ifdef CXE_USE_THUMBNAIL_MANAGER
+
     CX_DEBUG(("CxeThumbnailManagerSymbian::thumbnailReady error = %d", error));
 
     QString key;
@@ -151,11 +139,6 @@ void CxeThumbnailManagerSymbian::thumbnailReady(QPixmap thumbnail, void * data, 
         mThumbnailRequests.remove(key);
         emit thumbnailReady(thumbnail, error);
     }
-#else
-    Q_UNUSED(thumbnail);
-    Q_UNUSED(id);
-    Q_UNUSED(error);
-#endif
 
     CX_DEBUG_EXIT_FUNCTION();
 }

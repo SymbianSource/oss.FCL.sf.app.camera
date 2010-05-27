@@ -17,6 +17,7 @@
 *
 */
 
+#include <algorithm>
 #include <e32std.h> // For Symbian types used in mmsenginedomaincrkeys.h
 #include <MmsEngineDomainCRKeys.h>
 
@@ -35,15 +36,22 @@
 namespace
 {
     // Display IDs for cameras, used when requesting data from ICM
-    const int   PRIMARY_CAMERA_DISPLAY_ID   = 2;
-    const int   SECONDARY_CAMERA_DISPLAY_ID = 3;
+    const int    PRIMARY_CAMERA_DISPLAY_ID   = 2;
+    const int    SECONDARY_CAMERA_DISPLAY_ID = 3;
 
-    const int   ONE_MILLION    = 1000000;
-    const qreal ASPECT_16_BY_9 = (16/9.0);
-    const qreal DELTA_ERROR    = 0.20;
+    const int    ONE_MILLION    = 1000000;
+    const qreal  ASPECT_16_BY_9 = (16/9.0);
+    const qreal  DELTA_ERROR    = 0.20;
 
     // ICM "camcorderVisible" parameter value below this means sharing aka mms quality.
-    const int   MMS_QUALITY_CAMCORDERVISIBLE_LIMIT = 200;
+    const int    MMS_QUALITY_CAMCORDERVISIBLE_LIMIT = 200;
+
+    // Average video bit rate scaler
+    const qreal  VIDEO_AVG_BITRATE_SCALER = 0.9;
+    // Coefficient to estimate video metadata amount
+    const qreal  VIDEO_METADATA_COEFF = 1.03;
+    // Maximum video clip duration in seconds for all qualities
+    const qint64 VIDEO_MAX_DURATION = 5400;
 }
 
 
@@ -98,7 +106,7 @@ QList<CxeImageDetails> CxeQualityPresetsSymbian::imageQualityPresets(Cxe::Camera
     int totalLevels = mIcm->NumberOfImageQualityLevels();
 
     CX_DEBUG(("Total image quality levels = %d", totalLevels));
-    CArrayFixFlat<TUint>* levels= new CArrayFixFlat<TUint>(totalLevels);
+    CArrayFixFlat<TUint>* levels = new CArrayFixFlat<TUint>(totalLevels);
 
     // Get camera display id based on camera index
     int displayId = cameraId == Cxe::SecondaryCameraIndex
@@ -235,6 +243,7 @@ CxeImageDetails CxeQualityPresetsSymbian::createImagePreset(TImageQualitySet set
 */
 CxeVideoDetails CxeQualityPresetsSymbian::createVideoPreset(TVideoQualitySet set)
 {
+    CX_DEBUG_ENTER_FUNCTION();
     CxeVideoDetails newPreset;
     // set setting values from quality set
     newPreset.mWidth = set.iVideoWidth;
@@ -272,6 +281,7 @@ CxeVideoDetails CxeQualityPresetsSymbian::createVideoPreset(TVideoQualitySet set
     // set audiotype
     newPreset.mAudioType = toString(fourCCBuf);
 
+    CX_DEBUG_EXIT_FUNCTION();
     return newPreset;
 }
 
@@ -339,6 +349,48 @@ CxeQualityPresetsSymbian::calculateMegaPixelCount(int imageWidth, int imageHeigh
     return mpxCountString;
 
 
+}
+
+/*!
+* Get the available recording time with given video quality details and disk space.
+* @param details Video quality details to use in calculation.
+* @param space Available disk space to use in calculation.
+* @return Available recording time estimate in seconds.
+*/
+int CxeQualityPresetsSymbian::recordingTimeAvailable(const CxeVideoDetails& details, qint64 space)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    int time(0);
+
+    // Maximum clip size may be limited for mms quality.
+    // If mMaximumSizeInBytes == 0, no limit is specified.
+    if (details.mMaximumSizeInBytes > 0 && details.mMaximumSizeInBytes < space) {
+        space = details.mMaximumSizeInBytes;
+    }
+
+    // Use average audio/video bitrates to estimate remaining time
+    qreal scaler(avgVideoBitRateScaler());
+    if (scaler == 0) {
+        // video bit rate scaler is 0, use the constant value
+        scaler = VIDEO_AVG_BITRATE_SCALER;
+    }
+
+    int muteSetting = 0; // audio enabled
+    mSettings.get(CxeSettingIds::VIDEO_MUTE_SETTING, muteSetting);
+
+    int avgVideoBitRate = (details.mVideoBitRate * scaler);
+    int avgAudioBitRate = (muteSetting == 1) ? 0 : details.mAudioBitRate;
+
+    quint32 averageBitRate = (quint32)((avgVideoBitRate + avgAudioBitRate) * VIDEO_METADATA_COEFF);
+    quint32 averageByteRate = averageBitRate / 8;
+
+    // 0 <= Remaining time <= KCamCMaxClipDurationInSecs
+    qint64 remaining = std::max(qint64(0), space/averageByteRate);
+    time = std::min(remaining, VIDEO_MAX_DURATION);
+
+    CX_DEBUG(( "remaining time from algorithm: %d", time ));
+    CX_DEBUG_EXIT_FUNCTION();
+    return time;
 }
 
 

@@ -22,9 +22,6 @@
         <string name="settingskey" value="videoQuality"/>
         <string locid="txt_cam_opt_video_quality" name="text" value="Video quality"/>
     </object>
-    <object name="cxui_video_action_restore" type="HbAction">
-        <string locid="txt_cam_opt_restore_settings" name="text" value="Restore settings"/>
-    </object>
     <object name="cxui_video_action_help" type="HbAction">
         <string name="text" value="Help"/>
     </object>
@@ -40,12 +37,6 @@
     <object name="cxui_video_action_showcapturedvideo" type="HbAction">
         <string name="settingskey" value="video_showcaptured"/>
         <string locid="txt_cam_opt_show_captured_video" name="text" value="Show captured video"/>
-    </object>
-    <object name="cxui_video_action_videosound" type="HbAction">
-        <string locid="txt_cam_opt_video_sound" name="text" value="Video sound"/>
-    </object>
-    <object name="cxui_video_action_defaultvideoname" type="HbAction">
-        <string locid="txt_cam_opt_default_video_name" name="text" value="Default video name"/>
     </object>
     <object name="cxui_video_action_setdefaultscenemode" type="HbAction">
         <string locid="txt_cam_opt_set_as_default_scene_mode" name="text" value="Set as default scene mode"/>
@@ -211,10 +202,7 @@
         <connect receiver="video_capture_view" sender="video_view_menu" signal="aboutToHide()" slot="hideControls()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_settings" signal="triggered(bool)" slot="showSettingsGrid()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_quality" signal="triggered(bool)" slot="launchSetting()"/>
-        <connect receiver="video_capture_view" sender="cxui_video_action_restore" signal="triggered(bool)" slot="launchNotSupportedNotification()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_showcapturedvideo" signal="triggered(bool)" slot="launchSetting()"/>
-        <connect receiver="video_capture_view" sender="cxui_video_action_videosound" signal="triggered(bool)" slot="launchNotSupportedNotification()"/>
-        <connect receiver="video_capture_view" sender="cxui_video_action_defaultvideoname" signal="triggered(bool)" slot="launchNotSupportedNotification()"/>
         <connect receiver="video_capture_view" sender="video_zoom" signal="valueChanged(int)" slot="zoomTo(int)"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_record" signal="triggered(bool)" slot="record()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_resume" signal="triggered(bool)" slot="record()"/>
@@ -223,7 +211,7 @@
         <connect receiver="video_capture_view" sender="cxui_video_action_gotostill" signal="triggered(bool)" slot="goToStill()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_gotostill" signal="triggered(bool)" slot="hideControls()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_light" signal="triggered(bool)" slot="launchNotSupportedNotification()"/>
-        <connect receiver="video_capture_view" sender="cxui_video_action_scene" signal="triggered(bool)" slot="launchNotSupportedNotification()"/>
+        <connect receiver="video_capture_view" sender="cxui_video_action_scene" signal="triggered(bool)" slot="launchVideoScenePopup()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_gotovideos" signal="triggered(bool)" slot="launchVideosApp()"/>
     </section>
     <section name="video_standalone_mode">
@@ -234,10 +222,7 @@
                 <string locid="txt_cam_opt_general_settings" name="title" value="General settings"/>
                 <ref object="cxui_video_action_showcapturedvideo" role="HbMenu:addAction"/>
                 <ref object="cxui_video_action_quality" role="HbMenu:addAction"/>
-                <ref object="cxui_video_action_videosound" role="HbMenu:addAction"/>
-                <ref object="cxui_video_action_defaultvideoname" role="HbMenu:addAction"/>
             </widget>
-            <ref object="cxui_video_action_restore" role="HbMenu:addAction"/>
         </widget>
     </section>
     <section name="video_embedded_mode">
@@ -246,10 +231,7 @@
             <widget name="video_submenu_general" role="HbMenu:menu" type="HbMenu">
                 <string locid="txt_cam_opt_general_settings" name="title" value="General settings"/>
                 <ref object="cxui_video_action_quality" role="HbMenu:addAction"/>
-                <ref object="cxui_video_action_videosound" role="HbMenu:addAction"/>
-                <ref object="cxui_video_action_defaultvideoname" role="HbMenu:addAction"/>
             </widget>
-            <ref object="cxui_video_action_restore" role="HbMenu:addAction"/>
         </widget>
     </section>
     <section name="video_idle">

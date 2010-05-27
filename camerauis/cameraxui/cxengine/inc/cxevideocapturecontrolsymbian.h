@@ -38,6 +38,7 @@ class CxeCameraDevice;
 class CxeQualityPresets;
 class CxeFilenameGenerator;
 class CxeViewfinderControl;
+class CxeSnapshotControl;
 class CxeStillImageSymbian;
 class CxeSoundPlayerSymbian;
 class CxeCameraDeviceControl;
@@ -55,6 +56,7 @@ public:  // constructors
 
     CxeVideoCaptureControlSymbian(CxeCameraDevice &cameraDevice,
                                   CxeViewfinderControl &viewfinderControl,
+                                  CxeSnapshotControl &snapshotControl,
                                   CxeCameraDeviceControl &cameraDeviceControl,
                                   CxeFilenameGenerator &nameGenerator,
                                   CxeSettings &settings,
@@ -74,9 +76,6 @@ public:  // functions from CxeVideoCaptureControl
     QString filename() const;
     QPixmap snapshot() const;
     QList<CxeVideoDetails> supportedVideoQualities();
-
-public:  // public member functions, not in client API
-    void handleSnapshotEvent(CxeError::Id error);
 
 public: // functions from MVideoRecorderUtilityObserver
     void MvruoOpenComplete(TInt aError);
@@ -98,14 +97,14 @@ public slots:
     void deinit();
     //! Notification that videocapture sound has been played
     void handleSoundPlayed();
+    //! Snapshot has been received from adaptiation.
+    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot);
 
 protected slots:
     // notifications when ECam reference is changed
     void prepareForCameraDelete();
     void handleCameraAllocated(CxeError::Id error);
     void prepareForRelease();
-    // ECam events
-    void handleCameraEvent(int eventUid, int error);
     // settings call back
     void handleSettingValueChanged(const QString& settingId,QVariant newValue);
     // scene mode change
@@ -114,19 +113,18 @@ protected slots:
     void handleDiskSpaceChanged();
 
 private: // helper methods
-    CxeError::Id findVideoController(const TDesC8& aMimeType, const TDesC&  aPreferredSupplier);
     void releaseResources();
     void initializeStates();
-    CxeError::Id getVideoQualityDetails(CxeVideoDetails &videoInfo);
-    int prepareVideoSnapshot();
+    void getVideoQualityDetails(CxeVideoDetails &videoInfo);
     void initVideoRecorder();
     void open();
     void prepare();
-    TSize getSnapshotSize() const;
     virtual void createVideoRecorder();
-    void calculateRemainingTime(CxeVideoDetails videoDetails, int &time);
-    TFourCC audioType(const QString& str);
+    int calculateRemainingTime(const CxeVideoDetails& videoDetails);
     void updateRemainingRecordingTimeCounter();
+    void generateFilename();
+    void handlePrepareFailed();
+    void handleComposeFailed(int error);
 
 protected: // protected data
     //! Video Recorder
@@ -141,6 +139,7 @@ private: // private data
     CxeCameraDevice &mCameraDevice;
     CxeCameraDeviceControl &mCameraDeviceControl;
     CxeViewfinderControl &mViewfinderControl;
+    CxeSnapshotControl &mSnapshotControl;
     CxeFilenameGenerator &mFilenameGenerator;
     CxeSettings &mSettings;
     CxeQualityPresets &mQualityPresets;
@@ -150,8 +149,6 @@ private: // private data
     //! Soundplayers, own
     CxeSoundPlayerSymbian *mVideoStartSoundPlayer;
     CxeSoundPlayerSymbian *mVideoStopSoundPlayer;
-    //! New file name generated for the video prepare.
-    QString mNewFileName;
     //! Current video file name
     QString mCurrentFilename;
     //video resolutions supported by ICM

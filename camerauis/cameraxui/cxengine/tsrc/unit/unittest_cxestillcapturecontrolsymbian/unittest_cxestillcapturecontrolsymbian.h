@@ -26,6 +26,7 @@ class CxeStillCaptureControlSymbian;
 class CxeFakeCameraDeviceControl;
 class CxeStillCaptureControlSymbian;
 class CxeFakeViewfinderControl;
+class CxeSnapshotControl;
 class CxeFakeFilenameGenerator;
 class CxeFilenameGenerator;
 class CxeFakeSensorEventHandler;
@@ -68,6 +69,7 @@ private:
     CxeFakeCameraDeviceControl *mFakeCameraDeviceControl;
     CxeFakeCameraDevice *mFakeCameraDevice;
     CxeFakeViewfinderControl *mViewfinderControl;
+    CxeSnapshotControl *mSnapshotControl;
     CxeFakeFilenameGenerator *mFilenameGenerator;
     CxeFakeSensorEventHandler *mSensorEventHandler;
     CxeStillCaptureControlSymbian *mStillCaptureControl;

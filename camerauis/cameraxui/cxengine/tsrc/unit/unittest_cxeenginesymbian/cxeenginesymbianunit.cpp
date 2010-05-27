@@ -27,15 +27,18 @@
 #include "cxefakesensoreventhandler.h"
 #include "cxefakefilenamegenerator.h"
 #include "cxutils.h"
+#include "cxefakesettingsmodel.h"
 
 //  Member Functions
 
 CxeEngineSymbianUnit::CxeEngineSymbianUnit()
 {
+    CX_DEBUG_IN_FUNCTION();
 }
 
 CxeEngineSymbianUnit::~CxeEngineSymbianUnit()
 {
+    CX_DEBUG_IN_FUNCTION();
 }
 
 
@@ -66,6 +69,10 @@ void CxeEngineSymbianUnit::createControls()
         mZoomControl = new CxeFakeZoomControl();
 
         mVideoCaptureControl = new CxeFakeVideoCaptureControl();
+
+        mSettingsModel = new CxeFakeSettingsModel();
+
+        mFeatureManager = new CxeFakeFeatureManager();
 
     }
 

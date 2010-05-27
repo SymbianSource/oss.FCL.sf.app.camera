@@ -38,6 +38,7 @@ class CxeStillImageSymbian;
 class CxeImageDataQueue;
 class CxeImageDataQueueSymbian;
 class CxeViewfinderControl;
+class CxeSnapshotControl;
 class CxeSensorEventHandler;
 class CxeCameraDeviceControl;
 class CxeAutoFocusControl;
@@ -59,6 +60,7 @@ public:  // constructors
 
     CxeStillCaptureControlSymbian(CxeCameraDevice &cameraDevice,
                                   CxeViewfinderControl &viewfinderControl,
+                                  CxeSnapshotControl &snapshotControl,
                                   CxeCameraDeviceControl &cameraDeviceControl,
                                   CxeFilenameGenerator &nameGenerator,
                                   CxeSensorEventHandler &sensorEventHandler,
@@ -105,8 +107,10 @@ protected slots:
     void prepareForRelease();
 
     // ECam events
-    void handleCameraEvent( int eventUid, int error );
     void handleImageData( MCameraBuffer *buffer, int error );
+
+    // Snapshot event
+    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot);
 
     // settings call back
     void handleSettingValueChanged(const QString& settingId,QVariant newValue);
@@ -128,9 +132,7 @@ private: // helper functions
     CCamera::TFormat supportedStillFormat(Cxe::CameraIndex cameraIndex);
     int prepareStillSnapshot();
     CxeError::Id getImageQualityDetails(CxeImageDetails &imageInfo);
-    TSize getSnapshotSize() const;
     void handleSnapshotEvent(CxeError::Id error);
-    QPixmap extractSnapshot();
     void initializeStates();
     void prepare();
     void updateRemainingImagesCounter();
@@ -141,6 +143,7 @@ private: // private data
     CxeImageDataQueueSymbian *mImageDataQueue;  // own
     CxeCameraDevice &mCameraDevice;
     CxeViewfinderControl &mViewfinderControl;
+    CxeSnapshotControl &mSnapshotControl;
     CxeCameraDeviceControl &mCameraDeviceControl;
     CxeFilenameGenerator &mFilenameGenerator; //! @todo could be shared with video capture control?
     CxeSensorEventHandler &mSensorEventHandler;
@@ -162,20 +165,6 @@ private: // private data
     QList<TSize> mECamSupportedImageResolutions;
     //current image quality details in use
     CxeImageDetails mCurrentImageDetails;
-
-private: // Helper class
-
-    class CxeCameraBufferCleanup
-    {
-    public:
-        CxeCameraBufferCleanup(MCameraBuffer* buffer) : mBuffer(buffer) {}
-        ~CxeCameraBufferCleanup() { if (mBuffer) { mBuffer->Release(); } }
-
-    private:
-        Q_DISABLE_COPY(CxeCameraBufferCleanup)
-
-        MCameraBuffer* mBuffer;
-    };
 };
 
 #endif // CXESTILLCAPTURECONTROLSYMBIAN_H

@@ -31,9 +31,6 @@ class CxeMemoryMonitorPrivate : public QObject
 {
     Q_OBJECT
 
-    // Owner of this private implementation.
-    friend class CxeMemoryMonitor;
-
 private:
     explicit CxeMemoryMonitorPrivate(CxeFeatureManager &features);
     ~CxeMemoryMonitorPrivate();
@@ -55,6 +52,8 @@ private:
 #ifdef Q_OS_SYMBIAN
     ROomMonitorSession mOomMonitor;
 #endif // Q_OS_SYMBIAN
+
+    friend class CxeMemoryMonitor;
 };
 
 #endif // CXEMEMORYMONITORPRIVATE_H

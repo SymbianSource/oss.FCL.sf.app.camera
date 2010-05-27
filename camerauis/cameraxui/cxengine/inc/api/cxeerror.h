@@ -64,7 +64,6 @@ namespace CxeError
         //! any other general errors
         General             = 11
         };
-
 }
 
 Q_DECLARE_METATYPE(CxeError::Id)

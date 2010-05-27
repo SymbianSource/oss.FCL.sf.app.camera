@@ -42,6 +42,7 @@ SUBDIRS = cxeunitrunner \
           unittest_cxequalitypresetssymbian \
           unittest_cxethumbnailmanagersymbian \
           unittest_cxeharvestercontrolsymbian \
-          unittest_cxesettingscontrolsymbian
+          unittest_cxesettingscontrolsymbian \
+          unittest_cxesnapshotcontrol
 
 CONFIG *= ordered

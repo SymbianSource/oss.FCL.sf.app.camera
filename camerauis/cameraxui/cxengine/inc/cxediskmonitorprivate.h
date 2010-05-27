@@ -30,9 +30,6 @@ class CxeDiskMonitorPrivate : public QObject
 {
     Q_OBJECT
 
-    // Owner of this private implementation.
-    friend class CxeDiskMonitor;
-
 private:
     explicit CxeDiskMonitorPrivate(CxeSettings &settings);
     ~CxeDiskMonitorPrivate();
@@ -60,6 +57,8 @@ private:
 #endif // Q_OS_SYMBIAN
     qint64 mTriggerLevelBytes;
     qint64 mLatestFreeBytes;
+
+    friend class CxeDiskMonitor;
 };
 
 

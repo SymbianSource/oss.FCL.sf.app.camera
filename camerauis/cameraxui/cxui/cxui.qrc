@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/camerax" >
+        <file alias="cxui.css" >layouts/cxui.css</file>
     </qresource>
     <qresource prefix="/xml" >
         <file alias="setting_scenemode.docml" >layouts/setting_scenemode.docml</file>

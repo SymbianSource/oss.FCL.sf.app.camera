@@ -19,6 +19,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QSound>
 
 class CxeSettings;
 class CxuiDocumentLoader;
@@ -45,17 +46,17 @@ signals:
 public slots:
     void changeTimeOut(int seconds);
     void startTimer();
-    void reset();
+    void reset(bool update = true);
     void cancel();
 
 protected slots:
     void timeout();
 
 private:
-    void reset(bool update);
     void updateWidgets();
     void showWidgets();
     void hideWidgets();
+    void playSound();
 
 private:
     Q_DISABLE_COPY(CxuiSelfTimer)
@@ -74,6 +75,7 @@ private:
     // settings, not own
     CxeSettings &mSettings;
 
+    QSound mSound;
 };
 
 #endif // CXUISELFTIMER_H

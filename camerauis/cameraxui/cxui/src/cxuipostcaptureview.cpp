@@ -476,8 +476,8 @@ void CxuiPostcaptureView::paint(QPainter *painter, const QStyleOptionGraphicsIte
 //
 void CxuiPostcaptureView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    //! @todo temporary workaround for title bar mouse event handling bug
-    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70) {
+
+    if (event->type() == QEvent::GraphicsSceneMousePress) {
         mPostcaptureTimer.stop();
         toggleControls();
         event->accept();

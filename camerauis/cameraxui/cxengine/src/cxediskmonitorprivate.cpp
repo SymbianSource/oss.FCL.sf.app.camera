@@ -72,14 +72,6 @@ void CxeDiskMonitorPrivate::checkSpace()
     // Get the current free space.
     mLatestFreeBytes = free(false);
 
-    // TESTING >>>
-    /*
-    static qint64 TEST = 20*1000*1000;
-    TEST /= 2;
-    mLatestFreeBytes = TEST;
-    */
-    // <<< TESTING
-
     // If space has changed during monitoring, signal it now.
     if (previousFree != mLatestFreeBytes && isMonitoring()) {
         CX_DEBUG(("CxeDiskMonitorPrivate - Disk space changed %d -> %d bytes", previousFree, mLatestFreeBytes));

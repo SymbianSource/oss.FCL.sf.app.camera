@@ -107,6 +107,8 @@ void CxuiSettingRadioButtonList::showEvent(QShowEvent *event)
     CX_DEBUG_ENTER_FUNCTION();
 
     initOriginalSelectedItem();
+    // ensure that currently selected item is visible
+    scrollTo(currentIndex());
     QGraphicsWidget::showEvent(event);
 
     CX_DEBUG_EXIT_FUNCTION();

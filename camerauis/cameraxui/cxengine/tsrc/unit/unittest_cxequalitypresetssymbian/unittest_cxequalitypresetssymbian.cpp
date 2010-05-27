@@ -95,6 +95,40 @@ void UnitTestCxeQualityPresetsSymbian::testVideoQualityPresets()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+
+void UnitTestCxeQualityPresetsSymbian::testRecordingTimeAvailable()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    int time(0);
+
+    CxeVideoDetails details;
+    details.mAudioBitRate = 100;
+    details.mVideoBitRate = 100;
+
+    // Check zero time when disk full.
+    time = mQualityPresets->recordingTimeAvailable(details, qint64(0));
+    QVERIFY(time == 0);
+
+    // Common time limit is 90 minutes
+    time = mQualityPresets->recordingTimeAvailable(details, qint64(1000*1000*1000));
+    QVERIFY(time == 5400);
+
+    // Normal case, no quality specific limit
+    time = mQualityPresets->recordingTimeAvailable(details, qint64(1000*1000));
+    QVERIFY(time > 0);
+    QVERIFY(time < 5400);
+
+    // Normal case, quality specifies limit
+    details.mMaximumSizeInBytes = 10*1000;
+    time = mQualityPresets->recordingTimeAvailable(details, qint64(1000*1000));
+    QVERIFY(time > 0);
+    QVERIFY(time < 5400);
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
 // main() function non-GUI testing
 QTEST_MAIN(UnitTestCxeQualityPresetsSymbian);
 

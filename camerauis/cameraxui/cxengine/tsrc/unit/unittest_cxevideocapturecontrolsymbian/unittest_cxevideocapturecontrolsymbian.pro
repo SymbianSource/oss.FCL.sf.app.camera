@@ -52,6 +52,8 @@ SOURCES *= unittest_cxevideocapturecontrolsymbian.cpp \
     cxefakequalitypresets.cpp \
     cxediskmonitor.cpp \
     cxediskmonitorprivate.cpp \
+    cxesnapshotcontrol.cpp \
+    cxesnapshotcontrolprivate.cpp \
     cxesysutil.cpp
 
 HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
@@ -83,4 +85,6 @@ HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
     cxutils.h \
     cxediskmonitor.h \
     cxediskmonitorprivate.h \
+    cxesnapshotcontrol.h \
+    cxesnapshotcontrolprivate.h \
     cxesysutil.h

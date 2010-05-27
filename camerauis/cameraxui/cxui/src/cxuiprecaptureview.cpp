@@ -748,6 +748,8 @@ void CxuiPrecaptureView::launchSettingsDialog(QObject* action)
         return;
     }
 
+    hideControls();
+
     QString key = action->property(PROPERTY_KEY_SETTING_ID).toString();
     CX_DEBUG(("settingsKey=%s", key.toAscii().constData()));
 
@@ -855,6 +857,8 @@ void CxuiPrecaptureView::launchSliderSetting()
     if (!action) {
          return;
     }
+
+    hideControls();
 
     QString key = action->property(PROPERTY_KEY_SETTING_ID).toString();
     CX_DEBUG(("settingsKey=%s", key.toAscii().constData()));
@@ -1135,6 +1139,43 @@ void CxuiPrecaptureView::handleSettingValueChanged(const QString& key, QVariant 
     CX_DEBUG_ENTER_FUNCTION();
     Q_UNUSED(key);
     Q_UNUSED(newValue);
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Update the scene mode icon.
+* @param sceneId The new scene id.
+*/
+void CxuiPrecaptureView::updateSceneIcon(const QString& sceneId)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG(("CxuiPrecaptureView - scene: %s", sceneId.toAscii().constData()));
+
+    // No need to update icon, if widgets are not even loaded yet.
+    // We'll update the icon once the widgets are loaded.
+    if (mWidgetsLoaded) {
+
+        QString key;
+        QString iconObjectName;
+        if (mEngine->mode() == Cxe::VideoMode) {
+            key = CxeSettingIds::VIDEO_SCENE;
+            iconObjectName = VIDEO_PRE_CAPTURE_SCENE_MODE_ACTION;
+        } else {
+            key = CxeSettingIds::IMAGE_SCENE;
+            iconObjectName = STILL_PRE_CAPTURE_SCENE_MODE_ACTION;
+        }
+
+        QString icon = getSettingItemIcon(key, sceneId);
+        CX_DEBUG(("CxuiPrecaptureView - icon: %s", icon.toAscii().constData()));
+
+        if (mDocumentLoader) {
+            QObject *obj = mDocumentLoader->findObject(iconObjectName);
+            CX_DEBUG_ASSERT(obj);
+            qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
+        }
+    } else {
+        CX_DEBUG(("CxuiPrecaptureView - widgets not loaded yet, ignored!"));
+    }
     CX_DEBUG_EXIT_FUNCTION();
 }
 

@@ -24,37 +24,38 @@ class CxeVideoRecorderUtilitySymbian : public CxeVideoRecorderUtility
 {
 public:
 
-    CxeVideoRecorderUtilitySymbian(MVideoRecorderUtilityObserver& aObserver,
-                                       TInt aPriority=EMdaPriorityNormal,
-                                       TMdaPriorityPreference aPref=EMdaPriorityPreferenceTimeAndQuality);
-
+    CxeVideoRecorderUtilitySymbian(MVideoRecorderUtilityObserver& aObserver);
     ~CxeVideoRecorderUtilitySymbian();
 
-    TInt CustomCommandSync(const TMMFMessageDestinationPckg& aDestination,
-                           TInt aFunction,
-                           const TDesC8& aDataTo1,
-                           const TDesC8& aDataTo2);
-    void OpenFileL(const TDesC& aFileName,
-					TInt aCameraHandle,
-					TUid aControllerUid,
-					TUid aVideoFormat,
-					const TDesC8& aVideoType = KNullDesC8,
-					TFourCC aAudioType = KMMFFourCCCodeNULL);
-    void SetVideoFrameSizeL(TSize aSize);
-    void SetVideoFrameRateL(TInt aRate);
-    void SetVideoBitRateL(TInt aRate);
-    void SetAudioEnabledL(TBool aEnable);
-    void SetMaxClipSizeL(TInt aClipSizeInBytes);
-    void Close();
-    void Prepare();
-    void Record();
-    int Stop();
-    void PauseL();
-    TTimeIntervalMicroSeconds RecordTimeAvailable();
-    TTimeIntervalMicroSeconds DurationL();
+    virtual void open(int cameraHandle,
+                      const QString &filename,
+                      const QString &fileMimeType,
+                      const QString &supplier,
+                      const QString &videoType,
+                      const QString &audioType);
+    virtual void setVideoFrameSize(const QSize& size);
+    virtual void setVideoFrameRate(int rate);
+    virtual void setVideoBitRate(int rate);
+    virtual void setAudioEnabled(bool enabled);
+    virtual void setVideoMaxSize(int sizeInBytes);
+    virtual void close();
+    virtual void prepare();
+    virtual void record();
+    virtual void stop(bool asynchronous = false);
+    virtual void pause();
+    virtual int availableRecordingTime();
+    virtual int duration();
+
+private:
+    void findControllerL(const QString& fileMimeType,
+                         const QString& supplier,
+                         TUid& controllerId,
+                         TUid& formatId);
+
+    TFourCC audioFourCC(const QString& str);
+
 private:
     CVideoRecorderUtility *mVideoRecorder;
-    int mStartuperror;
 };
 
 

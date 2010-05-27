@@ -32,12 +32,13 @@ public:
     CxeFakeAutoFocusControl();
     virtual ~CxeFakeAutoFocusControl();
 
-    CxeError::Id start();
+    CxeError::Id start(bool soundEnabled = true);
     void cancel();
     void setMode(CxeAutoFocusControl::Mode newMode);
     CxeAutoFocusControl::Mode mode() const;
     CxeAutoFocusControl::State state() const;
     bool supported() const;
+    bool isSoundEnabled() const;
 
 public: // methods for testing
     void setFakeState(CxeAutoFocusControl::State);

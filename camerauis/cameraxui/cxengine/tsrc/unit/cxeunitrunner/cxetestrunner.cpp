@@ -66,6 +66,7 @@ void CxeTestRunner::runTests()
           << "unittest_cxethumbnailmanagersymbian"
           << "unittest_cxeharvestercontrolsymbian"
           << "unittest_cxesettingscontrolsymbian"
+          << "unittest_cxesnapshotcontrol"
           << "unittest_cxeenginesymbian";
 
     QDir dir;

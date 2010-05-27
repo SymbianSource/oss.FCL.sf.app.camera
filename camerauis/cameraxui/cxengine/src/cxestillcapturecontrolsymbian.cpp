@@ -18,11 +18,9 @@
 
 #include <algorithm>
 #include <exception>
-#include <fbs.h>
 #include <QPixmap>
 #include <coemain.h>
 #include <ECamOrientationCustomInterface2.h>
-#include <ecam/camerasnapshot.h>
 #include <ecamfacetrackingcustomapi.h>
 
 #include "cxestillcapturecontrolsymbian.h"
@@ -34,8 +32,8 @@
 #include "cxecameradevice.h"
 #include "cxesoundplayersymbian.h"
 #include "cxestillimagesymbian.h"
-#include "cxeviewfindercontrol.h"
 #include "cxeviewfindercontrolsymbian.h"
+#include "cxesnapshotcontrol.h"
 #include "cxesettingsmappersymbian.h"
 #include "cxestate.h"
 #include "cxesettings.h"
@@ -53,9 +51,10 @@
 
 
 // constants
-const int KMaintainAspectRatio = false;
-const TInt64 KMinRequiredSpaceImage = 2000000;
-
+namespace
+{
+    const TInt64 KMinRequiredSpaceImage = 2000000;
+}
 
 /**
  * Constructor.
@@ -63,6 +62,7 @@ const TInt64 KMinRequiredSpaceImage = 2000000;
 CxeStillCaptureControlSymbian::CxeStillCaptureControlSymbian(
     CxeCameraDevice &cameraDevice,
     CxeViewfinderControl &viewfinderControl,
+    CxeSnapshotControl &snapshotControl,
     CxeCameraDeviceControl &cameraDeviceControl,
     CxeFilenameGenerator &nameGenerator,
     CxeSensorEventHandler &sensorEventHandler,
@@ -74,6 +74,7 @@ CxeStillCaptureControlSymbian::CxeStillCaptureControlSymbian(
     : CxeStateMachine("CxeStillCaptureControlSymbian"),
       mCameraDevice(cameraDevice),
       mViewfinderControl(viewfinderControl),
+      mSnapshotControl(snapshotControl),
       mCameraDeviceControl(cameraDeviceControl),
       mFilenameGenerator(nameGenerator),
       mSensorEventHandler(sensorEventHandler),
@@ -116,9 +117,9 @@ CxeStillCaptureControlSymbian::CxeStillCaptureControlSymbian(
     // Connect ECam image buffer ready event
     connect(&mCameraDeviceControl, SIGNAL(imageBufferReady(MCameraBuffer*,int)),
             this, SLOT(handleImageData(MCameraBuffer*,int)));
-    // Connect signals for ECam events
-    connect(&mCameraDeviceControl, SIGNAL(cameraEvent(int,int)),
-            this, SLOT(handleCameraEvent(int,int)));
+    // connect snapshot ready signal
+    connect(&mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&)),
+            this, SLOT(handleSnapshotReady(CxeError::Id, const QPixmap&)));
 
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_CREATE_MID2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
@@ -217,16 +218,15 @@ void CxeStillCaptureControlSymbian::deinit()
     //stop viewfinder
     mViewfinderControl.stop();
 
-    // disable sensor event handler.
-    mSensorEventHandler.deinit();
-
-    if (mCameraDevice.cameraSnapshot()) {
-        mCameraDevice.cameraSnapshot()->StopSnapshot();
-    }
-
     if (state() == Capturing) {
         mCameraDevice.camera()->CancelCaptureImage();
     }
+
+    // disable sensor event handler.
+    mSensorEventHandler.deinit();
+
+    mSnapshotControl.stop();
+
     setState(Uninitialized);
 
     OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_OUT, "msg: e_CX_STILL_CAPCONT_DEINIT 0" );
@@ -332,39 +332,21 @@ void CxeStillCaptureControlSymbian::prepare()
 int CxeStillCaptureControlSymbian::prepareStillSnapshot()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0( camerax_performance, DUP4_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_SNAPSHOT 1" );
 
-    CCamera::CCameraSnapshot *cameraSnapshot = mCameraDevice.cameraSnapshot();
-    CX_ASSERT_ALWAYS(cameraSnapshot);
-
-    int err = KErrNone;
-    // Whether or not we have postcapture on, we need the snapshot for Thumbnail Manager.
-    if (cameraSnapshot) {
-        // Cancel active snapshot
-        cameraSnapshot->StopSnapshot();
-
-        // Prepare snapshot
-        CCamera::TFormat snapFormat = CCamera::EFormatFbsBitmapColor16MU;
-        OstTrace0( camerax_performance, DUP4_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_SNAPSHOT 1" );
-        TRAP(err, cameraSnapshot->PrepareSnapshotL(snapFormat,
-                                                   getSnapshotSize(),
-                                                   KMaintainAspectRatio));
-        OstTrace0( camerax_performance, DUP5_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_SNAPSHOT 0" );
-        CX_DEBUG(("PrepareSnapshotL done, err=%d", err));
-
-        // Start snapshot if no errors encountered.
-        if (err == KErrNone) {
-            CX_DEBUG(("Start still snapshot"));
-            cameraSnapshot->StartSnapshot();
-        }
-    } else {
-        // No snapshot interface available. Report error.
-        // Assert above takes care of this, but keeping this as an option.
-        err = KErrNotReady;
+    int status(KErrNone);
+    try {
+        QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
+                                mViewfinderControl.deviceDisplayResolution(),
+                                QSize(mCurrentImageDetails.mWidth, mCurrentImageDetails.mHeight));
+        mSnapshotControl.start(snapshotSize);
+    } catch (...) {
+        status = KErrGeneral;
     }
+    OstTrace0( camerax_performance, DUP5_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_SNAPSHOT 0" );
 
     CX_DEBUG_EXIT_FUNCTION();
-
-    return err;
+    return status;
 }
 
 
@@ -399,31 +381,6 @@ CxeError::Id CxeStillCaptureControlSymbian::getImageQualityDetails(CxeImageDetai
     CX_DEBUG_EXIT_FUNCTION();
     return err;
 }
-
-
-/*!
-* Returns snapshot size. Snapshot size is calculated based on the
-* display resolution and current image aspect ratio.
-*/
-TSize CxeStillCaptureControlSymbian::getSnapshotSize() const
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    TSize snapshotSize;
-
-    QSize deviceResolution = mViewfinderControl.deviceDisplayResolution();
-    QSize size = QSize(mCurrentImageDetails.mWidth, mCurrentImageDetails.mHeight);
-
-    // scale according to aspect ratio.
-    size.scale(deviceResolution.width(), deviceResolution.height(), Qt::KeepAspectRatio);
-    CX_DEBUG(("Still Snapshot size, (%d,%d)", size.width(), size.height()));
-    snapshotSize.SetSize(size.width(), deviceResolution.height());
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return snapshotSize;
-}
-
 
 /**
  * Command to start image capture now.
@@ -481,112 +438,38 @@ CCamera::TFormat CxeStillCaptureControlSymbian::supportedStillFormat(Cxe::Camera
     return imgFormat;
 }
 
-
-/**
- * Camera events. Only relevant one(s) are handled.
- */
-void CxeStillCaptureControlSymbian::handleCameraEvent(int eventUid, int error)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (eventUid == KUidECamEventSnapshotUidValue &&
-        mCameraDeviceControl.mode() == Cxe::ImageMode) {
-        handleSnapshotEvent(CxeErrorHandlingSymbian::map(error));
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 /**
  * Snapshot ready notification. Ask the snapshot from snapshot interface.
  * NB: Typically snapshot arrives before image data but can be in reverse
  * order as well.
  */
-void CxeStillCaptureControlSymbian::handleSnapshotEvent(CxeError::Id error)
+void CxeStillCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    if (mCameraDeviceControl.mode() == Cxe::ImageMode) {
 
-    if (state() == CxeStillCaptureControl::Uninitialized) {
-        // we ignore this event, when we are not active
-        return;
-    }
+        OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 1" );
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 1" );
-
-    // Get image container for current snapshot index.
-    // Remember to increment counter.
-    CxeStillImageSymbian* stillImage = getImageForIndex(mNextSnapshotIndex++);
-
-    if (error == CxeError::None) {
-        try {
-            stillImage->setSnapshot(extractSnapshot());
-        } catch (const std::exception& ex) {
-            error = CxeError::General;
+        // Get image container for current snapshot index.
+        // Remember to increment counter.
+        CxeStillImageSymbian* stillImage = getImageForIndex(mNextSnapshotIndex++);
+        if (status == CxeError::None) {
+            stillImage->setSnapshot(snapshot);
         }
-    }
 
-    // Emit snapshotReady signal in all cases (error or not)
-    emit snapshotReady(error, stillImage->snapshot(), stillImage->id());
+        // Emit snapshotReady signal in all cases (error or not)
+        emit snapshotReady(status, snapshot, stillImage->id());
 
-    // When the snapshot ready event is handled, prepare new filename.
-    if (stillImage->filename().isEmpty()) {
-        // Error ignored at this point, try again when image data arrives.
-        prepareFilename(stillImage);
-    }
+        // When the snapshot ready event is handled, prepare new filename.
+        if (stillImage->filename().isEmpty()) {
+            // Error ignored at this point, try again when image data arrives.
+            prepareFilename(stillImage);
+        }
 
-    OstTrace0( camerax_performance, DUP1_CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 0" );
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-/**
-* Gets QPixmap snapshot from ECAM buffer, if available.
-* @param buffer ECAM buffer containing the snapshot data. Will be released when this
-* method returns, even on exception.
-*/
-QPixmap CxeStillCaptureControlSymbian::extractSnapshot()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    QPixmap pixmap;
-
-    if (mCameraDevice.cameraSnapshot()) {
-
-        QT_TRAP_THROWING({
-            RArray<TInt> frameIndex;
-            CleanupClosePushL(frameIndex);
-
-            MCameraBuffer &buffer(mCameraDevice.cameraSnapshot()->SnapshotDataL(frameIndex));
-
-            // Make sure buffer is released on leave / exception
-            CxeCameraBufferCleanup cleaner(&buffer);
-            TInt firstImageIndex(frameIndex.Find(0));
-            CFbsBitmap &snapshot(buffer.BitmapL(firstImageIndex));
-
-            CleanupStack::PopAndDestroy(); // frameIndex
-
-            TSize size = snapshot.SizeInPixels();
-            TInt sizeInWords = size.iHeight * CFbsBitmap::ScanLineLength(size.iWidth, EColor16MU) / sizeof(TUint32);
-            CX_DEBUG(("size %d x %d, sizeInWords = %d", size.iWidth, size.iHeight, sizeInWords ));
-
-            TUint32* pixelData = new (ELeave) TUint32[ sizeInWords ];
-            // Convert to QImage
-            snapshot.LockHeap();
-            TUint32* dataPtr = snapshot.DataAddress();
-            memcpy(pixelData, dataPtr, sizeof(TUint32)*sizeInWords);
-            snapshot.UnlockHeap();
-
-            CX_DEBUG(("Creating QImage"));
-            QImage *snapImage = new QImage((uchar*)pixelData, size.iWidth, size.iHeight,
-                                           CFbsBitmap::ScanLineLength(size.iWidth, EColor16MU),
-                                           QImage::Format_RGB32);
-
-            pixmap = QPixmap::fromImage(*snapImage);
-            delete [] pixelData;
-            delete snapImage;
-        });
+        OstTrace0( camerax_performance, DUP1_CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 0" );
     }
 
     CX_DEBUG_EXIT_FUNCTION();
-    return pixmap;
 }
 
 /**

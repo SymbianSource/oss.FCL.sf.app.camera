@@ -23,15 +23,16 @@
 #include "cxutils.h"
 #include "cxediskmonitor.h"
 
-CxeVideoCaptureControlSymbianUnit::CxeVideoCaptureControlSymbianUnit( 
+CxeVideoCaptureControlSymbianUnit::CxeVideoCaptureControlSymbianUnit(
                                    CxeCameraDevice &cameraDevice,
                                    CxeViewfinderControl &viewfinderControl,
+                                   CxeSnapshotControl &snapshotControl,
                                    CxeCameraDeviceControl &cameraDeviceControl,
                                    CxeFilenameGenerator &nameGenerator,
                                    CxeSettings &settings,
                                    CxeQualityPresets &qualityPresets,
                                    CxeDiskMonitor &diskMonitor)
-    : CxeVideoCaptureControlSymbian(cameraDevice, viewfinderControl, 
+    : CxeVideoCaptureControlSymbian(cameraDevice, viewfinderControl, snapshotControl,
                                     cameraDeviceControl, nameGenerator,
                                     settings, qualityPresets, diskMonitor)
 {
@@ -50,7 +51,7 @@ void CxeVideoCaptureControlSymbianUnit::createVideoRecorder()
     // init video recoder
     if (state() == CxeVideoCaptureControl::Idle) {
         if (mVideoRecorder == NULL) {
-            TRAPD(initErr, mVideoRecorder = 
+            TRAPD(initErr, mVideoRecorder =
                 new CxeFakeVideoRecorderUtility( *this ,
                             KAudioPriorityVideoRecording,
                             TMdaPriorityPreference( KAudioPrefVideoRecording )));

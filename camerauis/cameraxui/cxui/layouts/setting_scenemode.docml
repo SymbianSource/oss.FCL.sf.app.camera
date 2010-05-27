@@ -15,20 +15,15 @@
             <widget name="scene_view_container" type="HbWidget">
                 <widget name="scene_view_radioButtonList" type="HbRadioButtonList">
                     <real name="z" value="4"/>
-                    <sizehint height="31.04478un" type="PREFERRED"/>
                 </widget>
                 <widget name="button_container" type="HbWidget">
                     <widget name="scene_ok_button" type="HbPushButton">
-                        <sizehint height="2un" type="PREFERRED"/>
-                        <sizehint height="2un" type="MINIMUM" width="12un"/>
                         <string name="text" value="txt_common_button_ok"/>
                         <string name="state" value="normal"/>
                     </widget>
                     <widget name="scene_cancel_button" type="HbPushButton">
-                        <sizehint height="2un" type="PREFERRED"/>
                         <string name="text" value="txt_common_button_cancel"/>
                         <string name="state" value="normal"/>
-                        <sizehint height="2un" type="MINIMUM"/>
                     </widget>
                     <real name="z" value="0"/>
                     <sizehint height="7un" type="PREFERRED" width="23.8806un"/>
@@ -40,12 +35,11 @@
                 </widget>
                 <widget name="scene_title" type="HbLabel">
                     <real name="z" value="4"/>
-                    <contentsmargins bottom="0un" left="3un" right="0un" top="1un"/>
                     <string name="plainText" value="txt_cam_title_scene_mode"/>
                     <fontspec name="fontSpec" role="Title" textheight="var(hb-param-text-height-primary)"/>
                 </widget>
                 <real name="z" value="2"/>
-                <sizehint height="41.49254un" type="PREFERRED" width="43.8806un"/>
+                <sizehint height="41.49254un" type="PREFERRED" width="expr(var(hb-param-widget-dialog-width) )"/>
                 <layout orientation="Vertical" type="linear">
                     <contentsmargins bottom="var(hb-param-margin-gene-bottom)" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="var(hb-param-margin-gene-top)"/>
                     <linearitem itemname="scene_title"/>
@@ -62,6 +56,7 @@
                 <anchoritem dst="scene_view_bg_icon2" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
                 <anchoritem dst="scene_view_bg_icon2" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
                 <anchoritem dst="scene_view_bg_icon2" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="scene_view_container" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-top) )" src="" srcEdge="TOP"/>
                 <anchoritem dst="scene_view_container" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
                 <anchoritem dst="scene_view_container" dstEdge="BOTTOM" spacing="-var(hb-param-margin-gene-bottom)" src="" srcEdge="BOTTOM"/>
             </layout>

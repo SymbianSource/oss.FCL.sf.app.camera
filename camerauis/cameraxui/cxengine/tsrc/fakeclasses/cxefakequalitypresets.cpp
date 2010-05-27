@@ -47,9 +47,15 @@ QList<CxeVideoDetails> CxeFakeQualityPresets::videoQualityPresets(Cxe::CameraInd
     return list;
 }
 
-qreal CxeFakeQualityPresets::avgVideoBitRateScaler()
+int CxeFakeQualityPresets::recordingTimeAvailable(const CxeVideoDetails& details, qint64 space)
 {
-    return 1.0;
+    int time(0);
+    if (details.mMaximumSizeInBytes > 0 && details.mMaximumSizeInBytes < space) {
+        time = details.mMaximumSizeInBytes / 1000; // 1 kB/s
+    } else {
+        time = space / 1000;
+    }
+    return time;
 }
 
 CxeImageDetails CxeFakeQualityPresets::fakeImageDetails()

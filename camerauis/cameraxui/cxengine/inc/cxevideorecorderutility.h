@@ -18,36 +18,36 @@
 #define CXEVIDEORECORDERUTILITY_H_
 
 #include <QObject>
+#include <QString>
+#include <QSize>
 
-// interface class for usage of CVideoRecorderUtility
+/*!
+* Video Recorder Utility interface.
+*/
 class CxeVideoRecorderUtility
 {
 public:
 
     virtual ~CxeVideoRecorderUtility() {}
 
-    virtual TInt CustomCommandSync(const TMMFMessageDestinationPckg& aDestination,
-                           TInt aFunction,
-                           const TDesC8& aDataTo1,
-                           const TDesC8& aDataTo2) = 0;
-    virtual void OpenFileL(const TDesC& aFileName,
-					TInt aCameraHandle,
-					TUid aControllerUid,
-					TUid aVideoFormat,
-					const TDesC8& aVideoType = KNullDesC8,
-					TFourCC aAudioType = KMMFFourCCCodeNULL) = 0;
-    virtual void SetVideoFrameSizeL(TSize aSize) = 0;
-    virtual void SetVideoFrameRateL(TInt aRate) = 0;
-    virtual void SetVideoBitRateL(TInt aRate) = 0;
-    virtual void SetAudioEnabledL(TBool aEnable) = 0;
-    virtual void SetMaxClipSizeL(TInt aClipSizeInBytes) = 0;
-    virtual void Close() = 0;
-    virtual void Prepare() = 0;
-    virtual void Record() = 0;
-    virtual int Stop() = 0;
-    virtual void PauseL() = 0;
-    virtual TTimeIntervalMicroSeconds RecordTimeAvailable() = 0;
-    virtual TTimeIntervalMicroSeconds DurationL() = 0;
+    virtual void open(int cameraHandle,
+                      const QString &filename,
+                      const QString &fileMimeType,
+                      const QString &supplier,
+                      const QString &videoType,
+                      const QString &aAudioType) = 0;
+    virtual void setVideoFrameSize(const QSize& size) = 0;
+    virtual void setVideoFrameRate(int rate) = 0;
+    virtual void setVideoBitRate(int rate) = 0;
+    virtual void setAudioEnabled(bool enable) = 0;
+    virtual void setVideoMaxSize(int sizeInBytes) = 0;
+    virtual void close() = 0;
+    virtual void prepare() = 0;
+    virtual void record() = 0;
+    virtual void stop(bool asynchronous = false) = 0;
+    virtual void pause() = 0;
+    virtual int availableRecordingTime() = 0;
+    virtual int duration() = 0;
 
 protected:
     CxeVideoRecorderUtility() {}

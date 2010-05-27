@@ -14,19 +14,22 @@
 * Description:
 *
 */
+
+#include <algorithm>
+#include <exception>
 #include <QTime>
-#include <fbs.h>
 #include <QPixmap>
 #include <coemain.h>
 #include <QStringList>
-#include <AudioPreference.h>
 
+#include "cxeexception.h"
 #include "cxevideocapturecontrolsymbian.h"
 #include "cxevideorecorderutilitysymbian.h"
 #include "cxecameradevicecontrolsymbian.h"
 #include "cxefilenamegeneratorsymbian.h"
 #include "cxeerrormappingsymbian.h"
 #include "cxeviewfindercontrol.h"
+#include "cxesnapshotcontrol.h"
 #include "cxestillimagesymbian.h"
 #include "cxecameradevice.h"
 #include "cxutils.h"
@@ -47,26 +50,11 @@
 // constants
 namespace
 {
-    // Controller UId, can be used by the client to identify the controller, e.g. if the custom command can be used
-    const TUid KCamCControllerImplementationUid = {0x101F8503};
     // TMMFEvent UIDs for Async stop
     const TUid KCamCControllerCCVideoRecordStopped = {0x2000E546};
     const TUid KCamCControllerCCVideoFileComposed = {0x2000E547};
 
-    // Custom command for setting a new filename without closing & reopening the controller
-    enum TCamCControllerCustomCommands
-        {
-        ECamCControllerCCNewFilename = 0,
-        ECamCControllerCCVideoStopAsync
-        };
-
-    const TInt    KOneSecond                  = 1000000;
-    const int     KMaintainAspectRatio        = false;
     const TInt64  KMinRequiredSpaceVideo      = 4000000;
-    const uint    KOneMillion                 = 1000000;
-    const qreal   KMetaDataCoeff              = 1.03;      // Coefficient to estimate metadata amount
-    const uint    KCamCMaxClipDurationInSecs  = 5400;      // Maximun video clip duration in seconds
-    const qreal   KCMRAvgVideoBitRateScaler   = 0.9;       // avg video bit rate scaler
 }
 
 
@@ -76,6 +64,7 @@ namespace
 CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
     CxeCameraDevice &cameraDevice,
     CxeViewfinderControl &viewfinderControl,
+    CxeSnapshotControl &snapshotControl,
     CxeCameraDeviceControl &cameraDeviceControl,
     CxeFilenameGenerator &nameGenerator,
     CxeSettings &settings,
@@ -86,12 +75,14 @@ CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
       mCameraDevice(cameraDevice),
       mCameraDeviceControl(cameraDeviceControl),
       mViewfinderControl(viewfinderControl),
+      mSnapshotControl(snapshotControl),
       mFilenameGenerator(nameGenerator),
       mSettings(settings),
       mQualityPresets(qualityPresets),
       mDiskMonitor(diskMonitor),
       mSnapshot(),
-      mNewFileName(""),
+      mVideoStartSoundPlayer(NULL),
+      mVideoStopSoundPlayer(NULL),
       mCurrentFilename("")
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -118,22 +109,25 @@ CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
             this, SLOT(prepareForRelease()) );
     connect(&cameraDevice, SIGNAL(cameraAllocated(CxeError::Id)),
             this, SLOT(handleCameraAllocated(CxeError::Id)));
+
     // connect playing sound signals
     connect(mVideoStartSoundPlayer, SIGNAL(playComplete(int)),
             this, SLOT(handleSoundPlayed()));
 
+    // connect snapshot ready signal
+    connect(&mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&)),
+            this, SLOT(handleSnapshotReady(CxeError::Id, const QPixmap&)));
+
     // enabling setting change callbacks to videocapturecontrol
     connect(&mSettings, SIGNAL(settingValueChanged(const QString&,QVariant)),
             this, SLOT(handleSettingValueChanged(const QString&,QVariant)));
-
-    connect(&mSettings, SIGNAL(sceneChanged(CxeScene&)), this, SLOT(handleSceneChanged(CxeScene&)));
-
+    connect(&mSettings, SIGNAL(sceneChanged(CxeScene&)),
+            this, SLOT(handleSceneChanged(CxeScene&)));
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_M2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_OUT, "msg: e_CX_VIDEOCAPTURECONTROL_NEW 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * CxeVideoCaptureControlSymbian::~CxeVideoCaptureControlSymbian()
@@ -149,7 +143,6 @@ CxeVideoCaptureControlSymbian::~CxeVideoCaptureControlSymbian()
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Initializes resources for video recording.
@@ -168,10 +161,8 @@ void CxeVideoCaptureControlSymbian::init()
     }
 
     OstTrace0( camerax_performance, DUP1_CXEVIDEOCAPTURECONTROLSYMBIAN_INIT, "msg: e_CX_VIDEO_CAPCONT_INIT 0" );
-
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*
 * Releases all resources
@@ -180,38 +171,30 @@ void CxeVideoCaptureControlSymbian::deinit()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if(state() == Idle) {
-        // nothing to do
-        return;
+    // Nothing to do if already idle.
+    if(state() != Idle) {
+        OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_VIDEO_CAPCONT_DEINIT 1" );
+
+        // first stop viewfinder
+        mViewfinderControl.stop();
+
+        // stop video-recording in-case if its ongoing.
+        stop();
+
+        mSnapshotControl.stop();
+
+        if (mVideoRecorder) {
+            mVideoRecorder->close();
+        }
+
+        mCurrentFilename = QString("");
+
+        setState(Idle);
+
+        OstTrace0( camerax_performance, DUP1_CXEVIDEOCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_VIDEO_CAPCONT_DEINIT 0" );
     }
-
-    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_VIDEO_CAPCONT_DEINIT 1" );
-
-    // first stop viewfinder
-    mViewfinderControl.stop();
-
-    // stop video-recording in-case if its ongoing.
-    stop();
-
-    if (mCameraDevice.cameraSnapshot()) {
-        mCameraDevice.cameraSnapshot()->StopSnapshot();
-    }
-
-    if (mVideoRecorder) {
-        mVideoRecorder->Close();
-    }
-
-    // revert back the new filename to empty string so that we generate a new file name
-    // when we init again
-    mNewFileName = QString("");
-
-    setState(Idle);
-
-    OstTrace0( camerax_performance, DUP1_CXEVIDEOCAPTURECONTROLSYMBIAN_DEINIT, "msg: e_CX_VIDEO_CAPCONT_DEINIT 0" );
-
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Intializes VideoRecorder for recording.
@@ -220,51 +203,27 @@ void CxeVideoCaptureControlSymbian::initVideoRecorder()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (state() != Idle) {
-        // not valid state to start "open" operation
-        return;
-    }
+    // Init needed only in Idle state
+    if (state() == Idle) {
+        try {
+            // if video recorder is not created, do it now.
+            createVideoRecorder();
 
-    if(!mVideoRecorder) {
-        // if video recorder is not created, do it now.
-        createVideoRecorder();
-    }
+            // update current video quality details from icm.
+            // Throws an error if unable to get the quality.
+            getVideoQualityDetails(mCurrentVideoDetails);
 
-    // update current video quality details from icm
-    CxeError::Id err = getVideoQualityDetails(mCurrentVideoDetails);
-
-    if (!err) {
-        // read videofile mime type
-        QByteArray videoFileData =
-                    mCurrentVideoDetails.mVideoFileMimeType.toLatin1();
-        TPtrC8 videoFileMimeType(reinterpret_cast<const TUint8*>
-                           (videoFileData.constData()), videoFileData.size());
-
-        // read preferred supplier
-        TPtrC16 supplier(reinterpret_cast<const TUint16*>
-                           (mCurrentVideoDetails.mPreferredSupplier.utf16()));
-
-        err = findVideoController(videoFileMimeType, supplier);
-
-        if (!err) {
-            // video recorder is ready to open video file for recording.
+            // Video recorder is ready to open video file for recording.
             setState(Initialized);
             open();
+        } catch (const std::exception &e) {
+            // Handle error
+            handlePrepareFailed();
         }
-    } else {
-        err = CxeErrorHandlingSymbian::map(KErrNotReady);
-    }
-
-    if (err) {
-        // In case of error
-        emit videoPrepareComplete(err);
-        deinit();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
-
 
 /*!
 * Opens file for video recording.
@@ -273,91 +232,52 @@ void CxeVideoCaptureControlSymbian::open()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (state() != Initialized) {
-        // not valid state to start "open" operation
-        return;
-    }
+    // Check valid state to start "open" operation
+    if (state() == Initialized) {
+        try {
+            // generate video file name, if necessary
+            generateFilename();
+            CX_DEBUG(( "Next video file path: %s", mCurrentFilename.toAscii().constData() ));
 
-    CxeError::Id err = CxeError::None;
+            // Start preparing..
+            setState(CxeVideoCaptureControl::Preparing);
 
-    // generate video file name, if necessary
-    if (mNewFileName.isEmpty()) {
-        QStringList list = mCurrentVideoDetails.mVideoFileMimeType.split("/");
-        QString fileExt(".");
-        if (list.count() == 2) {
-            fileExt = fileExt + list[1];
+            // Exception thrown if open fails.
+            mVideoRecorder->open(mCameraDevice.camera()->Handle(),
+                                 mCurrentFilename,
+                                 mCurrentVideoDetails.mVideoFileMimeType,
+                                 mCurrentVideoDetails.mPreferredSupplier,
+                                 mCurrentVideoDetails.mVideoCodecMimeType,
+                                 mCurrentVideoDetails.mAudioType);
+        } catch (const std::exception &e) {
+            handlePrepareFailed();
         }
-        // Generate new filename and open the file for writing video data
-        err = mFilenameGenerator.generateFilename(mNewFileName, fileExt);
-        if (err == CxeError::None) {
-            mCurrentFilename = mNewFileName;
-        } else {
-            // file name is not valid, re-initialize the value of current string
-            // back to empty string
-            mCurrentFilename = QString("");
-        }
-    }
-
-    if (!err &&
-        mVideoRecorder &&
-        !mCurrentFilename.isEmpty()) {
-
-        TPtrC16 fName(reinterpret_cast<const TUint16*>(mCurrentFilename.utf16()));
-        CX_DEBUG(( "Next video file path: %s", mCurrentFilename.toAscii().constData() ));
-
-        // read video codec mime type
-        QByteArray videoCodecData =
-                    mCurrentVideoDetails.mVideoCodecMimeType.toLatin1();
-        TPtrC8 videoCodecMimeType(reinterpret_cast<const TUint8*>
-                           (videoCodecData.constData()), videoCodecData.size());
-
-        setState(CxeVideoCaptureControl::Preparing);
-
-        TRAPD(openErr, mVideoRecorder->OpenFileL(fName,
-                       mCameraDevice.camera()->Handle(),
-                       mVideoControllerUid,
-                       mVideoFormatUid,
-                       videoCodecMimeType,
-                       audioType(mCurrentVideoDetails.mAudioType)));
-
-        err = CxeErrorHandlingSymbian::map(openErr);
-    }
-    if (err) {
-        // error occured.
-        deinit();
-        emit videoPrepareComplete(err);
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
-* Prepare Video Recorder with necessary settings for video capture.
+* Helper method for generating filename.
+* Throws exception, if file type mime is formatted wrong or
+* filename generation fails.
 */
-TFourCC CxeVideoCaptureControlSymbian::audioType(const QString& str)
+void CxeVideoCaptureControlSymbian::generateFilename()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    mCurrentFilename = QString("");
 
-    QByteArray audioType = str.toAscii();
-
-    quint8 char1(' ');
-    quint8 char2(' ');
-    quint8 char3(' ');
-    quint8 char4(' ');
-
-    if (audioType.count() > 3) {
-        char1 = audioType[0];
-        char2 = audioType[1];
-        char3 = audioType[2];
-
-        if (audioType.count() == 4) {
-            char4 = audioType[3];
-        }
+    QStringList list = mCurrentVideoDetails.mVideoFileMimeType.split("/");
+    // Throw exception if mime string is formatted wrong.
+    if (list.count() != 2) {
+        throw new CxeException(CxeError::General);
     }
+    QString fileExt = "." + list[1];
 
-    return TFourCC(char1, char2, char3, char4);
+    // Generate new filename and open the file for writing video data
+    CxeException::throwIfError(mFilenameGenerator.generateFilename(mCurrentFilename, fileExt));
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Prepare Video Recorder with necessary settings for video capture.
@@ -371,13 +291,8 @@ void CxeVideoCaptureControlSymbian::prepare()
         return;
     }
 
-    CX_DEBUG(("Video resoulution (%d,%d)", mCurrentVideoDetails.mWidth,
-                                           mCurrentVideoDetails.mHeight));
-    CX_DEBUG(("Video bitrate = %d)", mCurrentVideoDetails.mVideoBitRate));
-
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_VIDCAPCONT_PREPARE 1");
-    TSize frameSize;
-    frameSize.SetSize(mCurrentVideoDetails.mWidth, mCurrentVideoDetails.mHeight);
+    QSize frameSize(mCurrentVideoDetails.mWidth, mCurrentVideoDetails.mHeight);
 
     int muteSetting = 0; // audio enabled
     mSettings.get(CxeSettingIds::VIDEO_MUTE_SETTING, muteSetting);
@@ -390,226 +305,64 @@ void CxeVideoCaptureControlSymbian::prepare()
         frameRate = mCurrentVideoDetails.mVideoFrameRate;
     }
 
+    CX_DEBUG(("Video resolution (%d,%d)", mCurrentVideoDetails.mWidth,
+                                           mCurrentVideoDetails.mHeight));
+    CX_DEBUG(("Video bitrate = %d)", mCurrentVideoDetails.mVideoBitRate));
     CX_DEBUG(("Video frame rate = %d)", frameRate));
 
-    TRAPD(err,
-              {
-              mVideoRecorder->SetVideoFrameSizeL(frameSize);
-              mVideoRecorder->SetVideoFrameRateL(frameRate);
-              mVideoRecorder->SetVideoBitRateL(mCurrentVideoDetails.mVideoBitRate);
-              mVideoRecorder->SetAudioEnabledL(muteSetting == 0);
-              // "No limit" value is handled in video recorder wrapper.
-              mVideoRecorder->SetMaxClipSizeL(mCurrentVideoDetails.mMaximumSizeInBytes);
-              }
-         );
+    try {
+        mVideoRecorder->setVideoFrameSize(frameSize);
+        mVideoRecorder->setVideoFrameRate(frameRate);
+        mVideoRecorder->setVideoBitRate(mCurrentVideoDetails.mVideoBitRate);
+        mVideoRecorder->setAudioEnabled(muteSetting == 0);
+        // "No limit" value is handled in video recorder wrapper.
+        mVideoRecorder->setVideoMaxSize(mCurrentVideoDetails.mMaximumSizeInBytes);
 
-    if (!err) {
-        // settings have been applied successfully, start to prepare
-        mVideoRecorder->Prepare();
-        // prepare snapshot
-        err = prepareVideoSnapshot();
-    }
+        // Settings have been applied successfully, start to prepare.
+        mVideoRecorder->prepare();
 
-    if (!err) {
-        // prepare zoom only when there are no errors during prepare.
+        // Prepare snapshot. Snapshot control throws error if problems.
+        QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
+                                mViewfinderControl.deviceDisplayResolution(),
+                                QSize(mCurrentVideoDetails.mWidth, mCurrentVideoDetails.mHeight));
+        mSnapshotControl.start(snapshotSize);
+
+        // Prepare zoom only when there are no errors during prepare.
         emit prepareZoomForVideo();
+        emit videoPrepareComplete(CxeError::None);
+    } catch (const std::exception &e) {
+        // Handle error.
+        handlePrepareFailed();
     }
-    // emit video prepare status
-    emit videoPrepareComplete(CxeErrorHandlingSymbian::map(err));
 
     OstTrace0(camerax_performance, DUP1_CXEVIDEOCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_VIDCAPCONT_PREPARE 0");
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-
 /*!
-Fetches video qualites details based on video quality setting.
-Returns CxeError codes if any.
+* Fetches video qualites details based on video quality setting.
 */
-CxeError::Id
+void
 CxeVideoCaptureControlSymbian::getVideoQualityDetails(CxeVideoDetails &videoInfo)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    int videoQuality = 0;
-    CxeError::Id err = CxeError::None;
+    int quality(0);
 
+    // Get quality index for primary camera. Only one quality for secondary camera.
     if (mCameraDeviceControl.cameraIndex() == Cxe::PrimaryCameraIndex) {
-        err = mSettings.get(CxeSettingIds::VIDEO_QUALITY, videoQuality);
-
-        bool validQuality = (videoQuality >= 0 &&
-                             videoQuality < mIcmSupportedVideoResolutions.count());
-        if (err == CxeError::None && validQuality) {
-            // get video quality details
-            videoInfo = mIcmSupportedVideoResolutions.at(videoQuality);
-        } else {
-            // not valid video quality
-            err = CxeError::NotFound;
-        }
-    } else {
-        // get secondary camera video quality index
-        if (mIcmSupportedVideoResolutions.count() > 0) {
-            videoInfo = mIcmSupportedVideoResolutions.at(videoQuality);
-        } else {
-            // not valid video quality
-            err = CxeError::NotFound;
-        }
+        CxeException::throwIfError(mSettings.get(CxeSettingIds::VIDEO_QUALITY, quality));
     }
 
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return err;
-}
-
-
-/**!
- Prepare snapshot
- Returns symbian error code.
- */
-int CxeVideoCaptureControlSymbian::prepareVideoSnapshot()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CCamera::CCameraSnapshot *cameraSnapshot = mCameraDevice.cameraSnapshot();
-    CX_ASSERT_ALWAYS(cameraSnapshot);
-
-    int err = KErrNone;
-    // Whether or not we have postcapture on, we need the snapshot for Thumbnail Manager.
-    if (cameraSnapshot) {
-        // Cancel active snapshot
-        cameraSnapshot->StopSnapshot();
-
-        // Prepare snapshot
-        CCamera::TFormat snapFormat = CCamera::EFormatFbsBitmapColor16MU;
-        TRAP(err, cameraSnapshot->PrepareSnapshotL(snapFormat,
-                                                   getSnapshotSize(),
-                                                   KMaintainAspectRatio));
-        CX_DEBUG(("PrepareSnapshotL done, err=%d", err));
-        // Start snapshot if no errors encountered.
-        if (err == KErrNone) {
-            CX_DEBUG(("Start video snapshot"));
-            cameraSnapshot->StartSnapshot();
-        }
-    } else {
-        // No snapshot interface available. Report error.
-        // Assert above takes care of this, but keeping this as an option.
-        err = KErrNotReady;
+    if (quality < 0 || quality >= mIcmSupportedVideoResolutions.count()) {
+       throw new CxeException(CxeError::NotFound);
     }
 
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return err;
-}
-
-
-
-/*!
-* Returns snapshot size. Snapshot size is calculated based on the
-* display resolution and current video aspect ratio.
-*/
-TSize CxeVideoCaptureControlSymbian::getSnapshotSize() const
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    TSize snapshotSize;
-
-    QSize deviceResolution = mViewfinderControl.deviceDisplayResolution();
-    QSize size = QSize(mCurrentVideoDetails.mWidth, mCurrentVideoDetails.mHeight);
-
-    // scale according to aspect ratio.
-    size.scale(deviceResolution.width(),
-               deviceResolution.height(),
-               Qt::KeepAspectRatio);
-    CX_DEBUG(("Video Snapshot size, (%d,%d)", size.width(), size.height()));
-    snapshotSize.SetSize(size.width(), deviceResolution.height());
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return snapshotSize;
-}
-
-
-
-/**!
-* Camera events coming from ecam.
-*/
-void CxeVideoCaptureControlSymbian::handleCameraEvent(int eventUid, int error)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    if (eventUid == KUidECamEventSnapshotUidValue) {
-        handleSnapshotEvent(CxeErrorHandlingSymbian::map(error));
-    }
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-
-/*!
-* Handle Snapshot event from ecam
-*/
-void CxeVideoCaptureControlSymbian::handleSnapshotEvent(CxeError::Id error)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (state() == Idle) {
-        // we ignore this event, when we are not in active state(s)
-        CX_DEBUG(( "wrong state, ignoring snapshot" ));
-        CX_DEBUG_EXIT_FUNCTION();
-        return;
-    }
-
-    if (error) {
-        mSnapshot = QPixmap();
-        emit snapshotReady(error, mSnapshot, filename());
-        return;
-    }
-
-    RArray<TInt> snapList;
-    MCameraBuffer* buffer(NULL);
-    // Note: Cleanup not required in this function
-    CFbsBitmap *snapshot = NULL;
-    TRAPD(snapErr,
-          buffer = &mCameraDevice.cameraSnapshot()->SnapshotDataL(snapList));
-    if (!snapErr) {
-        TInt firstImageIndex = snapList.Find(0);
-        snapList.Close();
-        TRAP(snapErr, snapshot = &(buffer->BitmapL(firstImageIndex)));
-    }
-    if (!snapErr) {
-        TSize size = snapshot->SizeInPixels();
-        TInt sizeInWords = size.iHeight * CFbsBitmap::ScanLineLength(size.iWidth, EColor16MU)
-                / sizeof(TUint32);
-
-        TUint32 *snapshotData = NULL;
-        snapshotData = new TUint32[sizeInWords];
-
-        if (snapshotData) {
-            // Convert to QImage
-            snapshot->LockHeap();
-            TUint32* dataPtr = snapshot->DataAddress();
-            memcpy(snapshotData, dataPtr, sizeof(TUint32) * sizeInWords);
-            snapshot->UnlockHeap();
-
-
-            QImage *img = new QImage((uchar*) snapshotData, size.iWidth, size.iHeight,
-                                   CFbsBitmap::ScanLineLength(size.iWidth, EColor16MU),
-                                   QImage::Format_RGB32);
-
-            mSnapshot = QPixmap::fromImage(*img);
-            delete [] snapshotData;
-            delete img;
-        }
-    }
-    if (buffer) {
-        buffer->Release();
-    }
-    // Snapshot ready
-    emit snapshotReady(CxeErrorHandlingSymbian::map(snapErr), mSnapshot, filename());
+    // get video quality details
+    videoInfo = mIcmSupportedVideoResolutions.at(quality);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Resets the video snapshot and current video filename
@@ -627,7 +380,6 @@ void CxeVideoCaptureControlSymbian::reset()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
 * Returns current video filename
 */
@@ -639,7 +391,6 @@ QString CxeVideoCaptureControlSymbian::filename() const
     return mCurrentFilename;
 }
 
-
 /*!
 * Returns current video snapshot
 */
@@ -647,7 +398,6 @@ QPixmap CxeVideoCaptureControlSymbian::snapshot() const
 {
     return mSnapshot;
 }
-
 
 /*!
 * Starts video recording if we are in appropriate state.
@@ -666,29 +416,22 @@ void CxeVideoCaptureControlSymbian::record()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
 * Pauses video recording.
 */
 void CxeVideoCaptureControlSymbian::pause()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    setState(CxeVideoCaptureControl::Paused);
-    TRAPD(pauseErr, mVideoRecorder->PauseL());
-    // play the sound, but not changing the state
-    mVideoStopSoundPlayer->play();
-    if (pauseErr) {
-        CX_DEBUG(("[WARNING] Error %d pausing!", pauseErr));
-        //pause operation failed, report it
-        emit videoComposed(CxeErrorHandlingSymbian::map(pauseErr), filename());
-        // release resources.
-        deinit();
+    try {
+        mVideoRecorder->pause();
+        setState(CxeVideoCaptureControl::Paused);
+        // play the sound, but not changing the state
+        mVideoStopSoundPlayer->play();
+    } catch (const std::exception &e) {
+        handleComposeFailed(qt_symbian_exception2Error(e));
     }
-
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Stops video recording.
@@ -701,34 +444,29 @@ void CxeVideoCaptureControlSymbian::stop()
         // first stop viewfinder
         mViewfinderControl.stop();
 
-        TInt asyncStopErr = mVideoRecorder->CustomCommandSync(
-            TMMFMessageDestination(KCamCControllerImplementationUid,
-                                   KMMFObjectHandleController),
-            ECamCControllerCCVideoStopAsync,
-            KNullDesC8,
-            KNullDesC8 );
-        CX_DEBUG(("ECamCControllerCCVideoStopAsync sent, err=%d", asyncStopErr));
-        if (asyncStopErr) { // fall back to synchronous stop
-            TInt syncStopErr = mVideoRecorder->Stop();
-            if (syncStopErr) {
-                // error during stop operation, release resources
-                emit videoComposed(CxeErrorHandlingSymbian::map(asyncStopErr), filename());
-                deinit();
-            } else {
-                // stop operation went fine, set back the state to Initialized.
-                setState(Initialized);
-                mFilenameGenerator.raiseCounterValue();
-            }
-        } else {
-            // No error from asynch stop custom command... wait for stop event
+        try {
+            // Try asynchronous stopping first.
+            mVideoRecorder->stop(true);
+            // No error from asynchronous stop -> wait for stop event
             setState(Stopping);
-            mFilenameGenerator.raiseCounterValue();
+        } catch (const std::exception &e) {
+            CX_DEBUG(("CxeVideoCaptureControlSymbian - async stop failed, try sync.."));
+            try {
+                mVideoRecorder->stop(false);
+                 // stop operation went fine, set back the state to Initialized.
+                setState(Initialized);
+                // must increment counter now since no callback is coming in sync stop
+                mFilenameGenerator.raiseCounterValue();
+            } catch (const std::exception &e) {
+                // Even synchronous stopping failed -> release resources.
+                CX_DEBUG(("CxeVideoCaptureControlSymbian - sync stop failed, too!"));
+                handleComposeFailed(qt_symbian_exception2Error(e));
+            }
         }
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Callback when "Open" operation is complete.
@@ -739,19 +477,15 @@ void CxeVideoCaptureControlSymbian::MvruoOpenComplete(TInt aError)
     CX_DEBUG(("CxeVideoCaptureControlSymbian::MvruoOpenComplete, err=%d", aError));
 
     if (state() == Preparing) {
-        if (aError != KErrNone) {
-            deinit();
-            CxeError::Id err = CxeErrorHandlingSymbian::map(KErrNotReady);
-            // report error to interested parties
-            emit videoPrepareComplete(CxeErrorHandlingSymbian::map(err));
-        } else {
+        if (!aError) {
             prepare();
+        } else {
+            handlePrepareFailed();
         }
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Callback when "Prepare" request is complete.
@@ -767,16 +501,12 @@ void CxeVideoCaptureControlSymbian::MvruoPrepareComplete(TInt aError)
             mViewfinderControl.start();
             OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_GOTOVIDEO, "msg: e_CX_GO_TO_VIDEO_MODE 0" );
         } else {
-            deinit();
-            // report error to interested parties
-            CxeError::Id err = CxeErrorHandlingSymbian::map(KErrNotReady);
-            emit videoPrepareComplete(CxeErrorHandlingSymbian::map(err));
+            handlePrepareFailed();
         }
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Callback when "Record" operation is complete.
@@ -799,13 +529,11 @@ void CxeVideoCaptureControlSymbian::MvruoRecordComplete(TInt aError)
     }
     else {
         // error during recording, report to client
-        deinit();
-        emit videoComposed(CxeErrorHandlingSymbian::map(aError), filename());
+        handleComposeFailed(aError);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Callback from MVideoRecorderUtilityObserver
@@ -824,96 +552,15 @@ void CxeVideoCaptureControlSymbian::MvruoEvent(const TMMFEvent& aEvent)
             // stop operation went fine, set back the state to intialized.
             setState(Initialized);
         }
+        mFilenameGenerator.raiseCounterValue();
         // video file has composed, everything went well, inform the client
         emit videoComposed(CxeError::None, filename());
-        // revert back the new filename to empty string, since recording
-        // is complete and we need to generate a new file name
-        mNewFileName = QString("");
     } else {
         CX_DEBUG(("ignoring unknown MvruoEvent 0x%08x", aEvent.iEventType.iUid ));
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
-
-/*!
-Get corresponding controller for video capture.
-@param aMimeType denotes videofile mimetype,
-@param aPreferredSupplier denotes supplier.
-Returns CxeError::Id if any.
-*/
-CxeError::Id
-CxeVideoCaptureControlSymbian::findVideoController(const TDesC8& aMimeType,
-                                                   const TDesC& aSupplier)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CX_DEBUG(("video file mime type : %s", &aMimeType));
-    CX_DEBUG(("supplier name: %s", &aSupplier));
-
-    mVideoControllerUid.iUid = 0;
-    mVideoFormatUid.iUid = 0;
-
-    // Retrieve a list of possible controllers from ECOM.
-    // Controller must support recording the requested mime type.
-    // Controller must be provided by preferred supplier.
-
-    CMMFControllerPluginSelectionParameters* cSelect(NULL);
-    CMMFFormatSelectionParameters* fSelect(NULL);
-    RMMFControllerImplInfoArray controllers;
-
-    TRAPD(err, cSelect = CMMFControllerPluginSelectionParameters::NewL());
-    if (err) {
-        return CxeErrorHandlingSymbian::map(err);
-    }
-
-    TRAP(err, fSelect = CMMFFormatSelectionParameters::NewL());
-    if (err) {
-        if(cSelect) {
-            delete cSelect;
-        }
-        return CxeErrorHandlingSymbian::map(err);
-    }
-
-    TRAP( err, {
-        fSelect->SetMatchToMimeTypeL(aMimeType);
-        cSelect->SetRequiredRecordFormatSupportL(*fSelect);
-        cSelect->SetPreferredSupplierL(aSupplier,
-                                       CMMFPluginSelectionParameters::EOnlyPreferredSupplierPluginsReturned);
-        cSelect->ListImplementationsL(controllers);
-    } );
-
-    if (!err && controllers.Count() >= 1) {
-        // KErrNotFound is returned unless a controller is found
-        err = KErrNotFound;
-        // Get the controller UID.
-        mVideoControllerUid = controllers[0]->Uid();
-
-        // Inquires the controller about supported formats.
-        // We use the first controller found having index 0.
-        RMMFFormatImplInfoArray formats;
-        formats = controllers[0]->RecordFormats();
-
-        // Get the first format that supports our mime type.
-        int count = formats.Count();
-        for (int i=0; i<count; i++) {
-            if (formats[i]->SupportsMimeType(aMimeType)) {
-                mVideoFormatUid = formats[i]->Uid(); // set the UID
-                err = KErrNone;
-                break;
-            }
-        }
-    }
-    delete cSelect;
-    delete fSelect;
-    controllers.ResetAndDestroy();
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return CxeErrorHandlingSymbian::map(err);
-}
-
 
 /*!
 * camera reference changing, release resources
@@ -935,19 +582,24 @@ void CxeVideoCaptureControlSymbian::prepareForRelease()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
-* new camera available,
+* new camera available
 */
 void CxeVideoCaptureControlSymbian::handleCameraAllocated(CxeError::Id error)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     if (!error) {
-        // initialize the video recorder utility
-        createVideoRecorder();
+        try {
+            // Create the video recorder utility
+            createVideoRecorder();
+        } catch (...) {
+            // We are just trying to create the recorder early.
+            // Retry later when preparing, and fail then if
+            // error still persists.
+        }
         // new camera available, read supported video qualities from icm
-        // load all still qualities supported by icm
+        // load all video qualities supported by icm
         mIcmSupportedVideoResolutions.clear();
         Cxe::CameraIndex cameraIndex = mCameraDeviceControl.cameraIndex();
         // get list of supported image qualities based on camera index
@@ -958,34 +610,21 @@ void CxeVideoCaptureControlSymbian::handleCameraAllocated(CxeError::Id error)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
 * Initializes video recorder.
+* May throw exception.
 */
 void CxeVideoCaptureControlSymbian::createVideoRecorder()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    // init video recoder
-    if (state() == CxeVideoCaptureControl::Idle) {
-        if (mVideoRecorder == NULL) {
-            TRAPD(initErr, mVideoRecorder =
-                new CxeVideoRecorderUtilitySymbian( *this ,
-                            KAudioPriorityVideoRecording,
-                            TMdaPriorityPreference( KAudioPrefVideoRecording )));
-            if (initErr) {
-                CX_DEBUG(("WARNING - VideoRecorderUtility could not be reserved. Failed with err:%d", initErr));
-                mVideoRecorder = NULL;
-            }
-        }
+    if (mVideoRecorder == NULL) {
+        mVideoRecorder = new CxeVideoRecorderUtilitySymbian(*this);
     }
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
-* releases resources used by videocapture
+* releases resources used by video capture control
 */
 void CxeVideoCaptureControlSymbian::releaseResources()
 {
@@ -1013,18 +652,16 @@ void CxeVideoCaptureControlSymbian::releaseResources()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
-Returns current state of videocapture
+* Returns current state of video capture control
 */
 CxeVideoCaptureControl::State CxeVideoCaptureControlSymbian::state() const
 {
     return static_cast<CxeVideoCaptureControl::State> (stateId());
 }
 
-
 /*!
-* slot called when state is changed.
+* Called when state is changed.
 */
 void CxeVideoCaptureControlSymbian::handleStateChanged(int newStateId, CxeError::Id error)
 {
@@ -1047,7 +684,6 @@ void CxeVideoCaptureControlSymbian::handleStateChanged(int newStateId, CxeError:
     emit stateChanged(static_cast<State> (newStateId), error);
 }
 
-
 /*!
 * Initialize states for videocapturecontrol
 */
@@ -1066,7 +702,6 @@ void CxeVideoCaptureControlSymbian::initializeStates()
     setInitialState(Idle);
 }
 
-
 /*!
 * Updates remaining video recordng time counter to all the video qualities supported by ICM
 * this should be done whenever storage location setting changes and when values are
@@ -1078,7 +713,7 @@ void CxeVideoCaptureControlSymbian::updateRemainingRecordingTimeCounter()
 
     for( int index = 0; index < mIcmSupportedVideoResolutions.count(); index++) {
         CxeVideoDetails &qualityDetails = mIcmSupportedVideoResolutions[index];
-        calculateRemainingTime(qualityDetails, qualityDetails.mRemainingTime);
+        qualityDetails.mRemainingTime = calculateRemainingTime(qualityDetails);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -1093,14 +728,12 @@ void CxeVideoCaptureControlSymbian::remainingTime(int &time)
 
     if (state() == CxeVideoCaptureControl::Recording ||
         state() == CxeVideoCaptureControl::Paused) {
-        TTimeIntervalMicroSeconds remaining = 0;
-        remaining = mVideoRecorder->RecordTimeAvailable();
-        time = remaining.Int64() * 1.0 / KOneSecond;
-        CX_DEBUG(( "timeRemaining2: %d", time ));
+        time = mVideoRecorder->availableRecordingTime();
+        CX_DEBUG(("CxeVideoCaptureControlSymbian - time remaining: %d", time));
     } else {
         // Check if we need to recalculate the remaining time.
         if (mCurrentVideoDetails.mRemainingTime == CxeVideoDetails::UNKNOWN) {
-            calculateRemainingTime(mCurrentVideoDetails, mCurrentVideoDetails.mRemainingTime);
+            mCurrentVideoDetails.mRemainingTime = calculateRemainingTime(mCurrentVideoDetails);
         }
         time = mCurrentVideoDetails.mRemainingTime;
     }
@@ -1108,99 +741,41 @@ void CxeVideoCaptureControlSymbian::remainingTime(int &time)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-
 /*!
-* algorithm to calculate remaining recording time
-@ param videoDetails contains the current video resolution that is in use.
-@ time contains the remaining recording time
+* Get the remaining recording time
+* @param videoDetails Contains the current video resolution that is in use.
+* @return The remaining recording time
 */
-void CxeVideoCaptureControlSymbian::calculateRemainingTime(CxeVideoDetails videoDetails, int &time)
+int CxeVideoCaptureControlSymbian::calculateRemainingTime(const CxeVideoDetails& videoDetails)
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    TTimeIntervalMicroSeconds remaining = 0;
-
-    // get available space in the drive selected in the settings
-    // for storing videos
-    qint64 availableSpace = mDiskMonitor.free();
-
-    availableSpace = availableSpace - KMinRequiredSpaceVideo;
-
-    // Maximum clip size may be limited for mms quality.
-    // If mMaximumSizeInBytes == 0, no limit is specified.
-    if (videoDetails.mMaximumSizeInBytes > 0 && videoDetails.mMaximumSizeInBytes < availableSpace) {
-        availableSpace = videoDetails.mMaximumSizeInBytes;
-    }
-
-    // Use average audio/video bitrates to estimate remaining time
-    quint32  averageBitRate = 0;
-    quint32  averageByteRate = 0;
-    qreal    scaler = mQualityPresets.avgVideoBitRateScaler();
-
-    if (scaler == 0) {
-        // video bit rate scaler is 0, use the constant value
-        scaler = KCMRAvgVideoBitRateScaler;
-    }
-
-    int avgVideoBitRate = (videoDetails.mVideoBitRate * scaler);
-    int avgAudioBitRate =  videoDetails.mAudioBitRate;
-
-    int muteSetting = 0; // audio enabled
-    mSettings.get(CxeSettingIds::VIDEO_MUTE_SETTING, muteSetting);
-
-    if (muteSetting == 1) {
-        // audio disabled from setting. hence no audio
-        avgAudioBitRate = 0;
-    }
-
-    averageBitRate = (quint32)(
-                     (avgVideoBitRate + avgAudioBitRate) * KMetaDataCoeff);
-
-    averageByteRate = averageBitRate / 8;
-
-    if (availableSpace <= 0) {
-        remaining = 0;
-    } else {
-        // converting microseconds to seconds
-        remaining = availableSpace * KOneMillion / averageByteRate;
-        if ( (remaining.Int64()) > (quint64(KCamCMaxClipDurationInSecs) * KOneMillion) ) {
-            remaining = (quint64(KCamCMaxClipDurationInSecs) * KOneMillion);
-        }
-    }
-    if ( remaining <= quint64(0) ) {
-        remaining = 0;
-    }
-
-    time = remaining.Int64() * 1.0 / KOneSecond;
-
-    CX_DEBUG(( "remaining time from algorithm: %d", time ));
-
+    qint64 availableSpace = mDiskMonitor.free() - KMinRequiredSpaceVideo;
+    int time = mQualityPresets.recordingTimeAvailable(videoDetails, availableSpace);
     CX_DEBUG_EXIT_FUNCTION();
+    return time;
 }
 
-
 /*!
-* Calculates remaining recording time during video recording
+* Calculates elapsed recording time during video recording
+* @return Did fetching elapsed time succeed.
 */
 bool CxeVideoCaptureControlSymbian::elapsedTime(int &time)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    TTimeIntervalMicroSeconds timeElapsed = 0;
     bool ok = false;
     if (state() == CxeVideoCaptureControl::Recording ||
         state() == CxeVideoCaptureControl::Paused) {
-        TRAPD( err, timeElapsed = mVideoRecorder->DurationL() );
-        if (!err) {
-            time = timeElapsed.Int64() * 1.0 / KOneSecond;
-            CX_DEBUG(("timeElapsed2: %d", time));
+        try {
+            time = mVideoRecorder->duration();
+            CX_DEBUG(("CxeVideoCaptureControlSymbian - elapsed: %d", time));
             ok = true;
+        } catch (const std::exception &e) {
+            // Returning false.
         }
     }
 
     CX_DEBUG_EXIT_FUNCTION();
-
     return ok;
 }
 
@@ -1214,8 +789,7 @@ void CxeVideoCaptureControlSymbian::handleSoundPlayed()
     // start recording, if we were playing capture sound
     if (state() == CxeVideoCaptureControl::PlayingStartSound) {
         setState(CxeVideoCaptureControl::Recording);
-
-        mVideoRecorder->Record();
+        mVideoRecorder->record();
     }
 
     // in case of video capture stop sound playing, nothing needs to be done
@@ -1224,6 +798,23 @@ void CxeVideoCaptureControlSymbian::handleSoundPlayed()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+* Handle new snapshot.
+* @param status Status code for getting the snapshot.
+* @param snapshot Snapshot pixmap. Empty if error code reported.
+*/
+void CxeVideoCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mCameraDeviceControl.mode() == Cxe::VideoMode) {
+        // Need to store snapshot for ui to be able to get it also later.
+        mSnapshot = snapshot;
+        emit snapshotReady(status, snapshot, filename());
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
 /*!
 * setting has changed, check if we are interested.
@@ -1247,7 +838,7 @@ void CxeVideoCaptureControlSymbian::handleSettingValueChanged(const QString& set
             // mute setting changed, apply the new setting and re-prepare.
             setState(Preparing);
             prepare();
-        } else if (settingId == CxeSettingIds::FRAME_RATE){
+        } else if (settingId == CxeSettingIds::FRAME_RATE) {
             // Frame rate setting changed. Need to re-prepare if we are prepared already.
             // Otherwise can wait for next init call.
             if (state() == Ready) {
@@ -1268,6 +859,7 @@ void CxeVideoCaptureControlSymbian::handleSettingValueChanged(const QString& set
  */
 void CxeVideoCaptureControlSymbian::handleSceneChanged(CxeScene& scene)
 {
+    Q_UNUSED(scene)
     CX_DEBUG_ENTER_FUNCTION();
 
     // make sure we are in video mode
@@ -1293,8 +885,7 @@ void CxeVideoCaptureControlSymbian::handleDiskSpaceChanged()
     // Ignore updates on preparing phase.
     if (state() == CxeVideoCaptureControl::Ready) {
 
-        int time(0);
-        calculateRemainingTime(mCurrentVideoDetails, time);
+        int time(calculateRemainingTime(mCurrentVideoDetails));
 
         if (time !=  mCurrentVideoDetails.mRemainingTime) {
             mCurrentVideoDetails.mRemainingTime = time;
@@ -1316,4 +907,32 @@ QList<CxeVideoDetails> CxeVideoCaptureControlSymbian::supportedVideoQualities()
     return mIcmSupportedVideoResolutions;
 }
 
+/*!
+* Helper method to handle error during preparing phase.
+*/
+void CxeVideoCaptureControlSymbian::handlePrepareFailed()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG(("[ERROR] Preparing video failed!"));
+    // Cleanup
+    deinit();
+    // Inform client
+    emit videoPrepareComplete(CxeError::InitializationFailed);
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Helper method to handle error from video composing.
+* @param error Symbian error code.
+*/
+void CxeVideoCaptureControlSymbian::handleComposeFailed(int error)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG(("[ERROR] Composing video failed!"));
+    // Inform client
+    emit videoComposed(CxeErrorHandlingSymbian::map(error), filename());
+    // Cleanup
+    deinit();
+    CX_DEBUG_EXIT_FUNCTION();
+}
 // End of file

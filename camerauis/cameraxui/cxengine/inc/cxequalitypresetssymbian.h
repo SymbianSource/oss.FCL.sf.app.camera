@@ -37,9 +37,10 @@ public:
     ~CxeQualityPresetsSymbian();
     QList<CxeImageDetails> imageQualityPresets(Cxe::CameraIndex cameraId);
     QList<CxeVideoDetails> videoQualityPresets(Cxe::CameraIndex cameraId);
-    qreal avgVideoBitRateScaler();
+    int recordingTimeAvailable(const CxeVideoDetails& details, qint64 space);
 
 private:
+    qreal avgVideoBitRateScaler();
     Cxe::AspectRatio calculateAspectRatio(int width, int height) const;
     QString toString(const TUint8* aData);
     CxeVideoDetails createVideoPreset(TVideoQualitySet set);

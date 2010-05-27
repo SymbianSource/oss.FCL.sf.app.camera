@@ -35,104 +35,86 @@ CxeFakeVideoRecorderUtility::CxeFakeVideoRecorderUtility(MVideoRecorderUtilityOb
                               : mObserver( &aObserver )
 {
     CX_DEBUG_IN_FUNCTION();
-    //return new (ELeave) CxeFakeVideoRecorderUtility(aObserver);
 }
 
-/*CxeVideoRecorderUtility* CxeFakeVideoRecorderUtility::NewL(MVideoRecorderUtilityObserver& aObserver,
-                              TInt aPriority,
-                              TMdaPriorityPreference aPref)
-{
-    CX_DEBUG_IN_FUNCTION();
-    return new (ELeave) CxeFakeVideoRecorderUtility(aObserver);
-}*/
-
-TInt CxeFakeVideoRecorderUtility::CustomCommandSync(const TMMFMessageDestinationPckg& aDestination,
-                       TInt aFunction,
-                       const TDesC8& aDataTo1,
-                       const TDesC8& aDataTo2)
-{
-    CX_DEBUG_IN_FUNCTION();
-    return KErrNone;
-}
-
-void CxeFakeVideoRecorderUtility::OpenFileL(const TDesC& aFileName,
-				TInt aCameraHandle,
-				TUid aControllerUid,
-				TUid aVideoFormat,
-				const TDesC8& aVideoType,
-				TFourCC aAudioType)
+void CxeFakeVideoRecorderUtility::open(int cameraHandle,
+                                       const QString &/*filename*/,
+                                       const QString &/*fileMimeType*/,
+                                       const QString &/*supplier*/,
+                                       const QString &/*videoType*/,
+                                       const QString &/*audioType*/)
 {
     CX_DEBUG_ENTER_FUNCTION();
     mObserver->MvruoOpenComplete(KErrNone);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::SetVideoFrameSizeL(TSize aSize)
+void CxeFakeVideoRecorderUtility::setVideoFrameSize(const QSize &/*size*/)
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::SetVideoFrameRateL(TInt aRate)
+void CxeFakeVideoRecorderUtility::setVideoFrameRate(int rate)
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::SetVideoBitRateL(TInt aRate)
+void CxeFakeVideoRecorderUtility::setVideoBitRate(int rate)
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::SetAudioEnabledL(TBool aEnable)
+void CxeFakeVideoRecorderUtility::setAudioEnabled(bool enabled)
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::SetMaxClipSizeL(TInt aClipSizeInBytes)
+void CxeFakeVideoRecorderUtility::setVideoMaxSize(int sizeInBytes)
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::Close()
+void CxeFakeVideoRecorderUtility::close()
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::Prepare()
+void CxeFakeVideoRecorderUtility::prepare()
 {
     CX_DEBUG_ENTER_FUNCTION();
     mObserver->MvruoPrepareComplete(KErrNone);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::Record()
+void CxeFakeVideoRecorderUtility::record()
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-int CxeFakeVideoRecorderUtility::Stop()
+void CxeFakeVideoRecorderUtility::stop(bool asynchronous)
 {
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_ENTER_FUNCTION();
     mObserver->MvruoRecordComplete(KErrNone);
-    return KErrNone;
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeFakeVideoRecorderUtility::PauseL()
+void CxeFakeVideoRecorderUtility::pause()
 {
     CX_DEBUG_IN_FUNCTION();
 }
 
-TTimeIntervalMicroSeconds CxeFakeVideoRecorderUtility::RecordTimeAvailable()
+int CxeFakeVideoRecorderUtility::availableRecordingTime()
 {
     CX_DEBUG_IN_FUNCTION();
     // 100 s
-    return TTimeIntervalMicroSeconds(100000000);
+    return 100;
 }
 
-TTimeIntervalMicroSeconds CxeFakeVideoRecorderUtility::DurationL()
+int CxeFakeVideoRecorderUtility::duration()
 {
     CX_DEBUG_IN_FUNCTION();
     // 10 s
-    return TTimeIntervalMicroSeconds(10000000);
+    return 10;
 }
 
 

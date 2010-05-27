@@ -92,9 +92,9 @@ namespace CxUiLayout
     static const char *STILL_PRE_CAPTURE_SELFTIMER_CANCEL_BUTTON = "still_selftimer_cancel_button";
 
     static const char *VIDEO_PRE_CAPTURE_VIEW = "video_capture_view";
-    
+
     static const char *SETTINGS_DIALOG_OK_ACTION = "action_ok";
-    
+
     // video
     // In order to be able to refer to a widget, we need to know its object name.
     static const char *VIDEO_PRE_CAPTURE_TOOLBAR = "video_toolbar";
@@ -112,6 +112,7 @@ namespace CxUiLayout
     static const char *VIDEO_PRE_CAPTURE_POST_CAPTURE_ACTION  = "cxui_video_action_showcapturedvideo";
     static const char *VIDEO_PRE_CAPTURE_INDICATOR_CONTAINER_TOP = "video_indicator_container_top";
     static const char *VIDEO_PRE_CAPTURE_INDICATOR_CONTAINER_BOTTOM = "video_indicator_container_bottom";
+    static const char *VIDEO_PRE_CAPTURE_SCENE_MODE_ACTION = "cxui_video_action_scene";
 
     static const char *VIDEO_PRE_CAPTURE_QUALITY_ICON = "video_quality_indicator";
 

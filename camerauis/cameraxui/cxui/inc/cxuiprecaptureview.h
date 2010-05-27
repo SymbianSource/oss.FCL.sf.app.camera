@@ -144,6 +144,7 @@ protected:
     void addIncreaseDecreaseButtons(CxuiZoomSlider *slider);
     QString getSettingItemIcon(const QString &key, QVariant value);
     void updateQualityIcon();
+    void updateSceneIcon(const QString& sceneId);
     void createWidgetBackgroundGraphic(HbWidget *widget,
                                        const QString &graphicName,
                                        HbFrameDrawer::FrameType frameType =
@@ -197,7 +198,7 @@ private:
     CxuiSettingSlider *mSettingsSlider;
 
     CxuiSettingsInfo *mSettingsInfo;
-    
+
     HbAction *mSettingsDialogOkAction;
     HbAction *mSliderSettingsDialogOkAction;
 };

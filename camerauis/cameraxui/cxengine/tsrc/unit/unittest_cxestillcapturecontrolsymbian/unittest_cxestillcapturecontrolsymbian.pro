@@ -68,6 +68,8 @@ SOURCES *= unittest_cxestillcapturecontrolsymbian.cpp \
     cxefilesavethread.cpp \
     cxediskmonitor.cpp \
     cxediskmonitorprivate.cpp \
+    cxesnapshotcontrol.cpp \
+    cxesnapshotcontrolprivate.cpp \
     cxefakefilesavethread.cpp
 
 HEADERS *= unittest_cxestillcapturecontrolsymbian.h \
@@ -116,4 +118,6 @@ HEADERS *= unittest_cxestillcapturecontrolsymbian.h \
     cxefilesavethread.h \
     cxediskmonitor.h \
     cxediskmonitorprivate.h \
+    cxesnapshotcontrol.h \
+    cxesnapshotcontrolprivate.h \
     cxequalitypresets.h
