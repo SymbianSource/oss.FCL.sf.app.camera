@@ -80,6 +80,8 @@
 #include "CamCallStateAo.h"    
 #include "CamPropertyWatcher.h"
 #include <avkondomainpskeys.h>
+#include <ProfileEngineInternalPSKeys.h>
+#include <ProfileEnginePrivatePSKeys.h>
 
 #ifndef __WINSCW__
   #include "rlocationtrail.h"
@@ -108,6 +110,8 @@
 #include "CamGSInterface.h"
 #include "CameraUiConfigManager.h"
 #include "camsnapshotrotator.h"
+#include "CamVideoPreCaptureView.h"
+
 #include <bitmaptransforms.h> 
 
 #ifdef _DEBUG
@@ -495,6 +499,12 @@ CCamAppController::~CCamAppController()
     delete iKeyLockStatusWatcher;
     }
   
+  if ( iProfileStatusWatcher )
+      {
+      iProfileStatusWatcher->Cancel();
+      delete iProfileStatusWatcher;
+      }
+  
   if ( iConfigManager  && iConfigManager->IsPublishZoomStateSupported() )
       {
       TRAP_IGNORE ( PublishZoomStateL( EFalse ) );
@@ -598,6 +608,13 @@ CCamAppController::~CCamAppController()
       }
 
   delete iSnapShotRotator;
+  
+  if( iTvAccessoryMonitor )
+      {
+      delete iTvAccessoryMonitor;
+      iTvAccessoryMonitor = NULL;
+      }
+  
   PRINT( _L("Camera <= ~CCamAppController") );
   }
 
@@ -1077,6 +1094,12 @@ void CCamAppController::SetOperation( TCamCaptureOperation aNewOperation,
       {      
       iInfo.iOperation = aNewOperation;
       NotifyControllerObservers( ECamEventOperationStateChanged, aError );
+      if( aNewOperation == ECamStandby )
+          {
+          ClearSequenceBusyFlag( &iBusyFlags );
+          TCamControllerInfo& info = const_cast<TCamControllerInfo&>( iCameraController->ControllerInfo() );
+          ClearFlags( info.iBusy , ECamBusySequence );
+          }
       }
 
   PRINT( _L("Camera <= CCamAppController::SetOperation") );
@@ -1223,7 +1246,7 @@ CCamAppController::RecordTimeRemaining()
             iInfo.iOperation == ECamResuming     ||
             iInfo.iOperation == ECamCompleting )
             {    
-            iVideoTimeRemaining = iCameraController->RemainingVideoRecordingTime();  
+            iVideoTimeRemaining = RemainingVideoRecordingTime();  
             }
         else 
             {
@@ -1236,6 +1259,7 @@ CCamAppController::RecordTimeRemaining()
             }
         }
    if ( ECamControllerVideo == CurrentMode() &&
+            iInfo.iOperation == ECamNoOperation && 
    	    ECamMediaStorageCard == IntegerSettingValue( ECamSettingItemVideoMediaStorage ) &&
    	    appUi->IsMemoryFullOrUnavailable( ECamMediaStorageCard ) )
         {
@@ -1722,22 +1746,6 @@ void CCamAppController::Capture()
        }
 
     PRINT1( _L("Camera <> Tried to start capture, status:%d"), capture ); 
-    if ( capture )
-      {
-      if( ECamActiveCameraPrimary == iInfo.iActiveCamera
-          && iConfigManager && iConfigManager->IsCaptureToneDelaySupported() )
-        {
-        // first cancel to make sure
-        iCaptureToneDelayTimer->Cancel();
-        // delay playing of capture tone
-        iCaptureToneDelayTimer->StartTimer();
-        }
-      else
-        {
-        // Play capture sound
-        PlaySound( CaptureToneId(), EFalse );
-        }
-      }
     }
   // -------------------------------------------------------
   // Not ready for a capture
@@ -1864,58 +1872,65 @@ void CCamAppController::StartVideoRecordingL()
   {
   PRINT( _L("Camera => CCamAppController::StartVideoRecordingL") );    
   __ASSERT_DEBUG( iCameraController, CamPanic( ECamPanicInvalidState ) );
-  if( ECamControllerVideo == iInfo.iMode )
-    {
-    if( !iVideoRequested
-     &&  ECamNoOperation == iInfo.iOperation )
+  if ( ECamControllerVideo == iInfo.iMode )
       {
-      iVideoRequested = ETrue;     
-      if( !iSilentProfile || iShutterSndAlwaysOn  )
-        	{
-        	// Load (and play) the start video sound	
-        	PlaySound( ECamVideoStartSoundId , ETrue );  
-        	}   
-  
-      // initialise the array accessing values
-      iArrayUsageCount   = KVideoArrayUsers;
-      iCurrentImageIndex = 0;
-  
-      if( ECamMediaStorageCard == 
-              IntegerSettingValue( ECamSettingItemVideoMediaStorage ) )
-        {
-        TRAPD( err, ReserveFileNamesL( iInfo.iMode, ECamImageCaptureNone ) );
-        if ( err )
+      CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );  
+      if ( IntegerSettingValue( ECamSettingItemStopRecordingInHdmiMode) &&
+               IsHdmiCableConnected() )
           {
-          PRINT( _L("Camera <> invalid MMC") );        
-          NotifyControllerObservers( ECamEventInvalidMemoryCard );
-  
-          // If we have got here, we can't access MMC. Switch to phone memory
-          TRAP_IGNORE( ForceUsePhoneMemoryL() ); //with multiple drive support, 
-                                                 //this actually uses the internal mass memory
-          // Ignore for now, let fail when recording.
-          TRAP_IGNORE( ReserveFileNamesL( iInfo.iMode, ECamImageCaptureNone, ETrue ) );
+          appUi->HandleHdmiEventL( ECamHdmiCableConnectedBeforeRecording );
+          return;
           }
-        }
-      else
-        {
-        // Ignore for now, let fail when recording.
-        TRAP_IGNORE( ReserveFileNamesL( iInfo.iMode, ECamImageCaptureNone ) );
-        }
+      if ( !iVideoRequested
+              &&  ECamNoOperation == iInfo.iOperation )
+          {
+          iVideoRequested = ETrue;     
+      if( !iSilentProfile || iShutterSndAlwaysOn  )
+          {
+          // Load (and play) the start video sound	
+          PlaySound( ECamVideoStartSoundId , ETrue );  
+          }   
+  
+          // initialise the array accessing values
+          iArrayUsageCount   = KVideoArrayUsers;
+          iCurrentImageIndex = 0;
+  
+          if ( ECamMediaStorageCard == 
+                   IntegerSettingValue( ECamSettingItemVideoMediaStorage ) )
+              {
+              TRAPD( err, ReserveFileNamesL( iInfo.iMode, ECamImageCaptureNone ) );
+              if ( err )
+                  {
+                  PRINT( _L("Camera <> invalid MMC") );        
+                  NotifyControllerObservers( ECamEventInvalidMemoryCard );
+  
+                  // If we have got here, we can't access MMC. Switch to phone memory
+                  TRAP_IGNORE( ForceUsePhoneMemoryL() ); //with multiple drive support, 
+                                                         //this actually uses the internal mass memory
+                  // Ignore for now, let fail when recording.
+                  TRAP_IGNORE( ReserveFileNamesL( iInfo.iMode, ECamImageCaptureNone, ETrue ) );
+                  }
+              }
+          else
+              {
+              // Ignore for now, let fail when recording.
+              TRAP_IGNORE( ReserveFileNamesL( iInfo.iMode, ECamImageCaptureNone ) );
+              }
 
-        if( iSilentProfile && !iShutterSndAlwaysOn )
-        	{
-        	PlaySoundComplete();
-        	}
-      // Remember where are we recording
-      iInitialVideoStorageLocation = static_cast<TCamMediaStorage>( 
-                    IntegerSettingValue( ECamSettingItemVideoMediaStorage ) );
+          if( iSilentProfile && !iShutterSndAlwaysOn )
+              {
+              PlaySoundComplete();
+              }
+          // Remember where are we recording
+          iInitialVideoStorageLocation = static_cast<TCamMediaStorage>( 
+               IntegerSettingValue( ECamSettingItemVideoMediaStorage ) );
+          }
+      else
+          {
+          // Video already requested or other operation busy.
+          // Request ignored.
+          }
       }
-    else
-      {
-      // Video already requested or other operation busy.
-      // Request ignored.
-      }
-    }
   // Note: The code to actually START video recording has been moved
   // to the PlaySoundComplete function so as to only start when
   // sound playback has completed.
@@ -2231,7 +2246,8 @@ void CCamAppController::CancelFocusAndCapture()
    && ECamCompleting  != CurrentOperation() )
     {  
     // If we are currently focused, cancel autofocus
-    if ( IsViewFinding() && CurrentOperation() != ECamCapturing ) // Cannot do AF operations if VF not on. AF is anyway cancelled on VF start event.
+    if ( IsViewFinding() && CurrentOperation() != ECamCapturing &&  // Cannot do AF operations if VF not on. AF is anyway cancelled on VF start event.
+        iCurrentAFRequest != ECamRequestCancelAutofocus ) // Don't cancel twice
       {
       if( ECamFocusing == CurrentOperation() )
         {
@@ -2494,6 +2510,9 @@ void CCamAppController::SwitchCameraL()
     PRINT ( _L("Camera <> Photo quality index:                  ") );
     PRINT1( _L("Camera <> Before loading 2nd cam settings: %d   "), IntegerSettingValue( ECamSettingItemPhotoQuality ) );
 #endif
+    
+    // Scene mode is forced to Automatic while secondary camera is in use.
+    iSceneModeForcedBySecondaryCamera = ETrue;
 
     LoadSecondaryCameraSettingsL();
   
@@ -2523,6 +2542,9 @@ void CCamAppController::SwitchCameraL()
         {
         PRINT( _L("Camera <> switch to 1st cam") )
         targetCamera = ECamActiveCameraPrimary;
+        
+        // Primary camera will use its previously selected scene mode after camera switch.
+        iSceneModeForcedBySecondaryCamera = EFalse;
         }
     else
         {
@@ -3408,6 +3430,22 @@ CCamAppController::IntSettingChangedL( TCamSettingItemIds aSettingItem,
         CCamSettingConversion::Map2CameraControllerSettingId( aSettingItem ) );
       iCameraController->DirectSettingsChangeL( cameraId );
       NotifyControllerObservers( ECamEventFaceTrackingStateChanged );
+      
+      // If Face tracking was turned off by user (not forced off by a scene mode)
+      // update iPreviousFaceTrack to the current state as we are not going to
+      // reset to the previous state automatically at any point.
+      TCamSceneId scene = static_cast< TCamSceneId > 
+          ( IntegerSettingValue( ECamSettingItemDynamicPhotoScene ) );
+      
+      if ( scene != ECamSceneMacro &&
+           scene != ECamSceneScenery &&
+           scene != ECamSceneSports && 
+           !iSceneModeForcedBySecondaryCamera )
+          {
+          PRINT1( _L("Camera MK: Changing face tracking state -> update iPreviousFaceTrack to %d"), aSettingValue );
+          iSettingsModel->SetPreviousFaceTrack( static_cast<TCamSettingsOnOff>( aSettingValue ) );
+          }
+      
       break;
       }  
     case ECamSettingItemDynamicVideoFlash:  
@@ -4496,7 +4534,7 @@ void CCamAppController::SetPathnamesToNewStorageL( TCamMediaStorage aMediaStorag
           iInfo.iOperation == ECamResuming     ||
           iInfo.iOperation == ECamCompleting )
         {          
-        iVideoTimeRemaining = iCameraController->RemainingVideoRecordingTime();  
+        iVideoTimeRemaining = RemainingVideoRecordingTime();  
         }
       else 
         {
@@ -4724,6 +4762,7 @@ CCamAppController::CCamAppController()
   , iRamDiskCriticalLevel( KErrNotFound )
   , iImageOrientation( ECamOrientation0 )
   , iLastImageOrientation( ECamOrientation0 )
+  , iPendingHdmiEvent( ECamHdmiNoEvent )
   {
   }
 
@@ -4825,6 +4864,14 @@ void CCamAppController::ConstructL()
       // request notifications about key lock status
       iKeyLockStatusWatcher->Subscribe();     
       }
+  
+  iProfileStatusWatcher = CCamPropertyWatcher::NewL( *this,
+                                                     KPSUidProfileEngine,
+                                                     KProEngActiveProfileChanged );
+  // request notifications about profile status
+  iProfileStatusWatcher->Subscribe();    
+  IsProfileSilent();
+  
   // read central repository value indicating whether camera shutter sound
   // should be played always or depending on the current profile setting
   CRepository* cr = CRepository::NewLC( KCRUidCamcorderFeatures );
@@ -4887,7 +4934,10 @@ void CCamAppController::ConstructL()
 
   User::LeaveIfError( iFs.Connect() ); 
   iDriveChangeNotifier = CCamDriveChangeNotifier::NewL( iFs, *this ); 
-
+  
+  iTvAccessoryMonitor = CCamTvAccessoryMonitor::NewL( this );
+  iTvAccessoryMonitor->StartListeningL();
+  
   PRINT( _L("Camera <= CCamAppController::ConstructL"));
   }
 
@@ -7908,7 +7958,12 @@ void CCamAppController::HandlePropertyChangedL( const TUid& aCategory, const TUi
                   }
               }
           }
-
+      
+      if ( aCategory == KPSUidProfileEngine && aKey == KProEngActiveProfileChanged )
+          {
+          PRINT( _L("Camera <> aCategory == KCRUidProfileEngine && aKey == KProEngActiveWarningTones") );
+          IsProfileSilent();
+          }
 
 #endif // !( defined(__WINS__) || defined(__WINSCW__        
 
@@ -8340,11 +8395,21 @@ void CCamAppController::HandleObservedEvent( TCamObserverEvent aEvent )
 //  
 TBool CCamAppController::IsProfileSilent()
     {
-    TRAPD( ignore, iSilentProfile = IsProfileSilentL() );
-    if ( ignore )
+    if ( !iShutterSndAlwaysOn )
         {
+        TRAPD( ignore, iSilentProfile = IsProfileSilentL() );
+        if ( ignore )
+            {
+            // If reading the warning tone (= camera tones) value fails
+            // we set tones off by default
+            iSilentProfile = ETrue;
+            }
+        return iSilentProfile;
         }
-    return iSilentProfile;
+    else
+        {
+        return EFalse;
+        }
     }
 
 
@@ -8356,21 +8421,21 @@ TBool CCamAppController::IsProfileSilent()
 //  
 TBool CCamAppController::IsProfileSilentL()
     {
-    // get current keypad volume as indication of whether
+    // If camera tones have been set off from settings, return true here 
+    if ( iSettingsModel->IntegerSettingValue( ECamSettingItemPhotoCaptureTone )
+                == ECamSettToneOff )
+        {
+        return ETrue;
+        }
+    
+    // Get current keypad volume as an indication of whether
     // or not we have a silent profile
     CRepository* cr = CRepository::NewLC( KCRUidProfileEngine );
     TInt value;
     User::LeaveIfError( cr->Get( KProEngActiveWarningTones, value ) );
+    PRINT1(_L("Camera <> CCamAppController::IsProfileSilentL() value = %d"), value)
     CleanupStack::PopAndDestroy( cr );
     
-    //In case the phone variant allows turning camera tones off,
-    // first check if that is the case here.
-    if ( iSettingsModel->IntegerSettingValue( ECamSettingItemPhotoCaptureTone )
-            == ECamSettToneOff )
-        {
-        return ETrue;
-        }
-
     return ( value == 0 );
     }
 
@@ -9159,7 +9224,13 @@ CCamAppController
             return;
             }
       break;
-      }  
+      }
+    //Image capture event  
+    case ECamCameraEventImageCaptureEvent:
+      {
+      PlaySound( CaptureToneId(), EFalse );
+      }
+      break;  
     default:
       break;
     }
@@ -10771,12 +10842,13 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
                       }
                   }
               }
-          else if ( aType == EDriveUSBMassStorageModeOn )
+          else if ( aType == EDriveUSBMassStorageModeOn &&
+                  appUi->IsRecoverableStatus() )
               {
               SwitchToStandbyL(ECamErrMassStorageMode);
-
               }
-          else if ( aType == EDriveUSBMassStorageModeOff )
+          else if ( aType == EDriveUSBMassStorageModeOff &&
+                  !appUi->IsRecoverableStatus() )
               {
               SwitchToStandbyL( KErrNone );
               }
@@ -11363,6 +11435,151 @@ void CCamAppController::SnapshotRotationComplete()
     PRINT( _L( "Camera <= CCamAppController::SnapshotRotationComplete" ) );    
     }
 
- 
+// ---------------------------------------------------------------------------
+// CCamAppController::HandleTvAccessoryConnectedL
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::HandleTvAccessoryConnectedL()
+    {
+    PRINT(_L("Camera => CCamAppController::HandleTvAccessoryConnectedL "));
+    if( IntegerSettingValue( ECamSettingItemStopRecordingInHdmiMode) 
+            && IsHdmiCableConnected() )
+        {
+        if( ECamCapturing == iInfo.iOperation || 
+            ECamPaused == iInfo.iOperation )
+            {
+            CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+            iHdmiCableConnectedDuringRecording = ETrue;
+            TVwsViewId activeView;
+            if ( appUi->GetActiveViewId( activeView ) == KErrNone )
+              {
+              if( ECamViewIdVideoPreCapture == activeView.iViewUid.iUid  )
+                  {
+                  CCamVideoPreCaptureView* view = static_cast<CCamVideoPreCaptureView*>( appUi->View( activeView.iViewUid ) );
+                  view->HandleCommandL( ECamCmdStop );
+                  }
+              }
+            }
+        }
+    PRINT(_L("Camera <= CCamAppController::HandleTvAccessoryConnectedL "));
+    }
+
+// ---------------------------------------------------------------------------
+// CCamAppController::HandleTvAccessoryConnectedL
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::HandleTvAccessoryDisconnectedL()
+    {
+    
+    }
+
+// ---------------------------------------------------------------------------
+// CCamAppController::IsHdmiCableConnected
+// 
+// ---------------------------------------------------------------------------
+//
+TBool CCamAppController::IsHdmiCableConnected()
+    {
+    return iTvAccessoryMonitor->IsHdmiCableConnected();
+    }
+//  End of File  
+
+
+// ---------------------------------------------------------------------------
+// CCamAppController::RemainingVideoRecordingTime
+// 
+// ---------------------------------------------------------------------------
+//
+TTimeIntervalMicroSeconds CCamAppController::RemainingVideoRecordingTime()
+    {
+    return iCameraController->RemainingVideoRecordingTime();
+    }
+
+// ---------------------------------------------------------------------------
+// CCamAppController::HandlePostHdmiConnectDuringRecordingEventL
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::HandlePostHdmiConnectDuringRecordingEventL()
+    {
+    if( iHdmiCableConnectedDuringRecording == TBool(ETrue) )
+        {
+        iHdmiCableConnectedDuringRecording = EFalse;
+        CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+        appUi->HandleHdmiEventL( ECamHdmiCableConnectedDuringRecording );
+        }  
+    }
+
+
+// ---------------------------------------------------------------------------
+// CCamAppController::SetPendingHdmiEvent
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::SetPendingHdmiEvent( TCamHdmiEvent aPendingHdmiEvent )
+    {
+    iPendingHdmiEvent = aPendingHdmiEvent;
+    }
+
+
+// ---------------------------------------------------------------------------
+// CCamAppController::HandlePendingHdmiEvent
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::HandlePendingHdmiEvent()
+    {
+    if( iPendingHdmiEvent != ECamHdmiNoEvent )
+        {
+        CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+        appUi->HandleHdmiEventL( iPendingHdmiEvent );
+        iPendingHdmiEvent = ECamHdmiNoEvent;
+        }
+    }
+
+    
+// ---------------------------------------------------------------------------
+// CCamAppController::HandleSecondaryCameraExit
+// 
+// Place here any extra things that need to be done when
+// exiting camera app. in secondary camera mode
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::HandleSecondaryCameraExitL()
+    {
+    PRINT( _L( "Camera => CCamAppController::HandleSecondaryCameraExit" ) );          
+    
+    // Scene mode and face tracking issues --->
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );  
+    // Do a switch to primary camera.
+    appUi->HandleCommandL( ECamCmdSwitchCamera );
+    // Set correct settings for primary camera.
+    SetDynamicSettingsToDefaults();
+    // Check if "User" scene mode should be on.
+    iSettingsModel->SetUserSceneDefault();
+    // PhotoSceneHasChangedL() needs to be called to 
+    // get also face tracking to the correct state.
+    iSettingsModel->PhotoSceneHasChangedL( IntegerSettingValue( ECamSettingItemDynamicPhotoScene ) );
+    // StoreFaceTrackingValue() does nothing in 2ndary camera mode.
+    // (Because scene mode is forced to Auto while in 2ndary camera.)
+    // -> Always save face tracking state when exiting from 2ndary cam.
+    SetIntegerSettingValueL( ECamSettingItemFaceTracking, iSettingsModel->GetPreviousFaceTrack() );   
+    // <--- Scene mode and face tracking issues
+    
+    PRINT( _L( "Camera <= CCamAppController::HandleSecondaryCameraExit" ) );    
+    }    
+
+// ---------------------------------------------------------------------------
+// CCamAppController::SceneModeForcedBySecondaryCamera
+// 
+// ---------------------------------------------------------------------------
+//    
+TBool CCamAppController::SceneModeForcedBySecondaryCamera()
+    {
+    return iSceneModeForcedBySecondaryCamera;
+    }
+	
 //  End of File  
 

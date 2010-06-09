@@ -1731,6 +1731,11 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
      case ECamCmdSwitchCamera:
          {
          PRINT( _L("Camera => CCamAppUi::HandleCommandL ECamCmdSwitchCamera" ))
+         
+         // By now it safe to assume that we are no longer returning from a pretended exit.
+         PRINT( _L("Camera <> Set iReturningFromPretendExit = EFalse") )
+         iReturningFromPretendExit = EFalse;
+         
          //If modechange sequence going on ignore switching...
          if( iController.CaptureModeTransitionInProgress() ||
              iController.CaptureState() != ECamCaptureOff || 
@@ -3394,6 +3399,7 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
           //so we need to display toolbar when keylock is set to off and camera gain focus again.
           if ( ECamViewStatePreCapture == iViewState &&
                ECamPreCapViewfinder == iPreCaptureMode && 
+               ( !( iSelfTimer && iSelfTimer->IsActive() ) ) &&
                iController.CurrentOperation() != ECamCapturing )  
             {
             SetToolbarVisibility(); 
@@ -3791,7 +3797,7 @@ CCamAppUi::TrySwitchViewL( TBool aDeactivateFirst )
   //In those cases view switching is not needed unless current mode also changes.
   if( (iViewState==iTargetViewState) && ( iViewState==ECamViewStatePostCapture) && (iMode==iTargetMode) )
       {
-      PRINT(_L("Camera <> CCamAppUi::TrySwitchViewL, CALLED WITHOUT PURPOSE"));      
+      PRINT(_L("Camera <= CCamAppUi::TrySwitchViewL, CALLED WITHOUT PURPOSE"));      
       return;
       }  
   
@@ -3830,7 +3836,7 @@ CCamAppUi::TrySwitchViewL( TBool aDeactivateFirst )
   // If keylock is enabled, view switching is allowed in order to avoid 
   // flickering
   
-  if ( AppInBackground( ETrue ) && ECamViewStateStandby != iTargetViewState )  
+  if ( iPretendExit || ( AppInBackground( ETrue ) && ECamViewStateStandby != iTargetViewState ) )  
     {          
     PRINT( _L("Camera <> app in background set pending view switch") )
     if ( aDeactivateFirst )
@@ -4487,7 +4493,7 @@ CCamAppUi::CheckMemoryL()
 			if(currentLocation != ECamMediaStorageCard && 
 				!IsMemoryFullOrUnavailable(ECamMediaStorageCard))
 				{
-				supportedMemTypes |= AknCommonDialogsDynMem::EMemoryTypeMMCExternal;
+				supportedMemTypes |= AknCommonDialogsDynMem::EMemoryTypeMMCExternalInDevice;
 				}
 			if(currentLocation != ECamMediaStorageMassStorage && 
 				!IsMemoryFullOrUnavailable(ECamMediaStorageMassStorage))
@@ -5012,6 +5018,14 @@ CCamAppUi::StartCaptureL( const TKeyEvent& /*aKeyEvent*/ )
             PRINT( _L("Camera <= CCamAppUi::StartCaptureL, video no memory") );
             return EKeyWasNotConsumed;
             }
+        else if( iController.IntegerSettingValue( ECamSettingItemStopRecordingInHdmiMode) &&
+                iController.IsHdmiCableConnected() )
+            {
+            iController.SetPendingHdmiEvent( ECamHdmiCableConnectedBeforeRecording );
+            PRINT( _L("Camera <= CCamAppUi::StartCaptureL, HDMI Cable connected") );
+            return EKeyWasNotConsumed;
+            }
+        
         PERF_EVENT_END_L1( EPerfEventKeyToCapture );
         PERF_EVENT_START_L1( EPerfEventStartVideoRecording );    
         static_cast<CCamViewBase*>( iView )->UnsetCourtesySoftKeysL();
@@ -5193,7 +5207,19 @@ void CCamAppUi::CloseAppL()
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, CCAMAPPUI_CLOSEAPPL, "e_CCamAppUi_CloseAppL 1" );
     
     PRINT( _L("Camera => CCamAppUi::CloseAppL") )
-
+    
+    // Special considerations needed for secondary camera
+    // regarding scene mode and face tracking state
+    if ( IsSecondCameraEnabled() && !IsEmbedded() )
+        {
+        // This includes storing the face tracking value
+        iController.HandleSecondaryCameraExitL();
+        }
+    else
+        {
+        iController.StoreFaceTrackingValue(); // store the current FT setting
+        }
+    
     // cancel the self timer if active - can be active
     // if closing the slide while counting down
     if ( iInSelfTimerMode != ECamSelfTimerDisabled )
@@ -5398,6 +5424,9 @@ void CCamAppUi::InternalExitL()
                     {
                     SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_EXIT__CAPTURE_SECONDARY );      
                     }
+                // Special considerations needed for secondary camera
+                // regarding scene mode and face tracking state
+                iController.HandleSecondaryCameraExitL();
                 }
               }
             }
@@ -8480,9 +8509,21 @@ CCamAppUi::IsMemoryFullOrUnavailable(const TCamMediaStorage
 	else if(iMode == ECamControllerVideo)
 		{
 		TTimeIntervalMicroSeconds timeLeft = 0;
-		TRAPD(err,timeLeft =
-					iController.
-					CalculateVideoTimeRemainingL(aStorageLocation););
+		
+		TInt err(KErrNone);
+		if( iController.CurrentOperation() == ECamNoOperation )
+		    {
+            TRAP(err,timeLeft =
+                    iController.
+                    CalculateVideoTimeRemainingL(aStorageLocation) );
+            }
+		else
+		    {
+            TRAP(err,timeLeft =
+                    iController.
+                    RemainingVideoRecordingTime() );
+            }
+		
 		if(err)
 		    timeLeft = 0;
 		return (timeLeft < KMemoryFullVideoRemaining);
@@ -8836,6 +8877,36 @@ void CCamAppUi::HandleServerAppExit(TInt aReason)
     PRINT(_L("Camera <= CCamAppUi::HandleServerAppExit."));
     }
 
-
+// -----------------------------------------------------------------------------
+// CCamAppUi::HandleHdmiEventL 
+// -----------------------------------------------------------------------------
+//
+void CCamAppUi::HandleHdmiEventL( TCamHdmiEvent aEvent )
+    {
+    HBufC* noteString = NULL;
+    CAknWarningNote* note = NULL;
+    switch( aEvent )
+        {
+        case ECamHdmiCableConnectedBeforeRecording:
+            {
+            noteString = StringLoader::LoadLC( R_QTN_LCAM_HDMI_REMOVE_CABLE );
+            note = new (ELeave) CAknWarningNote();
+            note->ExecuteLD( *noteString );
+            CleanupStack::PopAndDestroy( noteString );
+            }
+            break;
+        case ECamHdmiCableConnectedDuringRecording:
+            {
+            noteString = StringLoader::LoadLC( R_QTN_LCAM_HDMI_CABLE_DETECTED );
+            note = new (ELeave) CAknWarningNote();
+            note->ExecuteLD( *noteString );
+            CleanupStack::PopAndDestroy( noteString );
+            }
+            break;
+        default:
+            break;
+        }
+    
+    }
 
 //  End of File

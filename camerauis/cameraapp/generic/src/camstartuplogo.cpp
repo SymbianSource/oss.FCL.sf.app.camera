@@ -24,6 +24,7 @@
 #include "camstartuplogo.h"
 
 _LIT(KCamBitmapFile, "z:\\resource\\apps\\cameraapp.mif");
+const TInt KStartupLogoOrdinalPriority( 2 );
 
 // ---------------------------------------------------------------------------
 // Two-phased constructor
@@ -158,7 +159,7 @@ void CCamStartupLogo::ShowL()
     RDrawableWindow* window = DrawableWindow();
     if (window)
         {
-        window->SetOrdinalPosition(0);
+        window->SetOrdinalPosition(0, KStartupLogoOrdinalPriority);
         }
 
     PRINT(_L("Camera <= CCamStartupLogo::ShowL"))

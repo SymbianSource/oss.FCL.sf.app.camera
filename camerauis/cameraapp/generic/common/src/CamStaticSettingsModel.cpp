@@ -99,34 +99,41 @@ TInt
 CCamStaticSettingsModel::IntegerSettingValue( TInt aSettingItem ) const
     {
     TInt value = KErrNotFound;
+    const RPointerArray<TIntSetting> *iStaticIntSettings=NULL;
     // If setting item is in the static photo settings return it's value.
     if( ECamSettingItemStaticPhotoRangeMax > aSettingItem
         && ECamSettingItemStaticPhotoRangeMin < aSettingItem )
       {
-      TInt settingIndex = SearchInSettingsListFor(
-                                                  iStaticPhotoIntSettings,
-                                                  aSettingItem );
-      value = iStaticPhotoIntSettings[settingIndex]->iValueId;
+        iStaticIntSettings=&iStaticPhotoIntSettings;
       }
     // Otherwise, if setting item is in the static video settings return it's value.
     else if( ECamSettingItemStaticVideoRangeMax > aSettingItem 
           && ECamSettingItemStaticVideoRangeMin < aSettingItem )
       {
-      TInt settingIndex = SearchInSettingsListFor( iStaticVideoIntSettings, aSettingItem );
-      value = iStaticVideoIntSettings[settingIndex]->iValueId;
+        iStaticIntSettings=&iStaticVideoIntSettings;
       }
     // Look in static common settings.
     else if( ECamSettingItemStaticCommonRangeMax > aSettingItem
           && ECamSettingItemStaticCommonRangeMin < aSettingItem )
       {
-      TInt settingIndex = SearchInSettingsListFor( iStaticCommonIntSettings, aSettingItem );
-      value = iStaticCommonIntSettings[settingIndex]->iValueId;
+        iStaticIntSettings=&iStaticCommonIntSettings;
       }
     else
       {
       PRINT( _L("Camera <> Not found, PANIC !! ECamPanicUnknownSettingItem" ))
       CamPanic( ECamPanicUnknownSettingItem );
       }
+
+    if( iStaticIntSettings )
+        {
+        TInt settingIndex = SearchInSettingsListFor(
+                                                    *iStaticIntSettings,
+                                                    aSettingItem );
+        if( settingIndex < iStaticIntSettings->Count() && settingIndex >= 0 )
+            {
+            value = (*iStaticIntSettings)[settingIndex]->iValueId;
+            }
+        }
     return value;
     }
 
@@ -732,6 +739,7 @@ CCamStaticSettingsModel::MapSettingItem2CRKey( TCamSettingItemIds aSettingId,
       case ECamSettingItemPhotoEditorSupport: crKey = KCamCrPhotoEditorSupport; break;
       case ECamSettingItemVideoEditorSupport: crKey = KCamCrVideoEditorSupport; break;
       case ECamSettingItemRemovePhoneMemoryUsage: crKey = KCamCrRemovePhoneMemoryUsage; break;
+	  case ECamSettingItemStopRecordingInHdmiMode: crKey = KCamCrStopRecordingInHdmiMode; break;
       
       default:                                CamPanic( ECamPanicUnknownSettingItem );
                                               break;

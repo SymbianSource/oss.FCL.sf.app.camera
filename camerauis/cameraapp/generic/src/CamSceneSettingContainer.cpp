@@ -703,10 +703,10 @@ TBool CCamSceneSettingContainer::SaveSceneSettingL()
 //
 TInt CCamSceneSettingContainer::CountComponentControls() const
   {
-  TInt count = 0; // Return the number of controls inside this container    
+  TInt count = CCamContainerBase::CountComponentControls(); // Return the number of controls inside this container    
   if ( iScrollFrame )
     {
-    count = iScrollFrame->CountComponentControls();
+    count += iScrollFrame->CountComponentControls();
     }
   return count;
   }
@@ -718,14 +718,17 @@ TInt CCamSceneSettingContainer::CountComponentControls() const
 //
 CCoeControl* CCamSceneSettingContainer::ComponentControl( TInt aIndex ) const
   {
-  if ( iScrollFrame )
-    {
-    return iScrollFrame->ComponentControl( aIndex );
-    }
+  CCoeControl* control = NULL;
+  if( aIndex == 0 )
+      control = CCamContainerBase::ComponentControl( aIndex );
   else
-    {
-    return NULL;
-    }    
+      {
+      if ( iScrollFrame )
+          {
+          return iScrollFrame->ComponentControl( aIndex - 1 );
+          }
+      }
+  return control;
   }
 
 // ---------------------------------------------------------

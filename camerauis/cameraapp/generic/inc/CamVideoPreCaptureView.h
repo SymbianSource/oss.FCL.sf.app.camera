@@ -26,6 +26,7 @@
 class CAknButton;
 class MAknsSkinInstance;
 class TAknsItemID;
+class CCamTimer;
 
 // CLASS DECLARATION
 
@@ -125,7 +126,19 @@ class CCamVideoPreCaptureView : public CCamPreCaptureViewBase
         * Update the softkeys for the current situation.
         * @since 2.8
         */
-        void UpdateCbaL();  
+        void UpdateCbaL();
+		
+		/*
+		* Hdmi Timer callback
+		*/        
+        static TInt HdmiTimerCallback( TAny* aSelf );
+
+		/*
+		* Hdmi Timer callback handler
+		*/        
+        void DoHdmiTimerCallbackL();
+    
+  
 
     protected:  // Functions from base classes
   
@@ -259,6 +272,7 @@ class CCamVideoPreCaptureView : public CCamPreCaptureViewBase
         // Have mute/unmute option in embedded video menu
         TInt iAudioEnabled;
         
+    	CCamTimer* iHdmiTimer;
     };
 
 #endif      // CAMVIDEOPRECAPTUREVIEW_H 

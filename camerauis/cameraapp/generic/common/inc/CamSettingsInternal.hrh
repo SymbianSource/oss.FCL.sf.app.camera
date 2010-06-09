@@ -87,6 +87,7 @@ enum TCamSettingItemIds
   ECamSettingItemPhotoEditorSupport,    // Support for photo editor
   ECamSettingItemVideoEditorSupport,    // Support for video editor
   ECamSettingItemRemovePhoneMemoryUsage, // Remove phone memory usage
+  ECamSettingItemStopRecordingInHdmiMode, // Stop video recording when HDMI cable is inserted
   ECamSettingItemStaticCommonRangeMax,    // Range marker for static common settings
   // -----------------------------------------------------
 
@@ -598,6 +599,7 @@ const TUint16* const KCamSettingItemNames[] =
   (const TUint16* const)_S16("ItemPhotoEditorSupport"),
   (const TUint16* const)_S16("ItemVideoEditorSupport"),
   (const TUint16* const)_S16("ItemRemovePhoneMemoryUsage"),
+  (const TUint16* const)_S16("ItemStopRecordingInHdmiMode"),
   (const TUint16* const)_S16("ItemStaticCommonRangeMax"),
   // -----------------------------------------------------
   (const TUint16* const)_S16("ItemUserSceneRangeMin"),

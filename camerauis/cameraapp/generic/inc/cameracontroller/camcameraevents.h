@@ -110,6 +110,8 @@ enum TCamCameraEventId
   ECamCameraEventFlashReady,
   ECamCameraEventFlashNotReady,
 
+  //Image capture event
+  ECamCameraEventImageCaptureEvent,
   // -------------------------------------------------------  
   // Not an event id, but a marker.
   ECamCameraEventCount 
@@ -197,7 +199,8 @@ static const TUint16* KCamCameraEventNames[] =
   (const TUint16*)_S16("ECamCameraEventSetAfRange"),
   
   (const TUint16*)_S16("ECamCameraEventFlashReady"),
-  (const TUint16*)_S16("ECamCameraEventFlashNotReady")
+  (const TUint16*)_S16("ECamCameraEventFlashNotReady"),
+  (const TUint16*)_S16("ECamCameraEventImageCaptureEvent")
   };
 
 __ASSERT_COMPILE( (sizeof(KCamCameraEventNames) / sizeof(TUint16*)) == ECamCameraEventCount );

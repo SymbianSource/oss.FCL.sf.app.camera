@@ -252,7 +252,7 @@ class CCamStillPreCaptureView : public CCamPreCaptureViewBase
         /*
          * Update Face Tracking specific icons if supported. 
         */
-        void UpdateFaceTracKingIconsL();
+        void UpdateFaceTrackingIconsL();
 
     private:    // Functions from base classes
 

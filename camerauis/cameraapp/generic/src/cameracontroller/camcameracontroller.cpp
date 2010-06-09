@@ -649,6 +649,10 @@ CCamCameraController::HandleEvent( const TECAMEvent& aEvent )
         HandleFlashStatusEvent( aEvent.iErrorCode, ECamCameraEventFlashNotReady );
         break;
       // -------------------------------
+      // Capture event
+      case KUidECamEventImageCaptureEventUidValue:
+          NotifyObservers(aEvent.iErrorCode,  ECamCameraEventImageCaptureEvent, EventClass( ECamCameraEventImageCaptureEvent ));
+      break;
       default:
         break;
       // -------------------------------
@@ -4140,6 +4144,8 @@ void
 CCamCameraController::HandleReserveGainEvent( TInt aStatus )
   {
   PRINT1( _L("Camera => CCamCameraController::HandleReserveGainEvent, status:%d"), aStatus );
+  iAfInProgress = EFalse;  // Stop waiting autofocus events, if reserving camera.
+
   CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
   if( appUi->StandbyStatus() && !appUi->IsRecoverableStatus() )
       {
@@ -5705,6 +5711,7 @@ CCamCameraController::EventClass( const TCamCameraEventId& aEventId )
     case ECamCameraEventImageStop:
     case ECamCameraEventImageRelease:
     case ECamCameraEventImageData:
+    case ECamCameraEventImageCaptureEvent:
       return ECamCameraEventClassImage;
     // -------------------------------------------------------
     case ECamCameraEventVideoInit:

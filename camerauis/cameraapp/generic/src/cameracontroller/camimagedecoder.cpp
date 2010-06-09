@@ -22,6 +22,7 @@
 
 #include <eikenv.h>
 #include <SvgCodecImageConstants.hrh>
+#include <SVGEngineInterfaceImpl.h>
 
 #include "camlogging.h"
 #include "camfilesaveutility.h"
@@ -88,7 +89,8 @@ CCamImageDecoder::~CCamImageDecoder()
      delete iDecodedMask;
      iDecodedMask = NULL;
      }
- 
+
+  delete iSvgEngine;
   iFs.Close();
   PRINT( _L("Camera <= ~CCamImageDecoder") );
   }
@@ -154,47 +156,57 @@ CCamImageDecoder::StartConversionL( CCamBufferShare* aBuffer )
   PRINT( _L("Camera <= CCamImageDecoder::StartConversionL") );
   }
 
-
-void CCamImageDecoder::StartIconConversionL( TDesC* aFilePath )
-  {
-  PRINT( _L("Camera => CCamImageDecoder::StartConversionL 2") );
-
-  // Data for CImageDecoder must be available throughout the conversion.
-  // Need to stop any outstanding operation before deleting the descriptor.
-  Cancel();
-
-  PRINT( _L("Camera <> CCamImageDecoder: Creating decoder..") );
-
-  delete iDecoder;
-  iDecoder = NULL;
-  
-  CImageDecoder::TOptions options = (CImageDecoder::TOptions) (CImageDecoder::EOptionNoDither );
-  iDecoder = CImageDecoder::FileNewL( iFs, *aFilePath , options, KImageTypeSVGUid );
-
-  if( iDecoder->FrameCount() > 0 )
+// ---------------------------------------------------------------------------
+// CCamImageDecoder::StartIconConversionL
+// ---------------------------------------------------------------------------
+//
+void CCamImageDecoder::StartIconConversionL( TDesC* aFilePath, TSize& aSize )
     {
-    const TFrameInfo& info( iDecoder->FrameInfo() );
+    PRINT3( _L("Camera => CCamImageDecoder::StartIconConversionL, file:[%S], size:(%d,%d)"),
+              &(*aFilePath), aSize.iWidth, aSize.iHeight );
 
-#ifdef _DEBUG   
-    TSize size = info.iOverallSizeInPixels;
-    PRINT2( _L("Camera <> CCamImageDecoder: Bmp size(%d,%d)"), size.iWidth, size.iHeight );
-    PRINT1( _L("Camera <> CCamImageDecoder: Bmp dispmode(%d)"), info.iFrameDisplayMode );
-#endif
+    // Delete any previous bitmaps, if any
+    delete iDecodedBitmap,
+    iDecodedBitmap = NULL;
+    delete iDecodedMask;
+    iDecodedMask = NULL;
+    
+    // Create bitmap for use while decoding 
+    CFbsBitmap* frameBuffer = new (ELeave) CFbsBitmap;
+    CleanupStack::PushL( frameBuffer );
 
+    TFontSpec spec;
+    if ( !iSvgEngine )
+        {
+        iSvgEngine = CSvgEngineInterfaceImpl::NewL( frameBuffer, NULL, spec );
+        }
+    
+    TInt domHandle = KErrNotFound;
+    MSvgError* serr = iSvgEngine->PrepareDom( *aFilePath, domHandle );
+    PRINT3( _L("Camera <> prepare svg dom reader, warning:%d, err code:%d, description:[%S]"), 
+                serr->IsWarning(), serr->ErrorCode(), &(serr->Description()) );
+    if ( serr->HasError() && !serr->IsWarning() )
+        {
+        PRINT1( _L("Camera <> leaving with error:%d"), serr->SystemErrorCode() );
+        User::Leave( serr->SystemErrorCode() );
+        }
+
+    // create image bitmap
     PRINT( _L("Camera <> CCamImageDecoder: Create bitmap for snapshot..") );
     if( !iDecodedBitmap ) iDecodedBitmap = new (ELeave) CFbsBitmap;
     else                  iDecodedBitmap->Reset();
-    
+
     if( !iDecodedMask ) iDecodedMask = new (ELeave) CFbsBitmap;
     else                iDecodedMask->Reset();
 
     TRAPD ( createError, 
-            {
-            iDecodedBitmap->Create( info.iOverallSizeInPixels, info.iFrameDisplayMode );
-            iDecodedMask->Create( info.iOverallSizeInPixels, EGray256 );
-            } );
-    if( KErrNone != createError )
+        {
+        iDecodedBitmap->Create( aSize, EColor64K );
+        iDecodedMask->Create( aSize, EGray256 );
+        } );
+    if( createError )
       {
+      PRINT1( _L("Camera <> Error while creating bitmaps:%d"), createError );
       delete iDecodedBitmap;
       iDecodedBitmap = NULL;
       delete iDecodedMask;
@@ -202,19 +214,29 @@ void CCamImageDecoder::StartIconConversionL( TDesC* aFilePath )
       User::Leave( createError );
       }
 
-    PRINT( _L("Camera <> CCamImageDecoder: start conversion..") );
-    iRetryCounter = 0;
-    iDecoder->Convert( &iStatus, *iDecodedBitmap, *iDecodedMask, 0 );
-    SetActive();
-    }
-  else
-    {
-    PRINT( _L("Camera <> CCamImageDecoder: No frame provided, leave..") );
-    User::Leave( KErrNotFound );    
+    // create soft mask
+    iSvgEngine->SetViewportHeight((CSvgDocumentImpl *)domHandle, aSize.iHeight);
+    iSvgEngine->SetViewportWidth((CSvgDocumentImpl *)domHandle, aSize.iWidth);
+
+    // render svg image
+    serr = iSvgEngine->RenderDom( domHandle, iDecodedBitmap, iDecodedMask );
+    PRINT3( _L("Camera <> render svg, warning:%d, err code:%d, description:[%S]"), 
+                serr->IsWarning(), serr->ErrorCode(), &(serr->Description()) );
+    if ( serr->HasError() && !serr->IsWarning() )
+        {
+        PRINT1( _L("Camera <> leaving with error:%d"), serr->SystemErrorCode() );
+        User::Leave( serr->SystemErrorCode() );
+        }
+
+    CleanupStack::PopAndDestroy( frameBuffer );
+    if ( !IsActive() )
+        {
+        SetActive();
+        }
+
+    PRINT( _L("Camera <= CCamImageDecoder::StartIconConversionL") );
     }
 
-  PRINT( _L("Camera <= CCamImageDecoder::StartConversionL 2") );
-  }
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -318,6 +340,12 @@ CCamImageDecoder::RunL()
       {
       // CImageDecoder has finished using the data,
       // so we are able to free it.
+      if ( iSvgEngine )
+          {
+          iSvgEngine->Destroy();
+          delete iSvgEngine;
+          iSvgEngine = NULL;
+          }
       SetImageData( NULL );
       iObserver.ImageDecodedL( iStatus.Int(), iDecodedBitmap, iDecodedMask );
       break;

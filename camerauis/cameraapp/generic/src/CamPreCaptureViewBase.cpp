@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -209,7 +209,10 @@ void CCamPreCaptureViewBase::HandleCommandL( TInt aCommand )
             break;
        case ECamCmdPopUpMenuZoom: 
             {
-            iContainer->ShowZoomPaneWithTimer();
+            if ( iContainer )
+                {
+                iContainer->ShowZoomPaneWithTimer();
+                }
             }     
             break;
         case ECamCmdCaptureSetupFlashStill:
@@ -247,6 +250,13 @@ void CCamPreCaptureViewBase::HandleCommandL( TInt aCommand )
                 }
             }     
             break;
+        case ECamCmdSettings:
+            // Hide the capture button
+            if ( iContainer )
+                {
+                iContainer->SetFocus( EFalse );
+                }
+            // fall-through
         default:
             {                                       
             CCamCaptureSetupViewBase::HandleCommandL( aCommand );                            
@@ -661,8 +671,12 @@ void CCamPreCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId,
         {
         StatusPane()->MakeVisible( EFalse );
         }
+    
     if ( iController.IsTouchScreenSupported() )
         {
+        // Make sure that icons are upto date
+        UpdateToolbarIconsL();
+    
         CAknToolbar* fixedToolbar = Toolbar();
         if ( fixedToolbar )
             {
@@ -790,6 +804,10 @@ void CCamPreCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId,
 void CCamPreCaptureViewBase::DoDeactivate()
     {                              
     PRINT( _L( "Camera => CCamPreCaptureViewBase::DoDeactivate" ) );
+    
+    delete iGestureFw;
+    iGestureFw = NULL;
+
     CCamCaptureSetupViewBase::DoDeactivate();
                                
     iController.RemoveControllerObserver( this );
@@ -1864,18 +1882,21 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
         CCamZoomPane *zoomPane = appUi->ZoomPane();
         
         CCamPreCaptureContainerBase* container = static_cast<CCamPreCaptureContainerBase*>( iContainer );
-        container->ShowZoomPaneWithTimer();
+        if ( container && zoomPane )
+            {
+            container->ShowZoomPaneWithTimer();
 
-        // Zoom to min (if not already at min) zoom level, otherwise zoom in to max level
-        if ( !zoomPane->IsZoomAtMinimum() )
-            {
-            PRINT( _L("Camera <> Zooming out to min level") );
-            zoomPane->ZoomToMinimum();
-            }
-        else
-            {
-            PRINT( _L("Camera <> Zooming to max level") );
-            zoomPane->ZoomToMaximum();
+            // Zoom to min (if not already at min) zoom level, otherwise zoom in to max level
+            if ( !zoomPane->IsZoomAtMinimum() )
+                {
+                PRINT( _L("Camera <> Zooming out to min level") );
+                zoomPane->ZoomToMinimum();
+                }
+            else
+                {
+                PRINT( _L("Camera <> Zooming to max level") );
+                zoomPane->ZoomToMaximum();
+                }
             }
         }
     else

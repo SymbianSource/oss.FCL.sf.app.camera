@@ -170,7 +170,7 @@ CCamBurstThumbnailContainer::CCamBurstThumbnailContainer(
 //
 TInt CCamBurstThumbnailContainer::CountComponentControls() const
     {    
-    return 1;   // Return the number of controls inside this container
+    return CCamContainerBase::CountComponentControls() + 1;   // Return the number of controls inside this container
     }
 
 // ---------------------------------------------------------
@@ -180,18 +180,22 @@ TInt CCamBurstThumbnailContainer::CountComponentControls() const
 //
 CCoeControl* CCamBurstThumbnailContainer::ComponentControl( TInt aIndex ) const
     {
+    CCoeControl* control = NULL;
+    control = CCamContainerBase::ComponentControl( aIndex );
+    if( control != NULL )
+        return control;
     switch ( aIndex )
         {
-        case 0:
+        case 1:
             {
-            return iGridControl;
-            }            
+            control = iGridControl;
+            }
+            break;
         default: 
             break;                   
         }
     
-    // Should never get here
-    return NULL;
+    return control;
     }
 
 

@@ -128,8 +128,7 @@ CCamStandbyContainer::CCamStandbyContainer( CCamAppController& aController,
 //
 TInt CCamStandbyContainer::CountComponentControls() const
     {
-    TInt count = 1;
-    return count; // Return the number of controls inside this container
+    return CCamContainerBase::CountComponentControls() + 1;
     }
 
 // ---------------------------------------------------------
@@ -139,17 +138,20 @@ TInt CCamStandbyContainer::CountComponentControls() const
 //
 CCoeControl* CCamStandbyContainer::ComponentControl( TInt aIndex ) const
     {
+    CCoeControl* control = CCamContainerBase::ComponentControl( aIndex );
+    if( control )
+        return control;
     switch ( aIndex )
         {
-        case 0:
+        case 1:
             {
-            return iText;
+            control = iText;
             }
+            break;
         default:
-            {
-            return NULL;
-            }
+            break;
         }
+    return control;
     }
 
 // ---------------------------------------------------------

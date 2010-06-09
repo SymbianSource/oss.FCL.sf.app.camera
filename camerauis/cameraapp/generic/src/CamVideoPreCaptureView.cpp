@@ -57,8 +57,9 @@
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "CamVideoPreCaptureViewTraces.h"
 #endif
+#include "CamTimer.h"
 
-
+const TInt KHdmiTimeout = 1000000; // 1 sec
 
 
 // ========================= MEMBER FUNCTIONS ================================
@@ -84,6 +85,11 @@ CCamVideoPreCaptureView* CCamVideoPreCaptureView::NewLC( CCamAppController& aCon
 //
 CCamVideoPreCaptureView::~CCamVideoPreCaptureView()
     {
+    if( iHdmiTimer )
+        {
+        delete iHdmiTimer;
+        iHdmiTimer = NULL;
+        }
     }
     
 // ---------------------------------------------------------------------------
@@ -148,7 +154,12 @@ CCamVideoPreCaptureView::HandleCommandL( TInt aCommand )
              // if the Camera in the Portrait mode
              // MSK event is handled like a capture key
             {
-            if ( iController.IsViewFinding() && appUi->CheckMemoryL() )
+            if( iController.IntegerSettingValue( ECamSettingItemStopRecordingInHdmiMode) &&
+                    iController.IsHdmiCableConnected() )
+                {
+                appUi->HandleHdmiEventL( ECamHdmiCableConnectedBeforeRecording );
+                }
+            else if ( iController.IsViewFinding() && appUi->CheckMemoryL() )
                 {
                 iController.StartVideoRecordingL();
                 // fixed toolbar is used only with touch devices
@@ -168,7 +179,11 @@ CCamVideoPreCaptureView::HandleCommandL( TInt aCommand )
         {
         	TInt callType( EPSCTsyCallTypeUninitialized );
             RProperty::Get( KPSUidCtsyCallInformation, KCTsyCallType, callType );
-            if ( callType != EPSCTsyCallTypeH324Multimedia && iController.IsViewFinding() && appUi->CheckMemoryL() )
+            if( iController.IsHdmiCableConnected() )
+                {
+                appUi->HandleHdmiEventL( ECamHdmiCableConnectedBeforeRecording );
+                }
+            else if ( callType != EPSCTsyCallTypeH324Multimedia && iController.IsViewFinding() && appUi->CheckMemoryL() )
             {
             SetSoftKeysL( R_CAM_SOFTKEYS_BLANK );
             appUi->SetLensCoverExit( EFalse );
@@ -575,7 +590,10 @@ void CCamVideoPreCaptureView::HandleControllerEventL( TCamControllerEvent aEvent
           {
           // Vf was stopped when stopping video recording, need to restart here
           // if postcapture is off.
-          StartViewFinder();  
+          StartViewFinder();
+          if( iHdmiTimer->IsActive() )
+              iHdmiTimer->Cancel();
+          iHdmiTimer->StartTimer();
           } 
       break;
       }
@@ -619,17 +637,17 @@ CCamVideoPreCaptureView::CCamVideoPreCaptureView( CCamAppController& aController
 //
 void CCamVideoPreCaptureView::ConstructL()
     {
-    BaseConstructL( ROID(R_CAM_VIDEO_PRE_CAPTURE_VIEW_ID));
+    BaseConstructL( ROID(R_CAM_VIDEO_PRE_CAPTURE_VIEW_ID) );
     if(iController.UiConfigManagerPtr()->IsXenonFlashSupported())
         {
         CreateAndSetToolbarL(R_CAM_VIDEO_PRECAPTURE_TOOLBAR);
-        UpdateToolbarIconsL();
         }
     else
         {
         CreateAndSetToolbarL(R_CAM_VIDEO_PRECAPTURE_TOOLBAR_VIDEOLIGHT);
         }
     CCamPreCaptureViewBase::ConstructL();
+    iHdmiTimer = CCamTimer::NewL( KHdmiTimeout, TCallBack(HdmiTimerCallback, this));
     }
 
 // ---------------------------------------------------------------------------
@@ -1314,7 +1332,12 @@ TBool CCamVideoPreCaptureView::StartMskCaptureL()
     		// in CCamVideoPreCaptureContainer
         	TInt callType( EPSCTsyCallTypeUninitialized );
             RProperty::Get( KPSUidCtsyCallInformation, KCTsyCallType, callType );
-            if ( callType != EPSCTsyCallTypeH324Multimedia && iController.IsViewFinding() && appUi->CheckMemoryL() )
+            if( iController.IntegerSettingValue( ECamSettingItemStopRecordingInHdmiMode) &&
+                    iController.IsHdmiCableConnected() )
+                {
+                appUi->HandleHdmiEventL( ECamHdmiCableConnectedBeforeRecording );
+                }
+            else if ( callType != EPSCTsyCallTypeH324Multimedia && iController.IsViewFinding() && appUi->CheckMemoryL() )
             {
                 SetSoftKeysL( R_CAM_SOFTKEYS_BLANK );
                 iController.StartVideoRecordingL();
@@ -1641,6 +1664,31 @@ void CCamVideoPreCaptureView::UpdateVideoColorToneIconsL()
          default:
              break;
          }
+     }
+
+ // ---------------------------------------------------------------------------
+ // CCamVideoPostCaptureView::HdmiTimerCallback
+ // ---------------------------------------------------------------------------
+ //
+ TInt CCamVideoPreCaptureView::HdmiTimerCallback( TAny* aSelf )
+     {
+     CCamVideoPreCaptureView* self = static_cast<CCamVideoPreCaptureView*>(aSelf);
+     TInt err(0);
+     if( self )
+         {
+         TRAP(err, self->DoHdmiTimerCallbackL() );
+         }
+     PRINT1( _L("Camera <> CCamVideoPreCaptureView::HdmiTimerCallback err=%d"), err);
+     return err;
+     }
+
+ // ---------------------------------------------------------------------------
+ // CCamVideoPostCaptureView::DoHdmlTimerCallbackL
+ // ---------------------------------------------------------------------------
+ //
+ void CCamVideoPreCaptureView::DoHdmiTimerCallbackL()
+     {
+     iController.HandlePostHdmiConnectDuringRecordingEventL();
      }
 
 

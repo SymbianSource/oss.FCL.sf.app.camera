@@ -58,7 +58,7 @@
 #include "camcameracontroller.h"
 #include "CamDriveChangeNotifier.h"
 #include "CamSyncRotatorAo.h"
-
+#include "camtvaccessorymonitor.h"
 
 // ===========================================================================
 // CONSTANTS
@@ -87,6 +87,12 @@ enum TCamBusyFlags
   EBusyLast // Marker
   };
 
+enum TCamHdmiEvent
+    {
+    ECamHdmiNoEvent,
+    ECamHdmiCableConnectedBeforeRecording,
+    ECamHdmiCableConnectedDuringRecording
+    };
 
 // ===========================================================================
 // FORWARD DECLARATIONS
@@ -165,7 +171,8 @@ class CCamAppController : public CBase,
                           public MCamBurstModeObserver,
                           public MCFListener
                           ,public MCamDriveChangeNotifierObserver
-                          ,public MBitmapRotationObserver 
+                          ,public MBitmapRotationObserver,
+                          public MCamTvAccessoryObserver
                           
     {
     public:  // Constructors and destructor
@@ -468,7 +475,31 @@ class CCamAppController : public CBase,
     * @param aErr KErrNone if successful
     */
     void RotationCompleteL( TInt aErr );
+    
+    /**
+    * From MCamTvaccessoryObserver
+    * Handles TV Out/HDMI Cable connect Events
+    */
+    void HandleTvAccessoryConnectedL();
+    
+    /**
+    * From MCamTvaccessoryObserver
+    * Handles TV Out/HDMI Cable disconnect Events
+    */
+    void HandleTvAccessoryDisconnectedL();
+    
+    
+    /**
+     * Returns Etrue if HDMI Cable is connected
+     */
+    TBool IsHdmiCableConnected();
+    
 
+    /**
+    * Called when exiting in secondary camera mode
+    */
+    void HandleSecondaryCameraExitL();
+	
 private:
     void ReadVariantFlagsL();
 
@@ -1531,6 +1562,7 @@ private:
     void ChangeOperation( TCamCaptureOperation aNewOperation, 
                           TInt          aError = KErrNone );
 
+  public:
     /**
     * Notify controller observers of an event.
     * @since 2.8
@@ -1539,6 +1571,7 @@ private:
     */
     void NotifyControllerObservers( TCamControllerEvent aEvent,
                                     TInt                aError = KErrNone ) const;
+  private:
 
     /**
     * Starts the viewfinder if the engine has been prepared for the 
@@ -2222,6 +2255,33 @@ public:
          * is rotated and ready for drawing
          */
         void SnapshotRotationComplete();
+        
+        /**
+         * Method to retrieve Remaining Recording time from CCaeEngine
+         */
+        TTimeIntervalMicroSeconds RemainingVideoRecordingTime();
+        
+        
+        /**
+         * Handles hdmi connect event during recording after video stop
+         */
+        void HandlePostHdmiConnectDuringRecordingEventL();
+        
+		/**
+		* Sets a Pending Hdmi Event
+		*/
+        void SetPendingHdmiEvent( TCamHdmiEvent aPendingHdmiEvent );
+        
+		/**
+		* Handles the current pending Hdmi EVent
+		*/
+        void HandlePendingHdmiEvent();
+		
+    /**
+	* Returns ETrue when scene mode is forced to 
+    * "Automatic" by secondary camera
+	*/
+    TBool SceneModeForcedBySecondaryCamera();
 
   private:
 
@@ -2504,6 +2564,8 @@ public:
     CCamPropertyWatcher* iSlideStateWatcher;
     // Property watcher to report changes in the keylock state
     CCamPropertyWatcher* iKeyLockStatusWatcher;
+    // Property watcher to report changes in the profile state
+    CCamPropertyWatcher* iProfileStatusWatcher;
     // Set to ETrue if shutter sound always played
     // otherwise playing shutter sound depends on
     // current profile
@@ -2608,8 +2670,17 @@ public:
     TCamImageOrientation  iCaptureOrientation;
     
     TBool iIssueModeChangeSequenceSucceeded;
+    
+    CCamTvAccessoryMonitor* iTvAccessoryMonitor;
+    
+    TBool iHdmiCableConnectedDuringRecording;
+    
     TBool iSnapshotRedrawNeeded;
     
+    TCamHdmiEvent iPendingHdmiEvent;
+	
+    TBool iSceneModeForcedBySecondaryCamera;
+	
     };
 
 #endif      // CAMAPPCONTROLLER_H

@@ -24,7 +24,7 @@
 // FORWARD DECLARATIONS
 class CCamAppController;
 class CCamContainerBase;
-
+class CCamTimer;
 
 // CLASS DECLARATION
 
@@ -111,6 +111,16 @@ class CCamVideoPostCaptureView : public CCamPostCaptureViewBase, public MAiwNoti
             TInt aEventId,
             CAiwGenericParamList& aEventParamList,
             const CAiwGenericParamList& aInParamList );
+
+		/*
+		* Hdmi Timer callback
+		*/        
+        static TInt HdmiTimerCallback( TAny* aSelf );
+
+		/*
+		* Hdmi Timer callback handler
+		*/        
+        void DoHdmiTimerCallbackL();
     
     private:    // New functions
 
@@ -161,6 +171,8 @@ class CCamVideoPostCaptureView : public CCamPostCaptureViewBase, public MAiwNoti
     private:    // Data
     
     	TBool iRockerKeyPress;
+    	
+    	CCamTimer* iHdmiTimer;
     };
 
 #endif      // CAMVIDEOPOSTCAPTUREVIEW_H   

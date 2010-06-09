@@ -201,7 +201,7 @@ CCamPostCaptureContainer::CCamPostCaptureContainer(
 //
 TInt CCamPostCaptureContainer::CountComponentControls() const
     {
-	TInt count = 0;
+	TInt count = CCamContainerBase::CountComponentControls();
     if( ( iPaneInUse == ECamPaneCounter ) || ( iPaneInUse == ECamPaneProgress ) )
 	    {
 	    count++;
@@ -225,7 +225,9 @@ TInt CCamPostCaptureContainer::CountComponentControls() const
 //
 CCoeControl* CCamPostCaptureContainer::ComponentControl( TInt aIndex ) const
     {
-	CCoeControl* con = NULL;
+	CCoeControl* con = CCamContainerBase::ComponentControl( aIndex );
+	if( con )
+	    return con;
    	switch( aIndex )
     	{
 	    case ECamPostCaptureSubControlNaviPane:

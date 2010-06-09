@@ -900,6 +900,11 @@ class CCamAppUi : public CCamAppUiBase,
         * otherwise EFalse.
         */
         TBool IsToolBarExtensionVisible() const;
+        
+        /*
+         * Handles Hdmi events
+         */
+        void HandleHdmiEventL( TCamHdmiEvent aEvent );
  
     public: // Functions from base classes
         /**

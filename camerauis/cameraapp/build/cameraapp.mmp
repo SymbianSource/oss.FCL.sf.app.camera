@@ -193,6 +193,8 @@ SOURCE 	        cambackupcontainer.cpp
 SOURCE          camsnapshotrotator.cpp
 SOURCE          camstartuplogo.cpp
 SOURCE          camstartuplogocontroller.cpp
+SOURCE          camcapturebuttoncontainer.cpp
+SOURCE          camtvaccessorymonitor.cpp
 
 // Camera controller sources
 SOURCEPATH      ../generic/src/cameracontroller
@@ -324,6 +326,8 @@ LIBRARY         ecampluginsupport.lib
 LIBRARY SensrvClient.lib
 LIBRARY sensrvutil.lib
 
+LIBRARY svgengine.lib // For reading share SVGs
+
 #ifdef CAMERAAPP_LOGGING
 LIBRARY flogger.lib
 #endif
@@ -352,6 +356,8 @@ LIBRARY glxcollectionmanager.lib
 LIBRARY glxmetadatadialog.lib
 
 LIBRARY thumbnailmanager.lib
+LIBRARY accclient.lib
+LIBRARY accpolicy.lib
 
 
 // ---------------------------------------------------------------------------

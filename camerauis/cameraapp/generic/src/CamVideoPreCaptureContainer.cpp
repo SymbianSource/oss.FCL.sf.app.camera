@@ -48,10 +48,6 @@
 #endif
 
 
-// CONSTANTS
-_LIT(KCamBitmapFile, "z:\\resource\\apps\\cameraapp.mif");
-const TSize KIconSize(35, 35);
-
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -84,12 +80,6 @@ CCamVideoPreCaptureContainer::~CCamVideoPreCaptureContainer()
       iFeedback->RemoveFeedbackForControl( this );
       }
   delete iFileTypeIndicator;
-  
-  if ( iCaptureIcon )
-      {
-      delete iCaptureIcon;
-      delete iCaptureMask;
-      }
   PRINT( _L("Camera <= ~CCamVideoPreCaptureContainer") );
   }
 
@@ -101,11 +91,8 @@ CCamVideoPreCaptureContainer::~CCamVideoPreCaptureContainer()
 void CCamVideoPreCaptureContainer::ConstructL( const TRect& aRect )
     {
     PRINT( _L("Camera => CCamVideoPreCaptureContainer::ConstructL"))
-	PRINT( _L("Camera => CCamVideoPreCaptureContainer::ConstructL C"))
 	TCamVideoResolution res = iController.GetCurrentVideoResolution();
-	PRINT( _L("Camera => CCamVideoPreCaptureContainer::ConstructL D"))
 	iVFRes = iController.VideoViewFinderResourceId( res );
-	PRINT( _L("Camera => CCamVideoPreCaptureContainer::ConstructL E"))
 
     BaseConstructL( aRect );
     iShowReticule = EFalse;
@@ -161,16 +148,6 @@ void CCamVideoPreCaptureContainer::ConstructL( const TRect& aRect )
         if ( !iFeedback )
             iFeedback = MTouchFeedback::CreateInstanceL();
         }
-    
-    // Load record icon
-    AknIconUtils::CreateIconL(
-             iCaptureIcon,
-             iCaptureMask,
-             KCamBitmapFile(),
-             EMbmCameraappQgn_indi_cam4_video,
-             EMbmCameraappQgn_indi_cam4_video_mask );
-    AknIconUtils::SetSize( iCaptureIcon, KIconSize, EAspectRatioPreserved );
-    AknIconUtils::SetSize( iCaptureMask, KIconSize, EAspectRatioPreserved );
     }
 
 // ---------------------------------------------------------------------------
@@ -438,6 +415,20 @@ CCamVideoPreCaptureContainer::HandleCaptureKeyEventL( const TKeyEvent& aKeyEvent
     {
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
     
+       if ( iController.UiConfigManagerPtr() 
+                && !iController.UiConfigManagerPtr()->IsAutoFocusSupported()
+                && iController.IsTouchScreenSupported() )
+                {
+                CAknToolbar* fixedToolbar = appUi->CurrentFixedToolbar();
+                if ( fixedToolbar )
+                   {
+                    CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
+                   if ( extension )
+                       {
+                        extension->SetShown( EFalse ); 
+                       }
+                    }
+                }
     // neither recording nor paused
     // so attempt to start recording
     PRINT( _L("Camera <> starting capture") );
@@ -446,10 +437,6 @@ CCamVideoPreCaptureContainer::HandleCaptureKeyEventL( const TKeyEvent& aKeyEvent
     // Hide the toolbar if we are capturing
     if( EKeyWasConsumed == keyResponse )
         {
-        // Hide capture button if we are capturing
-        iCaptureButtonShown = CaptureButtonActive();    
-        DrawNow( iCaptureRect );
-
         // Repeated key events (MSK) are ignored.
         iController.SetDemandKeyRelease( ETrue );  
         

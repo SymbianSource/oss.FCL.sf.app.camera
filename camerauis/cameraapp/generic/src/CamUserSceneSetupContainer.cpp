@@ -415,7 +415,7 @@ TInt CCamUserSceneSetupContainer::CommandIdForActivatingCurrentItemControl()
 //
 TInt CCamUserSceneSetupContainer::CountComponentControls() const
     {
-	return 1;
+	return CCamContainerBase::CountComponentControls() + 1;
 	}
 
 // ---------------------------------------------------------
@@ -425,15 +425,21 @@ TInt CCamUserSceneSetupContainer::CountComponentControls() const
 CCoeControl* CCamUserSceneSetupContainer::ComponentControl
 ( TInt aIndex ) const
     {
+    CCoeControl* control = CCamContainerBase::ComponentControl( aIndex );
+    if( control )
+        return control;
     switch( aIndex )
         {
-        case 0:
-            return iUserSceneSetupList;
+        case 1:
+            {
+            control = iUserSceneSetupList;
+            }
+            break;
         default:
-            return NULL;            
+            break;            
         }
         
-    // Should never get here
+    return control;
     }
 
 // ---------------------------------------------------------------------------
@@ -445,7 +451,7 @@ TKeyResponse CCamUserSceneSetupContainer::OfferKeyEventL(
     const TKeyEvent& aKeyEvent,
     TEventCode aType )
     {
-    if ( aType == EEventKeyDown &&
+    if ( aType == EEventKey &&
            ( aKeyEvent.iScanCode == EStdKeyEnter || 
                aKeyEvent.iScanCode == EStdKeyNkpEnter ) )
         {

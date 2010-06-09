@@ -173,17 +173,22 @@ void CCamCaptureSetupMenu::ConstructL( const TRect& aRect, TInt aResourceId, TIn
 TInt CCamCaptureSetupMenu::CountComponentControls() const
     {
 	// this control contains a listbox
-    return 1; 
+    return CCamContainerBase::CountComponentControls() + 1; 
     }
 
 // ---------------------------------------------------------
 // CCamCaptureSetupMenu::ComponentControl(TInt aIndex) const
 // ---------------------------------------------------------
 //
-CCoeControl* CCamCaptureSetupMenu::ComponentControl(TInt /*aIndex*/) const
+CCoeControl* CCamCaptureSetupMenu::ComponentControl(TInt aIndex) const
     {
-	return iCaptureSetupListBox;
-    }
+    CCoeControl* control = CCamContainerBase::ComponentControl( aIndex );
+    if( control == NULL)
+        {
+        control = iCaptureSetupListBox;
+        }
+    return control;
+	}
 
 // ---------------------------------------------------------
 // CCamCaptureSetupMenu::Draw(const TRect& aRect) const

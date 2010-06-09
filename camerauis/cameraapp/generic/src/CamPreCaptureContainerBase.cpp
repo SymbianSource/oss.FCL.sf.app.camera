@@ -66,6 +66,7 @@
 #include "camstartuplogo.h"
 #include "camvfgridinterface.h"
 #include "camlinevfgriddrawer.h"
+#include "camcapturebuttoncontainer.h"
 
 // CONSTANTS
 const TInt KZoomPanelTimeout = 4000000;     // 4s 
@@ -76,13 +77,9 @@ const TInt KIndicatorBlinkDelay = 250 * 1000;
 const TInt KNumberOfBlinks = 3;
 const TInt KNumberOfBlinksVideo = 8;
 
-const TRect KIconRect(0, 0, 40, 40);
-const TInt32 KCaptureButtonWidth( 50 );
-const TInt32 KCaptureButtonYDelta( 35 );
-const TInt32 KCaptureIconDelta( 7 );
-const TUint32 KToolbarExtensionBgColor = 0x00000000;
-const TInt KToolBarExtensionBgAlpha = 0x7F;
-
+const TSize  KCaptureButtonSize( 50, 50 );
+const TSize  KAdditionalArea( 25, 11 );
+const TInt32 KCaptureButtonYDelta( 10 );
 
 // Snapshot data is needed in timelapse mode
 const TUint KCameraEventInterest = ( ECamCameraEventClassVfControl      
@@ -102,7 +99,12 @@ const TUint KCameraEventInterest = ( ECamCameraEventClassVfControl
 CCamPreCaptureContainerBase::~CCamPreCaptureContainerBase()
   {
   PRINT( _L("Camera => ~CCamPreCaptureContainerBase" ))
-  
+
+  if( iCaptureButtonContainer )
+      {
+      delete iCaptureButtonContainer;
+      }
+
   iController.ViewfinderWindowDeleted( &Window() );
   
   iController.RemoveSettingsObserver  ( this );
@@ -311,14 +313,28 @@ void CCamPreCaptureContainerBase::BaseConstructL( const TRect& aRect )
     TRAP_IGNORE(iStartupLogo = CCamStartupLogo::NewL(*appUi->StartupLogoController(), aRect));
     }
 
-  // Capture icon rectangle
-  TRect containerRect = Rect();
-  TPoint center( containerRect.Center() );
+  // Capture button container  
+  if ( iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() &&
+       iController.IsTouchScreenSupported() )
+      {
+      TRect rect = Rect();
+      TPoint center( rect.Center() );
+      TRect captureRect;
+      captureRect.SetRect( center.iX   - KCaptureButtonSize.iWidth/2,
+                           rect.iBr.iY - KCaptureButtonSize.iHeight - KCaptureButtonYDelta, 
+                           center.iX   + KCaptureButtonSize.iWidth/2,
+                           rect.iBr.iY - KCaptureButtonYDelta  );
+      captureRect.Grow( KAdditionalArea );
 
-  iCaptureRect.SetRect( center.iX - KCaptureButtonWidth/2, 
-                        containerRect.iBr.iY - KCaptureButtonWidth - KCaptureButtonYDelta, 
-                        center.iX + KCaptureButtonWidth/2, 
-                        containerRect.iBr.iY - KCaptureButtonYDelta  );
+      TCamCameraMode mode = ECamControllerImage;
+      if ( iView.Id() == TUid::Uid( ECamViewIdVideoPreCapture ) )
+          {
+          mode = ECamControllerVideo;
+          }
+      iCaptureButtonContainer = CCamCaptureButtonContainer::NewL( iController, iView, 
+                                                                  *this, captureRect, 
+                                                                  mode );
+      }
 
   PRINT( _L("Camera <= CCamPreCaptureContainerBase::BaseConstructL ") );
   }
@@ -562,20 +578,7 @@ CCamPreCaptureContainerBase::OfferKeyEventL( const TKeyEvent& aKeyEvent,
     // Stop any zooming activity if capture key detected
     if ( captureKey )
         {
-        CCamZoomPane* zoom_pane = appUi->ZoomPane();
-
-        if ( zoom_pane )
-            {
-            PRINT( _L("Camera <> CCamPreCaptureContainerBase::OfferKeyEventL calling StopZoom()") );
-            zoom_pane->StopZoom();
-            }
-        
-        // Stop blinking icon when capture is initiated
-        if ( iIndBlinkTimer && iIndBlinkTimer->IsActive() )
-            {
-            iIndBlinkTimer->Cancel();
-            iDrawIndicator = ETrue;
-            }
+        PrepareForCapture();
         }
     TBool viewFinderRunning = iReceivedVfFrame;
     if ( iController.UiConfigManagerPtr() &&
@@ -671,6 +674,7 @@ CCamPreCaptureContainerBase::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             PRINT( _L("Camera <= CCamPreCaptureContainerBase::OfferKeyEventL .. capture key up handled") )
             return EKeyWasConsumed;
             }
+        iController.HandlePendingHdmiEvent();
         }
     else 
         {
@@ -742,6 +746,8 @@ CCamPreCaptureContainerBase
     // ---------------------------------------------------
     case ECamEventOperationStateChanged:
       {
+	  UpdateCaptureButton();
+
       if( iController.IsAppUiAvailable() && iController.UiConfigManagerPtr()
           && iController.UiConfigManagerPtr()->IsAutoFocusSupported() )
         {
@@ -752,12 +758,13 @@ CCamPreCaptureContainerBase
             HandleOperationStateChangeEventL();
             }
         }
-      iCaptureButtonShown = CaptureButtonActive();
       break;
       }
     // ---------------------------------------------------
     case ECamEventEngineStateChanged:
         {
+        UpdateCaptureButton();
+        
         PRINT1( _L("Camera <> Start mode indi blinking, op:%d"), iController.CurrentOperation() );
 
         if ( !iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() 
@@ -1120,12 +1127,6 @@ CCamPreCaptureContainerBase::Draw( const TRect& /*aRect*/ ) const
        }
    DrawScreenFurniture( gc );
    DrawNaviControls( gc );
-   
-   // Draw capture button
-   if( iCaptureButtonShown )
-       {
-       DrawCaptureButton( gc );   
-       }
 
    PRINT( _L( "Camera <= CCamPreCaptureContainerBase::Draw" ) );        
    }
@@ -1710,14 +1711,19 @@ TKeyResponse CCamPreCaptureContainerBase::HandleLeftRightNaviKeyL(
 //
 TInt CCamPreCaptureContainerBase::CountComponentControls() const
   {
-  TInt count = 0;
+  TInt count = CCamContainerBase::CountComponentControls();
     if(iActivePalette && iActivePalette->CoeControl()->IsVisible())
         {
         count++; //Active Palette
-        }   
+        }
     
-  return count;
-  }
+    if( iCaptureButtonContainer ) // Capture button container
+        {
+        count++;
+        }
+    PRINT1( _L("Camera <> CCamPreCaptureContainerBase::CountComponentControls %d"), count );
+    return count;
+    }
 
 // ----------------------------------------------------
 // CCamPreCaptureContainerBase::ComponentControl
@@ -1726,10 +1732,13 @@ TInt CCamPreCaptureContainerBase::CountComponentControls() const
 //
 CCoeControl* CCamPreCaptureContainerBase::ComponentControl( TInt aIndex ) const
   {
-  CCoeControl* con = NULL;
+  PRINT1( _L("Camera <> CCamPreCaptureContainerBase::ComponentControl index:%d"), aIndex );
+  CCoeControl* con = CCamContainerBase::ComponentControl( aIndex );
+  if( con )
+      return con;
+
   switch ( aIndex )
       {
-     
      /*
       case ECamTimeLapseControl:
             {
@@ -1752,9 +1761,26 @@ CCoeControl* CCamPreCaptureContainerBase::ComponentControl( TInt aIndex ) const
           if(iActivePalette && iActivePalette->CoeControl()->IsVisible())         
               {
               con = iActivePalette->CoeControl();
-              }             
+              }
+          else if( iCaptureButtonContainer )
+              {
+              PRINT( _L("Camera <> capture button container A") );
+              con = iCaptureButtonContainer;
+              }
+          else
+              {
+              
+              }
           break;
-          }        
+          }     
+      case ECamCaptureButton:
+          {
+          if( iCaptureButtonContainer )
+              {
+              PRINT( _L("Camera <> capture button container A") );
+              con = iCaptureButtonContainer;
+              }
+          }
         default:
             break;
       }         
@@ -2453,99 +2479,31 @@ void CCamPreCaptureContainerBase::HandlePointerEventL( const TPointerEvent& aPoi
         aPointerEvent.iType,
         aPointerEvent.iPosition.iX,
         aPointerEvent.iPosition.iY );
-   CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
-   
-   // Capture button
-   TRect captureRect( iCaptureRect );
-   captureRect.Grow( 30, 30 );
-   
-   if ( iCaptureButtonShown && captureRect.Contains( aPointerEvent.iPosition ) )
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+    if ( !appUi->IsSecondCameraEnabled() )
        {
-       if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
+       // don't let zoom pane be used when capturing image
+       if ( iController.CurrentMode() != ECamControllerImage ||
+            ( iController.CurrentOperation() != ECamCapturing &&
+              iController.CurrentOperation() != ECamCompleting &&
+              iController.CurrentOperation() != ECamFocusing ) )
            {
-           MTouchFeedback* feedback = MTouchFeedback::Instance(); 
-           if ( !iCaptureIconPressed && feedback )
-               {
-               feedback->InstantFeedback( ETouchFeedbackBasicButton );        
-               }
-           iCaptureIconPressed = ETrue;           
-           DrawNow( captureRect );
-           }
-       else if ( aPointerEvent.iType == TPointerEvent::EButton1Up
-                 && iCaptureIconPressed )
-           {
-           iCaptureIconPressed = EFalse;
-
-           // Give feedback on button release
-           MTouchFeedback* feedback = MTouchFeedback::Instance(); 
-           if ( feedback )
-               {
-               feedback->InstantFeedback( ETouchFeedbackBasicButton );        
-               }
-
-           // About to start capture ... hide stop zoom etc.
-           if ( iZoomPane )
-               {
-               PRINT( _L("Camera <> CCamPreCaptureContainerBase::HandlePointerEventL - StopZoom()") );
-               iZoomPane->StopZoom();
-               iZoomPane->MakeVisible( EFalse, ETrue );
-               }
-           // Stop blinking icon when capture is initiated
-           if ( iIndBlinkTimer && iIndBlinkTimer->IsActive() )
-               {
-               iIndBlinkTimer->Cancel();
-               iDrawIndicator = ETrue;
-               }
-
-           if ( iController.CurrentMode() == ECamControllerVideo ) 
-               {
-               iView.HandleCommandL( ECamCmdRecord );
-               }
-           else
-               {
-               iView.HandleCommandL( ECamCmdCaptureImage );
-               }
-           }
-       else
-           {
-		   // Avoid compiler warning
-           }
-       }
-   else 
-       {
-       PRINT( _L("Camera <> CCamPreCaptureContainerBase::HandlePointerEventL - outside button region") );
-       // Drags can potentially start from inside button area
-       if ( iCaptureIconPressed && aPointerEvent.iType != TPointerEvent::EDrag )
-           {
-           iCaptureIconPressed = EFalse;
-           DrawNow( captureRect );
-           }
-          
-       if ( !appUi->IsSecondCameraEnabled() )
-           {
-           // don't let zoom pane be used when capturing image
-           if ( iController.CurrentMode() != ECamControllerImage ||
-                ( iController.CurrentOperation() != ECamCapturing &&
-                  iController.CurrentOperation() != ECamCompleting &&
-                  iController.CurrentOperation() != ECamFocusing ) )
-               {
-               if ( iZoomPane )  
-                    {
-                    if ( iZoomPane->HandlePointerEventL( aPointerEvent ) )
-                        {
-                        ShowZoomPaneWithTimer(); 
-                        return;
-                        }
-                    }
-               }
-    
-            if ( aPointerEvent.iType == TPointerEvent::EButton1Down &&
-                  !appUi->DrawPreCaptureCourtesyUI() )
+           if ( iZoomPane )  
                 {
-                appUi->HandleCommandL( ECamCmdRaiseCourtesyUI );
+                if ( iZoomPane->HandlePointerEventL( aPointerEvent ) )
+                    {
+                    ShowZoomPaneWithTimer(); 
+                    return;
+                    }
                 }
-           CCamContainerBase::HandlePointerEventL( aPointerEvent );
            }
+
+        if ( aPointerEvent.iType == TPointerEvent::EButton1Down &&
+              !appUi->DrawPreCaptureCourtesyUI() )
+            {
+            appUi->HandleCommandL( ECamCmdRaiseCourtesyUI );
+            }
+       CCamContainerBase::HandlePointerEventL( aPointerEvent );
        }
 
     PRINT( _L("Camera <= CCamPreCaptureContainerBase::HandlePointerEventL") );
@@ -2904,64 +2862,64 @@ TInt CCamPreCaptureContainerBase::IndicatorVisible( TAny *aSelf )
     }
 
 // -------------------------------------------------------------
-// CCamPreCaptureContainerBase::DrawCaptureButton
-// -------------------------------------------------------------
-//
-void CCamPreCaptureContainerBase::DrawCaptureButton( CBitmapContext& aGc ) const
-    {
-    TRect containerRect = Rect();
-    TPoint iconTl( containerRect.Center().iX - KCaptureButtonWidth/2 + KCaptureIconDelta, 
-                   containerRect.iBr.iY - KCaptureButtonYDelta - KCaptureButtonWidth + KCaptureIconDelta );
-
-    aGc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-    aGc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-    aGc.SetPenStyle( CGraphicsContext::ENullPen );
-   
-    if ( iCaptureIconPressed )
-        {
-        aGc.SetBrushColor( KRgbBlack );
-        }
-    else
-        {
-        aGc.SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
-        }
-    aGc.DrawEllipse( iCaptureRect );    
-
-    aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
-    aGc.SetPenStyle( CGraphicsContext::ESolidPen );
-    aGc.BitBltMasked( iconTl, iCaptureIcon, KIconRect, iCaptureMask, EFalse );
-    }
-
-// -------------------------------------------------------------
 // CCamPreCaptureContainerBase::FocusChanged
 // -------------------------------------------------------------
 //
 void CCamPreCaptureContainerBase::FocusChanged( TDrawNow aDrawNow )
     {
-    PRINT2( _L("Camera <> CCamPreCaptureContainerBase::FocusChanged, draw:%d, focused:%d"), aDrawNow, 
-                IsFocused() );
-    iCaptureButtonShown = CaptureButtonActive();
-    if ( aDrawNow )
-        {
-        DrawNow();
-        }
+    PRINT3( _L("Camera <> CCamPreCaptureContainerBase::FocusChanged, draw:%d, focused:%d, button focused:%d"), 
+                aDrawNow, IsFocused(), 
+                iCaptureButtonContainer ? iCaptureButtonContainer->IsFocused() : 0 );
+    UpdateCaptureButton();
+    CCoeControl::FocusChanged( aDrawNow );
     }
 
 // -------------------------------------------------------------
-// CCamPreCaptureContainerBase::CaptureButtonActive
+// CCamPreCaptureContainerBase::UpdateCaptureButton
 // -------------------------------------------------------------
 //
-TBool CCamPreCaptureContainerBase::CaptureButtonActive() const
+void CCamPreCaptureContainerBase::UpdateCaptureButton()
     {
+    PRINT(_L("Camera => CCamPreCaptureContainerBase::UpdateCaptureButton"));
+    
     TBool buttonActive = EFalse;
-    if ( iController.UiConfigManagerPtr()->IsCustomCaptureButtonSupported() 
-            && iController.IsTouchScreenSupported() )
+    if ( iCaptureButtonContainer )
         {
-        buttonActive = IsFocused() && iController.CurrentOperation() == ECamNoOperation;
-        PRINT1( _L("Camera <> capture button active:%d"), buttonActive );
+        TCamCameraMode mode = iController.CurrentMode();
+        
+        buttonActive = ( IsFocused() || iCaptureButtonContainer->IsFocused() ) 
+                       && ECamNoOperation == iController.CurrentOperation()
+                       && ( ECamControllerImage == mode || ECamControllerVideo == mode );
+
+        PRINT1( _L("Camera <> capture button shown:%d"), buttonActive );
+        iCaptureButtonContainer->SetCaptureButtonShown( buttonActive );
         }
-    return buttonActive;
+    PRINT(_L("Camera <= CCamPreCaptureContainerBase::UpdateCaptureButton"));
     }
 
-// End of File  
+// -------------------------------------------------------------
+// CCamPreCaptureContainerBase::PrepareForCapture
+// -------------------------------------------------------------
+//
+void CCamPreCaptureContainerBase::PrepareForCapture()
+    {
+    if ( iZoomPane )
+        {
+        PRINT( _L("Camera <> CCamPreCaptureContainerBase::PrepareForCapture - StopZoom()") );
+        iZoomPane->StopZoom();
+        }
+    
+    // Stop blinking icon when capture is initiated
+    if ( iIndBlinkTimer && iIndBlinkTimer->IsActive() )
+        {
+        iIndBlinkTimer->Cancel();
+        iDrawIndicator = ETrue;
+        }
+    
+    if ( iCaptureButtonContainer )
+        {
+        iCaptureButtonContainer->SetCaptureButtonShown( EFalse );
+        }
+    }
+// End of File
 

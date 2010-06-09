@@ -277,16 +277,21 @@ iFullScreenVF(aFullScreenVF)
 //
 TInt CCamCaptureSetupContainer::CountComponentControls() const
     {
-    return 1; // Return the number of controls inside this container
+    return CCamContainerBase::CountComponentControls() + 1; // Return the number of controls inside this container
     }
 
 // ---------------------------------------------------------
 // CCamCaptureSetupContainer::ComponentControl
 // ---------------------------------------------------------
 //
-CCoeControl* CCamCaptureSetupContainer::ComponentControl(TInt /*aIndex*/) const
+CCoeControl* CCamCaptureSetupContainer::ComponentControl( TInt aIndex ) const
     {
-    return iCaptureSetupControl;
+    CCoeControl* control = CCamContainerBase::ComponentControl( aIndex );
+    if( control == NULL)
+        {
+        control = iCaptureSetupControl;
+        }
+    return control;
     }
 
 // ---------------------------------------------------------
@@ -395,11 +400,11 @@ TKeyResponse CCamCaptureSetupContainer::OfferKeyEventL(
     
     // If the Ok button or shutter key is pressed, select the current item
     if ( ( aKeyEvent.iCode == EKeyOK && aKeyEvent.iRepeats == 0 && aType == EEventKey ) ||
-         ( aType == EEventKeyDown && 
+         ( aType == EEventKey && 
          ( IsCaptureKeyL( aKeyEvent, aType ) || IsShutterKeyL( aKeyEvent, aType ) ) ) )  
         {
         TKeyResponse response = iCaptureSetupControl->OfferKeyEventL( aKeyEvent, aType );
-        if ( aType == EEventKeyDown && response == EKeyWasNotConsumed &&
+        if ( aType == EEventKey && response == EKeyWasNotConsumed &&
             ( ECamSettingItemDynamicPhotoFlash == iControlHandler.SettingType() ||
             ECamSettingItemDynamicSelfTimer == iControlHandler.SettingType() ) )
             {

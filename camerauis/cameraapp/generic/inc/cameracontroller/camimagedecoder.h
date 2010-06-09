@@ -30,7 +30,7 @@ class CFbsBitmap;
 class CImageDecoder;
 class MCameraBuffer;
 class CCamBufferShare;
-
+class CSvgEngineInterfaceImpl;
 
 // ===========================================================================
 // Classes
@@ -101,7 +101,7 @@ class CCamImageDecoder : public CActive
 
     void StartConversionL( CCamBufferShare* aBuffer );
     
-    void StartIconConversionL( TDesC* aFilePath );
+    void StartIconConversionL( TDesC* aFilePath, TSize& aSize );
 
   private:
 
@@ -154,7 +154,7 @@ class CCamImageDecoder : public CActive
 
     RFs                       iFs;
     MCamImageDecoderObserver& iObserver;
-    
+    CSvgEngineInterfaceImpl* iSvgEngine;
 
     CCamBufferShare* iSharedImageData;
     HBufC8*          iThumbnailData;

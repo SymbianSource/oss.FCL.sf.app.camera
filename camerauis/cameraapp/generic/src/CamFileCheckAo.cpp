@@ -99,6 +99,12 @@ void CCamFileCheckAo::RunL()
             PRINT1( _L("Camera <> CCamFileCheckAo::RunL: File %s didn't exist"),iArray->FileName( iFileIndex ).Ptr() )
             iArray->SetDeleted( iFileIndex, ETrue );             
             iFileCount--;
+            
+            // Avoid instant view switch from postcapture
+            // to precapture when the file was deleted
+            // in Photos or File Manager while camera
+            // postcapture view was in background.
+            User::After( 150000 ); 
             }  	
         }
     else

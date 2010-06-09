@@ -25,7 +25,6 @@
 #include <vgacamsettings.rsg>
 #include <centralrepository.h>
 
-
 #include "camoneclickuploadutility.h"
 #include "camlogging.h"
 #include "CamPanic.h"
@@ -362,7 +361,7 @@ void CCamOneClickUploadUtility::UpdateUploadIconL( CAknToolbar *aToolbar,
         PRINT( _L("Camera <> Decoding icon") );
         iToolbar = aToolbar;
         TRAPD( err, DecodeIconL( &currIcon ) );
-        if (err)
+        if ( err )
             {
             PRINT1( _L("Camera <> CamOneClickUploadUtility - Icon decoding failed: %d"), err );
             }
@@ -377,12 +376,19 @@ void CCamOneClickUploadUtility::UpdateUploadIconL( CAknToolbar *aToolbar,
             if ( button )
                 {
                 CAknButtonState* state = button->State();
-
-                CGulIcon *icon = CGulIcon::NewL( iIconImage, iIconMask );
+                CGulIcon *icon;
+                if ( iIconMask )
+                    {
+                    PRINT( _L("Camera <> Mask available") );
+                    icon =  CGulIcon::NewL( iIconImage, iIconMask );
+                    }
+                else
+                    {
+                    icon =  CGulIcon::NewL( iIconImage );
+                    }                
                 state->SetIcon( icon );
                 icon->SetBitmapsOwnedExternally( ETrue );
 
-                button->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
                 aToolbar->DrawNow();
                 }
             }
@@ -402,7 +408,30 @@ void CCamOneClickUploadUtility::DecodeIconL( TDesC* aPath )
         {
         iDecoder = CCamImageDecoder::NewL( *this );
         }
-    iDecoder->StartIconConversionL( aPath );
+    
+    TSize size( 44, 44 );
+    CAknButton* button = dynamic_cast<CAknButton*>(
+        iToolbar->ControlOrNull( ECamCmdDelete ) );
+    if ( button )
+        {
+        CAknButtonState* state = button->State();
+        if ( state )
+            {
+            const CGulIcon* icon = state->Icon();
+            if ( icon )
+                {
+                CFbsBitmap* bitmap = icon->Bitmap(); 
+                if ( bitmap )
+                    {
+                    if ( bitmap->SizeInPixels().iHeight > 0 )
+                        {
+                        size = bitmap->SizeInPixels();
+                        }
+                    }
+                }
+            }
+        }
+    iDecoder->StartIconConversionL( aPath, size );
 
     // Mark the given file as the icon in use when decoding has started
     iIconFileName.Copy( *aPath );
@@ -436,33 +465,27 @@ void CCamOneClickUploadUtility::ImageDecodedL( TInt aStatus, const CFbsBitmap* a
     
         if ( iToolbar )
             {
-            PRINT( _L("Displaying icon") );
+            PRINT( _L("Camera <> Ready to add icon to toolbar") );
             
             CAknButton* uploadButton =
                         static_cast<CAknButton*> (iToolbar->ControlOrNull(ECamCmdOneClickUpload));
             
-            CAknButtonState* currentState(NULL);
             if ( uploadButton )
                 {
-                currentState = uploadButton->State();
-                }
-            CGulIcon *icon(NULL);
-            if ( iIconMask )
-                {
-                icon =  CGulIcon::NewL( iIconImage, iIconMask );
-                }
-            else
-                {
-                icon =  CGulIcon::NewL( iIconImage ); //Prevent freed pointer warning
-                }
-            icon->SetBitmapsOwnedExternally( ETrue );
-            if ( currentState )
-                {
-                currentState->SetIcon( icon );
-                }
-            if ( uploadButton )
-                {
-                uploadButton->SetButtonFlags( KAknButtonNoFrame | KAknButtonPressedDownFrame );
+                PRINT( _L("Camera <> Creating new icon") );
+                CGulIcon *icon(NULL);
+                if ( iIconMask )
+                    {
+                    PRINT( _L("Camera <> Mask available") );
+                    icon =  CGulIcon::NewL( iIconImage, iIconMask );
+                    }
+                else
+                    {
+                    icon =  CGulIcon::NewL( iIconImage );
+                    }
+
+                icon->SetBitmapsOwnedExternally( ETrue );
+                uploadButton->State()->SetIcon( icon );
                 }
             iToolbar->DrawNow();
             }

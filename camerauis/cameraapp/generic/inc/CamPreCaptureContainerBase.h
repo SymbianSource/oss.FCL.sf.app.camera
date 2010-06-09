@@ -46,6 +46,7 @@ class CCamIndicator;
 class CCamTimeLapseSlider;
 class MCamVfGridDrawer;
 class CCamStartupLogo;
+class CCamCaptureButtonContainer;
 
 
 // ===========================================================================
@@ -74,7 +75,8 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     enum TCamPreCaptureSubControls
       {             
       // ECamTimeLapseControl         
-      ECamActivePalette
+      ECamActivePalette = 1,
+      ECamCaptureButton
       };
 
     enum TFocusState
@@ -165,7 +167,14 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     * @param aRect area where to draw
     */
     virtual void Draw( const TRect& aRect ) const;
-
+    
+    /**
+     * From CCoeControl.
+     * @since 5.2
+     * @param aDrawNow Flag to indicate if the container should be drawn
+     */
+    virtual void FocusChanged( TDrawNow aDrawNow );
+    
   // -------------------------------------------------------------------------
   // From MCamControllerObserver
   public:
@@ -272,28 +281,33 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     void BlinkResolutionIndicatorOnChange( TBool aBlink=ETrue );
     
     /**
-     * From CCoeControl.
-	 * @since 5.1
-	 * @param aDrawNow Flag to indicate if the container should be drawn
+     * Updates the visibility of the capture button 
+     * @since 5.2
      */
-    void FocusChanged( TDrawNow aDrawNow );
-
+    void UpdateCaptureButton();
+    
+    /**
+     * Perform the UI adjustments just before start of capture  
+     * @since 5.2
+     */
+    void PrepareForCapture();
+    
   protected: 
 
-        /**
-        * Callback for zoom timer when zoom pane needs to be hidden.
-        * @since 2.8
+    /**
+    * Callback for zoom timer when zoom pane needs to be hidden.
+    * @since 2.8
     * @param aObject - Pointer to instance of CCamPreCaptureContainerBase
-        * @return KErrNone
-        */
+    * @return KErrNone
+    */
     static TInt ZoomTimerCallback( TAny* aObject );
     
-        /**
-        * Callback for reticule timer, 
-        * @since 3.0
+    /**
+    * Callback for reticule timer, 
+    * @since 3.0
     * @param aObject - Pointer to instance of CCamPreCaptureContainerBase
-        * @return KErrNone
-        */
+    * @return KErrNone
+    */
     static TInt ReticuleTimerCallback( TAny* aObject );
 
         /**
@@ -396,13 +410,6 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     * @since S60 S60 v5.0
     */    
     void SizeChanged();
-    
-    /**
-     * Checks whether the custom capture button should be shown 
-     * @since 5.1
-     * @return ETrue if capture button should be active, EFalse otherwise
-     */
-    TBool CaptureButtonActive() const;
     
   private:
     /**
@@ -601,23 +608,16 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
 
     /**
      * Callback used by timer to blink resolution indicator
-     * @since 5.1
+     * @since 5.2
      * @param aSelf Pointer to self (container)
      */
     static TInt IndicatorVisible( TAny *aSelf );
     
     /**
      * Draw resolution indicator (for blinking).
-     * @since 5.1
+     * @since 5.2
      */
     void DrawResolutionIndicator();
-    
-    /**
-     * Draws Capture/Record button
-     * @since 5.1
-     * @param aGc The context to draw with
-     */
-    void DrawCaptureButton( CBitmapContext& aGc ) const;
 
   // =========================================================================
   // Data
@@ -668,11 +668,7 @@ class CCamPreCaptureContainerBase : public CCamContainerBase,
     TRect iReticuleRect;
 
     // Icons and rect for capturing image
-    CFbsBitmap *iCaptureIcon;
-    CFbsBitmap *iCaptureMask;
-    TRect iCaptureRect;
-    TBool iCaptureButtonShown;
-    TBool iCaptureIconPressed;
+    CCamCaptureButtonContainer* iCaptureButtonContainer;
 
     /**
      * Autofocus indication icons array.  

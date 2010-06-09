@@ -51,9 +51,6 @@ const TInt KGridThickness = 2;
 const TRgb KGridColor     = KRgbGray;
 const CGraphicsContext::TPenStyle KGridStyle = CGraphicsContext::ESolidPen;
 
-_LIT(KCamBitmapFile, "z:\\resource\\apps\\cameraapp.mif");
-const TSize KIconSize(35, 35);
-
 // ================= MEMBER FUNCTIONS =======================
 
 // ---------------------------------------------------------------------------
@@ -101,13 +98,6 @@ CCamStillPreCaptureContainer::~CCamStillPreCaptureContainer()
       delete iFlashBitmap;
       delete iFlashBitmapMask;
       }
-  
-  if ( iCaptureIcon )
-      {
-      delete iCaptureIcon;
-      delete iCaptureMask;
-      }
-  
   PRINT( _L("Camera <= ~CCamStillPreCaptureContainer" ))
   }
 
@@ -160,16 +150,6 @@ void CCamStillPreCaptureContainer::ConstructL( const TRect& aRect )
           ->SetupActivePaletteL( static_cast<CCamViewBase*>(&iView) );
       OstTrace0( CAMERAAPP_PERFORMANCE, DUP1_CCAMSTILLPRECAPTURECONTAINER_CONSTRUCTL, "e_CAM_APP_AP_SETUP 0" );
       }
-  
-  // Load capture icon
-  AknIconUtils::CreateIconL(
-           iCaptureIcon,
-           iCaptureMask,
-           KCamBitmapFile(),
-           EMbmCameraappQgn_indi_cam4_capture,
-           EMbmCameraappQgn_indi_cam4_capture_mask );
-  AknIconUtils::SetSize( iCaptureIcon, KIconSize, EAspectRatioPreserved );
-  AknIconUtils::SetSize( iCaptureMask, KIconSize, EAspectRatioPreserved );
 
   PRINT( _L("Camera <= CCamStillPreCaptureContainer::ConstructL" ))
   }
@@ -663,6 +643,20 @@ CCamStillPreCaptureContainer::HandleCaptureKeyEventL( const TKeyEvent& aKeyEvent
       return EKeyWasNotConsumed;
       }
     }
+  if ( iController.UiConfigManagerPtr() 
+         && !iController.UiConfigManagerPtr()->IsAutoFocusSupported()
+         && iController.IsTouchScreenSupported() )
+         {
+         CAknToolbar* fixedToolbar = appui->CurrentFixedToolbar();
+         if ( fixedToolbar )
+            {
+             CAknToolbarExtension* extension = fixedToolbar->ToolbarExtension();
+            if ( extension )
+                {
+                 extension->SetShown( EFalse ); 
+                }
+             }
+         }
 
   // Go straight to capture
   keyResponse = appui->StartCaptureL( aKeyEvent );

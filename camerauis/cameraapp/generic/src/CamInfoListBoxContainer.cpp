@@ -312,7 +312,7 @@ void CCamInfoListBoxContainer::HandleSettingValueUpdateL( TInt aNewValue )
 //
 TInt CCamInfoListBoxContainer::CountComponentControls() const
     {
-    return 1;
+    return CCamContainerBase::CountComponentControls() + 1;
     }
 
 // ---------------------------------------------------------
@@ -320,9 +320,14 @@ TInt CCamInfoListBoxContainer::CountComponentControls() const
 // Returns the requested component control
 // ---------------------------------------------------------
 //
-CCoeControl* CCamInfoListBoxContainer::ComponentControl( TInt /*aIndex*/ ) const
+CCoeControl* CCamInfoListBoxContainer::ComponentControl( TInt aIndex ) const
     {
-    return iListBox;
+    CCoeControl* control = CCamContainerBase::ComponentControl( aIndex );
+    if( control == NULL)
+        {
+        control = iListBox;
+        }
+    return control;
     }
 
 // ---------------------------------------------------------
@@ -411,7 +416,7 @@ TKeyResponse CCamInfoListBoxContainer::OfferKeyEventL(
     
     // If the Ok button or shutter key is pressed, select the current item
     if ( ( aKeyEvent.iCode == EKeyOK && aKeyEvent.iRepeats == 0 && aType == EEventKey ) ||
-         ( aType == EEventKeyDown && 
+         ( aType == EEventKey && 
          ( IsCaptureKeyL( aKeyEvent, aType ) || IsShutterKeyL( aKeyEvent, aType ) ) ) )
         {
         TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );

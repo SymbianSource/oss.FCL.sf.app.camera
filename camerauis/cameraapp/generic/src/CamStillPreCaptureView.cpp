@@ -1182,8 +1182,6 @@ void CCamStillPreCaptureView::DoActivateL( const TVwsViewId& aPrevViewId,
           CAknToolbar* toolbar = Toolbar();
           toolbar->SetToolbarVisibility(EFalse);
           }
-
-      UpdateToolbarIconsL();
       }
   else
       {
@@ -1351,6 +1349,7 @@ void CCamStillPreCaptureView::DynInitToolbarL( TInt aResourceId,
 //
 void CCamStillPreCaptureView::UpdateToolbarIconsL()
     {
+    PRINT( _L("Camera => CCamStillPreCaptureView::UpdateToolbarIconsL") );
 	OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, CCAMSTILLPRECAPTUREVIEW_UPDATETOOLBARICONSL, "e_CCamStillPreCaptureView_UpdateToolbarIconsL 1" );
     // fixed toolbar is used only with touch devices
     if(!iController.IsTouchScreenSupported())
@@ -1366,9 +1365,10 @@ void CCamStillPreCaptureView::UpdateToolbarIconsL()
 	UpdateSelfTimerIconsL();
 	UpdateVFGridIconsL();
 	UpdateBurstModeIconsL();
-	UpdateFaceTracKingIconsL(); 
+	UpdateFaceTrackingIconsL(); 
 	RedrawToolBar();
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP1_CCAMSTILLPRECAPTUREVIEW_UPDATETOOLBARICONSL, "e_CCamStillPreCaptureView_UpdateToolbarIconsL 0" );
+    PRINT( _L("Camera <= CCamStillPreCaptureView::UpdateToolbarIconsL") );
     }
 
 // ---------------------------------------------------------------------------
@@ -2148,7 +2148,7 @@ void CCamStillPreCaptureView::UpdateVFGridIconsL()
                     EMbmCameraappQgn_indi_cam4_viewfinder_off_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ViewfinderOff );
-                HBufC* buttonText = StringLoader::LoadLC( R_QTN_LCAM_TB_HIDE_VIEWFINDER_GRID );
+                HBufC* buttonText = StringLoader::LoadLC( R_QTN_LCAM_TB_GRID );
                 state->SetTextL( *buttonText );
                 CleanupStack::PopAndDestroy( buttonText );
                 }
@@ -2161,7 +2161,7 @@ void CCamStillPreCaptureView::UpdateVFGridIconsL()
                     EMbmCameraappQgn_indi_cam4_viewfinder_on_mask,
                     skinInstance,
                     KAknsIIDQgnIndiCam4ViewfinderOn );
-                HBufC* buttonText = StringLoader::LoadLC( R_QTN_LCAM_TB_SHOW_VIEWFINDER_GRID );
+                HBufC* buttonText = StringLoader::LoadLC( R_QTN_LCAM_TB_GRID );
                 state->SetTextL( *buttonText );
                 CleanupStack::PopAndDestroy( buttonText );
                 }
@@ -2232,48 +2232,47 @@ void CCamStillPreCaptureView::UpdateBurstModeIconsL()
 // CCamStillPreCaptureView::UpdateFaceTrackingIconsL 
 // ---------------------------------------------------------------------------
 //
-void CCamStillPreCaptureView::UpdateFaceTracKingIconsL()
+void CCamStillPreCaptureView::UpdateFaceTrackingIconsL()
     {
     CAknButton* button = ToolbarButtonById(  ECamCmdToggleFacetracking  );
       
     if ( button )
-              {
-              CAknButtonState* state = button->State();
-              if ( state )
-                  {
-                  TInt face = iController.IntegerSettingValue(  ECamSettingItemFaceTracking );
+        {
+        CAknButtonState* state = button->State();
+        if ( state )
+            {
+            TInt face = iController.IntegerSettingValue( 
+                ECamSettingItemFaceTracking );
                  
-                MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
-                TFileName iconFileName;
-                CamUtility::ResourceFileName( iconFileName );  
-                  if ( face == ECamSettOff )
-                      {
-                      PRINT( _L( "Camera => UpdateFaceTrackingIconL on" ) ); 
-                      SetIconL (
-                                button,
-                                iconFileName,
-                                EMbmCameraappQgn_indi_cam4_tb_facedet_off,
-                                EMbmCameraappQgn_indi_cam4_tb_facedet_off_mask,
-                                skinInstance,
-                                KAknsIIDQgnIndiCam4TbFacedetOff );
-                      
-                      }
-                  else
-                      {
-                      PRINT( _L( "Camera => UpdateFaceTrackingIconL off" ) ); 
-                      SetIconL (
-                                 button,
-                                 iconFileName,
-                                 EMbmCameraappQgn_indi_cam4_tb_facedet,
-                                 EMbmCameraappQgn_indi_cam4_tb_facedet_mask,
-                                 skinInstance,
-                                 KAknsIIDQgnIndiCam4TbFacedet );
-                      }
-                  }
-              }
-    
-          
-      
-     }
+            MAknsSkinInstance* skinInstance = AknsUtils::SkinInstance();
+            TFileName iconFileName;
+            CamUtility::ResourceFileName( iconFileName );  
+            if ( face == ECamSettOff )
+                {
+                PRINT( _L( "Camera => UpdateFaceTrackingIconL off" ) ); 
+                SetIconL (
+                    button,
+                    iconFileName,
+                    EMbmCameraappQgn_indi_cam4_tb_facedet_off,
+                    EMbmCameraappQgn_indi_cam4_tb_facedet_off_mask,
+                    skinInstance,
+                    KAknsIIDQgnIndiCam4TbFacedetOff );
+                }
+            else
+                {
+                PRINT( _L( "Camera => UpdateFaceTrackingIconL on" ) ); 
+                SetIconL (
+                          button,
+                          iconFileName,
+                          EMbmCameraappQgn_indi_cam4_tb_facedet,
+                          EMbmCameraappQgn_indi_cam4_tb_facedet_mask,
+                          skinInstance,
+                          KAknsIIDQgnIndiCam4TbFacedet );
+                }
+            }
+        }
+    // Update the status indicator too.
+    iController.NotifyControllerObservers( ECamEventFaceTrackingStateChanged );
+    }
 
 //  End of File  

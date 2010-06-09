@@ -43,7 +43,7 @@ class CCamPostCaptureContainer : public CCamContainerBase,
     
     enum TCamPostCaptureSubControls
         {
-        ECamPostCaptureSubControlNaviPane,
+        ECamPostCaptureSubControlNaviPane = 1,
         ECamPostCaptureActivePalette
         };
     

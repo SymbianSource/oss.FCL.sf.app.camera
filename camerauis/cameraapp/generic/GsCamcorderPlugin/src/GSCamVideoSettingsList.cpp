@@ -240,15 +240,61 @@ CAknSettingItem* CGSCamVideoSettingsList::CreateSettingItemL( TInt aIdentifier )
                 {
                 iDrive = static_cast<TDriveNumber>(0); //Doesn't matter
                 }
-            TInt includedMedias = AknCommonDialogsDynMem::EMemoryTypeMMCExternal |
-                                 AknCommonDialogsDynMem::EMemoryTypeInternalMassStorage;   
+            TInt includedMedias(0);
+            CGSCamcorderPlugin* parent = static_cast<CGSCamcorderPlugin*> 
+                                        ( AppUi->View( KGSCamcorderGSPluginUid ) );
+            TInt driveCount(0);
+            if( !parent->IntegerSettingValue(ECamSettingItemRemovePhoneMemoryUsage) )
+                {
+                includedMedias |= AknCommonDialogsDynMem::EMemoryTypePhone;
+                driveCount++;
+                }
+            
+            TInt drive(0);
+            TUint driveStatus(0);    
+            TInt err(0);
+            err = DriveInfo::GetDefaultDrive( DriveInfo::EDefaultMassStorage, drive );
+            if( err == KErrNone )
+                {
+                err = DriveInfo::GetDriveStatus( CCoeEnv::Static()->FsSession(), 
+                                                 drive, 
+                                                 driveStatus );
+                if( err == KErrNone )
+                    {
+                    if( ( driveStatus & DriveInfo::EDrivePresent) ==  DriveInfo::EDrivePresent )
+                        {
+                        includedMedias |= AknCommonDialogsDynMem::EMemoryTypeInternalMassStorage;
+                        driveCount++;
+                        }
+                    }
+                }
+            
+            err = DriveInfo::GetDefaultDrive( DriveInfo::EDefaultRemovableMassStorage, drive );
+            if( err == KErrNone )
+                {
+                err = DriveInfo::GetDriveStatus( CCoeEnv::Static()->FsSession(), 
+                                                 drive, 
+                                                 driveStatus );
+                if( err == KErrNone )
+                    {
+                    if( ( driveStatus & DriveInfo::EDrivePresent) ==  DriveInfo::EDrivePresent )
+                        {
+                        includedMedias |= AknCommonDialogsDynMem::EMemoryTypeMMCExternalInDevice;
+                        driveCount++;
+                        }
+                    }
+                }
             settingItem = new ( ELeave ) 
                           CAknMemorySelectionSettingItemMultiDrive(
                                                               aIdentifier,
                                                               iDrive
                                                               );
             static_cast<CAknMemorySelectionSettingItemMultiDrive*>(settingItem)
-                                            ->SetIncludedMediasL(includedMedias);
+                                ->SetIncludedMediasL(includedMedias);
+            if( driveCount <= 1 )
+                {
+                settingItem->SetHidden( ETrue );
+                }
             break;
             }
         case ECamSettingItemVideoNameBaseType:

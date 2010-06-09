@@ -498,7 +498,7 @@ void CCamShootingModeContainer::HandleSettingValueUpdateL( TInt /*aNewValue*/ )
 //
 TInt CCamShootingModeContainer::CountComponentControls() const
     {
-    return 1;
+    return CCamContainerBase::CountComponentControls() + 1;
     }
 
 // ---------------------------------------------------------
@@ -506,9 +506,14 @@ TInt CCamShootingModeContainer::CountComponentControls() const
 // Returns the requested component control
 // ---------------------------------------------------------
 //
-CCoeControl* CCamShootingModeContainer::ComponentControl( TInt /*aIndex*/ ) const
+CCoeControl* CCamShootingModeContainer::ComponentControl( TInt aIndex ) const
     {
-    return iListBox;
+    CCoeControl* control = CCamContainerBase::ComponentControl( aIndex );
+    if( control == NULL )
+        {
+        control = iListBox;
+        }
+    return control;
     }
 
 // ---------------------------------------------------------
@@ -587,7 +592,7 @@ TKeyResponse CCamShootingModeContainer::OfferKeyEventL(
     if ( iController.UiConfigManagerPtr()
          && iController.UiConfigManagerPtr()->IsAutoFocusSupported() )
         {
-        if( aType == EEventKeyDown && IsShutterKeyL( aKeyEvent, aType ) )
+        if( aType == EEventKey && IsShutterKeyL( aKeyEvent, aType ) )
             {
             TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );
             if( UserSceneHighlighted() )
@@ -601,7 +606,7 @@ TKeyResponse CCamShootingModeContainer::OfferKeyEventL(
             return response;
             }
         }
-    else if( aType == EEventKeyDown && IsCaptureKeyL( aKeyEvent, aType ) )
+    else if( aType == EEventKey && IsCaptureKeyL( aKeyEvent, aType ) )
         {
         TKeyResponse response = iListBox->OfferKeyEventL( aKeyEvent, aType );
         if( UserSceneHighlighted() )

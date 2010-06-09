@@ -45,10 +45,11 @@
 #include "camactivepalettehandler.h"
 #include "camoneclickuploadutility.h"
 #include "CameraUiConfigManager.h"
-
+#include "CamTimer.h"
 
 
 //CONSTANTS
+const TInt KHdmiTimeout = 1000000; //1 sec
 
 // ========================= MEMBER FUNCTIONS ================================
 
@@ -75,7 +76,12 @@ CCamVideoPostCaptureView* CCamVideoPostCaptureView::NewLC( CCamAppController& aC
 // ---------------------------------------------------------------------------
 //
 CCamVideoPostCaptureView::~CCamVideoPostCaptureView()
-    {     
+    {
+    if( iHdmiTimer )
+        {
+        delete iHdmiTimer;
+        iHdmiTimer = NULL;
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -318,6 +324,9 @@ void CCamVideoPostCaptureView::DoActivateL(
         iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ), 
                 R_CAM_SET_AS_RING_TONE_INTEREST );
         }
+    if( iHdmiTimer->IsActive() )
+        iHdmiTimer->Cancel();
+    iHdmiTimer->StartTimer();
     }
 
 // ---------------------------------------------------------------------------
@@ -340,7 +349,7 @@ void CCamVideoPostCaptureView::ConstructL()
     PRINT( _L("Camera => CCamVideoPostCaptureView::ConstructL"))
     BaseConstructL( ROID(R_CAM_VIDEO_POST_CAPTURE_VIEW_ID));
     CCamPostCaptureViewBase::ConstructL();
-
+    iHdmiTimer = CCamTimer::NewL( KHdmiTimeout, TCallBack(HdmiTimerCallback, this));
     PRINT( _L("Camera <= CCamVideoPostCaptureView::ConstructL"))
     }
 
@@ -618,6 +627,31 @@ void CCamVideoPostCaptureView::DynInitToolbarL( TInt aResourceId,
         }
 
     PRINT2( _L("Camera <= CCamVideoPostCaptureView::DynInitToolbarL(%d, 0x%X)" ), aResourceId, aToolbar );
+    }
+	
+// ---------------------------------------------------------------------------
+// CCamVideoPostCaptureView::HdmiTimerCallback
+// ---------------------------------------------------------------------------
+//
+TInt CCamVideoPostCaptureView::HdmiTimerCallback( TAny* aSelf )
+    {
+    CCamVideoPostCaptureView* self = static_cast<CCamVideoPostCaptureView*>(aSelf);
+    TInt err(0);
+    if( self )
+        {
+        TRAP(err, self->DoHdmiTimerCallbackL() );
+        }
+    PRINT1( _L("Camera <> CCamVideoPostCaptureView::HdmiTimerCallback err=%d"), err);
+    return err;
+    }
+
+// ---------------------------------------------------------------------------
+// CCamVideoPostCaptureView::DoHdmlTimerCallbackL
+// ---------------------------------------------------------------------------
+//
+void CCamVideoPostCaptureView::DoHdmiTimerCallbackL()
+    {
+    iController.HandlePostHdmiConnectDuringRecordingEventL();
     }
 
     

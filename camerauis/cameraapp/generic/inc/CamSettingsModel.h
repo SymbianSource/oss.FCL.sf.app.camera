@@ -368,7 +368,7 @@ class CCamSettingsModel : public CBase,
   public:
 
     /*
-    * Sets user scene setting to default if user has once selected
+    * Sets user scene setting to default
     */
 	void SetUserSceneDefault(); 
     

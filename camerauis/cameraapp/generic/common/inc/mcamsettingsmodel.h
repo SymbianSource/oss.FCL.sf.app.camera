@@ -312,6 +312,19 @@ class MCamSettingsModel
     virtual void SetPreviousSceneMode( TCamSceneId aPreviousSceneMode ) = 0;
     
     /**
+    * Sets user scene setting to default
+    */
+    virtual void SetUserSceneDefault() = 0;
+    
+    /**
+    * Handles a change in the value for the photo scene setting.
+    * That is, it updates the rest of the photo dynamic setings.
+    * @param the new scene value.
+    * @since 2.8
+    */
+    virtual void PhotoSceneHasChangedL( TInt aSettingValue ) = 0;
+    
+    /**
     * Store UserScene settings
     * @since 5.1
     */

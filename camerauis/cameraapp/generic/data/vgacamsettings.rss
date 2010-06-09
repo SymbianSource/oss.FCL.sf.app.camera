@@ -387,6 +387,35 @@ RESOURCE TBUF r_qtn_lcam_tt_video_editor
 	{
 	buf = qtn_lcam_tt_video_editor;
 	}
+
+//-----------------------------------------------------------------------------
+//
+//    r_qtn_lcam_hdmi_cable_detected
+//    This popup note is displayed when HDMI cable is plugged to the device
+//    while video recording is ongoing. Video recording is not allowed
+//    with HDMI connection.
+//    popup_note_window
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_lcam_hdmi_cable_detected
+	{
+	buf = qtn_lcam_hdmi_cable_detected;
+	}
+
+//-----------------------------------------------------------------------------
+//
+//    r_qtn_lcam_hdmi_remove_cable
+//    This popup note is displayed when user tries to start 
+//    video recording while HDMI cable is plugged. 
+//    Video recording is not allowed with HDMI connection.
+//    popup_note_window
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_lcam_hdmi_remove_cable
+	{
+	buf = qtn_lcam_hdmi_remove_cable;
+	}
+
 	
 /**************************************
 *         Other structures            *
@@ -1457,7 +1486,7 @@ RESOURCE AVKON_TOOLBAR r_cam_still_precapture_toolbar
                                 {
                                 AVKON_BUTTON_STATE
                                     {
-                                    txt = qtn_lcam_tb_show_viewfinder_grid;
+                                    txt = qtn_lcam_tb_grid;
                                     }
                                 };
                             };
@@ -3178,6 +3207,18 @@ RESOURCE TBUF r_qtn_lcam_tb_show_viewfinder_grid
 RESOURCE TBUF r_qtn_lcam_tb_hide_viewfinder_grid 
     {
     buf = qtn_lcam_tb_hide_viewfinder_grid;
+    }
+
+//----------------------------------------------------
+//   
+//    r_qtn_lcam_tb_grid
+//    Text for the 'grid' button in toolbar extension
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_lcam_tb_grid 
+    {
+    buf = qtn_lcam_tb_grid;
     }
 
 //----------------------------------------------------

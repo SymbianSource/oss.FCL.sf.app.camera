@@ -1356,7 +1356,7 @@ TBool CCamZoomModel::AllowDigZoom() const
         }
     else
         {
-        PRINT( _L( "Camera <= CCamZoomModel::AllowDigZoom ETrue" ) );
+        PRINT( _L( "Camera <= CCamZoomModel::AllowDigZoom False" ) );
         return EFalse;   
         }      
     }
