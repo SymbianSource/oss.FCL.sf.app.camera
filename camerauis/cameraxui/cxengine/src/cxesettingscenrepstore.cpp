@@ -314,6 +314,18 @@ void CxeSettingsCenRepStore::mapKeys()
     addKeyMapping(CxeSettingIds::VIDEO_MUTE_SETTING,
                   AudioMuteCr,
                   XQSettingsManager::TypeInt);
+    
+    addKeyMapping(CxeSettingIds::GEOTAGGING,
+                  GeoTaggingCr,
+                  XQSettingsManager::TypeInt);
+
+    addKeyMapping(CxeSettingIds::FACE_TRACKING,
+                  FacetrackingCr,
+                  XQSettingsManager::TypeInt);
+
+    addKeyMapping(CxeSettingIds::CAPTURE_SOUND_ALWAYS_ON,
+                  CaptureSoundAlwaysOnCr,
+                  XQSettingsManager::TypeInt);
 
     // mapping run-time keys
     addKeyMapping(CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS,

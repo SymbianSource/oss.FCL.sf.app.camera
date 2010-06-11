@@ -55,3 +55,22 @@ void CxuiZoomSlider::mousePressEvent(QGraphicsSceneMouseEvent *event)
     // underneath this slider
     event->accept();
 }
+
+/*!
+* Adding zoom buttons to the slider
+*/
+void CxuiZoomSlider::addZoomButtons()
+{
+    // get current slider elements
+    QList<QVariant> elements = sliderElements();
+
+    // add increase and decrease elements to the slider
+    elements << HbSlider::IncreaseElement << HbSlider::DecreaseElement;
+    setSliderElements(elements);
+
+    // set icons for the increase and decrease element
+    setElementIcon(HbSlider::DecreaseElement , HbIcon("qtg_mono_minus"));
+    setElementIcon(HbSlider::IncreaseElement , HbIcon("qtg_mono_plus"));
+}
+
+//End of file

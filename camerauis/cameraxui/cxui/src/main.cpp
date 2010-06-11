@@ -51,6 +51,11 @@ int main(int argc, char *argv[])
 
     Q_INIT_RESOURCE(cxui);
 
+    // Use software rendering / raster graphics system to save GPU memory.
+    CX_DEBUG(("CxUI: Take raster graphics system into use.."));
+    QApplication::setGraphicsSystem("raster");
+    CX_DEBUG(("CxUI: ..raster graphics system in use"));
+
     OstTrace0( camerax_performance, DUP1__MAIN, "msg: e_CX_HBAPP_CREATION 1" );
     CxuiApplication app(argc, argv);
     OstTrace0( camerax_performance, DUP2__MAIN, "msg: e_CX_HBAPP_CREATION 0" );

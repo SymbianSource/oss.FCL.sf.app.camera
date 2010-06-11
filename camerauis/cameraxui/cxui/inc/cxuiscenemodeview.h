@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -31,6 +31,7 @@
 #include "cxuisettingsinfo.h"
 #include "cxuienums.h"
 #include "cxeengine.h"
+#include "cxuiview.h"
 
 class CxuiCaptureKeyHandler;
 class CxuiDocumentLoader;
@@ -45,7 +46,7 @@ class CxuiSettingsInfo;
  */
 
 
-class CxuiSceneModeView : public HbView
+class CxuiSceneModeView : public CxuiView
 {
     Q_OBJECT
 
@@ -76,28 +77,20 @@ private slots:
     void finishScenesTransition();
     void handleOkButtonPress();
     void handleCancelButtonPress();
-    void releaseCameraHw();
 
 protected:
     void showEvent(QShowEvent *event);
+    bool allowShowControls() const;
 
 private:
     QString backgroundForScene(const QString& sceneId);
     void startBackgroundTransition();
-    void createWidgetBackgroundGraphic(HbWidget *widget,
-                           const QString &graphicName,
-                           HbFrameDrawer::FrameType frameType =
-                           HbFrameDrawer::NinePieces);
 
     void connectSignals();
     void closeView();
 
 private:
-    HbMainWindow *mMainWindow; //not own
     CxuiSettingsInfo *mSettingsInfo;
-    CxeEngine *mEngine; //not own
-    CxuiDocumentLoader *mDocumentLoader; //not own
-    CxuiCaptureKeyHandler *mCaptureKeyHandler;
 
     HbLabel* mScenesBackground;
     HbLabel* mScenesBackground2;

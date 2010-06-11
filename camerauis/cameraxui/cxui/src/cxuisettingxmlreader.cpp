@@ -18,6 +18,7 @@
 #include <QPair>
 #include <QtXml>
 #include <QFile>
+#include <hbparameterlengthlimiter.h>
 
 
 #include "cxutils.h"
@@ -34,7 +35,8 @@ namespace
     static const char *TAG_SETTING_LIST                   = "setting_list";
     static const char *TAG_SETTING_SLIDER                 = "setting_slider";
     static const char *TAG_ITEM                           = "item";
-    static const char *TAG_ITEM_VARIANT                   = "lnItem";
+    static const char *TAG_ITEM_VARIANT_LN                = "lnItem";
+    static const char *TAG_ITEM_VARIANT_L1                = "l1Item";
     static const char *TAG_SETUP                          = "setup";
 
     static const char *ATTRIBUTE_ID                       = "id";
@@ -47,6 +49,7 @@ namespace
     static const char *ATTRIBUTE_VALUE                    = "value";
     static const char *ATTRIBUTE_LOCALIZATION_ID          = "string";
     static const char *ATTRIBUTE_LOCALIZATION_ID_LN_VALUE = "lnValue";
+    static const char *ATTRIBUTE_LOCALIZATION_ID_L1_VALUE = "l1Value";
 
     static const char *ATTRIBUTE_SLIDER_MIN               = "min";
     static const char *ATTRIBUTE_SLIDER_MAX               = "max";
@@ -310,18 +313,26 @@ CxUiSettings::RadioButtonListParams *CxuiSettingXmlReader::parseSettingList(cons
             value.setValue(string);
         }
 
-
         // get the string text id from the xml, and format based on type.
         string = e.attribute(ATTRIBUTE_LOCALIZATION_ID);
         if (e.tagName() == TAG_ITEM) {
-            // get the localizable string from the hbtrid
+            // string without parameters: get localised string
             string = hbTrId(string.toAscii().constData());
-        } else if (e.tagName() == TAG_ITEM_VARIANT) {
+            CX_DEBUG(("tag name <%s>", e.tagName().toAscii().constData()));
+        } else if (e.tagName() == TAG_ITEM_VARIANT_L1) {
+            // string with numeric parameter: get localised string and add numeric parameter
+            QString l1Value = e.attribute(ATTRIBUTE_LOCALIZATION_ID_L1_VALUE);
+            string = hbTrId(string.toAscii().constData()).arg(l1Value.toInt());
+            CX_DEBUG(("tag name <%s>", e.tagName().toAscii().constData()));
+            CX_DEBUG(("attribute [%s] value[%s]", ATTRIBUTE_LOCALIZATION_ID_L1_VALUE,
+                     string.toAscii().constData()));
+        } else if (e.tagName() == TAG_ITEM_VARIANT_LN) {
             QString lnValue = e.attribute(ATTRIBUTE_LOCALIZATION_ID_LN_VALUE);
-            // format the setting string
-            string = hbTrId(string.toAscii().constData(), lnValue.toInt());
+            // string with count parameter: get localised string and add plural form numeric parameter
+            string = HbParameterLengthLimiter(string.toAscii().constData(), lnValue.toInt());
+            CX_DEBUG(("tag name <%s>", e.tagName().toAscii().constData()));
+            CX_DEBUG(("attribute [%s] value[%s]", ATTRIBUTE_LOCALIZATION_ID_LN_VALUE, string.toAscii().constData()));
         }
-        CX_DEBUG(("attribute [%s] value[%s]", ATTRIBUTE_LOCALIZATION_ID, string.toAscii().constData()));
 
         if (!string.isNull()) {
             CxUiSettings::SettingItem setting;
@@ -382,14 +393,14 @@ CxUiSettings::SliderParams *CxuiSettingXmlReader::parseSettingSlider(const QDomE
         stepString = e.attribute(ATTRIBUTE_SLIDER_MAJOR_STEP);
         p->mMajorStep = stepString.toReal();
 
-        // get the ln value from xml to generate strings for slider
-        QString lnValue = e.attribute(ATTRIBUTE_LOCALIZATION_ID_LN_VALUE);
+        // get the l1 value from xml to generate strings for slider
+        QString l1Value = e.attribute(ATTRIBUTE_LOCALIZATION_ID_L1_VALUE);
 
         // Don't create labels for slider if no strings are defined in settinsg xml
         // Create labels only for major ticks
         if (!minString.isEmpty() && !maxString.isEmpty()) {
             qreal step = p->mMajorStep;
-            qreal value = lnValue.toDouble();
+            qreal value = l1Value.toDouble();
             // generating all negative valued strings for slider setting
             while (value > 0) {
                 // format the setting string
@@ -401,7 +412,7 @@ CxUiSettings::SliderParams *CxuiSettingXmlReader::parseSettingSlider(const QDomE
             // generating all non-negative valued strings for slider setting
             step = p->mMajorStep;
             value = 0;
-            while(value <= lnValue.toInt()) {
+            while(value <= l1Value.toInt()) {
                 // format the setting string
                 QString str = hbTrId(maxString.toAscii().constData()).arg(value,0,'f',1);
                 p->mSettingStrings.append(str);
@@ -409,8 +420,8 @@ CxUiSettings::SliderParams *CxuiSettingXmlReader::parseSettingSlider(const QDomE
             }
         }
 
-        int min = -lnValue.toInt();
-        int max = lnValue.toInt();
+        int min = -l1Value.toInt();
+        int max = l1Value.toInt();
 
         p->mRange = qMakePair(min, max);
     }

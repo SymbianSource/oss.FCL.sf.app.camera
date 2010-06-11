@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,8 +20,8 @@
 #include <QObject>
 #include <QList>
 #include <QTimer>
-#include <hbview.h>
 #include <xqappmgr.h>
+#include "cxuiview.h"
 
 class QGraphicsRectItem;
 class HbMainWindow;
@@ -35,7 +35,7 @@ class CxuiDocumentLoader;
 /**
  * Post-capture view
  */
-class CxuiPostcaptureView : public HbView
+class CxuiPostcaptureView : public CxuiView
 {
     Q_OBJECT
 
@@ -66,42 +66,34 @@ protected:
 protected slots:
     void goToPrecaptureView();
     void stopViewfinder();
-    void releaseCamera();
 
-    // Control visibility
-    void hideControls();
-    void showControls();
-    void toggleControls();
+    void hideToolbar();
 
     // toolbar actions
-    void launchPhotosApp();
     void select();
     void launchShare();
     void playVideo();
     void showDeleteNote();
-    void launchVideosApp();
 
     void handleDeleteDialogClosed(HbAction *action);
 
 private:
-    void launchNotSupportedNotification();
     QString getCurrentFilename();
 
-private slots:
     void startTimers();
+    void startPostcaptureTimer();
+    void startReleaseTimers();
+
+private slots:
+    void handleFocusGained();
     void handleFocusLost();
 
 private: // data
-    HbMainWindow *mMainWindow; // not own
-    CxeEngine *mEngine; // not own
-    CxuiDocumentLoader *mDocumentLoader; // not own
     HbToolBar *mStillToolbar;
     HbToolBar *mVideoToolbar;
     HbToolBar *mEmbeddedToolbar;
     QGraphicsRectItem *mBackgroundItem;
     HbLabel *mImageLabel;
-
-    QTimer mHideControlsTimeout;
 
     /**
      * Timer used to stop viewfinder after a delay if the user remains in
@@ -125,11 +117,11 @@ private: // data
     */
     QTimer mPostcaptureTimer;
 
-    bool mControlsVisible;
-
     bool mTimersStarted;
-    
+
     XQApplicationManager mAppManager;
+
+    bool mDeleteNoteOpen;
 
 };
 

@@ -587,7 +587,7 @@ void CxuiViewManager::connectPostCaptureSignals()
     QObject *currentView = mMainWindow.currentView();
     if (currentView == mPostcaptureView) {
         // connecting view manager focus events to pre-capture views
-        connect(this, SIGNAL(focusGained()),  currentView, SLOT(startTimers()), Qt::UniqueConnection);
+        connect(this, SIGNAL(focusGained()),  currentView, SLOT(handleFocusGained()), Qt::UniqueConnection);
         connect(this, SIGNAL(focusLost()),    currentView, SLOT(handleFocusLost()), Qt::UniqueConnection);
         connect(currentView, SIGNAL(changeToPrecaptureView()), mStandbyHandler, SLOT(startTimer()), Qt::UniqueConnection);
 

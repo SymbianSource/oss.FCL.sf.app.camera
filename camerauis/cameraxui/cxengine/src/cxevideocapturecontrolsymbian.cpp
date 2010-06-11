@@ -181,13 +181,19 @@ void CxeVideoCaptureControlSymbian::deinit()
         // stop video-recording in-case if its ongoing.
         stop();
 
+        // Check if state is stopping, in which case we have to inform the
+        // file harvester that a file is to be completed. We would not
+        // call harvestFile otherwise in this case.
+        // Otherwise the video will not be found from videos app.
+        if (state() == Stopping) {
+            emit videoComposed(CxeError::None, mCurrentFilename);
+        }
+
         mSnapshotControl.stop();
 
         if (mVideoRecorder) {
             mVideoRecorder->close();
         }
-
-        mCurrentFilename = QString("");
 
         setState(Idle);
 
@@ -453,10 +459,8 @@ void CxeVideoCaptureControlSymbian::stop()
             CX_DEBUG(("CxeVideoCaptureControlSymbian - async stop failed, try sync.."));
             try {
                 mVideoRecorder->stop(false);
-                 // stop operation went fine, set back the state to Initialized.
-                setState(Initialized);
-                // must increment counter now since no callback is coming in sync stop
-                mFilenameGenerator.raiseCounterValue();
+                // stopping went ok
+                emulateNormalStopping();
             } catch (const std::exception &e) {
                 // Even synchronous stopping failed -> release resources.
                 CX_DEBUG(("CxeVideoCaptureControlSymbian - sync stop failed, too!"));
@@ -523,9 +527,7 @@ void CxeVideoCaptureControlSymbian::MvruoRecordComplete(TInt aError)
         // KErrCompletion is received when video recording stops
         // because of maximum clip size is reached. Emulate
         // normal stopping.
-        setState(Stopping);
-        MvruoEvent(TMMFEvent(KCamCControllerCCVideoRecordStopped, KErrNone));
-        MvruoEvent(TMMFEvent(KCamCControllerCCVideoFileComposed, KErrNone));
+        emulateNormalStopping();
     }
     else {
         // error during recording, report to client
@@ -630,21 +632,9 @@ void CxeVideoCaptureControlSymbian::releaseResources()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    // Save the state and filename before releasing.
-    QString filenameCopy(filename());
-    CxeVideoCaptureControl::State stateCopy(state());
-
     // first de-init videocapture control
     deinit();
     reset();
-
-    // Check if state is stopping, in which case we have to inform the
-    // file harvester that a file is to be completed. We would not
-    // call harvestFile otherwise in this case.
-    // Otherwise the video will not be found from videos app.
-    if (stateCopy == CxeVideoCaptureControl::Stopping) {
-        emit videoComposed(CxeError::None, filenameCopy);
-    }
 
     delete mVideoRecorder;
     mVideoRecorder = NULL;
@@ -933,6 +923,20 @@ void CxeVideoCaptureControlSymbian::handleComposeFailed(int error)
     emit videoComposed(CxeErrorHandlingSymbian::map(error), filename());
     // Cleanup
     deinit();
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Helper method to emulate video stopping events.
+ */
+void CxeVideoCaptureControlSymbian::emulateNormalStopping()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    setState(Stopping);
+    MvruoEvent(TMMFEvent(KCamCControllerCCVideoRecordStopped, KErrNone));
+    MvruoEvent(TMMFEvent(KCamCControllerCCVideoFileComposed, KErrNone));
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 // End of file

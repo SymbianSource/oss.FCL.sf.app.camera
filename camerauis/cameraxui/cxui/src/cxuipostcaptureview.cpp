@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -59,10 +59,6 @@
 using namespace CxUiLayout;
 using namespace Cxe;
 
-// CONSTANTS
-const int CXUI_HIDE_CONTROLS_TIMEOUT = 6000; // 6 seconds
-const QString PhotosAppExe = "photos.exe";
-const QString VideosAppExe = "videoplayer.exe";
 
 //!@todo Temporarily disabled.
 //const int CXUI_STOP_VIEWFINDER_TIMEOUT = 5000; // 5 seconds
@@ -74,19 +70,17 @@ const QString VideosAppExe = "videoplayer.exe";
 // ---------------------------------------------------------------------------
 //
 CxuiPostcaptureView::CxuiPostcaptureView(QGraphicsItem *parent) :
-    HbView(parent),
-    mMainWindow(NULL),
-    mEngine(NULL),
+    CxuiView(parent),
     mStillToolbar(NULL),
     mVideoToolbar(NULL),
     mEmbeddedToolbar(NULL),
     mBackgroundItem(NULL),
     mImageLabel(NULL),
-    mHideControlsTimeout(this),
     mStopViewfinderTimer(this),
     mReleaseCameraTimer(this),
     mPostcaptureTimer(this),
-    mTimersStarted(false)
+    mTimersStarted(false),
+    mDeleteNoteOpen(false)
 {
     CX_DEBUG_IN_FUNCTION();
 
@@ -116,9 +110,7 @@ void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    mMainWindow = mainwindow;
-    mEngine = engine;
-    mDocumentLoader = documentLoader;
+    CxuiView::construct(mainwindow, engine, documentLoader, NULL);
 
     // set back action to go back to pre-capture
     HbAction *backAction = new HbAction(Hb::BackNaviAction, this);
@@ -186,7 +178,9 @@ void CxuiPostcaptureView::handleCaptureKeyPressed()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    goToPrecaptureView();
+    if (!mDeleteNoteOpen) {
+        goToPrecaptureView();
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -200,7 +194,9 @@ void CxuiPostcaptureView::handleAutofocusKeyPressed()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    goToPrecaptureView();
+    if (!mDeleteNoteOpen) {
+        goToPrecaptureView();
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -238,6 +234,7 @@ void CxuiPostcaptureView::showDeleteNote()
                                SLOT(handleDeleteDialogClosed(HbAction*)));
     }
 
+    mDeleteNoteOpen = true;
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -251,6 +248,7 @@ void CxuiPostcaptureView::handleDeleteDialogClosed(HbAction *action)
     CX_DEBUG_ENTER_FUNCTION();
 
     hideControls();
+    mDeleteNoteOpen = false;
 
     HbMessageBox *dlg = qobject_cast<HbMessageBox*>(sender());
 
@@ -344,32 +342,12 @@ void CxuiPostcaptureView::stopViewfinder()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::releaseCamera
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPostcaptureView::releaseCamera()
+/*!
+* Hides toolbar.
+*/
+void CxuiPostcaptureView::hideToolbar()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    if (mMainWindow->currentView() == this) {
-        mEngine->cameraDeviceControl().release();
-    }
-    mReleaseCameraTimer.stop();
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::hideControls
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPostcaptureView::hideControls()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
     if (mStillToolbar) {
         mStillToolbar->hide();
     }
@@ -379,56 +357,6 @@ void CxuiPostcaptureView::hideControls()
     if (mEmbeddedToolbar) {
         mEmbeddedToolbar->hide();
     }
-
-    hideItems(Hb::AllItems);
-
-    mControlsVisible = false;
-
-    // stop hiding control timer
-    mHideControlsTimeout.stop();
-
-
-    // give the keyboard focus back to the view
-    // for the view to receive key events
-    setFocus();
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::showControls
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPostcaptureView::showControls()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    showToolbar();
-
-    showItems(Hb::AllItems);
-
-    mHideControlsTimeout.start(CXUI_HIDE_CONTROLS_TIMEOUT);
-    mControlsVisible = true;
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::toggleControls
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPostcaptureView::toggleControls()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (mControlsVisible) {
-        hideControls();
-    } else {
-        showControls();
-    }
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -609,16 +537,6 @@ void CxuiPostcaptureView::updateSnapshotImage()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/*!
-    Launches "Not supported yet" notification.
- */
-void CxuiPostcaptureView::launchNotSupportedNotification()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    HbNotificationDialog::launchDialog("Notification", "Not supported yet");
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 /* !
  * gets the filename of the current file
  */
@@ -645,14 +563,6 @@ QString CxuiPostcaptureView::getCurrentFilename()
 }
 
 /*!
-    Launches the Photos applications as a separate process
-*/
-void CxuiPostcaptureView::launchPhotosApp()
-{
-    QProcess::startDetached(PhotosAppExe);
-}
-
-/*!
     Sends current capture to client app and closes camera
 */
 void CxuiPostcaptureView::select()
@@ -667,14 +577,16 @@ void CxuiPostcaptureView::select()
 }
 
 /*!
-    Launches the Videos applications as a separate process
+    Handle cases when we gain focus
 */
-void CxuiPostcaptureView::launchVideosApp()
+void CxuiPostcaptureView::handleFocusGained()
 {
-    //Releasing cameda device in order to free
-    //graphical memory
-    releaseCamera();
-    QProcess::startDetached(VideosAppExe);
+    CX_DEBUG_ENTER_FUNCTION();
+
+    //Note: We should not start timers until we receive the ShowEvent
+    showControls();
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
@@ -692,46 +604,63 @@ void CxuiPostcaptureView::handleFocusLost()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
+/*!
+    Start the timers
+*/
 void CxuiPostcaptureView::startTimers()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     // we start timers only once in a given postcapture view session
-    if (!mTimersStarted) {
-        int postCaptureTimeout = 0;
-        QString settingId;
-
-        if (mEngine->mode() == ImageMode) {
-            settingId = CxeSettingIds::STILL_SHOWCAPTURED;
-        } else {
-            settingId = CxeSettingIds::VIDEO_SHOWCAPTURED;
-        }
-
-        if (!CxuiServiceProvider::isCameraEmbedded()) {
-            CxeError::Id err = mEngine->settings().get(settingId, postCaptureTimeout);
-
-            if (postCaptureTimeout > 0 && err == CxeError::None) {
-                mPostcaptureTimer.start(postCaptureTimeout);
-            } else {
-                // do nothing
-            }
-        }
-
-        // start the hide control timer.
-        mHideControlsTimeout.start(CXUI_HIDE_CONTROLS_TIMEOUT);
-
-        //! @todo Temporarily disabling release timer because of
-        // graphics memory problems related to releasing and reserving again.
-        // mReleaseCameraTimer.start(CXUI_RELEASE_CAMERA_TIMEOUT);
-        // mStopViewfinderTimer.start(CXUI_STOP_VIEWFINDER_TIMEOUT);
-
-        // we make sure that timers are started only once in a given postcaptureview session
+    if(!mTimersStarted) {
+        startPostcaptureTimer();
+        startReleaseTimers();
         mTimersStarted = true;
     }
 
-    // show controls when we get back focus
-    showControls();
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+    Start the timer to return to pre-capture view
+*/
+void CxuiPostcaptureView::startPostcaptureTimer()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    int postCaptureTimeout = 0;
+    QString settingId;
+
+    if (mEngine->mode() == ImageMode) {
+        settingId = CxeSettingIds::STILL_SHOWCAPTURED;
+    } else {
+        settingId = CxeSettingIds::VIDEO_SHOWCAPTURED;
+    }
+
+    if (!CxuiServiceProvider::isCameraEmbedded()) {
+        CxeError::Id err = mEngine->settings().get(settingId, postCaptureTimeout);
+
+        if (postCaptureTimeout > 0 && err == CxeError::None) {
+            mPostcaptureTimer.start(postCaptureTimeout);
+        } else {
+            // do nothing
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+    Start the timers to stop viewfinder and release the camera
+*/
+void CxuiPostcaptureView::startReleaseTimers()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // Todo Note: Temporarily disabling release timer because of
+    // graphics memory problems related to releasing and reserving again.
+    // mReleaseCameraTimer.start(CXUI_RELEASE_CAMERA_TIMEOUT);
+    // mStopViewfinderTimer.start(CXUI_STOP_VIEWFINDER_TIMEOUT);
 
     CX_DEBUG_EXIT_FUNCTION();
 }

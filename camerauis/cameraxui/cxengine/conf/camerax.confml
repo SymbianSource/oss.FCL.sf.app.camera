@@ -27,26 +27,6 @@
       </desc>
     </setting>
 
-    <setting ref="StillShowCapturedCr" name="Show Captured Image" type="selection">
-      <desc>StillShowCapturedCr defines setting in Image settings.
-            If disabled, post-capture view is not shown after capturing an image.
-      </desc>
-      <option name="On" value="-1"/>
-      <option name="2 seconds" value="2000"/>
-      <option name="10 seconds" value="10000"/>
-      <option name="Off" value="0"/>
-    </setting>
-    
-    <setting ref="VideoShowCapturedCr" name="Show Captured Video" type="selection">
-      <desc>VideoShowCapturedCr defines setting in Image settings.
-            If disabled, post-capture view is not shown after capturing an video.
-      </desc>
-      <option name="On" value="-1"/>
-      <option name="2 seconds" value="2000"/>
-      <option name="10 seconds" value="10000"/>
-      <option name="Off" value="0"/>
-    </setting>
-
     <setting ref="ImageQualityCr" name="Image quality" type="int">
       <desc>ImageQualityCr defines the quality currently in use in still mode.
       </desc>
@@ -76,6 +56,9 @@
       <ImageQualityCr>1</ImageQualityCr>
       <VideoQualityCr>0</VideoQualityCr>
       <AudioMuteCr>0</AudioMuteCr>
+      <GeoTaggingCr>0</GeoTaggingCr>
+      <FacetrackingCr>1</FacetrackingCr>
+      <CaptureSoundAlwaysOnCr>0</CaptureSoundAlwaysOnCr>
     </CxSettingsCrUid>
   </data>
 
@@ -88,6 +71,9 @@
       <StillShowCapturedCr>true</StillShowCapturedCr>
       <VideoShowCapturedCr>true</VideoShowCapturedCr>
       <AudioMuteCr>true</AudioMuteCr>
+      <GeoTaggingCr>true</GeoTaggingCr>
+      <FacetrackingCr>true</FacetrackingCr>
+      <CaptureSoundAlwaysOnCr>true</CaptureSoundAlwaysOnCr>
     </CxSettingsCrUid>
   </rfs>
 

@@ -147,7 +147,9 @@ namespace CxeSettingIds
     static const char* VIDEO_QUALITY                           = "videoQuality";
     static const char* SECONDARY_CAMERA                        = "2ndCamera";
     static const char* SELF_TIMER                              = "selfTimer";
-
+    static const char* FACE_TRACKING                           = "face_tracking";
+    static const char* GEOTAGGING                              = "geotagging";
+    static const char* CAPTURE_SOUND_ALWAYS_ON                    = "capture_sound_always_on";
 
     // file name/path related key values
     static const char*  FNAME_FOLDER_SUFFIX                    = "folder_suffix";

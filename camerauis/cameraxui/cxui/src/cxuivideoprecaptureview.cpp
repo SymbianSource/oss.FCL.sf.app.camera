@@ -75,9 +75,9 @@ CxuiVideoPrecaptureView::CxuiVideoPrecaptureView(QGraphicsItem *parent) :
     mRemainingTimeText(NULL),
     mRecordingIcon(NULL),
     mGoToStillAction(NULL),
-    mToolBarIdle(NULL),
-    mToolBarRec(NULL),
-    mToolBarPaused(NULL),
+    mToolbarIdle(NULL),
+    mToolbarRec(NULL),
+    mToolbarPaused(NULL),
     mVideoScenePopup(NULL),
     mVideoCaptureControl(NULL),
     mMenu(NULL),
@@ -101,7 +101,7 @@ void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
     CX_DEBUG_ENTER_FUNCTION();
 
     CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler);
-    mKeyHandler = keyHandler;
+    mCaptureKeyHandler = keyHandler;
 
     mVideoCaptureControl = &(engine->videoCaptureControl());
 
@@ -187,21 +187,21 @@ void CxuiVideoPrecaptureView::loadWidgets()
     CX_DEBUG_ASSERT(mSlider);
 
     //Let's add a plus and minus buttons to the slider
-    addIncreaseDecreaseButtons(mSlider);
+    mSlider->addZoomButtons();
     createWidgetBackgroundGraphic(mSlider, TRANSPARENT_BACKGROUND_GRAPHIC);
 
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_TOOLBAR);
-    mToolBarIdle = qobject_cast<HbToolBar *> (widget);
+    mToolbarIdle = qobject_cast<HbToolBar *> (widget);
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_TOOLBAR_REC);
-    mToolBarRec = qobject_cast<HbToolBar *> (widget);
+    mToolbarRec = qobject_cast<HbToolBar *> (widget);
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_TOOLBAR_PAUSED);
-    mToolBarPaused = qobject_cast<HbToolBar *> (widget);
+    mToolbarPaused = qobject_cast<HbToolBar *> (widget);
 
-    mToolBar = mToolBarIdle;
+    mToolbar = mToolbarIdle;
 
-    CX_DEBUG_ASSERT(mToolBarIdle);
-    CX_DEBUG_ASSERT(mToolBarRec);
-    CX_DEBUG_ASSERT(mToolBarPaused);
+    CX_DEBUG_ASSERT(mToolbarIdle);
+    CX_DEBUG_ASSERT(mToolbarRec);
+    CX_DEBUG_ASSERT(mToolbarPaused);
 
     hideControls();
 
@@ -300,7 +300,7 @@ void CxuiVideoPrecaptureView::initializeSettingsGrid()
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::WHITE_BALANCE);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        connect(mKeyHandler, SIGNAL(autofocusKeyPressed()), mSettingsGrid, SLOT(close()));
+        connect(mCaptureKeyHandler, SIGNAL(autofocusKeyPressed()), mSettingsGrid, SLOT(close()));
     }
 }
 
@@ -356,6 +356,23 @@ void CxuiVideoPrecaptureView::stop()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+
+/*!
+* Allow showing UI controls?
+*/
+bool CxuiVideoPrecaptureView::allowShowControls() const
+{
+    bool show(false);
+    if (mEngine) {
+        CxeVideoCaptureControl::State state(mEngine->videoCaptureControl().state());
+
+        show = (mEngine->isEngineReady()
+             || state == CxeVideoCaptureControl::Recording
+             || state == CxeVideoCaptureControl::Paused);
+    }
+    return show;
+}
+
 // CxuiPrecaptureView::showToolbar()
 // Shows toolbar. Calls the base class implementation if not recording
 // since toolbar is not shown during recording
@@ -363,19 +380,19 @@ void CxuiVideoPrecaptureView::showToolbar()
 {
     CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
     if (state == CxeVideoCaptureControl::Recording) {
-        if (mToolBar != mToolBarRec) {
-            mToolBar->hide();
-            mToolBar = mToolBarRec;
+        if (mToolbar != mToolbarRec) {
+            mToolbar->hide();
+            mToolbar = mToolbarRec;
         }
     } else if (state ==CxeVideoCaptureControl::Ready) {
-        if (mToolBar != mToolBarIdle) {
-            mToolBar->hide();
-            mToolBar = mToolBarIdle;
+        if (mToolbar != mToolbarIdle) {
+            mToolbar->hide();
+            mToolbar = mToolbarIdle;
         }
     } else if (state == CxeVideoCaptureControl::Paused) {
-        if (mToolBar != mToolBarPaused) {
-            mToolBar->hide();
-            mToolBar = mToolBarPaused;
+        if (mToolbar != mToolbarPaused) {
+            mToolbar->hide();
+            mToolbar = mToolbarPaused;
         }
     }
 
@@ -564,13 +581,8 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         break;
     case CxeVideoCaptureControl::Paused:
         mElapsedTimer.stop();
-
         if (mDocumentLoader){
             mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_PAUSED);
-        }
-
-        if (mRecordingAnimation && mRecordingIcon) {
-            mRecordingAnimation->stop();
         }
         showControls();
         enableFeedback();
@@ -603,28 +615,13 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
                     this, SLOT(prepareNewVideo(CxeError::Id)));
         }
         break;
+    case CxeVideoCaptureControl::PlayingStartSound:
+        // don't change anything
+        break;
     default:
         // in any other state, just hide the controls
         setRecordingItemsVisibility(false);
         break;
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-void CxuiVideoPrecaptureView::updateOrientation(Qt::Orientation orientation)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    hideControls();
-    mMainWindow->setOrientation(orientation);
-
-    if (mToolBar) {
-        if (orientation == Qt::Horizontal) {
-            mToolBar->setOrientation(Qt::Vertical);
-        } else {
-            mToolBar->setOrientation(Qt::Horizontal);
-        }
     }
 
     CX_DEBUG_EXIT_FUNCTION();

@@ -73,6 +73,7 @@ HB += hbcore hbwidgets hbfeedback hbutils
 HEADERS += cxuiapplication.h \
     cxuiapplicationframeworkmonitor.h \
     cxuiapplicationframeworkmonitorprivate.h \
+    cxuiview.h \
     cxuiprecaptureview.h \
     cxuistillprecaptureview.h \
     cxuivideoprecaptureview.h \
@@ -101,6 +102,7 @@ SOURCES += main.cpp \
     cxuiapplication.cpp \
     cxuiapplicationframeworkmonitor.cpp \
     cxuiapplicationframeworkmonitorprivate.cpp \
+    cxuiview.cpp \
     cxuiprecaptureview.cpp \
     cxuivideoprecaptureview.cpp \
     cxuistillprecaptureview.cpp \

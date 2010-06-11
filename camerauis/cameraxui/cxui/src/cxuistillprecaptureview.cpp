@@ -173,7 +173,7 @@ void CxuiStillPrecaptureView::loadWidgets()
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_ZOOM_SLIDER);
     mSlider = qobject_cast<CxuiZoomSlider *>(widget);
     CX_DEBUG_ASSERT(mSlider);
-    addIncreaseDecreaseButtons(mSlider);
+    mSlider->addZoomButtons();
     createWidgetBackgroundGraphic(mSlider, TRANSPARENT_BACKGROUND_GRAPHIC);
 
     if (mSelfTimer) {
@@ -196,8 +196,8 @@ void CxuiStillPrecaptureView::loadWidgets()
     connect(startButton, SIGNAL(released()), this, SLOT(hideControls()));
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_TOOLBAR);
-    mToolBar = qobject_cast<HbToolBar *>(widget);
-    CX_DEBUG_ASSERT(mToolBar);
+    mToolbar = qobject_cast<HbToolBar *>(widget);
+    CX_DEBUG_ASSERT(mToolbar);
 
     object = mDocumentLoader->findObject(STILL_PRE_CAPTURE_FLASH_ACTION);
     mFlashSetting = qobject_cast<HbAction *>(object);
@@ -299,16 +299,8 @@ void CxuiStillPrecaptureView::initializeSettingsGrid()
         mSettingsGrid->addAction(HbIcon("qtg_mono_face_tracking"), hbTrId("txt_cam_button_face_tracking"), this, SLOT(launchNotSupportedNotification()));
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        connect(mKeyHandler, SIGNAL(autofocusKeyPressed()), mSettingsGrid, SLOT(close()));
+        connect(mCaptureKeyHandler, SIGNAL(autofocusKeyPressed()), mSettingsGrid, SLOT(close()));
     }
-}
-
-void CxuiStillPrecaptureView::launchSceneModesPopup()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    hideControls();
-    emit showScenesView();
-    CX_DEBUG_EXIT_FUNCTION();
 }
 
 
@@ -462,24 +454,6 @@ void CxuiStillPrecaptureView::handleAutoFocusStateChanged(CxeAutoFocusControl::S
 }
 
 
-void CxuiStillPrecaptureView::updateOrientation(Qt::Orientation orientation)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    hideControls();
-    mMainWindow->setOrientation(orientation);
-
-    if (orientation == Qt::Horizontal) {
-        CX_DEBUG(("New screen orientation is horizontal"));
-        mToolBar->setOrientation(Qt::Vertical);
-    } else {
-        CX_DEBUG(("New screen orientation is vertical"));
-        mToolBar->setOrientation(Qt::Horizontal);
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 /*!
 * Handle capture key full press.
 */
@@ -593,21 +567,30 @@ void CxuiStillPrecaptureView::showEvent(QShowEvent *event)
     // in post-capture view, we need to start auto-focusing when entering
     // the still precapture view.
     if (event->type() == QEvent::Show &&
-            mKeyHandler && mKeyHandler->isAutofocusKeyPressed()) {
+            mCaptureKeyHandler && mCaptureKeyHandler->isAutofocusKeyPressed()) {
 
         CX_DEBUG(("Still pre-capture coming visible and auto-focus key pressed -> starting AF"));
         handleAutofocusKeyPressed();
     }
 }
 
-void CxuiStillPrecaptureView::showToolbar()
+/*!
+* Allow showing UI controls?
+*/
+bool CxuiStillPrecaptureView::allowShowControls() const
 {
-    if (mEngine && mEngine->isEngineReady()) {
-        CxuiPrecaptureView::showToolbar();
-    }
+    // show controls when selftimer counter is not active
+    // and when autofocus key is not being pressed
+    bool engineOk(mEngine && mEngine->isEngineReady());
+    bool selfTimerOk(!mSelfTimer || !mSelfTimer->isOngoing());
+    bool keysOk(!mCaptureKeyHandler || !mCaptureKeyHandler->isAutofocusKeyPressed());
+
+    return engineOk && selfTimerOk && keysOk;
 }
 
-
+/*!
+* Handle change in viewfinder state.
+*/
 void CxuiStillPrecaptureView::handleViewfinderStateChanged(
     CxeViewfinderControl::State newState, CxeError::Id /*error*/)
 {
@@ -622,7 +605,7 @@ void CxuiStillPrecaptureView::handleViewfinderStateChanged(
         }
 
         if(mMainWindow->currentView() == this &&
-            mKeyHandler->isAutofocusKeyPressed()) {
+            mCaptureKeyHandler->isAutofocusKeyPressed()) {
             // Viewfinder just started and the user is pressing the auto-focus key.
             // Start focusing.
 
@@ -654,17 +637,6 @@ void CxuiStillPrecaptureView::resetCapturePendingFlag()
     mCapturePending = false;
 }
 
-void CxuiStillPrecaptureView::showControls()
-{
-    // show controls when selftimer counter is not active
-    // and when autofocus key is not being pressed
-    if ( !(mSelfTimer && mSelfTimer->isOngoing())  &&
-         (!mKeyHandler || !mKeyHandler->isAutofocusKeyPressed()) ) {
-        CxuiPrecaptureView::showControls();
-    }
-
-}
-
 /*!
 * Slot to handle application being sent to background.
 */
@@ -681,13 +653,6 @@ void CxuiStillPrecaptureView::handleFocusLost()
     // If taking image is just ongoing, it will be cancelled by engine.
     releaseCamera();
 
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-void CxuiStillPrecaptureView::handleFocusGained()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    CxuiPrecaptureView::handleFocusGained();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -792,6 +757,10 @@ void CxuiStillPrecaptureView::launchSetting()
         launchSettingsDialog(action);
         // special case to get value changed event to the selftimer class
         if (settingsKey == CxeSettingIds::SELF_TIMER) {
+            // if selftimer is active remember the previously selected value
+            if (mSelfTimer->isEnabled()) {
+                mSettingsDialogList->setOriginalSelectedItemByValue(mSelfTimer->getTimeout());
+            }
             connect(mSettingsDialogList, SIGNAL(valueSelected(int)),
                     mSelfTimer, SLOT(changeTimeOut(int)));
         }
