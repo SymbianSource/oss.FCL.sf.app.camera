@@ -4169,6 +4169,10 @@ CCamCameraController::HandleReserveGainEvent( TInt aStatus )
   if( KErrNone == aStatus ) SetFlags  ( iInfo.iState, ECamReserved );
   else                      ClearFlags( iInfo.iState, ECamReserved );
 
+  // Make sure our priority is not downgraded
+  CEikonEnv* env = CEikonEnv::Static();
+  env->WsSession().ComputeMode(RWsSession::EPriorityControlDisabled);
+
 #ifdef CAMERAAPP_CAE_FIX
   if( ECamModeChangeVideo2Image == iModeChange )
     {

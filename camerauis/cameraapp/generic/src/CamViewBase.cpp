@@ -39,6 +39,7 @@
 #include "CamWaitDialog.h"
 #include "CamCommandHandlerAo.h"
 #include "CameraUiConfigManager.h"
+#include "CamNaviProgressBarModel.h"
 
 
 static const TRect KCamCbaHiddenRect = TRect(640,640,640,640);
@@ -122,6 +123,8 @@ void CCamViewBase::PrepareForModeChange()
 void CCamViewBase::HandleCommandL( TInt aCommand )
     {
     PRINT( _L("Camera => CCamViewBase::HandleCommandL"))
+    CCamAppUi* appUi =  static_cast<CCamAppUi*>( AppUi() );
+
     switch(aCommand)
         {
         case ECamCmdInternalExit:
@@ -155,7 +158,40 @@ void CCamViewBase::HandleCommandL( TInt aCommand )
             	}           
             }
             break;
-            
+
+        case ECamCmdRedrawVideoTime:
+            {
+            if( iContainer )
+            	{
+            	if(appUi)
+            	    {
+            	    iContainer->DrawNow( appUi->NaviProgressBarModel()->ProgPaneRect() );    
+            	    }
+                else
+                    {
+            	    iContainer->DrawDeferred();
+            	    }
+            	}           
+            }
+            break;
+
+        case ECamCmdRedrawZoom:
+            {    
+            if( iContainer )
+            	{
+            	if(appUi)
+            	    {
+            	    iContainer->DrawNow( appUi->ZoomPane()->Rect() );    
+            	    }
+            	else
+            	    {
+            	    PRINT( _L("Camera <> CCamViewBase::HandleCommandL ECamCmdRedrawZoom zoomRect"))                	        
+            	    iContainer->DrawDeferred();
+            	    }
+            	}           
+            }
+            break;
+
         default:
             {
             AppUi()->HandleCommandL( aCommand );

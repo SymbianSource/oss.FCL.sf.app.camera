@@ -560,7 +560,6 @@ void CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand, TB
         }
     iCaptureSetupContainer = CCamCaptureSetupContainer::NewL( iController, 
                                    *this, *iCaptureSetupControlHandler, rect, aFullScreenVF );
-    iCaptureSetupContainer->SetMopParent( this ); 
     appUi->AddToStackL( *this, iCaptureSetupContainer );
     iCaptureSetupContainer->ActivateL();
     iCaptureSetupContainer->DrawNow();

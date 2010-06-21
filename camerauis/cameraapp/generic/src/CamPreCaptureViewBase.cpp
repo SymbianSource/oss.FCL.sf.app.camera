@@ -539,9 +539,6 @@ void CCamPreCaptureViewBase::HandleControllerEventL( TCamControllerEvent aEvent,
       if( iController.IsAppUiAvailable() )
       {          
       PRINT( _L( "Camera <> case ECamEventEngineStateChanged" ) );        
-      // <CAMERAAPP_CAPI_V2_MIGRATION/>
-      // if ( iController.EngineState() == ECamEngineStillCapturePrepared ||
-      //      iController.EngineState() == ECamEngineVideoCapturePrepared )
       if ( ECamCameraPreparedVideo == iController.CameraState() || 
            ECamCameraPreparedImage == iController.CameraState() )
         {
@@ -555,11 +552,17 @@ void CCamPreCaptureViewBase::HandleControllerEventL( TCamControllerEvent aEvent,
         // when returning to prepactureview after image deletion. 
         // This will happen only if camera is started directly to portrait 
         // secondary camera i.e. Lens cover feature is supported
-        TBool noToolbar = (ECamCompleting == iController.CurrentOperation() ) && appUi->IsSecondCameraEnabled();
+        TBool noToolbar = ( ECamCompleting == iController.CurrentOperation() ) && appUi->IsSecondCameraEnabled();
 
-        if ( ECamCameraPreparedImage == iController.CameraState() &&
-               !appUi->IsBurstEnabled() && !noToolbar
-               && !iStandbyModeActive )
+        TBool showVideoModeToolbar = ( ECamCameraPreparedVideo == iController.CameraState() && 
+                ( iController.CurrentOperation() != ECamCapturing && iController.CurrentOperation() != ECamPaused ) );
+
+        TBool precaptureToolbarState = !appUi->IsBurstEnabled()
+                && !iStandbyModeActive && !appUi->IsInPretendExit();
+        
+        if ( ( ECamCameraPreparedImage == iController.CameraState() || 
+                showVideoModeToolbar ) &&     
+               !noToolbar && precaptureToolbarState )
             {
             // Also fixed toolbar might need to be enabled.
             appUi->SetToolbarVisibility();

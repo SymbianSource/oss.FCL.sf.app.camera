@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -105,11 +105,6 @@ CCamShootingModeContainer::~CCamShootingModeContainer()
   iTitleArray.ResetAndDestroy();
   iDescArray.ResetAndDestroy();
   iExplTxtLinesLayout.Close();  
-   
-  if ( iFeedback ) 
-    {
-    iFeedback->RemoveFeedbackForControl( iListBox );
-    }
 
   if ( iListBox )
 	  {
@@ -275,15 +270,8 @@ CCamShootingModeContainer::ConstructL( const TRect& aRect )
      
     iTooltipController->SetTimeDelayBeforeShow( KInfoTooltipDelay );
     iTooltipController->SetTimePopupInView( KInfoTooltipDisplayTime );
-    
-    iFeedback = MTouchFeedback::Instance();  
-    if ( iFeedback )  
-        {
-        iFeedback->SetFeedbackArea( iListBox, 0, iListBox->Rect(), 
-                                    ETouchFeedbackBasic, ETouchEventStylusDown );
-        }
 
-	PRINT(_L("Camera <= CCamShootingModeContainer::ConstructL") )    
+    PRINT(_L("Camera <= CCamShootingModeContainer::ConstructL") )    
     }
    
 

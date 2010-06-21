@@ -107,3 +107,13 @@ void CCamTextItem::Draw( CBitmapContext& aBitmapContext ) const
         }
     }
 
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+TRect CCamTextItem::Rect()
+    {
+    return iLayout.TextRect();    
+    }
+

@@ -638,14 +638,6 @@ CCamVideoPreCaptureView::CCamVideoPreCaptureView( CCamAppController& aController
 void CCamVideoPreCaptureView::ConstructL()
     {
     BaseConstructL( ROID(R_CAM_VIDEO_PRE_CAPTURE_VIEW_ID) );
-    if(iController.UiConfigManagerPtr()->IsXenonFlashSupported())
-        {
-        CreateAndSetToolbarL(R_CAM_VIDEO_PRECAPTURE_TOOLBAR);
-        }
-    else
-        {
-        CreateAndSetToolbarL(R_CAM_VIDEO_PRECAPTURE_TOOLBAR_VIDEOLIGHT);
-        }
     CCamPreCaptureViewBase::ConstructL();
     iHdmiTimer = CCamTimer::NewL( KHdmiTimeout, TCallBack(HdmiTimerCallback, this));
     }
@@ -1068,6 +1060,25 @@ CCamVideoPreCaptureView::DoActivateL( const TVwsViewId& aPrevViewId,
     PERF_EVENT_START_L2( EPerfEventVideoPreCaptureViewActivation );        
     // Ensure the correct menu is used for the current mode.
     CCamAppUi* appUi =  static_cast<CCamAppUi*>( AppUi() );
+    // Toolbar is created here.
+    // fixed toolbar is used only with touch devices
+  if ( iController.IsTouchScreenSupported() )
+      {
+      CAknToolbar* toolbar = Toolbar();
+      if( !toolbar )
+        {
+        PRINT( _L("Camera <> CCamVideoPreCaptureView::DoActivateL - Not toolbar -> Create one" ) );
+        if(iController.UiConfigManagerPtr()->IsXenonFlashSupported())
+            {
+            CreateAndSetToolbarL(R_CAM_VIDEO_PRECAPTURE_TOOLBAR);
+            }
+        else
+            {
+            CreateAndSetToolbarL(R_CAM_VIDEO_PRECAPTURE_TOOLBAR_VIDEOLIGHT);
+            }
+        }
+      }
+
     
     // fixed toolbar is used only with touch devices
     if ( iController.IsTouchScreenSupported() )

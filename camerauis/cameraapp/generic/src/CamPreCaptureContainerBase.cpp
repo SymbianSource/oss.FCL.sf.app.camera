@@ -161,7 +161,15 @@ CCamPreCaptureContainerBase::~CCamPreCaptureContainerBase()
   delete iViewFinderBackup;
   iViewFinderBackup = NULL;
   iReceivedVfFrame = EFalse;
-
+  if( iIndBlinkTimer ) 
+    {
+    if( iIndBlinkTimer->IsActive() )
+      {
+      iIndBlinkTimer->Cancel();
+      }
+    delete iIndBlinkTimer;
+    iIndBlinkTimer = NULL;
+    }
   PRINT( _L("Camera <= ~CCamPreCaptureContainerBase" ))
   }
 
@@ -673,6 +681,10 @@ CCamPreCaptureContainerBase::OfferKeyEventL( const TKeyEvent& aKeyEvent,
 
             PRINT( _L("Camera <= CCamPreCaptureContainerBase::OfferKeyEventL .. capture key up handled") )
             return EKeyWasConsumed;
+            }
+        else
+            {
+            UpdateCaptureButton();
             }
         iController.HandlePendingHdmiEvent();
         }
@@ -2889,6 +2901,7 @@ void CCamPreCaptureContainerBase::UpdateCaptureButton()
         
         buttonActive = ( IsFocused() || iCaptureButtonContainer->IsFocused() ) 
                        && ECamNoOperation == iController.CurrentOperation()
+                       && iController.IsViewFinding()
                        && ( ECamControllerImage == mode || ECamControllerVideo == mode );
 
         PRINT1( _L("Camera <> capture button shown:%d"), buttonActive );

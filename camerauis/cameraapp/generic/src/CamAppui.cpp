@@ -1230,6 +1230,7 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
         {
         iTargetMode = ECamControllerImage;
         }
+      SubmergeToolbar(); //Fix flickering when switching modes.
       TrySwitchViewL();
       
 
@@ -1410,6 +1411,7 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
       iTargetMode = ECamControllerVideo;
       SetSuppressUIRiseOnViewfinderStart( EFalse );
       PRINT( _L("Camera => CCamAppUi::HandleCommandL Try switch to video mode"));
+      SubmergeToolbar();
       TrySwitchViewL();
       }
       break;
@@ -1871,6 +1873,28 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
         }
       }
       break;
+    // -----------------------------------------------------
+    case ECamCmdRedrawVideoTime:
+      {
+      if( !iProcessingScreenRedraw && iView )
+        {
+        iProcessingScreenRedraw = ETrue;
+        iView->HandleCommandL(ECamCmdRedrawVideoTime);
+        iProcessingScreenRedraw = EFalse;
+        }
+      }
+      break;      
+    // -----------------------------------------------------
+    case ECamCmdRedrawZoom:
+      {
+      if( !iProcessingScreenRedraw && iView )
+        {
+        iProcessingScreenRedraw = ETrue;
+        iView->HandleCommandL(ECamCmdRedrawZoom);
+        iProcessingScreenRedraw = EFalse;
+        }
+      }
+      break;            
     // -----------------------------------------------------
     case ECamCmdShootSetup: // fall through
     case ECamCmdFlash:      // fall through
@@ -3063,6 +3087,12 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
         case EEventFocusGained:
           {            
           PRINT( _L("Camera <> CCamAppUi::HandleWsEventL: case EEventFocusGained") );
+          RAknUiServer* capServ = CAknSgcClient::AknSrv();
+          CleanupStack::PushL( TCleanupItem( CleanupBlankScreen, this ) );
+          if ( iPretendExit ) 
+            {
+            capServ->BlankScreen();
+            }
           iReturningFromPretendExit = iPretendExit; 
           
           TBool uiOverride = iController.UiConfigManagerPtr() && iController.UiConfigManagerPtr()->IsUIOrientationOverrideSupported();
@@ -3128,6 +3158,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                    StandbyStatus() == KErrInUse )
                   { 
                   // We call the base class and return
+                  capServ->UnblankScreen();
+                  CleanupStack::Pop();
                   CAknAppUi::HandleWsEventL( aEvent, aDestination );
                   return;
                   }
@@ -3143,6 +3175,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                       }
                   iPretendExit = EFalse; 	
                   // Go to standby with error	
+                  capServ->UnblankScreen();
+                  CleanupStack::Pop();
                   HandleStandbyEventL( KErrInUse );
                   // We call the base class and return
                   CAknAppUi::HandleWsEventL( aEvent, aDestination );
@@ -3197,6 +3231,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
               {
               ActivateLocalViewL ( iViaPlayerUid );
               // We call the base class and return
+              capServ->UnblankScreen();
+              CleanupStack::Pop();
               CAknAppUi::HandleWsEventL( aEvent, aDestination );
               return;
               }
@@ -3214,6 +3250,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
               // iPretendExit flag needs to be reset before returning, otherwise
               // views think we are still in exit state and will not reserve camera
               iPretendExit = EFalse;
+              capServ->UnblankScreen();
+              CleanupStack::Pop();
               CAknAppUi::HandleWsEventL( aEvent, aDestination );
               return;
               }
@@ -3235,6 +3273,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                   iTargetViewState = ECamViewStateSettings;
                   }
               TrySwitchViewL();
+              capServ->UnblankScreen();
+              CleanupStack::Pop();
               CAknAppUi::HandleWsEventL( aEvent, aDestination );
               return;
               }
@@ -3273,6 +3313,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
           if ( memError && freeMemory < iController.UiConfigManagerPtr()->CriticalLevelRamMemoryFocusGained() )
               {
               PRINT( _L("Camera <> CCamAppUi::HandleWsEvent ECamEventFocusGained memory too low. Exiting") );
+              capServ->UnblankScreen();
+              CleanupStack::Pop();
               CloseAppL();
               PRINT( _L("Camera <= CCamAppUi::HandleWsEvent ECamEventFocusGained memory too low. Exiting") );
               return;
@@ -3302,6 +3344,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
               // check if exit is required
               if ( iController.CheckExitStatus() )
                   {
+                  capServ->UnblankScreen();
+                  CleanupStack::Pop();
                   InternalExitL();
                   PRINT( _L("Camera <= CCamAppUi::HandleWsEventL, internal exit") )
                   return;
@@ -3400,7 +3444,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
           if ( ECamViewStatePreCapture == iViewState &&
                ECamPreCapViewfinder == iPreCaptureMode && 
                ( !( iSelfTimer && iSelfTimer->IsActive() ) ) &&
-               iController.CurrentOperation() != ECamCapturing )  
+               iController.CurrentOperation() != ECamCapturing &&
+               iController.CurrentOperation() != ECamPaused )
             {
             SetToolbarVisibility(); 
             }          
@@ -3429,6 +3474,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                  }
               }
 
+          capServ->UnblankScreen();
+          CleanupStack::Pop();
           if (iStartupLogoController && iReturningFromPretendExit)
               {
               iStartupLogoController->ShowLogo();
@@ -3439,7 +3486,13 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
         case EEventFocusLost:
           {
           PRINT( _L("Camera <> CCamAppUi::HandleWsEventL: case EEventFocusLost") );
-
+          // Stop VF early to reduce load
+          if( AppInBackground( EFalse )
+              && iViewState == ECamViewStatePreCapture
+              && iMode == ECamControllerVideo )
+              {
+              iController.StopViewFinder(); 
+              }
           //When go to background from video post caputure view, we need to hide the toolbar to avoid icons overlap
           if( AppInBackground( EFalse )
               && iViewState == ECamViewStatePostCapture
@@ -5468,6 +5521,7 @@ void CCamAppUi::InternalExitL()
         {
         iStartupLogoController->ShowLogo();
         }
+    SubmergeToolbar(); //For preventing toolbar to show up when starting camera again.
 
     PRINT( _L("Camera <= CCamAppUi::InternalExitL") );
     OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP_CCAMAPPUI_INTERNALEXITL, "e_CCamAppUi_InternalExitL 0" );
@@ -7121,7 +7175,7 @@ void CCamAppUi::ShowZoomPane(TBool aRedraw)
     
   if ( aRedraw && IsDirectViewfinderActive() )
         {
-        TRAP_IGNORE(HandleCommandL(ECamCmdRedrawScreen));
+        TRAP_IGNORE(HandleCommandL(ECamCmdRedrawZoom));
         }
   PRINT( _L("Camera <= CCamAppUi::ShowZoomPane" ))
     }
@@ -7147,7 +7201,7 @@ void CCamAppUi::HideZoomPane( TBool aRedraw )
         
   if ( aRedraw && IsDirectViewfinderActive() )
         {
-        TRAP_IGNORE( HandleCommandL(ECamCmdRedrawScreen ) );
+        TRAP_IGNORE( HandleCommandL(ECamCmdRedrawZoom ) );
         }
   PRINT( _L("Camera <= CCamAppUi::HideZoomPane" ))
     }
@@ -8578,7 +8632,7 @@ void CCamAppUi::CompleteAppUIConstructionL()
     PRINT( _L("Camera <> call CCamAppController::LoadStaticSettingsL..") )
     iController.LoadStaticSettingsL( IsEmbedded() );
     
-    iInternalStorage = static_cast<TCamMediaStorage>(iController.IntegerSettingValue( ECamSettingItemPhotoMediaStorage ));
+    iInternalStorage = static_cast<TCamMediaStorage>(iController.IntegerSettingValueUnfiltered( ECamSettingItemPhotoMediaStorage ));
     // store the userscene settings
     iController.StoreUserSceneSettingsL();
 
@@ -8907,6 +8961,29 @@ void CCamAppUi::HandleHdmiEventL( TCamHdmiEvent aEvent )
             break;
         }
     
+    }
+
+// -----------------------------------------------------------------------------
+// CCamAppUi::NaviProgressBarModel 
+// -----------------------------------------------------------------------------
+//
+CCamNaviProgressBarModel* CCamAppUi::NaviProgressBarModel()
+    {
+    return iNaviProgressBarModel;    
+    }
+
+
+void CCamAppUi::CleanupBlankScreen( TAny* aAny )
+    {
+    PRINT(_L("Camera => CCamAppUi::CleanupBlankScreen."));
+    CCamAppUi* appui = static_cast<CCamAppUi*>( aAny );
+    RAknUiServer* capServ = CAknSgcClient::AknSrv();
+    if( capServ )
+        {
+        capServ->UnblankScreen();
+        appui->Exit();
+        }
+    PRINT(_L("Camera <= CCamAppUi::CleanupBlankScreen."));
     }
 
 //  End of File

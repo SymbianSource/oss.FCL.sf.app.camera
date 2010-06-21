@@ -358,7 +358,7 @@ LIBRARY glxmetadatadialog.lib
 LIBRARY thumbnailmanager.lib
 LIBRARY accclient.lib
 LIBRARY accpolicy.lib
-
+LIBRARY akncapserverclient.lib
 
 // ---------------------------------------------------------------------------
 #ifdef FORCE_DUMMY_ENGINE

@@ -132,7 +132,9 @@ enum TCamCmd
   
   ECamCmdToggleCourtesyUI,
   ECamCmdRedrawScreen,
-  
+  ECamCmdRedrawVideoTime,
+  ECamCmdRedrawZoom,
+      
   ECamCmdToggleVideoFlash, 
   ECamCmdCaptureSetupFlashVideo,
   ECamCmdPrintIntent,

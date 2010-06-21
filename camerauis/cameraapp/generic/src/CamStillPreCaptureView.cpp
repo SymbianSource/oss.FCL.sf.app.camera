@@ -460,6 +460,7 @@ void CCamStillPreCaptureView::HandleControllerEventL( TCamControllerEvent aEvent
             {
             case ECamCompleting:
                 {
+                iController.SetTouchCapture( EFalse );
                 UpdateCbaL();
                 break;
                 }
@@ -665,6 +666,13 @@ void CCamStillPreCaptureView::ConstructL()
 
     iPreviousControllerOperation = ECamNoOperation;
     
+    CAknToolbar* toolbar = Toolbar();
+    if ( toolbar )
+        {
+        //Hide toolbar for first camera startup.        
+        toolbar->SetToolbarVisibility(EFalse);
+        }
+        
     CCamPreCaptureViewBase::ConstructL();
     }
 

@@ -263,8 +263,11 @@ CAknSettingItem* CGSCamVideoSettingsList::CreateSettingItemL( TInt aIdentifier )
                     {
                     if( ( driveStatus & DriveInfo::EDrivePresent) ==  DriveInfo::EDrivePresent )
                         {
-                        includedMedias |= AknCommonDialogsDynMem::EMemoryTypeInternalMassStorage;
-                        driveCount++;
+                        if( ( driveStatus & DriveInfo::EDriveRemovable ) != DriveInfo::EDriveRemovable )
+                            {
+                            includedMedias |= AknCommonDialogsDynMem::EMemoryTypeInternalMassStorage;
+                            driveCount++;
+                            }
                         }
                     }
                 }

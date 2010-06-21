@@ -734,6 +734,12 @@ void CCamNaviProgressBarModel::TouchLayoutL()
     // Progress bar
     iProgressBarRect.LayoutRect( progressPaneRect,
         AknLayoutScalable_Apps::wait_bar_pane_cp07( iconVariant ) );
+    
+    // Minimum progress pane rect for drawing while recording
+    iProgPaneRect = iRemainingTimeTextItem->Rect();
+    iProgPaneRect.BoundingRect( iElapsedTimeTextItem->Rect() );
+    iProgPaneRect.BoundingRect( iProgressIconRect.Rect() );
+    iProgPaneRect.BoundingRect( iProgressBarRect.Rect() );    
     }
 
 // ---------------------------------------------------------
@@ -763,7 +769,13 @@ void CCamNaviProgressBarModel::NonTouchLayoutL()
 
     // Progress bar
     iProgressBarRect.LayoutRect( progressPaneRect,
-        AknLayoutScalable_Apps::wait_bar_pane_cp08( 0 ) );       
+        AknLayoutScalable_Apps::wait_bar_pane_cp08( 0 ) );     
+    
+    // Minimum progress pane rect for drawing while recording
+    iProgPaneRect = iRemainingTimeTextItem->Rect();
+    iProgPaneRect.BoundingRect( iElapsedTimeTextItem->Rect() );
+    iProgPaneRect.BoundingRect( iProgressIconRect.Rect() );
+    iProgPaneRect.BoundingRect( iProgressBarRect.Rect() );    
     }
 
 // ---------------------------------------------------------
@@ -795,5 +807,14 @@ void CCamNaviProgressBarModel::NonTouchLayoutSecondaryL()
     iProgressBarRect.LayoutRect( progressPaneRect,
         AknLayoutScalable_Apps::wait_bar_pane_cp08( 1 ) );
     }
-
+    
+// ---------------------------------------------------------
+// CCamNaviProgressBarModel::ProgPaneRect
+// 
+// ---------------------------------------------------------
+TRect CCamNaviProgressBarModel::ProgPaneRect()
+    {
+    return iProgPaneRect;    
+    }
+                
 // End of File

@@ -153,7 +153,7 @@ void CCamNaviProgressBarControl::HandleObservedEvent(TCamObserverEvent aEvent)
 
             if ( appUi && appUi->IsDirectViewfinderActive() )
                 {
-                TRAP_IGNORE(appUi->HandleCommandL( ECamCmdRedrawScreen ));
+                TRAP_IGNORE(appUi->HandleCommandL( ECamCmdRedrawVideoTime ));
                 }
             else
                 {

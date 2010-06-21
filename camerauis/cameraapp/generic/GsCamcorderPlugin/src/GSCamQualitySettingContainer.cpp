@@ -187,10 +187,7 @@ CGSCamQualitySettingContainer::~CGSCamQualitySettingContainer()
 
   iLayoutSettingDescLines.Reset();
   iEnumArray.Reset();
-  if ( iFeedback )
-    {
-    iFeedback->RemoveFeedbackForControl( iSlider );
-    } 
+
   delete iSlider;
   delete iTextTitle;
   delete iTextTopSubtitle;
@@ -287,13 +284,7 @@ void CGSCamQualitySettingContainer::ConstructFromResourceL( TResourceReader& aRe
   AknTextUtils::WrapToArrayL( ( *iDescArray )[iSelectedQuality], 
                               layout.TextRect().Width(), 
                               *( layout.Font() ), 
-                              *iCurrentDescLineArray );
-  iFeedback = MTouchFeedback::Instance();
-  if ( iFeedback )  
-    {
-    iFeedback->SetFeedbackArea( iSlider, 0, iSlider->Rect(), 
-                                ETouchFeedbackBasic, ETouchEventStylusDown );
-    }
+                              *iCurrentDescLineArray );   
   }
 
 // -----------------------------------------------------------------------------

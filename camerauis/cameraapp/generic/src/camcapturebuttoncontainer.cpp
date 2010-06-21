@@ -184,6 +184,7 @@ void CCamCaptureButtonContainer::HandlePointerEventL( const TPointerEvent& aPoin
                 }
             else
                 {
+                iController.SetTouchCapture( ETrue );
                 iView.HandleCommandL( ECamCmdCaptureImage );
                 }
             }

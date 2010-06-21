@@ -1057,6 +1057,11 @@ class CCamAppUi : public CCamAppUiBase,
         * @return Pointer to CCamStartupLogoController or NULL.
         */
         CCamStartupLogoController* StartupLogoController();
+        
+        /**
+        * Get a pointer to the NaviProgressBarModel.
+        */
+        CCamNaviProgressBarModel* NaviProgressBarModel();
 
     private: // New functions
 
@@ -1425,6 +1430,13 @@ class CCamAppUi : public CCamAppUiBase,
         * @return void
         */
 		void SetViewFinderInTransit(TBool aInTransit);
+
+        /**
+        * Turns screen back visible if leave has occured.
+        * @param aAny Pointer to CamAppUi instance 
+        * @return void
+        */
+		static void CleanupBlankScreen( TAny* aAny );
 		
      public: //MCamAddToAlbumObserver
 

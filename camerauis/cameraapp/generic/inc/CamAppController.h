@@ -2277,11 +2277,16 @@ public:
 		*/
         void HandlePendingHdmiEvent();
 		
-    /**
-	* Returns ETrue when scene mode is forced to 
-    * "Automatic" by secondary camera
-	*/
-    TBool SceneModeForcedBySecondaryCamera();
+        /**
+        * Returns ETrue when scene mode is forced to 
+        * "Automatic" by secondary camera
+        */
+        TBool SceneModeForcedBySecondaryCamera();
+
+        /**
+        * Set value defining if capturing with touch capture button 
+        */
+        void SetTouchCapture( TBool aTouchCapture );
 
   private:
 
@@ -2680,6 +2685,8 @@ public:
     TCamHdmiEvent iPendingHdmiEvent;
 	
     TBool iSceneModeForcedBySecondaryCamera;
+
+    TBool iTouchCapture;
 	
     };
 

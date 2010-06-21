@@ -104,6 +104,12 @@ class CCamNaviProgressBarModel : public CBase,
     * @param aExtent New extent
     */
     void SetExtentL( const TRect& aExtent );
+    
+    /**
+    * Returns the rect used for progress bar and 
+    * elapsed/remaining videotime
+    */
+    TRect ProgPaneRect();
         
   protected:
 
@@ -253,6 +259,8 @@ class CCamNaviProgressBarModel : public CBase,
     TAknLayoutText iElapsedTimeTextLayout; 
     TAknLayoutText iRemainingTimeTextLayout; 
 
+    TRect iProgPaneRect;
+    
     // own
     CCamTextItem* iElapsedTimeTextItem;
 

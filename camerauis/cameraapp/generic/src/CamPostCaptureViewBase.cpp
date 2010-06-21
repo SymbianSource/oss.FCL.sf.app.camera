@@ -586,6 +586,7 @@ void CCamPostCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId, TUid a
                     {
                     fixedToolbar->SetDimmed(ETrue);
                     }
+                fixedToolbar->HideItemsAndDrawOnlyBackground( EFalse ); 
                 fixedToolbar->SetToolbarVisibility( ETrue );
                 }
             }

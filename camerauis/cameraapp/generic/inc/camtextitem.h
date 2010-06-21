@@ -78,6 +78,12 @@ public:
      * @param aBitmapContext Graphics context to draw into.
      */
     void Draw( CBitmapContext& aBitmapContext ) const;
+    
+    /**
+     * Return the rect of the textitem
+     *
+     */
+    TRect Rect();
 
 private:
     

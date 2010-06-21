@@ -89,10 +89,7 @@ CCamCaptureSetupContainer::~CCamCaptureSetupContainer()
   iController.ViewfinderWindowDeleted( &Window() );
   
   iController.RemoveCameraObserver( this );
-  if ( iFeedback )
-    {
-    iFeedback->RemoveFeedbackForControl( iCaptureSetupControl );
-    } 
+
   delete iCaptureSetupControl;
   delete iTitleText;
   PRINT( _L("Camera <= ~CCamCaptureSetupContainer") );
@@ -107,6 +104,7 @@ void CCamCaptureSetupContainer::ConstructL( const TRect& aRect )
     {
     PRINT( _L("Camera => CCamCaptureSetupContainer::ConstructL ") );
     
+    SetMopParent( &iView );
     CCamContainerBase::BaseConstructL( aRect );
     if ( iController.IsTouchScreenSupported() )
         {
@@ -192,15 +190,6 @@ void CCamCaptureSetupContainer::ConstructL( const TRect& aRect )
         listbox->UpdateScrollBarsL();
         listbox->ScrollBarFrame()->DrawScrollBarsNow();             
         listbox->SetListBoxObserver(this);
-        }
-
-    iFeedback = MTouchFeedback::Instance();
-    if ( iFeedback )  
-        {
-        iFeedback->SetFeedbackArea( iCaptureSetupControl, 0, 
-                                    iCaptureSetupControl->Rect(), 
-                                    ETouchFeedbackBasic, 
-                                    ETouchEventStylusDown );
         }
        
     iCaptureSetupControl->MakeVisible( ETrue );

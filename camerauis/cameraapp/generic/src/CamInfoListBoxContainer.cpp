@@ -85,11 +85,6 @@ CCamInfoListBoxContainer::~CCamInfoListBoxContainer()
     iDescArray.ResetAndDestroy();
     iExplTxtLinesLayout.Close();  
 
-    if ( iFeedback ) 
-        {
-        iFeedback->RemoveFeedbackForControl( iListBox );
-        } 
-
     delete iListBox;
 
     if ( iTooltipController )
@@ -239,13 +234,7 @@ void CCamInfoListBoxContainer::ConstructL( const TRect& aRect, TInt aListBoxReso
      
     iTooltipController->SetTimeDelayBeforeShow( KInfoTooltipDelay );
     iTooltipController->SetTimePopupInView( KInfoTooltipDisplayTime );
-
-    iFeedback = MTouchFeedback::Instance();  
-    if ( iFeedback ) 
-        {
-        iFeedback->SetFeedbackArea( iListBox, 0, iListBox->Rect(), 
-                                  ETouchFeedbackBasic, ETouchEventStylusDown );
-        }
+        
     iController.SetViewfinderWindowHandle( &Window() );
     PRINT(_L("Camera <= CCamInfoListBoxContainer::ConstructL") )    
     }

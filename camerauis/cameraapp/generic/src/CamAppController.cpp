@@ -3094,6 +3094,7 @@ CCamAppController::GenerateModeChangeSequenceL( RCamRequestArray& aSequence )
   iNoBurstCancel = EFalse;
   iKeyUP = EFalse;
   iAFCancelInProgress = EFalse;
+  iTouchCapture = EFalse;
 
   // -------------------------------------------------------
   if( ECamTriIdle != iCameraController->ViewfinderState() )
@@ -9035,9 +9036,21 @@ CCamAppController
         TRAP( aStatus, RestoreSettingsToCameraL() );  
         }
       // fixed toolbar is used only with touch devices
-      if ( IsTouchScreenSupported() )
+      if ( IsTouchScreenSupported() && appUi )
           {
-          appUi->SetToolbarVisibility();// avoid flickering in settings view
+          CAknToolbar* toolbar = appUi->CurrentFixedToolbar();
+          if ( toolbar )
+              {
+              CAknToolbarExtension* toolbarextension = toolbar->ToolbarExtension();
+              if ( toolbarextension && toolbarextension->IsShown() )
+                  {
+                  appUi->SetToolbarVisibility();// avoid flickering in settings view
+                  }
+              else
+                  {
+                  appUi->SubmergeToolbar();
+                  }
+              }
           PRINT( _L( "Camera <> SetToolbarVisibility done ") );
           }
       // else use AP    
@@ -9137,6 +9150,15 @@ CCamAppController
         OstTrace0( CAMERAAPP_PERFORMANCE, DUP5_CCAMAPPCONTROLLER_HANDLECAMERAEVENTL, "e_CAM_APP_CAPTURE_START 1" );
         OstTrace0( CAMERAAPP_PERFORMANCE, DUP6_CCAMAPPCONTROLLER_HANDLECAMERAEVENTL, "e_CAM_PRI_SERIAL_SHOOTING 1" );
         
+        // When image capture is started with touch capture button, a short
+        // delay is added after AF completes, but before capturing starts to 
+        // avoid blurry screen sometimes when VF is frozen and before the 
+        // snapshot is drawn. Delay also helps to see focus reticule. 
+        if( iTouchCapture )
+            {
+            User::After( 50000 );
+            iTouchCapture = EFalse;
+            }
         Capture();  
         }           
       break;  
@@ -11580,6 +11602,15 @@ TBool CCamAppController::SceneModeForcedBySecondaryCamera()
     {
     return iSceneModeForcedBySecondaryCamera;
     }
-	
+
+// ---------------------------------------------------------------------------
+// CCamAppController::SetTouchCapture
+// 
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::SetTouchCapture( TBool aTouchCapture )
+    {
+    iTouchCapture = aTouchCapture;
+    }
 //  End of File  
 

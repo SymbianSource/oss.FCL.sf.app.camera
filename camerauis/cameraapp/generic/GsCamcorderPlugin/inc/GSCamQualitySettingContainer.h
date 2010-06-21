@@ -295,7 +295,6 @@ class CGSCamQualitySettingContainer : public CCoeControl,
         // Configuration Manager        
         CCamConfiguration* iConfiguration;
         
-        MTouchFeedback* iFeedback; // not own
     };
 
 #endif      // GSCAMQUALITYSETTINGCONTAINER_H   

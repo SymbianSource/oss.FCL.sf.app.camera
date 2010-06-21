@@ -283,14 +283,14 @@ CCamCaptureSetupListBoxModel::SettingValueSupportedL( CCamInfoListboxItemBase* a
   CleanupClosePushL( supportedItems );
   supportedItems.Reset();
 
-  // just for flash to start with
-  if( aSettingItem == ECamSettingItemDynamicPhotoFlash )
-    {
-#ifndef CAMERAAPP_PLUGIN_BUILD
-    if ( dynamicSettings )
+    // just for flash to start with
+    if( aSettingItem == ECamSettingItemDynamicPhotoFlash )
         {
-        dynamicSettings->SupportedFlashModeSettingsL( supportedItems );
-        }
+#ifndef CAMERAAPP_PLUGIN_BUILD
+        if ( dynamicSettings )
+            {
+            dynamicSettings->SupportedFlashModeSettingsL( supportedItems );
+            }
 #endif //CAMERAAPP_PLUGIN_BUILD
 		}
     else if( ECamSettingItemDynamicPhotoWhiteBalance == aSettingItem ||
@@ -304,7 +304,8 @@ CCamCaptureSetupListBoxModel::SettingValueSupportedL( CCamInfoListboxItemBase* a
 #endif //CAMERAAPP_PLUGIN_BUILD
 	    }
     else if ( ECamSettingItemDynamicPhotoColourFilter == aSettingItem ||
-              ECamSettingItemDynamicVideoColourFilter == aSettingItem )
+              ECamSettingItemDynamicVideoColourFilter == aSettingItem || 
+              ECamSettingItemUserSceneColourFilter    == aSettingItem )
         {
 #ifndef CAMERAAPP_PLUGIN_BUILD
         if ( dynamicSettings )

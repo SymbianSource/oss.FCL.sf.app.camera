@@ -473,9 +473,7 @@ void CCamUserSceneSetupViewBase::UpdateCbaL()
     // if the view is user scene setup
     else
         {
-		// R_AVKON_SOFTKEYS_OPTIONS_BACK --> 
-		//						R_CAM_SOFTKEYS_OPTIONS_BACK__CHANGE
-        SetSoftKeysL( R_CAM_SOFTKEYS_OPTIONS_BACK__CHANGE );
+        SetSoftKeysL( R_AVKON_SOFTKEYS_BACK );
         }
     PRINT( _L("Camera <= CCamUserSceneSetupViewBase::UpdateCbaL()") );    	    
     }
