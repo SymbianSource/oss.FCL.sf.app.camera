@@ -45,6 +45,10 @@ public:
     CxuiStandby(CxuiCaptureKeyHandler &keyHandler, CxuiDocumentLoader *documentLoader, CxeEngine *engine);
     ~CxuiStandby();
 
+public:
+    void allowDismiss(bool allow);
+    bool isActive() const;
+
 signals:
 
     /*
@@ -58,26 +62,15 @@ signals:
     void aboutToExitStandby();
 
 public slots:
-
-    /*
-    * starts standby timer
-    */
     void startTimer();
-
-    /*
-    * stops standby timer
-    */
     void stopTimer();
-
-    /*
-    * handles focus gain event
-    */
-    bool handleMouseEvent();
+    bool handleMouseEvent(QEvent *event);
+    void enterStandby();
+    void exitStandby();
 
 private slots:
 
     void dismissStandby();
-    void toStandby();
 
 private: // helper methods
 
@@ -92,6 +85,7 @@ private:
     HbDialog *mStandbyPopup;
     QTimer *mStandbyTimer;
     bool mStandbyDialogVisible;
+    bool mAllowDismiss;
 };
 
 #endif // CXUISTANDBY_H

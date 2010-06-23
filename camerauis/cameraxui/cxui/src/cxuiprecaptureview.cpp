@@ -16,7 +16,6 @@
 */
 
 #include <coemain.h>
-#include <QGraphicsSceneEvent>
 #include <QProcess>
 #include <QApplication>
 #include <hbmainwindow.h>
@@ -169,9 +168,6 @@ void CxuiPrecaptureView::prepareWindow()
 
     if (mMainWindow) {
         mEngine->viewfinderControl().setWindow(mMainWindow->effectiveWinId());
-        setFlag(QGraphicsItem::ItemIsFocusable);
-        setFocusPolicy(Qt::StrongFocus);
-        setFocus();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -278,23 +274,7 @@ void CxuiPrecaptureView::toggleControls()
         // call load widgets to load app DocML and get the pointers to needed widgets
         loadWidgets();
     }
-
     CxuiView::toggleControls();
-}
-
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::mousePressEvent
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    //! @todo temporary workaround for title bar mouse event handling bug
-    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70) {
-        toggleControls();
-        event->accept();
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -483,15 +463,13 @@ void CxuiPrecaptureView::prepareToShowDialog(HbAction *action)
 */
 void CxuiPrecaptureView::prepareToCloseDialog(HbAction *action)
 {
-    if (!action) {
-        return;
-    }
-
     // Check if the dialog was started from grid, and show the grid now if needed.
     // Autofocus key-press will clear the action to disable showing the grid.
-    QString fromGrid = action->property(PROPERTY_KEY_SETTING_GRID).toString();
-    if (fromGrid.compare(QString(PROPERTY_KEY_TRUE)) == 0 ) {
-        showSettingsGrid();
+    if (action) {
+        QString fromGrid = action->property(PROPERTY_KEY_SETTING_GRID).toString();
+        if (fromGrid.compare(QString(PROPERTY_KEY_TRUE)) == 0 ) {
+            showSettingsGrid();
+        }
     }
 
     // Clear the starter actions to be sure they are not reused.

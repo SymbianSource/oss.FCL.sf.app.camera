@@ -82,6 +82,7 @@ namespace CxUiLayout
     static const char *STILL_PRE_CAPTURE_GOTO_VIDEO_ACTION = "cxui_action_goto_video";
     static const char *STILL_PRE_CAPTURE_IMAGES_LEFT_LABEL = "images_remaining";
     static const char *STILL_PRE_CAPTURE_QUALITY_ICON = "quality_indicator";
+    static const char *STILL_PRE_CAPTURE_FACE_TRACKING_ICON = "face_tracking_indicator";
     static const char *STILL_PRE_CAPTURE_POST_CAPTURE_ACTION = "cxui_action_stillpostcapture";
     static const char *STILL_PRE_CAPTURE_INDICATOR_CONTAINER = "indicatorContainer";
     static const char *STILL_PRE_CAPTURE_IMAGES_LEFT_CONTAINER = "images_left_container";
@@ -150,6 +151,7 @@ namespace CxUiLayout
     static const char *SCENE_VIEW_RADIOBUTTONS  = "scene_view_radioButtonList";
     static const char *SCENE_VIEW_OK_BUTTON  = "scene_ok_button";
     static const char *SCENE_VIEW_CANCEL_BUTTON  = "scene_cancel_button";
+    static const char *SCENE_VIEW_HEADING_WIDGET = "scene_title";
 }
 
 namespace CxUiInternal

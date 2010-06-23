@@ -56,6 +56,9 @@ public:
     */
     CxuiDocumentLoader* documentLoader();
 
+    //@todo: Temporarily needed in main().
+    bool proceedStartup();
+
 public slots:
     void changeToPostcaptureView();
     void changeToPrecaptureView();
@@ -64,8 +67,10 @@ public slots:
     void showScenesView();
 
 private slots:
+    void startupCheck();
     void toForeground();
     void handleForegroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState state);
+    void showUsbErrorPopup(bool show);
     void handleBatteryEmpty();
     void aboutToLooseFocus();
     void aboutToGainFocus();
@@ -81,6 +86,7 @@ protected:
     bool eventFilter(QObject *object, QEvent *event);
 
 private:
+    void initStartupView();
     void createStillPrecaptureView();
     void createVideoPrecaptureView();
     CxuiPrecaptureView* getPrecaptureView(Cxe::CameraMode mode, Cxe::CameraIndex camera);

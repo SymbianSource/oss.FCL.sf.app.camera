@@ -58,25 +58,25 @@
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                     <icon iconName="qtg_mono_camcorder" name="icon"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
                 </widget>
                 <widget name="video_quality_indicator" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                     <icon iconName="qtg_mono_vga" name="icon"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
                 </widget>
                 <widget name="video_audio_mute_indicator" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                     <icon iconName="qtg_mono_call_mute" name="icon"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
                 </widget>
                 <widget name="video_stability_indicator" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                     <icon iconName="qtg_mono_call_mute" name="icon"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
                     <bool name="visible" value="FALSE"/>
                 </widget>
                 <real name="z" value="5"/>

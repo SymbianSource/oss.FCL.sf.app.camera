@@ -27,6 +27,7 @@
 
 //forward declarations
 class CxeCameraDevice;
+class CxeSettings;
 
 
 
@@ -41,7 +42,7 @@ class CxeAutoFocusControlSymbian : public CxeAutoFocusControl,
     Q_OBJECT
 public:
 
-    CxeAutoFocusControlSymbian( CxeCameraDevice &cameraDevice );
+    CxeAutoFocusControlSymbian( CxeCameraDevice &cameraDevice, CxeSettings &settings );
     virtual ~CxeAutoFocusControlSymbian();
 
     CxeError::Id  start(bool soundEnabled = true);
@@ -81,7 +82,8 @@ protected slots:
 
     // Handle ECam events
     void handleCameraEvent( int eventUid, int error );
-    void handleSceneChanged(CxeScene& scene);
+    void handleSceneChanged(CxeScene &scene);
+    void handleSettingValueChanged(const QString &settingId, QVariant newValue);
 
 private:
 
@@ -93,8 +95,11 @@ protected:
     CCamera::CCameraAdvancedSettings *mAdvancedSettings; // not owned
     CxeAutoFocusControl::Mode mAfMode;
     CCamera::CCameraAdvancedSettings::TFocusRange mAFRange;
+    CxeSettings &mSettings;
     bool mCancelled;
     bool mSoundEnabled;
+    bool mFaceTrackingOverride; //need for temporary override of the AF mode if FT is enabled by user
+    CxeAutoFocusControl::Mode mPreviousAFMode; //for restoring previous AF mode in case of FT override
     };
 
 #endif // CXEAUTOFOCUSCONTROLSYMBIAN_H

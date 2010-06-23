@@ -575,9 +575,13 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         }
         mElapsedTimer.start(CXUI_ELAPSED_TIME_TIMEOUT);
         disableFeedback();
-        if (mRecordingAnimation && mRecordingIcon) {
-            mRecordingAnimation->start();
-        }
+
+        // commented out the activation of the recording animation because
+        // it is causing issues when using SW rendering
+        //if (mRecordingAnimation && mRecordingIcon) {
+        //  mRecordingAnimation->start();
+        //}
+
         break;
     case CxeVideoCaptureControl::Paused:
         mElapsedTimer.stop();
@@ -593,9 +597,12 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
             mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_PAUSED);
         }
 
-        if (mRecordingAnimation && mRecordingIcon) {
-            mRecordingAnimation->stop();
-        }
+        // commented out the stopping of the recording animation since the activation
+        // is commented out also couple lines earlier
+        //if (mRecordingAnimation && mRecordingIcon) {
+        //    mRecordingAnimation->stop();
+        //}
+
         enableFeedback();
 
         mElapsedTimer.stop();

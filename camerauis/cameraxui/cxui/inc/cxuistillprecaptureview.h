@@ -125,6 +125,7 @@ protected slots:
 protected:
     void initializeSettingsGrid();
     void closeDialogs();
+    void updateFaceTrackingIcon();
 
 protected:
     CxuiSelfTimer *mSelfTimer;

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="1.0">
+<hbdocument version="1.1">
     <widget name="standbymode_popup" type="HbDialog">
+        <sizehint height="360" type="MINIMUM" width="640"/>
         <widget name="standbymode_widget" role="HbDialog:contentWidget" type="HbWidget">
             <widget name="standby_text" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
@@ -10,9 +11,8 @@
             </widget>
             <real name="z" value="0.1"/>
         </widget>
-        <sizehint height="360" type="MINIMUM" width="640"/>
     </widget>
-    <metadata activeUIState="Common ui state" display="NHD landscape" unit="un">
+    <metadata activeUIState="Common ui state" display="NHD-3.2-inch_landscape" unit="un">
         <uistate name="Common ui state" sections="#common"/>
     </metadata>
 </hbdocument>

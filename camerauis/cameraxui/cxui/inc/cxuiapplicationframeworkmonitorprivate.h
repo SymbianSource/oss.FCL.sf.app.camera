@@ -28,6 +28,7 @@ class RWsSession;
 class RWindowGroup;
 class QString;
 class QSymbianEvent;
+class CxuiEventLog;
 #endif // Q_OS_SYMBIAN
 
 
@@ -35,16 +36,14 @@ class CxuiApplicationFrameworkMonitorPrivate : public QObject
 {
     Q_OBJECT
 
-public:
-    CxuiApplicationFrameworkMonitorPrivate(CxuiApplication &application, CxeSettings& settings);
+private:
+    CxuiApplicationFrameworkMonitorPrivate(CxuiApplicationFrameworkMonitor *parent,
+                                           CxuiApplication &application,
+                                           CxeSettings &settings);
     virtual ~CxuiApplicationFrameworkMonitorPrivate();
 
-public:
     CxuiApplicationFrameworkMonitor::ForegroundState foregroundState() const;
-
-signals:
-    void foregroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState t);
-    void batteryEmpty();
+    bool isUsbMassMemoryModeActive() const;
 
 #ifdef Q_OS_SYMBIAN
 private slots:
@@ -53,25 +52,33 @@ private slots:
 
 private:
     void init();
-    bool handleWindowServerEvent(const QSymbianEvent *event);
+    void handleWindowServerEvent(const QSymbianEvent *event);
+    void handleUsbPropertyEvent(unsigned long int key, QVariant value);
     void setState(CxuiApplicationFrameworkMonitor::ForegroundState state);
     CxuiApplicationFrameworkMonitor::ForegroundState getCurrentState();
     unsigned int focusedApplicationUid();
 #endif // Q_OS_SYMBIAN
 
-
 private:
+    CxuiApplicationFrameworkMonitor *q;
     CxuiApplication &mApplication;
-    CxeSettings& mSettings;
+    CxeSettings &mSettings;
 #ifdef Q_OS_SYMBIAN
     RWsSession &mWsSession;
     RWindowGroup &mWindowGroup;
     int mWindowGroupId;
     QString mWindowGroupName;
+
     int mKeyLockState;
     int mBatteryStatus;
+    int mUsbPersonality;
+
+    CxuiEventLog *mEventLog;
 #endif // Q_OS_SYMBIAN
+
     CxuiApplicationFrameworkMonitor::ForegroundState mState;
+
+    friend class CxuiApplicationFrameworkMonitor;
 };
 
 #endif // CXUIAPPLICATIONFRAMEWORKMONITORPRIVATE_H

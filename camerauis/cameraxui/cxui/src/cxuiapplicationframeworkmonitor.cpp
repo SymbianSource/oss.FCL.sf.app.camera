@@ -28,13 +28,7 @@
 CxuiApplicationFrameworkMonitor::CxuiApplicationFrameworkMonitor(CxuiApplication &application, CxeSettings &settings)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    p = new CxuiApplicationFrameworkMonitorPrivate(application, settings);
-
-    connect(p, SIGNAL(foregroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState)),
-            this, SIGNAL(foregroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState)));
-    connect(p, SIGNAL(batteryEmpty()), this, SIGNAL(batteryEmpty()));
-
-
+    p = new CxuiApplicationFrameworkMonitorPrivate(this, application, settings);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -55,6 +49,15 @@ CxuiApplicationFrameworkMonitor::~CxuiApplicationFrameworkMonitor()
 CxuiApplicationFrameworkMonitor::ForegroundState CxuiApplicationFrameworkMonitor::foregroundState() const
 {
     return p->foregroundState();
+}
+
+/*!
+* Is USB connected in mass memory mode?
+* @return True if USB mass memory mode is active and connected, false otherwise.
+*/
+bool CxuiApplicationFrameworkMonitor::isUsbMassMemoryModeActive() const
+{
+    return p->isUsbMassMemoryModeActive();
 }
 
 // end of file

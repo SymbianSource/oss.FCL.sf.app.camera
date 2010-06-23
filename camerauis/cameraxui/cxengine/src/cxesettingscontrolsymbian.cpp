@@ -19,6 +19,7 @@
 #include <ecamadvsettings.h>
 #include <ecamimageprocessing.h>
 #include <ecam/ecamconstants.h>
+#include <ecamfacetrackingcustomapi.h>
 
 #include <QString>
 #include <QVariant>
@@ -59,6 +60,8 @@ CxeSettingsControlSymbian::~CxeSettingsControlSymbian()
 /*!
 * Handle new setting value.
 * New value is set to camera.
+* \param settingId The id of the updated setting
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::handleSettingValueChanged(const QString& settingId, QVariant newValue)
 {
@@ -79,6 +82,8 @@ void CxeSettingsControlSymbian::handleSettingValueChanged(const QString& setting
         updateExposureModeSetting(newValue);
     } else if (settingId == CxeSettingIds::EV_COMPENSATION_VALUE) {
             updateExposureCompensationSetting(newValue);
+    } else if (settingId == CxeSettingIds::FACE_TRACKING) {
+            updateFaceTrackingSetting(newValue);
     } else {
         // do nothing
     }
@@ -93,7 +98,7 @@ void CxeSettingsControlSymbian::handleSettingValueChanged(const QString& setting
 /*!
 * Handle new scene being set.
 * Scene settings are checked and new values are set to camera.
-* @param scene New scene containing scene specific settings.
+* \param scene New scene containing scene specific settings.
 */
 void CxeSettingsControlSymbian::handleSceneChanged(CxeScene& scene)
 {
@@ -104,12 +109,13 @@ void CxeSettingsControlSymbian::handleSceneChanged(CxeScene& scene)
     foreach (const QString& settingId, scene.keys()) {
         handleSettingValueChanged(settingId, scene[settingId]);
     }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
 /*!
-*
+* Update color tone setting value to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateColorToneSetting(QVariant newValue)
 {
@@ -136,7 +142,8 @@ void CxeSettingsControlSymbian::updateColorToneSetting(QVariant newValue)
 }
 
 /*!
-*
+* Update white balance setting value to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateWhiteBalanceSetting(QVariant newValue)
 {
@@ -155,7 +162,8 @@ void CxeSettingsControlSymbian::updateWhiteBalanceSetting(QVariant newValue)
 }
 
 /*!
-*
+* Update light sensitivity (ISO) setting value to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateLightSensitivitySetting(QVariant newValue)
 {
@@ -180,7 +188,8 @@ void CxeSettingsControlSymbian::updateLightSensitivitySetting(QVariant newValue)
 }
 
 /*!
-*
+* Update sharpness setting value to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateSharpnessSetting(QVariant newValue)
 {
@@ -210,7 +219,8 @@ void CxeSettingsControlSymbian::updateSharpnessSetting(QVariant newValue)
 }
 
 /*!
-*
+* Update contrast setting value to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateContrastSetting(QVariant newValue)
 {
@@ -233,7 +243,8 @@ void CxeSettingsControlSymbian::updateContrastSetting(QVariant newValue)
 }
 
 /*!
-*
+* Update brightness setting value to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateBrightnessSetting(QVariant newValue)
 {
@@ -256,7 +267,8 @@ void CxeSettingsControlSymbian::updateBrightnessSetting(QVariant newValue)
 }
 
 /*!
-*
+* Update Exposure mode to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateExposureModeSetting(QVariant newValue)
 {
@@ -275,7 +287,8 @@ void CxeSettingsControlSymbian::updateExposureModeSetting(QVariant newValue)
 }
 
 /*!
-*
+* Update Exposure Compensation mode to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateExposureCompensationSetting(QVariant newValue)
 {
@@ -297,7 +310,8 @@ void CxeSettingsControlSymbian::updateExposureCompensationSetting(QVariant newVa
 }
 
 /*!
-*
+* Update flash mode to the camera device
+* \param newValue A new value for the updated setting
 */
 void CxeSettingsControlSymbian::updateFlashSetting(QVariant newValue)
 {
@@ -312,6 +326,20 @@ void CxeSettingsControlSymbian::updateFlashSetting(QVariant newValue)
         CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
     }
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Update face tracking mode to the camera device
+* \param newValue A new value for the updated setting
+*/
+void CxeSettingsControlSymbian::updateFaceTrackingSetting(QVariant newValue)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    MCameraFaceTracking *faceTracking = mCameraDevice.faceTracking();
+    if(faceTracking) {
+        TRAP_IGNORE(faceTracking->SetFaceTrackingL(newValue.toInt()));
+    }
     CX_DEBUG_EXIT_FUNCTION();
 }
 

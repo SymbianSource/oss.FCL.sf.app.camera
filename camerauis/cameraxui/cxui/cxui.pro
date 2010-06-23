@@ -24,7 +24,7 @@ symbian {
     TARGET.UID3         = 0x101f857a
     TARGET.VID          = VID_DEFAULT
     TARGET.EPOCHEAPSIZE = 0x020000 0x1000000
-    ICON                = ./icons/cxui.svg
+    SKINICON            = qtg_large_camera
     RSS_RULES           = "group_name=\"Qt Camera\";"
     # Fix for QMake translating INCLUDEPATH to SYSTEMINCLUDE
     # and TraceCompiler needing USERINCLUDE.
@@ -59,7 +59,8 @@ LIBS += -lecam  \
     -lefsrv \
     -lws32 \
     -lgdi \
-    -lapgrfx
+    -lapgrfx \
+    -lusbman
 
 CONFIG += hb
 CONFIG += service
@@ -96,6 +97,7 @@ HEADERS += cxuiapplication.h \
     cxuiserviceprovider.h \
     cxuiscenemodeview.h \
     cxuizoomslider.h \
+    cxuieventlog.h \
     traces/OstTraceDefinitions.h
 
 SOURCES += main.cpp \
@@ -123,7 +125,8 @@ SOURCES += main.cpp \
     cxuisettingxmlreader.cpp \
     cxuiserviceprovider.cpp \
     cxuiscenemodeview.cpp \
-    cxuizoomslider.cpp
+    cxuizoomslider.cpp \
+    cxuieventlog.cpp
 
 RESOURCES += cxui.qrc
 

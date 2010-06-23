@@ -18,11 +18,11 @@
                 </widget>
                 <widget name="button_container" type="HbWidget">
                     <widget name="scene_ok_button" type="HbPushButton">
-                        <string name="text" value="txt_common_button_ok"/>
+                        <string locid="txt_common_button_ok" name="text" value="Ok"/>
                         <string name="state" value="normal"/>
                     </widget>
                     <widget name="scene_cancel_button" type="HbPushButton">
-                        <string name="text" value="txt_common_button_cancel"/>
+                        <string locid="txt_common_button_cancel" name="text" value="Cancel"/>
                         <string name="state" value="normal"/>
                     </widget>
                     <real name="z" value="0"/>
@@ -35,7 +35,7 @@
                 </widget>
                 <widget name="scene_title" type="HbLabel">
                     <real name="z" value="4"/>
-                    <string name="plainText" value="txt_cam_title_scene_mode"/>
+                    <string name="plainText" value="Scene settings dialog"/>
                     <fontspec name="fontSpec" role="Title" textheight="var(hb-param-text-height-primary)"/>
                 </widget>
                 <real name="z" value="2"/>

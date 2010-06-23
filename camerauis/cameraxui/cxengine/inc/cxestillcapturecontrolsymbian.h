@@ -95,7 +95,7 @@ signals:
     void prepareZoomForStill(int ecamStillResolutionIndex);
 
 protected: // from CxeStateMachine
-    void handleStateChanged( int newStateId, CxeError::Id error );
+    void handleStateChanged(int newStateId, CxeError::Id error);
 
 
 protected slots:
@@ -106,8 +106,11 @@ protected slots:
     // notification for when camera is released
     void prepareForRelease();
 
-    // ECam events
-    void handleImageData( MCameraBuffer *buffer, int error );
+    // ECAM events
+    void handleCameraEvent(int eventUid, int error);
+
+    // Image data event
+    void handleImageData(MCameraBuffer *buffer, int error);
 
     // Snapshot event
     void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot);

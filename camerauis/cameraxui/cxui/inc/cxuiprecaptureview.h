@@ -113,7 +113,6 @@ protected:
     virtual void initializeSettingsGrid() = 0;
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
     bool eventFilter(QObject *object, QEvent *event);
     void launchSettingsDialog(QObject *action);
     bool isPostcaptureOn() const;
@@ -147,6 +146,7 @@ protected:
     CxuiSettingDialog *mSettingsDialog;
     CxuiSettingRadioButtonList *mSettingsDialogList;
     HbLabel *mQualityIcon;
+    HbLabel *mFaceTrackingIcon;
 
 private:
     CxuiSettingDialog* createSettingsDialog();

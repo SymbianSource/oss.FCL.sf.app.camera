@@ -20,6 +20,7 @@
 #include <QObject>
 #include "cxeerror.h"
 
+class HbAction;
 class HbDialog;
 class CxuiDocumentLoader;
 class CxuiCaptureKeyHandler;
@@ -42,10 +43,13 @@ signals:
     void aboutToRecoverError();
     void errorRecovered();
 
-private slots:
+public slots:
 
-    void analyze(CxeError::Id error);
-    void aboutToClosePopup();
+    void showPopup(CxeError::Id error);
+    void hidePopup(CxeError::Id error);
+
+private slots:
+    void popupClosed(HbAction *action);
     void closeApp();
 
 private:
@@ -59,10 +63,10 @@ private:
         Critical // when error can be recovered, but needs actions e.g. camera in use
     };
 
-    void launchPopup(QString& errorMsgTxt);
-    void showHighSeverityNote(QString& errorMsgTxt);
-    void showLowSeverityNote(QString& errorMsgTxt);
-    QString getErrorDetails(CxeError::Id error);
+    void launchPopup(const QString &errorText, const QString &buttonText);
+    void showHighSeverityNote(const QString &errorText, const QString &buttonText);
+    void showLowSeverityNote(const QString &errorText);
+    void getErrorDetails(QString &errorText, QString &buttonText);
 
 private:
 
@@ -70,6 +74,7 @@ private:
     CxuiCaptureKeyHandler &mKeyHandler;
     CxuiDocumentLoader *mDocumentLoader; // not own
     HbDialog* mErrorMsgPopup;
+    CxeError::Id mErrorId;
     CxuiErrorManager::ErrorSeverity mErrorSeverity;
 };
 

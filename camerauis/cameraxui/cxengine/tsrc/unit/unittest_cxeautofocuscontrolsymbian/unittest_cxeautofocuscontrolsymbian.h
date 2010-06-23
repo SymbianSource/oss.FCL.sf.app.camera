@@ -24,6 +24,7 @@
 class CxeAutoFocusControlSymbian;
 class CxeFakeCameraDeviceControl;
 class CxeFakeCameraDevice;
+class CxeFakeSettings;
 
 class UnitTestCxeAutoFocusControlSymbian : public QObject
 {
@@ -53,6 +54,7 @@ private:
     CxeAutoFocusControlSymbian *mAutoFocusControl;
     CxeFakeCameraDeviceControl *mCameraDeviceControl;
     CxeFakeCameraDevice *mCameraDevice;
+    CxeFakeSettings *mFakeSettings;
 };
 
 #endif // UNITTEST_CXEAUTOFOCUSCONTROLSYMBIAN_H

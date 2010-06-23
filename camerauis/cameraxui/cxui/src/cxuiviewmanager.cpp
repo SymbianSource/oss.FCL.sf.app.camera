@@ -76,8 +76,8 @@ CxuiViewManager::CxuiViewManager(CxuiApplication &application, HbMainWindow &mai
     mApplicationMonitor = new CxuiApplicationFrameworkMonitor(mApplication, mEngine.settings());
     connect(mApplicationMonitor, SIGNAL(foregroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState)),
             this, SLOT(handleForegroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState)));
-    connect(mApplicationMonitor, SIGNAL(batteryEmpty()),
-            this, SLOT(handleBatteryEmpty()));
+    connect(mApplicationMonitor, SIGNAL(batteryEmpty()), this, SLOT(handleBatteryEmpty()));
+    connect(mApplicationMonitor, SIGNAL(usbMassMemoryModeToggled(bool)), this, SLOT(showUsbErrorPopup(bool)));
 
     // Connect memory monitor start / stop to focused status
     connect(this, SIGNAL(focusGained()), &mEngine.memoryMonitor(), SLOT(startMonitoring()));
@@ -105,48 +105,23 @@ CxuiViewManager::CxuiViewManager(CxuiApplication &application, HbMainWindow &mai
     connect(mErrorManager, SIGNAL(aboutToRecoverError()), this, SLOT(aboutToLooseFocus()));
     connect(mErrorManager, SIGNAL(errorRecovered()), this, SLOT(aboutToGainFocus()));
 
-    if (!CxuiServiceProvider::isCameraEmbedded()) {
-        // For embedded mode: don't create view yet, create
-        // when engine inits to correct mode
-        CX_DEBUG_ASSERT(mEngine.cameraDeviceControl().cameraIndex() == Cxe::PrimaryCameraIndex);
-        if (mEngine.mode() == Cxe::VideoMode) {
-            createVideoPrecaptureView();
-            mMainWindow.blockSignals(true);
-            mMainWindow.setCurrentView(mVideoPrecaptureView, false);
-            mMainWindow.blockSignals(false);
-        } else {
-            createStillPrecaptureView();
-            mMainWindow.blockSignals(true);
-            mMainWindow.setCurrentView(mStillPrecaptureView, false);
-            mMainWindow.blockSignals(false);
-        }
-        connectPreCaptureSignals();
-    }
-
     //connecting initmode signals
     connect(&mEngine.cameraDeviceControl(), SIGNAL(initModeComplete(CxeError::Id)),
             this, SLOT(createPostcaptureView()));
 
     connect(&mEngine.cameraDeviceControl(), SIGNAL(initModeComplete(CxeError::Id)),
-            mErrorManager, SLOT(analyze(CxeError::Id)));
+            mErrorManager, SLOT(showPopup(CxeError::Id)));
 
     connect(&mEngine.stillCaptureControl(), SIGNAL(imageCaptured(CxeError::Id, int)),
-            mErrorManager, SLOT(analyze(CxeError::Id)));
-
-    if (CxuiServiceProvider::isCameraEmbedded()) {
-        // connect signals to set up the view after image/video prepare
-        connect(&mEngine.stillCaptureControl(), SIGNAL(imagePrepareComplete(CxeError::Id)),
-                this, SLOT(changeToPrecaptureView()));
-        connect(&mEngine.videoCaptureControl(), SIGNAL(videoPrepareComplete(CxeError::Id)),
-                this, SLOT(changeToPrecaptureView()));
-
-        // start standby timer now because view will not be ready when viewfinder is started
-        mStandbyHandler->startTimer();
-    }
+            mErrorManager, SLOT(showPopup(CxeError::Id)));
 
     // Register stylesheet. It will be automatically destroyed on application
     // exit.
     HbStyleLoader::registerFilePath(":/camerax/cxui.css");
+
+    // Create the view we are starting in, or connect signals so it
+    // will be created once we know the mode we are starting to.
+    initStartupView();
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -167,6 +142,14 @@ CxuiViewManager::~CxuiViewManager()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/**
+* Temporary method to check if camera startup should be proceeded after creating view mananger.
+*/
+bool CxuiViewManager::proceedStartup()
+{
+    return !mStandbyHandler->isActive();
+}
+
 
 // ---------------------------------------------------------------------------
 // CxuiViewManager::prepareWindow
@@ -178,6 +161,61 @@ void CxuiViewManager::prepareWindow()
     getPrecaptureView(mEngine.mode(), mEngine.cameraDeviceControl().cameraIndex())->prepareWindow();
 }
 
+/*!
+* Check if we need to take special actions in startup.
+* USB mass memory mode atleast requires us to enter error standby mode,
+* where user can only exit or fix the issue (remove cable).
+*/
+void CxuiViewManager::startupCheck()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mApplicationMonitor && mApplicationMonitor->isUsbMassMemoryModeActive()) {
+        showUsbErrorPopup(true);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Select and initialize the view we need to start into.
+*/
+void CxuiViewManager::initStartupView()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (!CxuiServiceProvider::isCameraEmbedded()) {
+        // For embedded mode: don't create view yet, create
+        // when engine inits to correct mode
+        CX_DEBUG_ASSERT(mEngine.cameraDeviceControl().cameraIndex() == Cxe::PrimaryCameraIndex);
+        if (mEngine.mode() == Cxe::VideoMode) {
+            createVideoPrecaptureView();
+            mMainWindow.blockSignals(true);
+            mMainWindow.setCurrentView(mVideoPrecaptureView, false);
+            mMainWindow.blockSignals(false);
+        } else {
+            createStillPrecaptureView();
+            mMainWindow.blockSignals(true);
+            mMainWindow.setCurrentView(mStillPrecaptureView, false);
+            mMainWindow.blockSignals(false);
+        }
+        connectPreCaptureSignals();
+
+        startupCheck();
+    } else {
+        // For embedded mode: don't create view yet, create when engine inits to correct mode.
+        // Connect signals to set up the view after image/video prepare
+        connect(&mEngine.stillCaptureControl(), SIGNAL(imagePrepareComplete(CxeError::Id)),
+                this, SLOT(changeToPrecaptureView()));
+        connect(&mEngine.videoCaptureControl(), SIGNAL(videoPrepareComplete(CxeError::Id)),
+                this, SLOT(changeToPrecaptureView()));
+
+        // start standby timer now because view will not be ready when viewfinder is started
+        mStandbyHandler->startTimer();
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
 // ---------------------------------------------------------------------------
 // CxuiViewManager::createStillPrecaptureView
@@ -415,21 +453,25 @@ void CxuiViewManager::changeToPrecaptureView()
                 this, SLOT(changeToPrecaptureView()));
     }
 
-    HbView *view = getPrecaptureView(mEngine.mode(),
-        mEngine.cameraDeviceControl().cameraIndex());
+    // If standby mode is active, don't switch to precapture view and reserve camera now.
+    if (mStandbyHandler->isActive()) {
+        CX_DEBUG(("CxuiViewManager - Change to precapture blocked as standby mode still active."));
+    } else {
+        HbView *view = getPrecaptureView(mEngine.mode(),
+            mEngine.cameraDeviceControl().cameraIndex());
 
-    mMainWindow.blockSignals(true);
-    mMainWindow.setCurrentView(view, false);
-    mMainWindow.blockSignals(false);
+        mMainWindow.blockSignals(true);
+        mMainWindow.setCurrentView(view, false);
+        mMainWindow.blockSignals(false);
 
-    if (mSceneModeView){
-        delete mSceneModeView;
-        mSceneModeView = NULL;
+        if (mSceneModeView){
+            delete mSceneModeView;
+            mSceneModeView = NULL;
+        }
+        // connecting necessary pre-capture view signals
+        connectPreCaptureSignals();
+        emit startStandbyTimer();
     }
-    // connecting necessary pre-capture view signals
-    connectPreCaptureSignals();
-    emit startStandbyTimer();
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -567,7 +609,7 @@ void CxuiViewManager::connectPreCaptureSignals()
         connect(currentView, SIGNAL(switchCamera()), this, SLOT(switchCamera()), Qt::UniqueConnection);
 
         // connecting error signals from precapture view to errormanager.
-        connect(currentView, SIGNAL(reportError(CxeError::Id)),   mErrorManager, SLOT(analyze(CxeError::Id)), Qt::UniqueConnection);
+        connect(currentView, SIGNAL(reportError(CxeError::Id)),   mErrorManager, SLOT(showPopup(CxeError::Id)), Qt::UniqueConnection);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -652,6 +694,33 @@ void CxuiViewManager::handleForegroundStateChanged(CxuiApplicationFrameworkMonit
     }
 }
 
+/*!
+* Show or hide error popup based on change in USB mass memory mode activity.
+* @param show Show the popup?
+*/
+void CxuiViewManager::showUsbErrorPopup(bool show)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    if (show) {
+        mStandbyHandler->enterStandby();
+        mStandbyHandler->allowDismiss(false);
+        // Emulate "mass memory not accessible" error to Error Manager
+        // to get the same functionality as if the error came from CxEngine.
+        mErrorManager->showPopup(CxeError::MemoryNotAccessible);
+    } else {
+        mStandbyHandler->allowDismiss(true);
+        // If we are in postcapture view or scene view, we can return right away to normal mode.
+        // For precapture views we expect user action before reserving camera
+        // and starting viewfinder again.
+        QObject *currentView = mMainWindow.currentView();
+        if (currentView == mPostcaptureView || currentView == mSceneModeView) {
+            mStandbyHandler->exitStandby();
+        }
+        mErrorManager->hidePopup(CxeError::MemoryNotAccessible);
+    }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
 // ---------------------------------------------------------------------------
 // CxuiViewManager::aboutToLooseFocus()
 //
@@ -681,20 +750,27 @@ void CxuiViewManager::aboutToGainFocus()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    // Disconnect capture key event and bringing us to foreground connection (if there is one).
-    disconnect(mKeyHandler, SIGNAL(captureKeyPressed()), this, SLOT(toForeground()));
-
-    // we are getting the focus.
-    if (mMainWindow.currentView() != mPostcaptureView) {
-        connectPreCaptureSignals();
+    // If standby mode is still active, no action is needed yet.
+    // This is the case when USB mass memory mode error is cleared.
+    if (mStandbyHandler->isActive()) {
+        CX_DEBUG(("CxuiViewManager - Focus gain event ignored as standby mode still active."));
     } else {
-        connectPostCaptureSignals();
-    }
 
-    if (mKeyHandler) {
-        mKeyHandler->listenKeys(true);
+        // Disconnect capture key event and bringing us to foreground connection (if there is one).
+        disconnect(mKeyHandler, SIGNAL(captureKeyPressed()), this, SLOT(toForeground()));
+
+        // we are getting the focus.
+        if (mMainWindow.currentView() != mPostcaptureView) {
+            connectPreCaptureSignals();
+        } else {
+            connectPostCaptureSignals();
+        }
+
+        if (mKeyHandler) {
+            mKeyHandler->listenKeys(true);
+        }
+        emit focusGained();
     }
-    emit focusGained();
 
     CX_DEBUG_EXIT_FUNCTION();
 }
