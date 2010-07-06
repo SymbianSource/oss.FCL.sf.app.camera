@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -41,7 +41,7 @@ namespace Cxe
     enum CameraMode
     {
         //! Still image capture mode
-        ImageMode,
+        ImageMode = 0,
 
         //! Video recording mode
         VideoMode
@@ -109,7 +109,8 @@ namespace Cxe
     enum AspectRatio
     {
         AspectRatio4to3, // standard
-        AspectRatio16to9 // wide screen
+        AspectRatio16to9, // wide screen
+        AspectRatio11to9
     };
 
     enum SettingKeyType
@@ -126,11 +127,45 @@ namespace Cxe
         FreeMemoryTrigger = 0,
         FreeMemoryTarget
     };
+
+    /*!
+    * Indicates if Geotagging setting is enabled or disabled.
+    */
+    enum GeoTagging
+    {
+        GeoTaggingOff = 0,
+        GeoTaggingOn
+    };
+
+    /*!
+    * Indicates if Geotagging disclaimer note is shown to the users during camera first startup
+    */
+    enum GeoTaggingDisclaimer
+    {
+        GeoTaggingDisclaimerDisabled = 0,
+        GeoTaggingDisclaimerEnabled
+    };
+
+    // image scene mode key values
+    static const char*  IMAGE_SCENE_AUTO                       = "image_scene_auto";
+    static const char*  IMAGE_SCENE_PORTRAIT                   = "image_scene_portrait";
+    static const char*  IMAGE_SCENE_SCENERY                    = "image_scene_scenery";
+    static const char*  IMAGE_SCENE_MACRO                      = "image_scene_macro";
+    static const char*  IMAGE_SCENE_SPORTS                     = "image_scene_sports";
+    static const char*  IMAGE_SCENE_NIGHT                      = "image_scene_night";
+    static const char*  IMAGE_SCENE_NIGHTPORTRAIT              = "image_scene_night_portrait";
+
+    // video scene setting key values
+    static const char*  VIDEO_SCENE_AUTO                       = "video_scene_auto";
+    static const char*  VIDEO_SCENE_NIGHTPORTRAIT              = "video_scene_night_portrait";
+    static const char*  VIDEO_SCENE_LOWLIGHT                   = "video_scene_low_light";
+    static const char*  VIDEO_SCENE_NIGHT                      = "video_scene_night";
 }
 
 namespace CxeSettingIds
 {
     // Setting Ids
+    static const char* CAMERA_MODE                             = "camera_mode";
     static const char* FOCAL_RANGE                             = "focal_range";
     static const char* FLASH_MODE                              = "flash_mode";
     static const char* WHITE_BALANCE                           = "white_balance";
@@ -149,7 +184,8 @@ namespace CxeSettingIds
     static const char* SELF_TIMER                              = "selfTimer";
     static const char* FACE_TRACKING                           = "face_tracking";
     static const char* GEOTAGGING                              = "geotagging";
-    static const char* CAPTURE_SOUND_ALWAYS_ON                    = "capture_sound_always_on";
+    static const char* GEOTAGGING_DISCLAIMER                   = "geotagging_disclaimer";
+    static const char* CAPTURE_SOUND_ALWAYS_ON                 = "capture_sound_always_on";
 
     // file name/path related key values
     static const char*  FNAME_FOLDER_SUFFIX                    = "folder_suffix";
@@ -160,21 +196,6 @@ namespace CxeSettingIds
     // scene mode keys
     static const char* IMAGE_SCENE                             = "still_scene_modes";
     static const char* VIDEO_SCENE                             = "video_scene_modes";
-
-    // image scene mode key values
-    static const char*  IMAGE_SCENE_AUTO                       = "image_scene_auto";
-    static const char*  IMAGE_SCENE_PORTRAIT                   = "image_scene_portrait";
-    static const char*  IMAGE_SCENE_SCENERY                    = "image_scene_scenery";
-    static const char*  IMAGE_SCENE_MACRO                      = "image_scene_macro";
-    static const char*  IMAGE_SCENE_SPORTS                     = "image_scene_sports";
-    static const char*  IMAGE_SCENE_NIGHT                      = "image_scene_night";
-    static const char*  IMAGE_SCENE_NIGHTPORTRAIT              = "image_scene_night_portrait";
-
-    // video scene setting key values
-    static const char*  VIDEO_SCENE_AUTO                       = "video_scene_auto";
-    static const char*  VIDEO_SCENE_NIGHTPORTRAIT              = "video_scene_night_portrait";
-    static const char*  VIDEO_SCENE_LOWLIGHT                   = "video_scene_low_light";
-    static const char*  VIDEO_SCENE_NIGHT                      = "video_scene_night";
 
     // setting keys for post capture timeout
     static const char*  STILL_SHOWCAPTURED                     = "still_showcaptured";

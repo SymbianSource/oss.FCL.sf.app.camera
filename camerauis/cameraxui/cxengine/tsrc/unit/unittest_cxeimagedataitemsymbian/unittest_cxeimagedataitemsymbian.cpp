@@ -44,7 +44,7 @@ void UnitTestCxeImageDataItemSymbian::init()
     mPath = generateImageFileName(index);
     QByteArray data = "1234";
 
-    mImageDataItem = new CxeImageDataItemUnit(index, data, mPath);
+    mImageDataItem = new CxeImageDataItemUnit(index, data, mPath, false);
 
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SavePending);
     CX_DEBUG_EXIT_FUNCTION();
@@ -96,7 +96,7 @@ void UnitTestCxeImageDataItemSymbian::testSaveFail()
 
     delete mImageDataItem;
     mImageDataItem = NULL;
-    mImageDataItem = new CxeImageDataItemUnit( index, data, path );
+    mImageDataItem = new CxeImageDataItemUnit( index, data, path, false );
     returnValue = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
     QVERIFY(returnValue == KErrArgument);
@@ -104,7 +104,7 @@ void UnitTestCxeImageDataItemSymbian::testSaveFail()
     delete mImageDataItem;
     mImageDataItem = NULL;
     QString filename = generateImageFileNameWithLetter(++index, "C");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename );
+    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
     returnValue = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
     QVERIFY(returnValue != KErrNone);
@@ -113,7 +113,7 @@ void UnitTestCxeImageDataItemSymbian::testSaveFail()
     delete mImageDataItem;
     mImageDataItem = NULL;
     filename = generateImageFileNameWithLetter(++index, "");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename );
+    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
     returnValue = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
     QVERIFY(returnValue != KErrNone);
@@ -122,7 +122,7 @@ void UnitTestCxeImageDataItemSymbian::testSaveFail()
     delete mImageDataItem;
     mImageDataItem = NULL;
     filename = generateImageFileNameWithLetter(++index, "12");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename );
+    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
     returnValue = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
     QVERIFY(returnValue != KErrNone);
@@ -131,7 +131,7 @@ void UnitTestCxeImageDataItemSymbian::testSaveFail()
     delete mImageDataItem;
     mImageDataItem = NULL;
     filename = generateImageFileNameWithLetter(++index, "Edata");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename );
+    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
     returnValue = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
     QVERIFY(returnValue != KErrNone);

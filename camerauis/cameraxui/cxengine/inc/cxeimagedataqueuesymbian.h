@@ -49,7 +49,7 @@ public: // from CxeImageDataQueue
     CxeImageDataItem &operator[]( int index );
 
 public:  // public member functions, not in client API
-    CxeImageDataItemSymbian *startSave( QByteArray data, QString path, int id );
+    CxeImageDataItemSymbian *startSave( QByteArray data, QString path, int id, bool addLocation);
 
 private: // private data members
     QList<CxeImageDataItemSymbian*> mList;

@@ -35,6 +35,11 @@ public: // from HbApplication
 #endif // Q_WS_S60
 
 signals:
+    /*!
+    * Testing framework support.
+    * Application ready signal is emitted after startup when UI is fully loaded and functional.
+    */
+    void applicationReady();
 #if defined(Q_WS_S60)
     void symbianEvent(const QSymbianEvent *e);
 #endif // Q_WS_S60

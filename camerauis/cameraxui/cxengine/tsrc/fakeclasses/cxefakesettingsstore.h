@@ -30,7 +30,7 @@ public:
 public: // from base class
     void reset();
 	CxeError::Id get(const QString& key, QVariant &value);
-	void get(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value);
+	void startMonitoring(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value);
 	CxeError::Id set(const QString& key,const QVariant newValue);
 	QHash<QString, QVariantList> loadRuntimeSettings(QList<QString>& keylist);
 

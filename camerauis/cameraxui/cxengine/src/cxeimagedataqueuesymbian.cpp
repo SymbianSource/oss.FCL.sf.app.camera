@@ -80,12 +80,12 @@ CxeImageDataItem &CxeImageDataQueueSymbian::operator[]( int index )
     return *mList[index];
 }
 
-CxeImageDataItemSymbian *CxeImageDataQueueSymbian::startSave( QByteArray data, QString path, int id )
+CxeImageDataItemSymbian *CxeImageDataQueueSymbian::startSave(QByteArray data, QString path, int id, bool addLocation)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxeImageDataItemSymbian* dataItem = new CxeImageDataItemSymbian(data, path, id);
-    mList.append( dataItem );
+    CxeImageDataItemSymbian* dataItem = new CxeImageDataItemSymbian(data, path, id, addLocation);
+    mList.append(dataItem);
 
     CX_DEBUG_EXIT_FUNCTION();
     return dataItem;

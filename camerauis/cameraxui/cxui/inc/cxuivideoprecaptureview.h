@@ -54,7 +54,8 @@ public:
      */
     void construct(HbMainWindow *mainwindow, CxeEngine *engine,
                    CxuiDocumentLoader *documentLoader,
-                   CxuiCaptureKeyHandler *keyHandler = NULL);
+                   CxuiCaptureKeyHandler *keyHandler,
+                   HbActivityManager *activityManager);
 
     /**
      * Loads widgets that are needed right from the start.
@@ -66,6 +67,10 @@ public:
      * Widgets are created at the time they are first loaded.
      */
     virtual void loadWidgets();
+
+    void restoreActivity(const QString &activityId, const QVariant &data);
+    void saveActivity();
+    void clearActivity();
 
 public slots:
 
@@ -86,22 +91,8 @@ protected slots:
     void handleVideoStateChanged(CxeVideoCaptureControl::State newState, CxeError::Id error);
     void handleCaptureKeyPressed();
     void prepareNewVideo(CxeError::Id error = CxeError::None);
-    void toggleLight();
     void launchVideoScenePopup();
     void launchSetting();
-
-    /**
-     * Application focus slots are called if focus state is changed.
-     * Recording is stopped and camera released or reserved according to new state.
-     */
-    void handleFocusLost();
-
-    /**
-     * Battery almost empty warning signal.
-     * Need to stop ongoing recording.
-     */
-    void handleBatteryEmpty();
-
     void updateTimeLabels();
 
     // from CxuiPrecaptureView
@@ -112,12 +103,16 @@ protected:
     void setVideoTime(HbLabel* label, int time);
     bool getElapsedTime();
     void getRemainingTime();
-    virtual bool allowShowControls() const;
-    virtual void showToolbar();
+    bool allowShowControls() const;
+    bool isFeedbackEnabled() const;
+    void showToolbar();
     void disableFeedback();
     void enableFeedback();
 
     void initializeSettingsGrid();
+    bool isPostcaptureOn() const;
+    void updateSceneIcon(const QString& sceneId);
+    void updateQualityIcon();
     void setRecordingItemsVisibility(bool visible);
 
     // from QObject

@@ -37,11 +37,10 @@ class HbLabel;
 class CxuiSelfTimerRadioButtonList;
 class HbToolBarExtension;
 class HbWidget;
+
 /**
  * Pre-capture view for still image mode
  */
-
-
 class CxuiStillPrecaptureView : public CxuiPrecaptureView
 {
     Q_OBJECT
@@ -53,28 +52,18 @@ public:
 
 public:
 
-    /**
-     * Construct-method handles initialisation tasks for this class. Needs to be called
-     * before the instance of this class is used.
-     * @param mainwindow
-     * @param engine
-     * @param documentLoader
-     * @param keyHandler
-     */
-    virtual void construct(HbMainWindow *mainwindow, CxeEngine *engine,
-                   CxuiDocumentLoader *documentLoader, CxuiCaptureKeyHandler *keyHandler = NULL);
+    virtual void construct(HbMainWindow *mainwindow, 
+                           CxeEngine *engine,
+                           CxuiDocumentLoader *documentLoader, 
+                           CxuiCaptureKeyHandler *keyHandler,
+                           HbActivityManager *activityManager);
 
-    /**
-     * Loads default widgets in layouts xml.
-     */
     virtual void loadDefaultWidgets();
-
-    /**
-     * Loads widgets that are not part of the default section in layouts xml.
-     * Widgets are created at the time they are first loaded.
-     */
     virtual void loadWidgets();
 
+    void restoreActivity(const QString &activityId, const QVariant &data);
+    void saveActivity();
+    void clearActivity();
 protected:
 
     void showEvent(QShowEvent *event);
@@ -89,12 +78,14 @@ public slots:
     // connects to the sceneChanged signal of CxeSettings
     void handleSceneChanged(CxeScene &scene);
 
+    // From CxuiPrecaptureView
+    virtual void enterStandby();
+
 protected slots:
     void focusAndCapture();
     void capture();
     void setCapturePending();
     void goToVideo();
-
 
     // Key events
     void handleCaptureKeyPressed();
@@ -107,23 +98,16 @@ protected slots:
     void handleStillCaptureStateChanged(CxeStillCaptureControl::State newState, CxeError::Id error);
     void handleSnapshot(CxeError::Id error);
 
-    /**
-     * Signal used to reset mCapturePending after a short timeout. If the image
-     * cannot be captured within a given time of the key press, it is better to cancel
-     * the whole operation.
-     */
     void resetCapturePendingFlag();
 
-    /**
-     * Application focus slots are called if focus state is changed.
-     * Camera is released or reserved according to new state.
-     */
-    void handleFocusLost();
     void launchSetting();
     void updateImagesLeftLabel();
 
 protected:
     void initializeSettingsGrid();
+    bool isPostcaptureOn() const;
+    void updateSceneIcon(const QString& sceneId);
+    void updateQualityIcon();
     void closeDialogs();
     void updateFaceTrackingIcon();
 

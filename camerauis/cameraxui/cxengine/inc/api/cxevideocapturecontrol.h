@@ -90,9 +90,9 @@ public slots:
     virtual void deinit() = 0;
 
 signals:
-    void videoComposed(CxeError::Id error, const QString& filename);
+    void videoComposed(CxeError::Id error, const QString &filename);
     void stateChanged(CxeVideoCaptureControl::State newState, CxeError::Id error);
-    void snapshotReady(CxeError::Id error, const QPixmap& snapshot, const QString& filename);
+    void snapshotReady(CxeError::Id error, const QImage &snapshot, const QString &filename);
     void remainingTimeChanged();
 
 protected:

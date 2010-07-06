@@ -67,7 +67,8 @@ void CxeTestRunner::runTests()
           << "unittest_cxeharvestercontrolsymbian"
           << "unittest_cxesettingscontrolsymbian"
           << "unittest_cxesnapshotcontrol"
-          << "unittest_cxeenginesymbian";
+          << "unittest_cxeenginesymbian"
+          << "unittest_cxegeotaggingtrail";
 
     QDir dir;
     dir.mkpath(logFileFolder);

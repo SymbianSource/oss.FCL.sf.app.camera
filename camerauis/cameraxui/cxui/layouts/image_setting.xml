@@ -70,7 +70,6 @@
             <item string="txt_cam_list_sepia"    value="1" icon="" />
             <item string="txt_cam_list_white"    value="3" icon="" />
             <item string="txt_cam_list_vivid"    value="4" icon="" />
-            <item string="txt_cam_list_negative" value="2" icon="" />
         </setting_list>
 
         <!-- ISO Light sensitivity (setting list) -->
@@ -84,6 +83,16 @@
             <l1Item string="txt_cam_list_iso_l1" l1Value="200"  value="200" icon="" />
             <l1Item string="txt_cam_list_iso_l1" l1Value="400"  value="400" icon="" />
             <l1Item string="txt_cam_list_iso_l1" l1Value="800"  value="800" icon="" />
+        </setting_list>
+        
+        <!-- GeoTagging (setting list) -->
+        <setting_list id="geotagging"
+                      heading="txt_cam_title_geotagging"
+                      preview="0"
+                      type="SingleLineListBox"
+                      setting_icon="">
+            <item string="txt_cam_list_geotagging_on"   value="1" icon="" />
+            <item string="txt_cam_list_geotagging_off"    value="0" icon="" />
         </setting_list>
 
         <!-- Exposure compensation (setting slider) -->

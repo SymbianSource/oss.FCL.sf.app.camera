@@ -54,16 +54,18 @@
 #include "cxuisettingslider.h"
 #include "cxuisettingsinfo.h"
 #include "OstTraceDefinitions.h"
+#include "cxuiserviceprovider.h"
+#include "cxuizoomslider.h"
+#include "cxuifullscreenpopup.h"
+
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuiprecaptureviewTraces.h"
 #endif
-#include "cxuiserviceprovider.h"
-#include "cxuizoomslider.h"
+#include "cxegeotaggingtrail.h"
 
 using namespace CxUiLayout;
 using namespace CxUiSettings;
 using namespace CxUiInternal;
-
 
 
 // ---------------------------------------------------------------------------
@@ -80,6 +82,9 @@ CxuiPrecaptureView::CxuiPrecaptureView(QGraphicsItem *parent) :
     mSettingsDialog(NULL),
     mSettingsDialogList(NULL),
     mQualityIcon(NULL),
+    mGeoTaggingIndicatorIcon(NULL),
+    mFaceTrackingIcon(NULL),
+    mStandbyPopup(NULL),
     mSettingsDialogHeading(NULL),
     mSliderSettingsDialog(NULL),
     mSliderSettingsDialogHeading(NULL),
@@ -111,12 +116,13 @@ CxuiPrecaptureView::~CxuiPrecaptureView()
  */
 void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
                                    CxuiDocumentLoader *documentLoader,
-                                   CxuiCaptureKeyHandler * keyHandler)
+                                   CxuiCaptureKeyHandler * keyHandler,
+                                   HbActivityManager *activityManager)
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0( camerax_performance, CXUIPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_PRECAPVIEW_CONST 1" );
 
-    CxuiView::construct(mainWindow, engine, documentLoader, keyHandler);
+    CxuiView::construct(mainWindow, engine, documentLoader, keyHandler, activityManager);
 
     mSettingsInfo = new CxuiSettingsInfo(engine);
     CX_DEBUG_ASSERT(mSettingsInfo);
@@ -132,6 +138,9 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
 
     connect(&mEngine->viewfinderControl(), SIGNAL(stateChanged(CxeViewfinderControl::State, CxeError::Id)),
             this, SLOT(handleVfStateChanged(CxeViewfinderControl::State, CxeError::Id)));
+
+    connect(&mEngine->geoTaggingTrail(), SIGNAL(stateChanged(CxeGeoTaggingTrail::State, CxeError::Id)),
+            this, SLOT(updateLocationIndicator(CxeGeoTaggingTrail::State, CxeError::Id)));
 
     connect(&(mEngine->settings()), SIGNAL(settingValueChanged(const QString&,QVariant)),
             this, SLOT(handleSettingValueChanged(const QString&, QVariant)));
@@ -150,27 +159,21 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
         connect(exitAction, SIGNAL(triggered()), CxuiServiceProvider::instance(), SLOT(sendFilenameToClientAndExit()));
         setNavigationAction(exitAction);
     }
+
     OstTrace0( camerax_performance, DUP1_CXUIPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_PRECAPVIEW_CONST 0" );
 
     QCoreApplication::instance()->installEventFilter(this);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::prepareWindow
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::prepareWindow()
+/*!
+* Is standby mode supported / needed by this view.
+* Pre-capture views implement / need standby mode and return true.
+* @return True if standby mode is supported, false otherwise.
+*/
+bool CxuiPrecaptureView::isStandbyModeSupported() const
 {
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (mMainWindow) {
-        mEngine->viewfinderControl().setWindow(mMainWindow->effectiveWinId());
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
+    return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -241,17 +244,23 @@ void CxuiPrecaptureView::toggleZoom()
 
 bool CxuiPrecaptureView::eventFilter(QObject *object, QEvent *event)
 {
-    Q_UNUSED(object)
-
     bool eventWasConsumed = false;
 
     switch (event->type())
     {
     case QEvent::GraphicsSceneMouseRelease:
-        mHideControlsTimeout.start();
+        if (mStandbyPopup) {
+            mStandbyPopup->handleMouseRelease();
+        } else {
+            mHideControlsTimeout.start();
+        }
         break;
     case QEvent::GraphicsSceneMousePress:
-        mHideControlsTimeout.stop();
+        if (object == mStandbyPopup) {
+            mStandbyPopup->handleMousePress();
+        } else {
+            mHideControlsTimeout.stop();
+        }
         break;
     default:
         break;
@@ -423,18 +432,48 @@ void CxuiPrecaptureView::handleVfStateChanged(
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-/*
- * CxuiPrecaptureView::handleFocusGained
- */
-void CxuiPrecaptureView::handleFocusGained()
+/*!
+* Slot for entering standby mode.
+* Show standby canvas in addition to base class implementation.
+* @sa CxuiView::enterStandby()
+*/
+void CxuiPrecaptureView::enterStandby()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    // Set the window size and handle again.
-    prepareWindow();
-    initCamera();
+    // Release camera right away to avoid any problems with GPU memory.
+    CxuiView::enterStandby();
 
+    // If this view is still the current view, show popup.
+    // If we moved to precapture view because (error) standby during capturing,
+    // don't try show the popup.
+    if (mMainWindow->currentView() == this) {
+        // Show standby canvas / popup.
+        if (!mStandbyPopup) {
+            mStandbyPopup = CxuiFullScreenPopup::create(scene(), hbTrId("txt_cam_info_camera_in_standby_mode"));
+        }
+        mStandbyPopup->show();
+    }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Slot for exiting standby mode.
+* Hide the standby canvas and re-prepare camera.
+* @sa CxuiView::exitStandby()
+*/
+void CxuiPrecaptureView::exitStandby()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CxuiView::exitStandby();
+
+    if (mStandbyPopup) {
+        mStandbyPopup->hide();
+        delete mStandbyPopup;
+        mStandbyPopup = NULL;
+    }
+
+    initCamera();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -469,6 +508,14 @@ void CxuiPrecaptureView::prepareToCloseDialog(HbAction *action)
         QString fromGrid = action->property(PROPERTY_KEY_SETTING_GRID).toString();
         if (fromGrid.compare(QString(PROPERTY_KEY_TRUE)) == 0 ) {
             showSettingsGrid();
+        }
+        // disable geotagging disclaimer after geotagging setting is triggered from FirstTimeUse dialog
+        QString settingId = action->property(PROPERTY_KEY_SETTING_ID).toString();
+        int value = Cxe::GeoTaggingDisclaimerDisabled;
+        mEngine->settings().get(CxeSettingIds::GEOTAGGING_DISCLAIMER, value);
+        if (settingId == CxeSettingIds::GEOTAGGING && value == Cxe::GeoTaggingDisclaimerEnabled) {
+            // disable geotagging first-time-use dialog
+            disableGeotaggingDisclaimer();
         }
     }
 
@@ -720,16 +767,6 @@ void CxuiPrecaptureView::launchSliderSetting()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/*!
-* Show "Disk full" notification.
-*/
-void CxuiPrecaptureView::launchDiskFullNotification()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    HbMessageBox::warning(hbTrId("txt_cam_info_memory_full"));
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 /**
 * Show settings grid.
 */
@@ -760,36 +797,6 @@ void CxuiPrecaptureView::hideSettingsGrid()
         mSettingsGrid->hide();
     }
     CX_DEBUG_EXIT_FUNCTION();
-}
-
-/**
-* Get if postcapture view should be shown or not.
-* Postcapture view may be shown for a predefined time or
-* until user dismisses it, or it may be completely disabled.
-*/
-bool CxuiPrecaptureView::isPostcaptureOn() const
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    if (CxuiServiceProvider::isCameraEmbedded()) {
-        // always show post capture in embedded mode
-        return true;
-    }
-
-    // Read the value from settings. Ignoring reading error.
-    // On error (missing settings) default to "postcapture on".
-    int showPostcapture(-1);
-    QString key;
-    if(mEngine) {
-        if (mEngine->mode() == Cxe::ImageMode) {
-            key = CxeSettingIds::STILL_SHOWCAPTURED;
-        } else {
-            key = CxeSettingIds::VIDEO_SHOWCAPTURED;
-        }
-        mEngine->settings().get(key, showPostcapture);
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-    return showPostcapture != 0; // 0 == no postcapture
 }
 
 /*!
@@ -841,33 +848,6 @@ QString CxuiPrecaptureView::getSettingItemIcon(const QString &key, QVariant valu
     return icon;
 }
 
-/*!
-    Update the quality indicator
-*/
-void CxuiPrecaptureView::updateQualityIcon()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (mQualityIcon && mEngine) {
-        QString key = "";
-        QString icon = "";
-        int currentValue = -1;
-
-        if (mEngine->mode() == Cxe::VideoMode) {
-            key = CxeSettingIds::VIDEO_QUALITY;
-        } else {
-            key = CxeSettingIds::IMAGE_QUALITY;
-        }
-
-        mEngine->settings().get(key, currentValue);
-        icon = getSettingItemIcon(key, currentValue);
-
-        mQualityIcon->setIcon(HbIcon(icon));
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 void CxuiPrecaptureView::handleSettingValueChanged(const QString& key, QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -877,40 +857,102 @@ void CxuiPrecaptureView::handleSettingValueChanged(const QString& key, QVariant 
 }
 
 /*!
-* Update the scene mode icon.
-* @param sceneId The new scene id.
+ * Slot to keep track of state changes in GeotaggingLocation trail. We use these states to update
+ * the UI by enabling right icon.
+ */
+void CxuiPrecaptureView::updateLocationIndicator(CxeGeoTaggingTrail::State newState, CxeError::Id error)
+{
+    CX_DEBUG( ("CxuiPrecaptureView::updateLocationIndicator <> error: %d ", error));
+
+    if (mGeoTaggingIndicatorIcon) {
+        if (newState == CxeGeoTaggingTrail::DataAvailable && error == CxeError::None) {
+            CX_DEBUG(("CxuiPrecaptureView::updateLocationIndicator GPS data available, showing icon"));
+            mGeoTaggingIndicatorIcon->setIcon(HbIcon("qtg_mono_geotag"));
+            mGeoTaggingIndicatorIcon->show();
+        } else {
+            CX_DEBUG(("CxuiPrecaptureView::handleIconChanged GPS data not available"));
+            mGeoTaggingIndicatorIcon->hide();
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* Lauches "Geotagging first-time use" notification to the user
 */
-void CxuiPrecaptureView::updateSceneIcon(const QString& sceneId)
+void CxuiPrecaptureView::launchGeoTaggingDisclaimerDialog()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CX_DEBUG(("CxuiPrecaptureView - scene: %s", sceneId.toAscii().constData()));
 
-    // No need to update icon, if widgets are not even loaded yet.
-    // We'll update the icon once the widgets are loaded.
-    if (mWidgetsLoaded) {
+    QString ftuMsg = hbTrId("txt_cam_info_captured_photos_and_videos_will_be_ta");
+    QString actionOkTxt = hbTrId("txt_common_button_ok");
+    QString actionSettingsTxt = hbTrId("txt_cam_opt_general_settings");
 
-        QString key;
-        QString iconObjectName;
-        if (mEngine->mode() == Cxe::VideoMode) {
-            key = CxeSettingIds::VIDEO_SCENE;
-            iconObjectName = VIDEO_PRE_CAPTURE_SCENE_MODE_ACTION;
-        } else {
-            key = CxeSettingIds::IMAGE_SCENE;
-            iconObjectName = STILL_PRE_CAPTURE_SCENE_MODE_ACTION;
-        }
+    HbDialog *dialog = new HbDialog();
+    HbLabel *label = new HbLabel();
 
-        QString icon = getSettingItemIcon(key, sceneId);
-        CX_DEBUG(("CxuiPrecaptureView - icon: %s", icon.toAscii().constData()));
+    // initializing dialog's content widget
+    label->setPlainText(ftuMsg);
+    label->setTextWrapping(Hb::TextWordWrap);
+    label->setElideMode(Qt::ElideNone);
+    label->setMaximumWidth(350);
+    dialog->setContentWidget(label);
 
-        if (mDocumentLoader) {
-            QObject *obj = mDocumentLoader->findObject(iconObjectName);
-            CX_DEBUG_ASSERT(obj);
-            qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
-        }
-    } else {
-        CX_DEBUG(("CxuiPrecaptureView - widgets not loaded yet, ignored!"));
-    }
+    // initializing dialog's actions
+    HbAction *okAction = new HbAction(actionOkTxt, dialog);
+    HbAction *settingsAction = new HbAction(actionSettingsTxt, dialog);
+    dialog->addAction(okAction);
+    dialog->addAction(settingsAction);
+
+    // connecting signals for dialog's actions
+    connect(okAction,
+            SIGNAL(triggered()),
+            this,
+            SLOT(disableGeotaggingDisclaimer()));
+
+    connect(settingsAction,
+            SIGNAL(triggered()),
+            this,
+            SLOT(launchGeoTaggingSetting()));
+
+    // initializing dialog's properties
+    dialog->setTimeout(HbDialog::NoTimeout);
+    dialog->setDismissPolicy(HbPopup::NoDismiss);
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
+    dialog->show();
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Slot that disables Geotagging first-time use notification.
+*/
+void CxuiPrecaptureView::disableGeotaggingDisclaimer()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // disable geotagging first-time-use dialog
+    mEngine->settings().set(CxeSettingIds::GEOTAGGING_DISCLAIMER, Cxe::GeoTaggingDisclaimerDisabled);
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* Slot that accepts "Geotagging first-time use" note and launches geotagging setting dialog.
+*/
+void CxuiPrecaptureView::launchGeoTaggingSetting()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    QObject *action = sender();
+    action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::GEOTAGGING);
+    launchSettingsDialog(action);
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 // end of file
+

@@ -63,6 +63,7 @@ public:
     CxeSettings &settings();
     CxeFeatureManager &featureManager();
     Cxe::CameraMode mode() const;
+    void setMode(Cxe::CameraMode mode);
     void initMode(Cxe::CameraMode cameraMode);
     bool isEngineReady();
 

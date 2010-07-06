@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -39,6 +39,7 @@
 #include "cxecameradevice.h"
 #include "cxememorymonitor.h"
 #include "cxediskmonitor.h"
+#include "cxegeotaggingtrail.h"
 
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -66,7 +67,8 @@ CxeEngineSymbian::CxeEngineSymbian()
       mQualityPresets(NULL),
       mFileSaveThread(NULL),
       mDiskMonitor(NULL),
-      mMemoryMonitor(NULL)
+      mMemoryMonitor(NULL),
+      mGeoTaggingTrail(NULL)
 {
     CX_DEBUG_IN_FUNCTION();
 }
@@ -120,6 +122,17 @@ void CxeEngineSymbian::createControls()
 
         mSettings = new CxeSettingsImp(*mSettingsModel);
 
+        // Loading current camera mode value from settings store and updating 
+		// devicecontrol        
+        Cxe::CameraMode cameraMode = Cxe::ImageMode;
+        int value;
+        CxeError::Id err = mSettings->get(CxeSettingIds::CAMERA_MODE, value);
+        if (!err) {
+            cameraMode = static_cast<Cxe::CameraMode>(value);
+        }
+        // set current camera mode to devicecontrol.
+        mCameraDeviceControl->setMode(cameraMode);
+        
         //! @todo a temporary hack to change the startup sequence to avoid GOOM problems
         static_cast<CxeSettingsImp*>(mSettings)->loadSettings(mode());
 
@@ -168,6 +181,10 @@ void CxeEngineSymbian::createControls()
             *mFilenameGenerator, *mSettings, *mQualityPresets, *mDiskMonitor);
 
         mSettingsControl = new CxeSettingsControlSymbian(*mCameraDevice, *mSettings);
+
+        mGeoTaggingTrail = new CxeGeoTaggingTrail(*mStillCaptureControl,
+                                                  *mVideoCaptureControl,
+                                                  *mSettings);
 
         OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_OUT, "e_CX_ENGINE_CREATE_CONTROLS 0");
     }
@@ -243,17 +260,25 @@ void CxeEngineSymbian::connectSignals()
     // Connect file saving thread to snapshot signals and video saved signal.
     // Image saving it handles internally.
     connect(mStillCaptureControl,
-            SIGNAL(snapshotReady(CxeError::Id, const QPixmap&, int)),
+            SIGNAL(snapshotReady(CxeError::Id, const QImage&, int)),
             mFileSaveThread,
-            SLOT(handleSnapshotReady(CxeError::Id, const QPixmap&, int)));
+            SLOT(handleSnapshotReady(CxeError::Id, const QImage&, int)));
     connect(mVideoCaptureControl,
             SIGNAL(videoComposed(CxeError::Id, const QString&)),
             mFileSaveThread,
             SLOT(handleVideoSaved(CxeError::Id, const QString&)));
     connect(mVideoCaptureControl,
-            SIGNAL(snapshotReady(CxeError::Id, const QPixmap&, const QString&)),
+            SIGNAL(snapshotReady(CxeError::Id, const QImage&, const QString&)),
             mFileSaveThread,
-            SLOT(handleSnapshotReady(CxeError::Id, const QPixmap&, const QString&)));
+            SLOT(handleSnapshotReady(CxeError::Id, const QImage&, const QString&)));
+
+
+    // stop location trail when releasing camera.
+    connect(mCameraDevice,
+            SIGNAL(prepareForRelease()),
+            mGeoTaggingTrail,
+            SLOT(stop()),
+            Qt::UniqueConnection);
 
     OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_OUT, "e_CX_ENGINE_CONNECT_SIGNALS 0");
 
@@ -263,7 +288,11 @@ void CxeEngineSymbian::connectSignals()
 CxeEngineSymbian::~CxeEngineSymbian()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
+    
+    // Saving current camera mode to cenrep
+    saveMode();
+    
+    delete mGeoTaggingTrail;
     delete mAutoFocusControl;
     delete mZoomControl;
     delete mSettingsControl;
@@ -319,13 +348,17 @@ CxeZoomControl &CxeEngineSymbian::zoomControl()
     return *mZoomControl;
 }
 
-// Get the settings handle
+/*!
+Returns the settings handle
+*/
 CxeSettings &CxeEngineSymbian::settings()
 {
     return *mSettings;
 }
 
-// Get the sensor event  handle
+/*! 
+Returns the sensor event  handle
+*/
 CxeSensorEventHandler &CxeEngineSymbian::sensorEventHandler()
 {
     return *mSensorEventHandler;
@@ -338,14 +371,23 @@ CxeFeatureManager &CxeEngineSymbian::featureManager()
 }
 
 /*!
-* Get memory monitor utility handle.
+* Returns memory monitor utility handle.
 */
 CxeMemoryMonitor &CxeEngineSymbian::memoryMonitor()
 {
     return *mMemoryMonitor;
 }
 
-/*
+
+/*!
+ Returns geotaggingtrail handle
+ */
+CxeGeoTaggingTrail &CxeEngineSymbian::geoTaggingTrail()
+{
+    return *mGeoTaggingTrail;
+}
+
+/*!
 * Returns true, if the engine is ready or else false.
 */
 bool CxeEngineSymbian::isEngineReady()
@@ -382,12 +424,17 @@ void CxeEngineSymbian::doInit()
         settingsImp->loadSettings(mode());
     }
 
-
     if (mode() == Cxe::ImageMode) {
+        // start geotagging trail in image mode.
+        startGeotaggingTrail();
         mVideoCaptureControl->deinit();
         mStillCaptureControl->init();
     } else if (mode() == Cxe::VideoMode) {
         mStillCaptureControl->deinit();
+        if (mGeoTaggingTrail) {
+            // in video mode, Geotagging is not supported for now.
+            mGeoTaggingTrail->stop();
+        }
         mVideoCaptureControl->init();
     }
 
@@ -396,11 +443,24 @@ void CxeEngineSymbian::doInit()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Returns camera mode.
+ */
 Cxe::CameraMode CxeEngineSymbian::mode() const
 {
     return mCameraDeviceControl->mode();
 }
 
+/*!
+ * Sets the camera mode.
+ * \parama mode New camera mode
+ */
+void CxeEngineSymbian::setMode(Cxe::CameraMode mode)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mCameraDeviceControl->setMode(mode);
+    CX_DEBUG_EXIT_FUNCTION();
+}
 /*!
     Check if we need to reserve camera.
 */
@@ -525,6 +585,44 @@ void CxeEngineSymbian::reserve()
     CX_DEBUG_ENTER_FUNCTION();
     mCameraDeviceControl->reserve();
     emit reserveStarted();
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* Saves current mode to the cenrep
+*/
+void CxeEngineSymbian::saveMode()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mCameraDeviceControl && mSettings) {
+        int value = mCameraDeviceControl->mode();
+        mSettings->set(CxeSettingIds::CAMERA_MODE, value);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* Start geotagging trail.
+*/
+void CxeEngineSymbian::startGeotaggingTrail()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    
+    if (mGeoTaggingTrail && mSettings) {
+        // location trail is limited to image mode only for now.
+        int value = Cxe::GeoTaggingDisclaimerDisabled;
+        mSettings->get(CxeSettingIds::GEOTAGGING_DISCLAIMER, value);
+
+        // we start location trail only when Geotagging First-time-use note is accepted by user.
+        if (value == Cxe::GeoTaggingDisclaimerDisabled) {
+            mGeoTaggingTrail->start();
+        }
+    }
+    
     CX_DEBUG_EXIT_FUNCTION();
 }
 

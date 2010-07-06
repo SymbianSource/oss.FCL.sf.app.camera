@@ -82,31 +82,26 @@ void UnitTestCxeSnapshotControl::testCalculateSnapshotSize()
 
     QSize snapshotSize;
     QSize displaySize;
-    QSize captureResolution;
 
     // 16:9 display, 4:3 capture format
     displaySize = QSize(1600, 900);
-    captureResolution = QSize(400, 300);
-    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, captureResolution);
+    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, Cxe::AspectRatio4to3);
     QVERIFY(snapshotSize == QSize(1200, 900));
 
     // 16:9 display, 16:9 capture format
     displaySize = QSize(640, 360);
-    captureResolution = QSize(4000, 2248);
-    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, captureResolution);
+    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, Cxe::AspectRatio16to9);
     QVERIFY(snapshotSize == QSize(640, 360));
 
 
     // 4:3 display, 16:9 capture format
     displaySize = QSize(640, 480);
-    captureResolution = QSize(4000, 2248);
-    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, captureResolution);
+    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, Cxe::AspectRatio16to9);
     QVERIFY(snapshotSize == QSize(640, 360));
 
     // 4:3 display, 4:3 capture format
     displaySize = QSize(640, 480);
-    captureResolution = QSize(2048, 1536);
-    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, captureResolution);
+    snapshotSize = mSnapshotControl->calculateSnapshotSize(displaySize, Cxe::AspectRatio4to3);
     QVERIFY(snapshotSize == QSize(640, 480));
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -142,7 +137,7 @@ void UnitTestCxeSnapshotControl::testHandleCameraEvent()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    QSignalSpy spySnapshotReady(mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&)));
+    QSignalSpy spySnapshotReady(mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QImage&)));
 
     // Snapshot not started, camera events should not effect in any way.
     mSnapshotControl->handleCameraEvent(KUidECamEventSnapshotUidValue, KErrNone);

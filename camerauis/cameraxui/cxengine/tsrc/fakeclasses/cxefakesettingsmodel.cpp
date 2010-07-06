@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,7 +20,12 @@
 
 CxeFakeSettingsModel::CxeFakeSettingsModel()
 {
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_ENTER_FUNCTION();
+
+    initDefaultCameraSettings();
+    initRuntimeSettings();
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 CxeFakeSettingsModel::~CxeFakeSettingsModel()
@@ -34,8 +39,8 @@ CxeError::Id CxeFakeSettingsModel::getRuntimeValue( const QString &key, QVariant
     CxeError::Id err = CxeError::None;
 
     // read run-time configuration value
-    if (mStore.contains(key))  {
-        value = qVariantFromValue<QList<QVariant> > (mStore[key]);
+    if (mRuntimeSettings.contains(key)) {
+        value = qVariantFromValue<QVariantList > (mRuntimeSettings.value(key));
     } else {
         err = CxeError::NotFound;
     }
@@ -72,7 +77,7 @@ void CxeFakeSettingsModel::getSettingValue(long int uid, unsigned long int key, 
 }
 
 
-/* This is a helper method for this fake class that can be used to set key-value pairs
+/*! This is a helper method for this fake class that can be used to set key-value pairs
  * to local mStore database. Key-value pairs don't have to refer any real values used
  * in camera application as the fake class is used only for testing purposes
  */
@@ -95,29 +100,29 @@ CxeError::Id CxeFakeSettingsModel::set(const QString &key, QVariant value)
 
 CxeError::Id CxeFakeSettingsModel::setImageScene(const QString &newScene)
 {
-    mDummyScene.clear();
+    mDummyImageScene.clear();
 
     // image scene mode key values
-    if(newScene == CxeSettingIds::IMAGE_SCENE_AUTO) {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_AUTO);
+    if(newScene == Cxe::IMAGE_SCENE_AUTO) {
+        mDummyImageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_AUTO);
     }
-    else if(newScene == CxeSettingIds::IMAGE_SCENE_PORTRAIT) {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_PORTRAIT);
+    else if(newScene == Cxe::IMAGE_SCENE_PORTRAIT) {
+        mDummyImageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_PORTRAIT);
     }
-    else if(newScene == CxeSettingIds::IMAGE_SCENE_SCENERY) {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_SCENERY);
+    else if(newScene == Cxe::IMAGE_SCENE_SCENERY) {
+        mDummyImageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_SCENERY);
     }
-    else if(newScene == CxeSettingIds::IMAGE_SCENE_MACRO) {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_MACRO);
+    else if(newScene == Cxe::IMAGE_SCENE_MACRO) {
+        mDummyImageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_MACRO);
     }
-    else if(newScene == CxeSettingIds::IMAGE_SCENE_SPORTS) {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_SPORTS);
+    else if(newScene == Cxe::IMAGE_SCENE_SPORTS) {
+        mDummyImageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_SPORTS);
     }
-    else if(newScene == CxeSettingIds::IMAGE_SCENE_NIGHT) {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_NIGHT);
+    else if(newScene == Cxe::IMAGE_SCENE_NIGHT) {
+        mDummyImageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_NIGHT);
     }
-    else if(newScene == CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT) {
-        mDummyScene.insert(CxeSettingIds::IMAGE_SCENE, CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT);
+    else if(newScene == Cxe::IMAGE_SCENE_NIGHTPORTRAIT) {
+        mDummyImageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_NIGHTPORTRAIT);
     }
     else {
         return CxeError::NotFound;
@@ -128,26 +133,44 @@ CxeError::Id CxeFakeSettingsModel::setImageScene(const QString &newScene)
 
 CxeError::Id CxeFakeSettingsModel::setVideoScene(const QString &newScene)
 {
-    mDummyScene.clear();
+    mDummyVideoScene.clear();
 
     // image scene mode key values
-    if(newScene == CxeSettingIds::VIDEO_SCENE_AUTO) {
-        mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_AUTO);
+    if(newScene == Cxe::VIDEO_SCENE_AUTO) {
+        mDummyVideoScene.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_AUTO);
     }
-    else if(newScene == CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT) {
-        mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT);
+    else if(newScene == Cxe::VIDEO_SCENE_NIGHTPORTRAIT) {
+        mDummyVideoScene.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_NIGHTPORTRAIT);
     }
-    else if(newScene == CxeSettingIds::VIDEO_SCENE_LOWLIGHT) {
-        mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_LOWLIGHT);
+    else if(newScene == Cxe::VIDEO_SCENE_LOWLIGHT) {
+        mDummyVideoScene.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_LOWLIGHT);
     }
-    else if(newScene == CxeSettingIds::VIDEO_SCENE_NIGHT) {
-        mDummyScene.insert(CxeSettingIds::VIDEO_SCENE, CxeSettingIds::VIDEO_SCENE_NIGHT);
+    else if(newScene == Cxe::VIDEO_SCENE_NIGHT) {
+        mDummyVideoScene.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_NIGHT);
     }
     else {
         return CxeError::NotFound;
     }
 
     return CxeError::None;
+}
+
+
+CxeScene& CxeFakeSettingsModel::currentImageScene()
+{
+    return mDummyImageScene;
+}
+
+
+CxeScene& CxeFakeSettingsModel::currentVideoScene()
+{
+    return mDummyVideoScene;
+}
+
+
+void CxeFakeSettingsModel::cameraModeChanged(Cxe::CameraMode newMode)
+{
+    mDummyCameraMode = newMode;
 }
 
 
@@ -171,34 +194,47 @@ void CxeFakeSettingsModel::initDefaultCameraSettings()
     mSettingStore.insert(CxeSettingIds::FRAME_RATE, QVariant(1));
     mSettingStore.insert(CxeSettingIds::IMAGE_QUALITY, QVariant(1));
     mSettingStore.insert(CxeSettingIds::IMAGE_SCENE, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_AUTO, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_MACRO, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_NIGHT, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_PORTRAIT, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_SCENERY, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::IMAGE_SCENE_SPORTS, QVariant(1));
     mSettingStore.insert(CxeSettingIds::LIGHT_SENSITIVITY, QVariant(1));
     mSettingStore.insert(CxeSettingIds::SCENE_ID, QVariant(1));
     mSettingStore.insert(CxeSettingIds::SECONDARY_CAMERA, QVariant(1));
     mSettingStore.insert(CxeSettingIds::SELF_TIMER, QVariant(1));
     mSettingStore.insert(CxeSettingIds::VIDEO_SCENE, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::VIDEO_SCENE_AUTO, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::VIDEO_SCENE_LOWLIGHT, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::VIDEO_SCENE_NIGHT, QVariant(1));
-    mSettingStore.insert(CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT, QVariant(1));
     mSettingStore.insert(CxeSettingIds::WHITE_BALANCE, QVariant(1));
+
+    // default scene
+    setImageScene(Cxe::IMAGE_SCENE_AUTO);
+    setVideoScene(Cxe::VIDEO_SCENE_AUTO);
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeFakeSettingsModel::testSetCurrenImageScene()
-{
-    mDummyScene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE);
-}
 
-void CxeFakeSettingsModel::testSetCurrenVideoScene()
+
+/* This helper method initializes fake runtime setting values for the keys
+ */
+void CxeFakeSettingsModel::initRuntimeSettings()
 {
-    mDummyScene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::VIDEO_SCENE);
+    CX_DEBUG_ENTER_FUNCTION();
+
+    QVariantList supported;
+    supported.append(QVariant(1));
+
+    QVariantList notSupported;
+    notSupported.append(QVariant(0));
+
+    QVariantList values;
+    values.append(QVariant(1));
+    values.append(QVariant(2));
+    values.append(QVariant(3));
+
+    mRuntimeSettings.insert(CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS, supported);
+    mRuntimeSettings.insert(CxeRuntimeKeys::PRIMARY_CAMERA_AUTOFOCUS_KEYS,  supported);
+    mRuntimeSettings.insert(CxeRuntimeKeys::SECONDARY_CAMERA_CAPTURE_KEYS, notSupported);
+    mRuntimeSettings.insert(CxeRuntimeKeys::FREE_MEMORY_LEVELS, notSupported);
+    mRuntimeSettings.insert(CxeRuntimeKeys::STILL_MAX_ZOOM_LIMITS, values);
+    mRuntimeSettings.insert(CxeRuntimeKeys::VIDEO_MAX_ZOOM_LIMITS, values);
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 

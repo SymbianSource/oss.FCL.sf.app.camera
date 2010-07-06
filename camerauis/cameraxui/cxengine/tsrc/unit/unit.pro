@@ -43,6 +43,7 @@ SUBDIRS = cxeunitrunner \
           unittest_cxethumbnailmanagersymbian \
           unittest_cxeharvestercontrolsymbian \
           unittest_cxesettingscontrolsymbian \
-          unittest_cxesnapshotcontrol
+          unittest_cxesnapshotcontrol \
+          unittest_cxegeotaggingtrail
 
 CONFIG *= ordered

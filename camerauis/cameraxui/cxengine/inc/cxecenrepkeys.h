@@ -31,6 +31,11 @@ const unsigned long int  AudioMuteCr                    = 0x9;
 const unsigned long int  GeoTaggingCr                   = 0xA;
 const unsigned long int  FacetrackingCr                 = 0xB;
 const unsigned long int  CaptureSoundAlwaysOnCr         = 0xC;
+const unsigned long int  GeoTaggingDisclaimerCr         = 0xD;
+const unsigned long int  CameraModeCr                   = 0xE;
+const unsigned long int  FlashModeStillCr               = 0xF;
+const unsigned long int  SceneModeStillCr               = 0x10;
+const unsigned long int  SceneModeVideoCr               = 0x11;
 
 const unsigned long int  CxRuntimeFeaturesCrUid         =  {0x20027018};
 

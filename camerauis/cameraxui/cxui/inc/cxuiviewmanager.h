@@ -24,8 +24,7 @@
 #include "cxeviewfindercontrol.h"
 #include "cxenamespace.h"
 #include "cxeerror.h"
-#include "cxuiapplicationframeworkmonitor.h"
-
+#include "cxuiapplicationstate.h"
 
 class QGraphicsSceneMouseEvent;
 class HbMainWindow;
@@ -38,8 +37,8 @@ class CxuiPostcaptureView;
 class CxeEngine;
 class CxuiDocumentLoader;
 class CxuiErrorManager; // class that handles all errors in ui.
-class CxuiStandby;
 class CxuiSceneModeView;
+class CxuiView;
 
 class CxuiViewManager : public QObject
 {
@@ -49,89 +48,65 @@ public:
     CxuiViewManager(CxuiApplication &application, HbMainWindow &mainWindow, CxeEngine &engine);
     ~CxuiViewManager();
 
-    void prepareWindow();
+    CxuiDocumentLoader *documentLoader();
 
-    /**
-    * Get a pointer to the document loader instance.
-    */
-    CxuiDocumentLoader* documentLoader();
+    CxuiApplicationState &applicationState();
 
-    //@todo: Temporarily needed in main().
-    bool proceedStartup();
-
+    void initEngine();
 public slots:
     void changeToPostcaptureView();
     void changeToPrecaptureView();
     void switchCamera();
-    void createPostcaptureView();
     void showScenesView();
 
 private slots:
-    void startupCheck();
     void toForeground();
-    void handleForegroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState state);
-    void showUsbErrorPopup(bool show);
-    void handleBatteryEmpty();
-    void aboutToLooseFocus();
-    void aboutToGainFocus();
+    void handleApplicationStateChanged(CxuiApplicationState::State newState,
+                                       CxuiApplicationState::State oldState);
+    void startStandbyTimer();
+    void stopStandbyTimer();
 
 signals:
-    void focusGained();
-    void focusLost();
-    void batteryEmpty();
-    void disableStandbyTimer();
-    void startStandbyTimer();
+    void normalStateEntered();
+    void normalStateExited();
+    void standbyExitRequested();
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);
 
 private:
+    CxuiView *currentView() const;
     void initStartupView();
-    void createStillPrecaptureView();
-    void createVideoPrecaptureView();
+    CxuiView *createView(const QString &viewName);
     CxuiPrecaptureView* getPrecaptureView(Cxe::CameraMode mode, Cxe::CameraIndex camera);
 
-    void createSceneModesView();
+    CxuiView *createSceneModesView();
 
-    /*
-    * connects all necessary signals for precapture view
-    */
+    void connectSignals(QObject *view);
+    void disconnectSignals(QObject *view = NULL);
     void connectPreCaptureSignals();
-
-    /*
-    * disconnects signals
-    */
-    void disconnectSignals();
-
-    /*
-    * connects all necessary signals for postcapture view
-    */
     void connectPostCaptureSignals();
-
-
-    /*
-    * connects capture key handler signals to the current view.
-    */
+    void connectSceneModeSignals();
     void connectCaptureKeySignals();
+
+    void handleExitingNormalState();
+    void clearAllActivities();
 
 private:
 
     //data
     CxuiApplication &mApplication;
     HbMainWindow &mMainWindow;
-    CxuiStillPrecaptureView *mStillPrecaptureView;
-    CxuiVideoPrecaptureView *mVideoPrecaptureView;
-    CxuiPostcaptureView *mPostcaptureView;
+    QMap<QString, CxuiView*> mViews;
+    QMap<QString, QString> mDocmlFilesByView;
 
     CxeEngine &mEngine;
     CxuiCaptureKeyHandler *mKeyHandler;
-    CxuiApplicationFrameworkMonitor *mApplicationMonitor;
-
-private:
     CxuiDocumentLoader *mCameraDocumentLoader;
-    CxuiStandby *mStandbyHandler;
+    CxuiApplicationState *mApplicationState;
     CxuiErrorManager *mErrorManager;
     CxuiSceneModeView *mSceneModeView;
+    QTimer mStandbyTimer;
 };
 
 #endif // CXUIVIEWMANAGER_H

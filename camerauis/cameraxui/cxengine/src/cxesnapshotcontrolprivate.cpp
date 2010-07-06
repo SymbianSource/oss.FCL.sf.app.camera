@@ -39,6 +39,10 @@ namespace
 {
     const int MAINTAIN_ASPECT = false;
 
+    const QSize ASPECT_RATIO_SIZE_4BY3  = QSize(4,3);
+    const QSize ASPECT_RATIO_SIZE_16BY9 = QSize(16, 9);
+    const QSize ASPECT_RATIO_SIZE_11BY9 = QSize(11, 9);
+
 #ifdef Q_OS_SYMBIAN
     /*!
     * Helper class for cleaning up MCameraBuffer instances.
@@ -131,25 +135,35 @@ void CxeSnapshotControlPrivate::initializeStates()
 /*!
 * Calculate snapshot size based on diplay size and image / video output resolution.
 * @param displaySize Display size in pixels.
-* @param outputResolution Resolution of the output image / video in pixels.
+* @param Cxe::AspectRatio Aspect ratio of image/video resolution.
 * @return Proposed best snapshot size.
 */
-QSize CxeSnapshotControlPrivate::calculateSnapshotSize(const QSize &displaySize, const QSize &outputResolution) const
+
+QSize CxeSnapshotControlPrivate::calculateSnapshotSize(const QSize& displaySize, Cxe::AspectRatio aspectRatio) const
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CX_DEBUG(("CxeSnapshotControlPrivate - output resolution (%d,%d)", outputResolution.width(), outputResolution.height()));
     CX_DEBUG(("CxeSnapshotControlPrivate - display size      (%d,%d)", displaySize.width(), displaySize.height()));
 
     // Take resolution as reference for aspect ratio.
     // Scale keeping aspect ratio to just fit display.
-    QSize size(outputResolution);
+    QSize size;
+    
+    if (aspectRatio == Cxe::AspectRatio4to3) {
+        size = ASPECT_RATIO_SIZE_4BY3;
+    } else if (aspectRatio == Cxe::AspectRatio16to9) {
+        size = ASPECT_RATIO_SIZE_16BY9;
+    } else if (aspectRatio == Cxe::AspectRatio11to9) {
+        size = ASPECT_RATIO_SIZE_11BY9;
+    }
     size.scale(displaySize, Qt::KeepAspectRatio);
-    CX_DEBUG(("CxeSnapshotControlPrivate - calculated size, (%d,%d)", size.width(), size.height()));
-    size.setHeight(displaySize.height());
+
     CX_DEBUG(("CxeSnapshotControlPrivate - adjusted final size, (%d,%d)", size.width(), size.height()));
+
     CX_DEBUG_EXIT_FUNCTION();
+
     return size;
 }
+
 
 /*!
 * Start getting snapshots from camera.
@@ -205,54 +219,53 @@ void CxeSnapshotControlPrivate::stop()
 /*!
 * Helper method for getting the snapshot.
 * Throws exception if fetching the snapshot fails.
-* @return QPixmap containing the snapshot.
+* @return QImage containing the snapshot.
 */
-QPixmap CxeSnapshotControlPrivate::snapshot()
+QImage CxeSnapshotControlPrivate::snapshot()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    QPixmap pixmap;
+    QImage image;
 
-#ifdef Q_OS_SYMBIAN
-    TRAPD(status, {
-        RArray<TInt> frameIndex;
-        CleanupClosePushL(frameIndex);
+    #ifdef Q_OS_SYMBIAN
 
-        MCameraBuffer &buffer(mDevice.cameraSnapshot()->SnapshotDataL(frameIndex));
-        // Make sure buffer is released on leave / exception.
-        // Buffer is released once the cleanup item goes out of scope.
-        CxeCameraBufferCleanup cleaner(&buffer);
+        CFbsBitmap *snapshot = NULL;
+        TRAPD(status, {
+            RArray<TInt> frameIndex;
+            CleanupClosePushL(frameIndex);
 
-        TInt firstImageIndex(frameIndex.Find(0));
-        CFbsBitmap &snapshot(buffer.BitmapL(firstImageIndex));
+            MCameraBuffer &buffer(mDevice.cameraSnapshot()->SnapshotDataL(frameIndex));
+            // Make sure buffer is released on leave / exception.
+            // Buffer is released once the cleanup item goes out of scope.
+            CxeCameraBufferCleanup cleaner(&buffer);
 
-        CleanupStack::PopAndDestroy(); // frameIndex
+            TInt firstImageIndex(frameIndex.Find(0));
+            snapshot = &buffer.BitmapL(firstImageIndex);
 
-        TSize size = snapshot.SizeInPixels();
-        TInt sizeInWords = size.iHeight * CFbsBitmap::ScanLineLength(size.iWidth, EColor16MU) / sizeof(TUint32);
-        CX_DEBUG(("size %d x %d, sizeInWords = %d", size.iWidth, size.iHeight, sizeInWords ));
+            CleanupStack::PopAndDestroy(); // frameIndex
 
-        TUint32 *pixelData = new (ELeave) TUint32[ sizeInWords ];
-        // Convert to QImage
-        snapshot.LockHeap();
-        TUint32 *dataPtr = snapshot.DataAddress();
-        memcpy(pixelData, dataPtr, sizeof(TUint32)*sizeInWords);
-        snapshot.UnlockHeap();
+            TSize size = snapshot->SizeInPixels();
+            TInt sizeInWords = size.iHeight * CFbsBitmap::ScanLineLength(size.iWidth, EColor16MU) / sizeof(TUint32);
+            CX_DEBUG(("size %d x %d, sizeInWords = %d", size.iWidth, size.iHeight, sizeInWords ));
 
-        CX_DEBUG(("Creating QImage"));
-        QImage *snapImage = new QImage((uchar*)pixelData, size.iWidth, size.iHeight,
-                                       CFbsBitmap::ScanLineLength(size.iWidth, EColor16MU),
-                                       QImage::Format_RGB32);
+            CX_DEBUG(("Creating QImage"));
+            image = QImage(size.iWidth, size.iHeight, QImage::Format_RGB32);
 
-        pixmap = QPixmap::fromImage(*snapImage);
-        delete [] pixelData;
-        delete snapImage;
-    });
-    // We throw error with the Symbian error code if there was problems.
-    CxeException::throwIfError(status);
-#endif // Q_OS_SYMBIAN
+            // Convert to QImage
+            snapshot->LockHeap();
+            const uchar *dataPtr = (const uchar*) snapshot->DataAddress();
+            uchar *dst = image.bits();
+            memcpy(dst, dataPtr, image.numBytes());
+            snapshot->UnlockHeap();
 
-    CX_DEBUG_EXIT_FUNCTION();
-    return pixmap;
+        });
+        // We throw error with the Symbian error code if there was problems.
+        CxeException::throwIfError(status);
+
+
+    #endif // Q_OS_SYMBIAN
+
+        CX_DEBUG_EXIT_FUNCTION();
+        return image;
 }
 
 /*!
@@ -268,7 +281,7 @@ void CxeSnapshotControlPrivate::handleCameraEvent(int id, int error)
     if (state() == CxeSnapshotControl::Active) {
 #ifdef Q_OS_SYMBIAN
         if (id == KUidECamEventSnapshotUidValue) {
-            QPixmap ss;
+            QImage ss;
 
             if (!error) {
                 try {

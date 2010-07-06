@@ -53,9 +53,9 @@ CxeSnapshotControl::State CxeSnapshotControl::state() const
 * @param outputResolution Resolution of the output image / video in pixels.
 * @return Proposed best snapshot size.
 */
-QSize CxeSnapshotControl::calculateSnapshotSize(const QSize& displaySize, const QSize& outputResolution) const
+QSize CxeSnapshotControl::calculateSnapshotSize(const QSize& displaySize, Cxe::AspectRatio aspectRatio) const
 {
-    return d->calculateSnapshotSize(displaySize, outputResolution);
+    return d->calculateSnapshotSize(displaySize, aspectRatio);
 }
 
 /*!

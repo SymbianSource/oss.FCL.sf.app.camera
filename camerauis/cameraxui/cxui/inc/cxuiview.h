@@ -31,6 +31,7 @@ class CxuiZoomSlider;
 class CxuiCaptureKeyHandler;
 class CxeEngine;
 class HbWidget;
+class HbActivityManager;
 
 // CONSTANTS
 const int CXUI_HIDE_CONTROLS_TIMEOUT     = 6000; // 6 seconds
@@ -47,16 +48,22 @@ public:
     CxuiView(QGraphicsItem *parent = 0);
     virtual ~CxuiView();
 
-protected:
     virtual void construct(HbMainWindow *mainWindow, CxeEngine *engine,
                            CxuiDocumentLoader *documentLoader,
-                           CxuiCaptureKeyHandler * keyHandler);
+                           CxuiCaptureKeyHandler * keyHandler,
+                           HbActivityManager *activityManager);
 
 public:
+    virtual bool isStandbyModeSupported() const;
     virtual void updateOrientation(Qt::Orientation orientation);
+
+    virtual void restoreActivity(const QString &activityId, const QVariant &data);
+    virtual void saveActivity();
+    virtual void clearActivity();
 
 protected:
     virtual bool allowShowControls() const;
+    virtual bool isFeedbackEnabled() const;
     virtual void toggleControls();
     virtual void showToolbar();
     virtual void hideZoom();
@@ -70,6 +77,11 @@ protected:
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
+public slots:
+    virtual void enterStandby();
+    virtual void exitStandby();
+
 protected slots:
     virtual void launchNotSupportedNotification();
     virtual void launchPhotosApp();
@@ -104,6 +116,7 @@ protected: //common data
     QTimer mHideControlsTimeout;
 
     HbInstantFeedback mControlsFeedback;
+    HbActivityManager *mActivityManager;
 };
 
 #endif // CXUIVIEW_H

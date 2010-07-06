@@ -22,7 +22,8 @@ HEADERS *= unittest_cxeharvestercontrolsymbian.h \
            cxeerrormappingsymbian.h \
            cxeharvestercontrolsymbian.h \
            harvesterclient.h \
-           cxutils.h
+           cxutils.h \
+           cxeerror.h
 
 SOURCES *= unittest_cxeharvestercontrolsymbian.cpp \
            cxeerrormappingsymbian.cpp \

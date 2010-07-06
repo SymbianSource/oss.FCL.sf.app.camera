@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -36,7 +36,7 @@
 using namespace Cxe;
 
 
-/*
+/*!
 * CxeSettingsModel::CxeSettingsModel
 */
 CxeSettingsModelImp::CxeSettingsModelImp(CxeSettingsStore *settingsStore)
@@ -51,28 +51,26 @@ CxeSettingsModelImp::CxeSettingsModelImp(CxeSettingsStore *settingsStore)
 }
 
 
-/*
+/*!
 * CxeSettingsModelImp::init
 */
 void CxeSettingsModelImp::init()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    mCurrentImgScene.clear();
+    mCurrentVidScene.clear();
+
     loadRuntimeSettings();
     loadImageScenes();
     loadVideoScenes();
-
-    // TODO: for now the current image scene when we start camera is SceneAuto
-    mCameraMode = Cxe::ImageMode;
-    setImageScene(CxeSettingIds::IMAGE_SCENE_AUTO);
-    setVideoScene(CxeSettingIds::VIDEO_SCENE_AUTO);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 
 
-/*
+/*!
 * CxeSettingsModelImp::~CxeSettingsModelImp()
 */
 CxeSettingsModelImp::~CxeSettingsModelImp()
@@ -94,7 +92,7 @@ CxeSettingsModelImp::~CxeSettingsModelImp()
 
 
 
-/*
+/*!
 * Loads all run-time settings
 */
 void CxeSettingsModelImp::loadRuntimeSettings()
@@ -112,7 +110,7 @@ void CxeSettingsModelImp::loadRuntimeSettings()
 }
 
 
-/*
+/*!
 * Get setting value associated with the key.
 * @Param key - Setting key Id ( refer to CxeSettingIds in cxenums.h )
 * @Param value - contains the value associated with the key.
@@ -123,17 +121,17 @@ CxeError::Id CxeSettingsModelImp::getSettingValue(const QString &key, QVariant &
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG_ASSERT(mSettingStore);
 
-    // Try first to find the item from scene settings.
-    // These need to override the common setting values.
-    CxeError::Id err = sceneSettingValue(key, value);
-    CX_DEBUG(( "status reading from scene data: %d", err));
+    // Try first to find the item from cenrep store.
 
-    // If scene does not control this setting, read it from settings store.
-    if (err == CxeError::NotFound) {
+    CxeError::Id err = mSettingStore->get(key, value);
+
+    // If setting is not in cenrep store, try fetching it from scene settings.
+    if (err) {
         // setting not found in setting store, try finding if its scene specific setting.
-        CX_DEBUG(( "fetching value from settings store" ));
-        err = mSettingStore->get(key, value);
+        CX_DEBUG(( "fetching value from scene settings" ));
+        err = sceneSettingValue(key, value);
     }
+
     CX_DEBUG_EXIT_FUNCTION();
 
     return err;
@@ -142,7 +140,7 @@ CxeError::Id CxeSettingsModelImp::getSettingValue(const QString &key, QVariant &
 
 
 
-/*
+/*!
 * Get setting value associated with the key.
 * @param uid - UID of component that owns the setting key
 * @Param key - key id of the setting
@@ -157,7 +155,7 @@ void CxeSettingsModelImp::getSettingValue(long int uid,
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG_ASSERT(mSettingStore);
 
-    mSettingStore->get(uid, key, type, value);
+    mSettingStore->startMonitoring(uid, key, type, value);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -165,7 +163,7 @@ void CxeSettingsModelImp::getSettingValue(long int uid,
 
 
 
-/*
+/*!
 * Set a value to the key.
 * @Param key - Setting key Id ( refer to CxeSettingIds in cxenums.h )
 * @Param value - contains the value associated with the key.
@@ -176,15 +174,12 @@ CxeError::Id CxeSettingsModelImp::set(const QString &key, const QVariant newValu
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG_ASSERT(mSettingStore);
 
-    // If this is one of scene settings,
-    // store it as modification of current scene.
-    CxeError::Id err = setSceneSettingValue(key, newValue);
-    CX_DEBUG(( "status storing to scene data: %d", err));
+    // Try storing new value to cenrep
+    CxeError::Id err = mSettingStore->set(key, newValue);
 
-    // If not scene specific, store the setting value.
-    if (err == CxeError::NotFound) {
-        CX_DEBUG(( "writing value to settings store" ));
-        err = mSettingStore->set(key, newValue);
+    if (err) {
+        CX_DEBUG(( "Key not found in cenrepstore, writing value to scene settings" ));
+        err = setSceneSettingValue(key, newValue);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -193,7 +188,7 @@ CxeError::Id CxeSettingsModelImp::set(const QString &key, const QVariant newValu
 }
 
 
-/*
+/*!
 * Reset all settings
 */
 void CxeSettingsModelImp::reset()
@@ -205,7 +200,7 @@ void CxeSettingsModelImp::reset()
 }
 
 
-/*
+/*!
 * Get the configured run-time value associated with the key.
 * @Param key - Setting key Id ( refer to CxeSettingIds in cxenums.h )
 * @Param value - contains the value associated with the key.
@@ -230,7 +225,7 @@ CxeError::Id CxeSettingsModelImp::getRuntimeValue(const QString &key, QVariant &
 }
 
 
-/*
+/*!
 * Set new Image scene mode.
 * @returns CxeError::None if successful or any CxeError specific error code.
 */
@@ -238,16 +233,20 @@ CxeError::Id CxeSettingsModelImp::setImageScene(const QString &newScene)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxeError::Id err = CxeError::None;
+    // load scene specific settings
+    CxeError::Id err = loadSceneData(newScene, mCurrentImgScene);
 
-    // load the scene setting default values for the new scene id = "newScene"
-    CxeScene sceneSettings;
-    err = imageScene(newScene, sceneSettings);
+    if (!err) {
+        // saving current image scene to cenrep
+        err = set(CxeSettingIds::IMAGE_SCENE, newScene);
 
-    // create of copy of the new scene as we use it for accessing the scene settings later.
-    if (CxeError::None == err) {
-        mCurrentImgScene.clear();
-        loadSceneData(mCurrentImgScene, sceneSettings);
+        // saving flash value from scene to cenrep
+        QString key(CxeSettingIds::FLASH_MODE);
+        err = set(key, mCurrentImgScene[key].toInt());
+
+        // saving face tracking value from scene to cenrep
+        key = CxeSettingIds::FACE_TRACKING;
+        err = set(key, mCurrentImgScene[key].toInt());
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -256,7 +255,7 @@ CxeError::Id CxeSettingsModelImp::setImageScene(const QString &newScene)
 }
 
 
-/*
+/*!
 * Set new video scene mode.
 * @returns CxeError::None if successful or any CxeError specific error code.
 */
@@ -264,16 +263,11 @@ CxeError::Id CxeSettingsModelImp::setVideoScene(const QString &newScene)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxeError::Id err = CxeError::None;
+    CxeError::Id err = loadSceneData(newScene, mCurrentVidScene);
 
-    // load the scene setting default values for the new scene id = "newScene"
-    CxeScene sceneSettings;
-    err = videoScene(newScene, sceneSettings);
-
-    // create of copy of the new scene as we use it for accessing the scene settings later.
-    if (CxeError::None == err) {
-        mCurrentVidScene.clear();
-        loadSceneData(mCurrentVidScene, sceneSettings);
+    if (!err) {
+        // video scene loaded successfully, store the scene value to cenrep
+        err = set(CxeSettingIds::VIDEO_SCENE, newScene);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -283,7 +277,7 @@ CxeError::Id CxeSettingsModelImp::setVideoScene(const QString &newScene)
 
 
 
-/*
+/*!
 * Loads Image scene settings for the given Scene ID
 */
 CxeError::Id CxeSettingsModelImp::imageScene(const QString &sceneId, CxeScene &sceneSettings)
@@ -304,8 +298,10 @@ CxeError::Id CxeSettingsModelImp::imageScene(const QString &sceneId, CxeScene &s
 }
 
 
-/*
+/*!
 * Loads Video scene settings for the given Scene ID
+* \param sceneId
+* \param sceneSettings
 */
 CxeError::Id CxeSettingsModelImp::videoScene(const QString &sceneId, CxeScene &sceneSettings)
 {
@@ -325,27 +321,46 @@ CxeError::Id CxeSettingsModelImp::videoScene(const QString &sceneId, CxeScene &s
 }
 
 
-/*
+/*!
 * Creates a copy of the selected scene that we use for accessing specific scene settings.
+* \param newScene
+* \param currentSceneSettings
 */
-void CxeSettingsModelImp::loadSceneData(CxeScene &currentScene, CxeScene &sceneDefaultSettings)
+CxeError::Id CxeSettingsModelImp::loadSceneData(const QString &newScene, CxeScene &currentSceneSettings)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    // creating a deep copy of the scene mode selected.
+    CxeScene sceneDefaultSettings;
+    CxeError::Id err = imageScene(newScene, sceneDefaultSettings);
 
-    CxeScene::const_iterator scene = sceneDefaultSettings.constBegin();
-     while (scene != sceneDefaultSettings.constEnd()) {
-         currentScene.insert(scene.key(), scene.value());
-         ++scene;
-     }
+    if (err == CxeError::NotFound) {
+        // not still scene, try in video scene.
+        err = videoScene(newScene, sceneDefaultSettings);
+    }
+
+    if (!err) {
+        // We have a new scene available, so we can clear the old values.
+        currentSceneSettings.clear();
+
+        // creating a deep copy of the scene mode selected.
+        CxeScene::const_iterator scene = sceneDefaultSettings.constBegin();
+         while (scene != sceneDefaultSettings.constEnd()) {
+             currentSceneSettings.insert(scene.key(), scene.value());
+             ++scene;
+         }
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
+
+    return err;
 }
 
 
-/*
-* returns value associated with the key
+/*!
+* Returns scene setting value
+* \param key Settings key
+* \param[out] value Value associated with the key
+* \return Error id. CxeError::None if no errors.
 */
 CxeError::Id CxeSettingsModelImp::sceneSettingValue(const QString &key, QVariant &value)
 {
@@ -375,29 +390,33 @@ CxeError::Id CxeSettingsModelImp::sceneSettingValue(const QString &key, QVariant
 }
 
 
-/*
-* set scene setting value associated with the key
+/*!
+* Sets new value to settings specific to the scene.
+* @param key - setting id.
+* @param newValue - new setting value
+* @param error Error code. CxeError::None if operation has been successful.
+* @return Error id. CxeError::None if no errors.
 */
 CxeError::Id CxeSettingsModelImp::setSceneSettingValue(const QString &key, QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     CxeError::Id err = CxeError::None;
+    CxeScene *scene(0);
 
-    if(mCameraMode == Cxe::ImageMode) {
+    if (mCameraMode == Cxe::ImageMode) {
         CX_DEBUG(( "CxeSettingsModelImp::setSceneSettingValue - Image mode Setting"));
-        if(mCurrentImgScene.contains(key)) {
-            mCurrentImgScene[key] = newValue;
-        } else {
-            err = CxeError::NotFound;
-        }
+        scene = &mCurrentImgScene;
     } else {
         CX_DEBUG(( "CxeSettingsModelImp::setSceneSettingValue - Video mode Setting"));
-        if(mCurrentVidScene.contains(key)) {
-            mCurrentVidScene[key] = newValue;
-        } else {
-            err = CxeError::NotFound;
-        }
+        scene = &mCurrentVidScene;
+    }
+
+    if (scene && scene->contains(key)) {
+        CX_DEBUG(( "CxeSettingsModelImp::setSceneSettingValue KEY found, writing value"));
+        scene->insert(key, newValue);
+    } else {
+        err = CxeError::NotFound;
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -406,7 +425,10 @@ CxeError::Id CxeSettingsModelImp::setSceneSettingValue(const QString &key, QVari
 }
 
 
-// appending the run-time keys to an array
+/*! 
+* Appending the run-time keys to an array
+* \param[in,out] runtimeKeys QList where the supported runtimekeys will be added to
+*/
 void CxeSettingsModelImp::supportedKeys(QList<QString>& runtimeKeys)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -422,7 +444,7 @@ void CxeSettingsModelImp::supportedKeys(QList<QString>& runtimeKeys)
 }
 
 
-/*
+/*!
 * Loads all video scene modes
 */
 void CxeSettingsModelImp::loadVideoScenes()
@@ -433,7 +455,7 @@ void CxeSettingsModelImp::loadVideoScenes()
 
     CxeScene vidSceneAuto;
 
-    vidSceneAuto.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::VIDEO_SCENE_AUTO);
+    vidSceneAuto.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_AUTO);
     vidSceneAuto.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Hyperfocal);
     vidSceneAuto.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     vidSceneAuto.insert(CxeSettingIds::EXPOSURE_MODE, ExposureAuto);
@@ -442,12 +464,12 @@ void CxeSettingsModelImp::loadVideoScenes()
     vidSceneAuto.insert(CxeSettingIds::FRAME_RATE, 0);
     vidSceneAuto.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
 
-    mVideoSceneModes.insert(CxeSettingIds::VIDEO_SCENE_AUTO,vidSceneAuto);
+    mVideoSceneModes.insert(Cxe::VIDEO_SCENE_AUTO,vidSceneAuto);
 
 
     CxeScene vidSceneNight;
 
-    vidSceneNight.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::VIDEO_SCENE_NIGHT);
+    vidSceneNight.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_NIGHT);
     vidSceneNight.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Hyperfocal);
     vidSceneNight.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     vidSceneNight.insert(CxeSettingIds::EXPOSURE_MODE, ExposureNight);
@@ -456,12 +478,12 @@ void CxeSettingsModelImp::loadVideoScenes()
     vidSceneNight.insert(CxeSettingIds::FRAME_RATE, 0);
     vidSceneNight.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
 
-    mVideoSceneModes.insert(CxeSettingIds::VIDEO_SCENE_NIGHT, vidSceneNight);
+    mVideoSceneModes.insert(Cxe::VIDEO_SCENE_NIGHT, vidSceneNight);
 
 
     CxeScene vidSceneLowLight;
 
-    vidSceneLowLight.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::VIDEO_SCENE_LOWLIGHT);
+    vidSceneLowLight.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_LOWLIGHT);
     vidSceneLowLight.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Hyperfocal);
     vidSceneLowLight.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     vidSceneLowLight.insert(CxeSettingIds::EXPOSURE_MODE, ExposureAuto);
@@ -470,14 +492,14 @@ void CxeSettingsModelImp::loadVideoScenes()
     vidSceneLowLight.insert(CxeSettingIds::FRAME_RATE, 15); //fps
     vidSceneLowLight.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
 
-    mVideoSceneModes.insert(CxeSettingIds::VIDEO_SCENE_LOWLIGHT, vidSceneLowLight);
+    mVideoSceneModes.insert(Cxe::VIDEO_SCENE_LOWLIGHT, vidSceneLowLight);
 
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 
-/*
+/*!
 * Loads all Image Scene Modes
 */
 void CxeSettingsModelImp::loadImageScenes()
@@ -488,7 +510,7 @@ void CxeSettingsModelImp::loadImageScenes()
 
     CxeScene imgSceneAuto;
 
-    imgSceneAuto.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_AUTO);
+    imgSceneAuto.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_AUTO);
     imgSceneAuto.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Auto);
     imgSceneAuto.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     imgSceneAuto.insert(CxeSettingIds::EXPOSURE_MODE, ExposureAuto);
@@ -501,12 +523,12 @@ void CxeSettingsModelImp::loadImageScenes()
     imgSceneAuto.insert(CxeSettingIds::FLASH_MODE, FlashAuto);
     imgSceneAuto.insert(CxeSettingIds::FACE_TRACKING, 1);
 
-    mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_AUTO, imgSceneAuto);
+    mImageSceneModes.insert(Cxe::IMAGE_SCENE_AUTO, imgSceneAuto);
 
 
     CxeScene imgSceneSports;
 
-    imgSceneSports.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_SPORTS);
+    imgSceneSports.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_SPORTS);
     imgSceneSports.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Hyperfocal);
     imgSceneSports.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     imgSceneSports.insert(CxeSettingIds::EXPOSURE_MODE, ExposureSport);
@@ -519,12 +541,12 @@ void CxeSettingsModelImp::loadImageScenes()
     imgSceneSports.insert(CxeSettingIds::FLASH_MODE, FlashOff);
     imgSceneSports.insert(CxeSettingIds::FACE_TRACKING, 0);
 
-    mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_SPORTS, imgSceneSports);
+    mImageSceneModes.insert(Cxe::IMAGE_SCENE_SPORTS, imgSceneSports);
 
 
     CxeScene imgSceneCloseUp;
 
-    imgSceneCloseUp.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_MACRO);
+    imgSceneCloseUp.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_MACRO);
     imgSceneCloseUp.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Macro);
     imgSceneCloseUp.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     imgSceneCloseUp.insert(CxeSettingIds::EXPOSURE_MODE, ExposureAuto);
@@ -537,11 +559,11 @@ void CxeSettingsModelImp::loadImageScenes()
     imgSceneCloseUp.insert(CxeSettingIds::FLASH_MODE, FlashAuto);
     imgSceneCloseUp.insert(CxeSettingIds::FACE_TRACKING, 0);
 
-    mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_MACRO, imgSceneCloseUp);
+    mImageSceneModes.insert(Cxe::IMAGE_SCENE_MACRO, imgSceneCloseUp);
 
     CxeScene imgPortraitscene;
 
-    imgPortraitscene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_PORTRAIT);
+    imgPortraitscene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_PORTRAIT);
     imgPortraitscene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Portrait);
     imgPortraitscene.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     imgPortraitscene.insert(CxeSettingIds::EXPOSURE_MODE, ExposureBacklight);
@@ -554,11 +576,11 @@ void CxeSettingsModelImp::loadImageScenes()
     imgPortraitscene.insert(CxeSettingIds::FLASH_MODE, FlashAntiRedEye);
     imgPortraitscene.insert(CxeSettingIds::FACE_TRACKING, 1);
 
-    mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_PORTRAIT, imgPortraitscene);
+    mImageSceneModes.insert(Cxe::IMAGE_SCENE_PORTRAIT, imgPortraitscene);
 
     CxeScene imglandscapescene;
 
-    imglandscapescene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_SCENERY);
+    imglandscapescene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_SCENERY);
     imglandscapescene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Infinity);
     imglandscapescene.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceSunny);
     imglandscapescene.insert(CxeSettingIds::EXPOSURE_MODE, ExposureAuto);
@@ -571,12 +593,12 @@ void CxeSettingsModelImp::loadImageScenes()
     imglandscapescene.insert(CxeSettingIds::FLASH_MODE, FlashOff);
     imglandscapescene.insert(CxeSettingIds::FACE_TRACKING, 0);
 
-    mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_SCENERY, imglandscapescene);
+    mImageSceneModes.insert(Cxe::IMAGE_SCENE_SCENERY, imglandscapescene);
 
 
     CxeScene imgNightscene;
 
-    imgNightscene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_NIGHT);
+    imgNightscene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_NIGHT);
     imgNightscene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Auto);
     imgNightscene.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     imgNightscene.insert(CxeSettingIds::EXPOSURE_MODE, ExposureNight);
@@ -589,11 +611,11 @@ void CxeSettingsModelImp::loadImageScenes()
     imgNightscene.insert(CxeSettingIds::FLASH_MODE, FlashOff);
     imgNightscene.insert(CxeSettingIds::FACE_TRACKING, 1);
 
-    mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_NIGHT, imgNightscene);
+    mImageSceneModes.insert(Cxe::IMAGE_SCENE_NIGHT, imgNightscene);
 
     CxeScene imgNightpotraitscene;
 
-    imgNightpotraitscene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT);
+    imgNightpotraitscene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_NIGHTPORTRAIT);
     imgNightpotraitscene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Portrait);
     imgNightpotraitscene.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     imgNightpotraitscene.insert(CxeSettingIds::EXPOSURE_MODE, ExposureNight);
@@ -606,12 +628,12 @@ void CxeSettingsModelImp::loadImageScenes()
     imgNightpotraitscene.insert(CxeSettingIds::FLASH_MODE, FlashAntiRedEye);
     imgNightpotraitscene.insert(CxeSettingIds::FACE_TRACKING, 1);
 
-    mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, imgNightpotraitscene);
+    mImageSceneModes.insert(Cxe::IMAGE_SCENE_NIGHTPORTRAIT, imgNightpotraitscene);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/*
+/*!
 * Returns the current image scene mode.
 */
 CxeScene& CxeSettingsModelImp::currentImageScene()
@@ -623,7 +645,7 @@ CxeScene& CxeSettingsModelImp::currentImageScene()
 }
 
 
-/*
+/*!
 * Returns the current video scene mode.
 */
 CxeScene& CxeSettingsModelImp::currentVideoScene()
@@ -635,13 +657,96 @@ CxeScene& CxeSettingsModelImp::currentVideoScene()
 }
 
 
-/*
-* Updating settings model whenever mode is changed from image to video and vice-versa.
+/*!
+* Restores settings whenever we switch between Image/Video modes or
+* during startup.
 */
 void CxeSettingsModelImp::cameraModeChanged(Cxe::CameraMode newMode)
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    if (newMode == Cxe::ImageMode) {
+        restoreImageSettings();
+    } else {
+        restoreVideoSettings();
+    }
+
     mCameraMode = newMode;
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+
+/*!
+* Restores image settings, during mode change or during startup.
+*/
+void CxeSettingsModelImp::restoreImageSettings()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    CxeError::Id err = CxeError::None;
+    QVariant currentSceneInUse = mCurrentImgScene[CxeSettingIds::SCENE_ID];
+
+    // get the image scene value from cenrep and load the scene settings
+    QVariant cenrepSceneValue;
+    QString key(CxeSettingIds::IMAGE_SCENE);
+    err = getSettingValue(key, cenrepSceneValue);
+
+    bool ok2LoadSceneSettings = (cenrepSceneValue != currentSceneInUse);
+
+    if (!err && ok2LoadSceneSettings) {
+        // loading scene settings
+        err = loadSceneData(cenrepSceneValue.toString(), mCurrentImgScene);
+    }
+
+    // Updating Flash setting from cenrep
+    QVariant value;
+    key = CxeSettingIds::FLASH_MODE;
+    err = getSettingValue(key, value);
+
+    if (!err && mCurrentImgScene.contains(key)) {
+        // update local datastructure with flash setting value from cenrep.
+        CX_DEBUG(( "flash setting value %d", value.toInt()));
+        mCurrentImgScene[key] = value;
+    }
+
+    // Updating Face Tracking setting from cenrep
+    key = CxeSettingIds::FACE_TRACKING;
+    err = getSettingValue(key, value);
+
+    if (!err && mCurrentImgScene.contains(key)) {
+        // update local datastructure with flash setting value from cenrep.
+        CX_DEBUG(( "Face Tracking setting value %d", value.toInt()));
+        mCurrentImgScene[key] = value;
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+
+/*!
+* Restores video settings, during mode change or during startup.
+*/
+void CxeSettingsModelImp::restoreVideoSettings()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    CxeError::Id err = CxeError::None;
+    QVariant currentSceneInUse = mCurrentVidScene[CxeSettingIds::SCENE_ID];
+
+    // get the video scene value from cenrep and load the scene settings
+    QVariant cenrepSceneValue;
+    err = getSettingValue(CxeSettingIds::VIDEO_SCENE, cenrepSceneValue);
+
+    bool ok2LoadSceneSettings = (cenrepSceneValue != currentSceneInUse);
+
+    if (!err && ok2LoadSceneSettings) {
+        // loading video scene settings
+        loadSceneData(cenrepSceneValue.toString(), mCurrentVidScene);
+    }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 

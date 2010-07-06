@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -41,10 +41,9 @@ LIBS *= -lplatformenv
 LIBS *= -lsensrvclient
 LIBS *= -lsensrvutil
 LIBS *= -limagingconfigmanager
-LIBS *= -lalfclient
-LIBS *= -lalfdecoderserverclient
 LIBS *= -lxqserviceutil
 LIBS *= -loommonitor
+LIBS += -llocationmanager
 
 
 SOURCES *= unittest_cxeenginesymbian.cpp \
@@ -105,7 +104,9 @@ SOURCES *= unittest_cxeenginesymbian.cpp \
            cxememorymonitorprivate.cpp \
            cxesnapshotcontrol.cpp \
            cxesnapshotcontrolprivate.cpp \
-           cxefakesettingsmodel.cpp
+           cxefakesettingsmodel.cpp \
+           cxegeotaggingtrail.cpp \
+           cxegeotaggingtrailprivate.cpp           
 
 
 
@@ -180,4 +181,6 @@ HEADERS *= unittest_cxeenginesymbian.h \
            cxememorymonitorprivate.h \
            cxesnapshotcontrol.h \
            cxesnapshotcontrolprivate.h \
-           cxefakesettingsmodel.h
+           cxefakesettingsmodel.h \
+           cxegeotaggingtrail.h \
+           cxegeotaggingtrailprivate.h

@@ -48,9 +48,8 @@ public:
 
 public slots:
     void handleVideoSaved(CxeError::Id status, const QString& filename);
-    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, const QString& filename);
-    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, int id);
-
+    void handleSnapshotReady(CxeError::Id status, const QImage& snapshot, const QString& filename);
+    void handleSnapshotReady(CxeError::Id status, const QImage& snapshot, int id);
 
 protected slots:
     void handleFileHarvested(CxeError::Id status, const QString& filename);
@@ -67,7 +66,7 @@ private:
     void run();
     void read();
     void saveNow();
-    void harvestFile(const QString& filename);
+    void harvestFile(const QString& filename, bool addLocation);
 
 private: // data shared between the threads
 
@@ -78,7 +77,7 @@ private: // data shared between the threads
     QWaitCondition mDataToSave;
 
     mutable QMutex mSnapshotsMutex;
-    QHash<QString, QPixmap> mSnapshots;
+    QHash<QString, QImage> mSnapshots;
 
 protected: // thread only used data
     int mCount;

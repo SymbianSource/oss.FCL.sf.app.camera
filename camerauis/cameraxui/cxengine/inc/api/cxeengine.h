@@ -31,6 +31,7 @@ class CxeImageDataQueue;
 class CxeFeatureManager;
 class CxeSettings;
 class CxeMemoryMonitor;
+class CxeGeoTaggingTrail;
 
 /**
  * CxeEngine provides the the entry point into CameraX engine. This is the
@@ -98,11 +99,21 @@ public:
      * Memory monitor utility.
      */
     virtual CxeMemoryMonitor &memoryMonitor() = 0;
-
+    
+    /**
+     * Geotagging trail utility.
+     */
+    virtual CxeGeoTaggingTrail &geoTaggingTrail() = 0;
+    
     /**
      * Get current camera mode.
      */
     virtual Cxe::CameraMode mode() const = 0;
+
+    /**
+     * Set current camera mode.
+     */
+    virtual void setMode(Cxe::CameraMode mode) = 0;
 
     /**
      * Initialize the camera in either still or video mode. This method is also

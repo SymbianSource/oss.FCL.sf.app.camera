@@ -66,7 +66,7 @@ QObject *CxuiDocumentLoader::createObject(const QString& type, const QString &na
     } else if (type == "HbSlider") {
         if (name == CxUiLayout::SETTINGS_SLIDER_DIALOG_CONTENT_WIDGET) {
             object = new CxuiSettingSlider(NULL, mEngine);
-        } else if (name == CxUiLayout::STILL_PRE_CAPTURE_ZOOM_SLIDER 
+        } else if (name == CxUiLayout::STILL_PRE_CAPTURE_ZOOM_SLIDER
          || name == CxUiLayout::VIDEO_PRE_CAPTURE_ZOOM_SLIDER) {
             object = new CxuiZoomSlider();
         }

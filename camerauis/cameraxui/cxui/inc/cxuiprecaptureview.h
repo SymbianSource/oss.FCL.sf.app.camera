@@ -25,6 +25,7 @@
 #include <hbframedrawer.h>
 
 #include "cxezoomcontrol.h"
+#include "cxegeotaggingtrail.h"
 #include "cxeviewfindercontrol.h"
 #include "cxuidisplaypropertyhandler.h"
 #include "cxuiview.h"
@@ -47,6 +48,8 @@ class CxuiSettingSlider;
 class HbToolBarExtension;
 class HbWidget;
 class CxuiZoomSlider;
+class CxuiFullScreenPopup;
+
 
 /**
  * Pre-capture view
@@ -62,67 +65,25 @@ public:
 
 public:
 
-    virtual void construct(HbMainWindow *mainWindow, CxeEngine *engine,
+    virtual void construct(HbMainWindow *mainWindow,
+                           CxeEngine *engine,
                            CxuiDocumentLoader *documentLoader,
-                           CxuiCaptureKeyHandler *keyHandler);
+                           CxuiCaptureKeyHandler *keyHandler,
+                           HbActivityManager *activityManager);
 
+    virtual bool isStandbyModeSupported() const;
     /**
-     * Loads widgets that are not part of the default section in layouts xml.
-     * Widgets are created at the time they are first loaded.
-     */
+    * Loads widgets that are not part of the default section in layouts xml.
+    * Widgets are created at the time they are first loaded.
+    */
     virtual void loadWidgets() = 0;
-    void prepareWindow();
-
-public slots:
-
-    void initCamera();
-    void requestCameraSwitch();
-
-    // whenever a setting is changed on the engine side, an icon might need updating
-    // connects to the settingValueChanged signal of CxeSettings
-    virtual void handleSettingValueChanged(const QString& key, QVariant newValue);
-
-protected slots:
-
-    // Key events
-    virtual void handleAutofocusKeyPressed();
-
-    // Camera / Engine
-    void handleEngineZoomStateChange(CxeZoomControl::State newState, CxeError::Id error);
-    void handleZoomLevelChange(int);
-    void handleVfStateChanged(CxeViewfinderControl::State newState, CxeError::Id error);
-    virtual void handleFocusGained();
-    virtual void handleFocusLost() = 0;
-    // UI: Zoom slider change notification
-    void zoomTo(int value);
-
-    void disableControlsTimeout();
-
-    void toggleZoom();
-
-    // Settings related
-    void launchDiskFullNotification();
-    void showSettingsGrid();
-    void hideSettingsGrid();
-    void launchSliderSetting();
-    void prepareToShowDialog(HbAction *action);
-    void prepareToCloseDialog(HbAction *action);
-
-protected:
-    void toggleControls();
-    virtual void initializeSettingsGrid() = 0;
-    void showEvent(QShowEvent *event);
-    void hideEvent(QHideEvent *event);
-    bool eventFilter(QObject *object, QEvent *event);
-    void launchSettingsDialog(QObject *action);
-    bool isPostcaptureOn() const;
-    void addIncreaseDecreaseButtons(CxuiZoomSlider *slider);
-    QString getSettingItemIcon(const QString &key, QVariant value);
-    void updateQualityIcon();
-    void updateSceneIcon(const QString& sceneId);
-
 
 signals:
+
+    /*!
+    * Signal that view is ready to be used.
+    */
+    void viewReady();
 
     // signals to switch to post/pre-capture view.
     void changeToPostcaptureView();
@@ -136,7 +97,67 @@ signals:
     void stopStandbyTimer();
 
     // signal to report error to ErrorManager for further actions.
-    void reportError(CxeError::Id errorId);
+    void errorEncountered(CxeError::Id id);
+
+public slots:
+
+    void initCamera();
+    void requestCameraSwitch();
+
+    // whenever a setting is changed on the engine side, an icon might need updating
+    // connects to the settingValueChanged signal of CxeSettings
+    virtual void handleSettingValueChanged(const QString& key, QVariant newValue);
+
+    // From CxuiView
+    virtual void enterStandby();
+    virtual void exitStandby();
+
+protected slots:
+
+    // Key events
+    virtual void handleAutofocusKeyPressed();
+
+    // Camera / Engine
+    void handleEngineZoomStateChange(CxeZoomControl::State newState, CxeError::Id error);
+    void handleZoomLevelChange(int);
+    void handleVfStateChanged(CxeViewfinderControl::State newState, CxeError::Id error);
+    // UI: Zoom slider change notification
+    void zoomTo(int value);
+
+    void disableControlsTimeout();
+
+    void toggleZoom();
+
+    // Settings related
+    void showSettingsGrid();
+    void hideSettingsGrid();
+    void launchSliderSetting();
+    void prepareToShowDialog(HbAction *action);
+    void prepareToCloseDialog(HbAction *action);
+    void updateLocationIndicator(CxeGeoTaggingTrail::State newState, CxeError::Id error);
+
+private slots:
+    void disableGeotaggingDisclaimer();
+    void launchGeoTaggingSetting();
+
+protected:
+    void toggleControls();
+    virtual void initializeSettingsGrid() = 0;
+    void showEvent(QShowEvent *event);
+    void hideEvent(QHideEvent *event);
+    bool eventFilter(QObject *object, QEvent *event);
+    void launchSettingsDialog(QObject *action);
+    virtual bool isPostcaptureOn() const = 0;
+    void addIncreaseDecreaseButtons(CxuiZoomSlider *slider);
+    QString getSettingItemIcon(const QString &key, QVariant value);
+    virtual void updateQualityIcon() = 0;
+    virtual void updateSceneIcon(const QString& sceneId) = 0;
+    void launchGeoTaggingDisclaimerDialog();
+
+private:
+    CxuiSettingDialog* createSettingsDialog();
+    CxuiSettingDialog* createSliderSettingsDialog();
+    QPointF getDialogPosition();
 
 protected:
     HbTransparentWindow *mViewfinder; // not own, owned by the graphics scene
@@ -146,12 +167,10 @@ protected:
     CxuiSettingDialog *mSettingsDialog;
     CxuiSettingRadioButtonList *mSettingsDialogList;
     HbLabel *mQualityIcon;
+    HbLabel *mGeoTaggingIndicatorIcon;
     HbLabel *mFaceTrackingIcon;
+    CxuiFullScreenPopup *mStandbyPopup;
 
-private:
-    CxuiSettingDialog* createSettingsDialog();
-    CxuiSettingDialog* createSliderSettingsDialog();
-    QPointF getDialogPosition();
 private:
     HbLabel *mSettingsDialogHeading;
 

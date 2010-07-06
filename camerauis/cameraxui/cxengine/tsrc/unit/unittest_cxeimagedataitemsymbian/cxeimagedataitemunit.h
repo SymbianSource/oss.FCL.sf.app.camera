@@ -36,7 +36,7 @@ class CxeImageDataItemUnit : public CxeImageDataItemSymbian
 	Q_OBJECT	
 public:
 
-    CxeImageDataItemUnit(int index, QByteArray data, QString filename);
+    CxeImageDataItemUnit(int index, QByteArray data, QString filename, bool addLocation);
     virtual ~CxeImageDataItemUnit();
     int checkDiskSpace(RFs* aFs,
                 TInt aBytesToWrite,

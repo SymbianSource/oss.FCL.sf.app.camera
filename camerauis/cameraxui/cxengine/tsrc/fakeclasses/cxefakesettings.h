@@ -41,7 +41,8 @@ class CxeFakeSettings : public CxeSettings
         void reset();
 
     public: // methods for unit testing
-        // ??
+        
+        void emulate(long int uid, unsigned long int key, QVariant value);
 
     private: // data
         QHash<QString, QVariant> mSettingKeyHash;

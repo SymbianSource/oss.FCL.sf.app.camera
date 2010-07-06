@@ -3,9 +3,6 @@
     <object name="cxui_video_action_record" type="HbAction">
         <icon iconName="qtg_small_record" name="icon"/>
     </object>
-    <object name="cxui_video_action_light" type="HbAction">
-        <icon iconName="qtg_mono_light" name="icon"/>
-    </object>
     <object name="cxui_video_action_zoom" type="HbAction">
         <icon iconName="qtg_mono_zoom" name="icon"/>
     </object>
@@ -37,9 +34,6 @@
     <object name="cxui_video_action_showcapturedvideo" type="HbAction">
         <string name="settingskey" value="video_showcaptured"/>
         <string locid="txt_cam_opt_show_captured_video" name="text" value="Show captured video"/>
-    </object>
-    <object name="cxui_video_action_setdefaultscenemode" type="HbAction">
-        <string locid="txt_cam_opt_set_as_default_scene_mode" name="text" value="Set as default scene mode"/>
     </object>
     <object name="cxui_video_action_settings" type="HbAction">
         <string locid="txt_cam_opt_camera_settings" name="text" value="Camera settings"/>
@@ -112,7 +106,6 @@
                     <sizehint type="PREFERRED" width="var(hb-param-widget-toolbar-height)"/>
                     <enums name="orientation" value="Vertical"/>
                     <ref object="cxui_video_action_record" role="HbWidget:addAction"/>
-                    <ref object="cxui_video_action_light" role="HbWidget:addAction"/>
                     <ref object="cxui_video_action_scene" role="HbWidget:addAction"/>
                     <ref object="cxui_video_action_gotostill" role="HbWidget:addAction"/>
                 </widget>
@@ -122,7 +115,6 @@
                     <enums name="orientation" value="Vertical"/>
                     <bool name="visible" value="FALSE"/>
                     <ref object="cxui_video_action_pause" role="HbWidget:addAction"/>
-                    <ref object="cxui_video_action_light" role="HbWidget:addAction"/>
                     <ref object="cxui_video_action_stop" role="HbWidget:addAction"/>
                 </widget>
                 <widget name="video_zoom" type="HbSlider">
@@ -136,7 +128,6 @@
                     <enums name="orientation" value="Vertical"/>
                     <bool name="visible" value="FALSE"/>
                     <ref object="cxui_video_action_resume" role="HbWidget:addAction"/>
-                    <ref object="cxui_video_action_light" role="HbWidget:addAction"/>
                     <ref object="cxui_video_action_stop" role="HbWidget:addAction"/>
                 </widget>
                 <widget name="video_indicator_container_bottom" type="HbWidget">
@@ -208,7 +199,6 @@
         <connect receiver="video_capture_view" sender="cxui_video_action_pause" signal="triggered(bool)" slot="pause()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_gotostill" signal="triggered(bool)" slot="goToStill()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_gotostill" signal="triggered(bool)" slot="hideControls()"/>
-        <connect receiver="video_capture_view" sender="cxui_video_action_light" signal="triggered(bool)" slot="launchNotSupportedNotification()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_scene" signal="triggered(bool)" slot="launchVideoScenePopup()"/>
         <connect receiver="video_capture_view" sender="cxui_video_action_gotovideos" signal="triggered(bool)" slot="launchVideosApp()"/>
     </section>

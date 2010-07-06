@@ -31,6 +31,7 @@
 #include <hbnotificationdialog.h>
 #include <hbfeedbacksettings.h>
 #include <hbfeedbacknamespace.h>
+#include <hbactivitymanager.h>
 
 #include "cxuivideoprecaptureview.h"
 #include "cxeengine.h"
@@ -96,17 +97,18 @@ CxuiVideoPrecaptureView::~CxuiVideoPrecaptureView()
 
 void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
                                         CxuiDocumentLoader *documentLoader,
-                                        CxuiCaptureKeyHandler *keyHandler)
+                                        CxuiCaptureKeyHandler *keyHandler,
+                                        HbActivityManager *activityManager)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler);
+    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler, activityManager);
     mCaptureKeyHandler = keyHandler;
 
     mVideoCaptureControl = &(engine->videoCaptureControl());
 
     connect(&mElapsedTimer, SIGNAL(timeout()), this, SLOT(updateTimeLabels()));
-    connect(mVideoCaptureControl, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&, const QString&)),
+    connect(mVideoCaptureControl, SIGNAL(snapshotReady(CxeError::Id, const QImage&, const QString&)),
             this, SLOT(handleSnapshot(CxeError::Id)));
     connect(mVideoCaptureControl, SIGNAL(stateChanged(CxeVideoCaptureControl::State, CxeError::Id)),
             this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
@@ -274,7 +276,46 @@ void CxuiVideoPrecaptureView::loadWidgets()
     // Initialize the video time counters.
     updateTimeLabels();
 
+    // View is ready. Needed for startup performance automated testing.
+    emit viewReady();
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Restore view state from activity.
+ */
+void CxuiVideoPrecaptureView::restoreActivity(const QString &activityId, const QVariant &data)
+{
+    Q_UNUSED(activityId);
+    Q_UNUSED(data);
+
+    CX_DEBUG_ENTER_FUNCTION();
+    // no need to restore any state
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Save view state to activity.
+ */
+void CxuiVideoPrecaptureView::saveActivity()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    QVariantMap data;
+    QVariantHash params;
+    //@todo: add pre-capture icon as screenshot
+    mActivityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
+    mActivityManager->addActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY, data, params);
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Clear activity from activity manager.
+ */
+void CxuiVideoPrecaptureView::clearActivity()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mActivityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -304,6 +345,82 @@ void CxuiVideoPrecaptureView::initializeSettingsGrid()
     }
 }
 
+/**
+* Get if postcapture view should be shown or not.
+* Postcapture view may be shown for a predefined time or
+* until user dismisses it, or it may be completely disabled.
+*/
+bool CxuiVideoPrecaptureView::isPostcaptureOn() const
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    if (CxuiServiceProvider::isCameraEmbedded()) {
+        // always show post capture in embedded mode
+        CX_DEBUG_EXIT_FUNCTION();
+        return true;
+    }
+
+    // Read the value from settings. Ignoring reading error.
+    // On error (missing settings) default to "postcapture on".
+    int showPostcapture(-1);
+    if(mEngine) {
+        mEngine->settings().get(CxeSettingIds::VIDEO_SHOWCAPTURED, showPostcapture);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+    return showPostcapture != 0; // 0 == no postcapture
+}
+
+/*!
+* Update the scene mode icon.
+* @param sceneId The new scene id.
+*/
+void CxuiVideoPrecaptureView::updateSceneIcon(const QString& sceneId)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mEngine->mode() == Cxe::VideoMode) {
+        CX_DEBUG(("CxuiPrecaptureView - scene: %s", sceneId.toAscii().constData()));
+
+        // No need to update icon, if widgets are not even loaded yet.
+        // We'll update the icon once the widgets are loaded.
+        if (mWidgetsLoaded) {
+            QString iconObjectName = VIDEO_PRE_CAPTURE_SCENE_MODE_ACTION;
+            QString icon = getSettingItemIcon(CxeSettingIds::VIDEO_SCENE, sceneId);
+
+            CX_DEBUG(("CxuiVideoPrecaptureView - icon: %s", icon.toAscii().constData()));
+
+            if (mDocumentLoader) {
+                QObject *obj = mDocumentLoader->findObject(iconObjectName);
+                CX_DEBUG_ASSERT(obj);
+                qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
+            }
+        } else {
+            CX_DEBUG(("CxuiVideoPrecaptureView - widgets not loaded yet, ignored!"));
+        }
+    }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+    Update the quality indicator
+*/
+void CxuiVideoPrecaptureView::updateQualityIcon()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mQualityIcon && mEngine) {
+        QString icon = "";
+        int currentValue = -1;
+
+        mEngine->settings().get(CxeSettingIds::VIDEO_QUALITY, currentValue);
+        icon = getSettingItemIcon(CxeSettingIds::VIDEO_QUALITY, currentValue);
+
+        mQualityIcon->setIcon(HbIcon(icon));
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
 void CxuiVideoPrecaptureView::handleSnapshot(CxeError::Id /*error*/)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -322,7 +439,7 @@ void CxuiVideoPrecaptureView::record()
         mMenu = takeMenu();
         mVideoCaptureControl->record();
     } else {
-        launchDiskFullNotification();
+        emit errorEncountered(CxeError::DiskFull);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -371,6 +488,20 @@ bool CxuiVideoPrecaptureView::allowShowControls() const
              || state == CxeVideoCaptureControl::Paused);
     }
     return show;
+}
+
+/*!
+ * Play feedback when touching view outside of any widget?
+ * If video is paused feedback is off.  Otherwise on.
+ */
+bool CxuiVideoPrecaptureView::isFeedbackEnabled() const
+{
+    CxeVideoCaptureControl::State state(mEngine->videoCaptureControl().state());
+    if (state == CxeVideoCaptureControl::Paused) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 // CxuiPrecaptureView::showToolbar()
@@ -570,6 +701,7 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         break;
     case CxeVideoCaptureControl::Recording:
         hideControls();
+        emit stopStandbyTimer();
         if (mDocumentLoader){
             mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_RECORDING);
         }
@@ -604,7 +736,7 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         //}
 
         enableFeedback();
-
+        emit startStandbyTimer();
         mElapsedTimer.stop();
         hideControls();
 
@@ -664,17 +796,9 @@ void CxuiVideoPrecaptureView::prepareNewVideo(CxeError::Id error)
         disconnect(mVideoCaptureControl, SIGNAL(videoComposed(CxeError::Id, const QString&)),
                    this, SLOT(prepareNewVideo(CxeError::Id)));
     } else {
-        emit reportError(error);
+        emit errorEncountered(error);
     }
 
-}
-
-/**
-* Toggle video light on / off.
-*/
-void CxuiVideoPrecaptureView::toggleLight()
-{
-    launchNotSupportedNotification();
 }
 
 void CxuiVideoPrecaptureView::handleQuitClicked()
@@ -695,25 +819,6 @@ void CxuiVideoPrecaptureView::handleQuitClicked()
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
-void CxuiVideoPrecaptureView::handleFocusLost()
-{
-    CX_DEBUG_IN_FUNCTION();
-    // Release camera. Stopping possibly ongoing recording is handled by engine.
-    releaseCamera();
-}
-
-void CxuiVideoPrecaptureView::handleBatteryEmpty()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
-    if (state == CxeVideoCaptureControl::Recording){
-        stop(); // delete recording icon
-    }
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 
 void CxuiVideoPrecaptureView::launchVideoScenePopup()
 {
@@ -822,3 +927,4 @@ bool CxuiVideoPrecaptureView::eventFilter(QObject *object, QEvent *event)
 }
 
 //end of file
+

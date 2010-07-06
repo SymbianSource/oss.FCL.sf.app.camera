@@ -30,12 +30,19 @@ class CxeImageDataItemSymbian : public CxeImageDataItem,
 {
     Q_OBJECT
 public: // from CxeImageDataItemSymbian
-    CxeImageDataItemSymbian(QByteArray data, QString filename, int id, CxeImageDataItem::State state = CxeImageDataItem::SavePending);
+    CxeImageDataItemSymbian(QByteArray data,
+                            QString filename,
+                            int id,
+                            bool addLocation,
+                            CxeImageDataItem::State state = CxeImageDataItem::SavePending);
+
     virtual ~CxeImageDataItemSymbian();
 
     CxeImageDataItem::State state() const;
     CxeError::Id save();
     int id() const;
+    bool isLocationEnabled() const;
+    
 public: // new methods
     QString path() const;
 
@@ -60,6 +67,7 @@ private: // private data members
 
     // used for image saving
     QByteArray mData;
+    bool mAddLocationInfo;
     QString mPath;
     RFile mFile;
     RFs mFs;

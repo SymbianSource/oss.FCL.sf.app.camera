@@ -60,7 +60,8 @@ LIBS += -lecam  \
     -lws32 \
     -lgdi \
     -lapgrfx \
-    -lusbman
+    -lusbman \
+    -lthumbnailmanagerqt
 
 CONFIG += hb
 CONFIG += service
@@ -74,6 +75,7 @@ HB += hbcore hbwidgets hbfeedback hbutils
 HEADERS += cxuiapplication.h \
     cxuiapplicationframeworkmonitor.h \
     cxuiapplicationframeworkmonitorprivate.h \
+    cxuiapplicationstate.h \
     cxuiview.h \
     cxuiprecaptureview.h \
     cxuistillprecaptureview.h \
@@ -90,13 +92,13 @@ HEADERS += cxuiapplication.h \
     cxuisettingradiobuttonlist.h \
     cxuiscenelabel.h \
     cxuierrormanager.h \
-    cxuistandby.h \
     cxuisettingradiobuttonlistmodel.h \
     cxuisettingsinfo.h \
     cxuisettingxmlreader.h \
     cxuiserviceprovider.h \
     cxuiscenemodeview.h \
     cxuizoomslider.h \
+    cxuifullscreenpopup.h \
     cxuieventlog.h \
     traces/OstTraceDefinitions.h
 
@@ -104,6 +106,7 @@ SOURCES += main.cpp \
     cxuiapplication.cpp \
     cxuiapplicationframeworkmonitor.cpp \
     cxuiapplicationframeworkmonitorprivate.cpp \
+    cxuiapplicationstate.cpp \
     cxuiview.cpp \
     cxuiprecaptureview.cpp \
     cxuivideoprecaptureview.cpp \
@@ -119,13 +122,13 @@ SOURCES += main.cpp \
     cxuisettingradiobuttonlist.cpp \
     cxuiscenelabel.cpp \
     cxuierrormanager.cpp \
-    cxuistandby.cpp \
     cxuisettingradiobuttonlistmodel.cpp \
     cxuisettingsinfo.cpp \
     cxuisettingxmlreader.cpp \
     cxuiserviceprovider.cpp \
     cxuiscenemodeview.cpp \
     cxuizoomslider.cpp \
+    cxuifullscreenpopup.cpp \
     cxuieventlog.cpp
 
 RESOURCES += cxui.qrc

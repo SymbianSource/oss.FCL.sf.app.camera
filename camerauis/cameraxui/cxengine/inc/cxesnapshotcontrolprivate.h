@@ -23,7 +23,6 @@
 #include "cxeerror.h"
 #include "cxestatemachine.h"
 
-class QPixmap;
 class CxeSnapshotControl;
 class CxeCameraDevice;
 
@@ -43,11 +42,11 @@ protected: // from CxeStateMachine
 private:
     CxeSnapshotControl::State state() const;
     void initializeStates();
-    QSize calculateSnapshotSize(const QSize &displaySize, const QSize &outputResolution) const;
+    QSize calculateSnapshotSize(const QSize &displaySize, Cxe::AspectRatio aspectRatio) const;
     void start(const QSize &size);
     void stop();
     void handleCameraEvent(int id, int error);
-    QPixmap snapshot();
+    QImage snapshot();
 
 private:
     CxeSnapshotControl *q;

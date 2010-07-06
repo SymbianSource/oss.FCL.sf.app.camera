@@ -48,9 +48,11 @@ namespace CxUiLayout
 
     static const char *SCENEMODE_SETTING_XML = ":/xml/setting_scenemode.docml";
 
-    static const char *STANDBY_POPUP_XML = ":/xml/standbymode_popup.docml";
     static const char *ERROR_POPUP_XML = ":/xml/errornote_popup.docml";
     static const char *SETTINGS_SLIDER_DIALOG_XML = ":/xml/setting_slider.docml";
+
+    static const char *FULL_SCREEN_POPUP_XML = ":/xml/full_screen_popup.docml";
+
 
     // Graphics
     static const char *TRANSPARENT_BACKGROUND_GRAPHIC = "qtg_fr_popup_trans";
@@ -86,6 +88,7 @@ namespace CxUiLayout
     static const char *STILL_PRE_CAPTURE_POST_CAPTURE_ACTION = "cxui_action_stillpostcapture";
     static const char *STILL_PRE_CAPTURE_INDICATOR_CONTAINER = "indicatorContainer";
     static const char *STILL_PRE_CAPTURE_IMAGES_LEFT_CONTAINER = "images_left_container";
+    static const char *STILL_PRE_CAPTURE_GEOTAGGING_INDICATOR_ICON = "still_geotagging_indicator";
 
     static const char *STILL_PRE_CAPTURE_SELFTIMER_CONTAINER = "still_precapture_selftimer_container";
     static const char *STILL_PRE_CAPTURE_SELFTIMER_COUNTER = "still_selftimer_counter";
@@ -101,7 +104,6 @@ namespace CxUiLayout
     static const char *VIDEO_PRE_CAPTURE_TOOLBAR = "video_toolbar";
     static const char *VIDEO_PRE_CAPTURE_TOOLBAR_REC = "video_toolbar_recording";
     static const char *VIDEO_PRE_CAPTURE_TOOLBAR_PAUSED = "video_toolbar_paused";
-    static const char *VIDEO_PRE_CAPTURE_FLASH_ACTION = "cxui_video_action_light";
     static const char *VIDEO_PRE_CAPTURE_VIEWFINDER = "video_viewfinder_widget";
     static const char *VIDEO_PRE_CAPTURE_ZOOM_SLIDER = "video_zoom";
     static const char *VIDEO_PRE_CAPTURE_RECORDING_ICON = "video_recording_icon";
@@ -116,10 +118,16 @@ namespace CxUiLayout
     static const char *VIDEO_PRE_CAPTURE_SCENE_MODE_ACTION = "cxui_video_action_scene";
 
     static const char *VIDEO_PRE_CAPTURE_QUALITY_ICON = "video_quality_indicator";
+    static const char *VIDEO_PRE_CAPTURE_GEOTAGGING_INDICATOR_ICON = "video_geotagging_indicator";
 
     // standby
     static const char *STANDBY_POPUP = "standbymode_popup";
     static const char *STANDBY_TEXT_WIDGET = "standby_text";
+
+    // Full screen popup
+    static const char *FULL_SCREEN_POPUP = "full_screen_popup";
+    static const char *FULL_SCREEN_POPUP_TEXT = "full_screen_popup_text";
+    static const char *FULL_SCREEN_POPUP_BUTTON = "full_screen_popup_button";
 
     // error manager
     static const char *ERROR_POPUP = "errornote_popup";
@@ -161,6 +169,15 @@ namespace CxUiInternal
     // Property for settings grid initiated settings
     static const char *PROPERTY_KEY_SETTING_GRID = "settingsgrid";
     static const char *PROPERTY_KEY_TRUE         = "1";
+}
+
+namespace CxuiActivityIds
+{
+  static const QString STILL_PRECAPTURE_ACTIVITY =  "CameraViewfinderShow";
+  static const QString STILL_POSTCAPTURE_ACTIVITY = "CameraPostCaptureShow";
+
+  static const QString VIDEO_PRECAPTURE_ACTIVITY =  "CamcorderViewfinderShow";
+  static const QString VIDEO_POSTCAPTURE_ACTIVITY = "CamcorderPostCaptureShow";
 }
 
 Q_DECLARE_METATYPE(CxUi::CameraView)

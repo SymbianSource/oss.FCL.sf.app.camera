@@ -31,7 +31,7 @@ class ShareUi;
 
 class CxeEngine;
 class CxuiDocumentLoader;
-
+class ThumbnailManager;
 
 /**
  * Post-capture view
@@ -43,14 +43,22 @@ class CxuiPostcaptureView : public CxuiView
 public:
     CxuiPostcaptureView(QGraphicsItem *parent = 0);
     virtual ~CxuiPostcaptureView();
-    void construct(HbMainWindow *mainwindow, CxeEngine *engine, CxuiDocumentLoader *documentLoader);
+    void construct(HbMainWindow *mainwindow, CxeEngine *engine,
+                   CxuiDocumentLoader *documentLoader, CxuiCaptureKeyHandler *keyHandler,
+                   HbActivityManager *activityManager);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+    void restoreActivity(const QString &activityId, const QVariant &data);
+    void saveActivity();
+    void clearActivity();
 
 signals:
     void changeToPrecaptureView();
 
 public slots:
+    void enterStandby();
+    void exitStandby();
     void handleCaptureKeyPressed();
     void handleAutofocusKeyPressed();
 
@@ -85,8 +93,7 @@ private:
     void startReleaseTimers();
 
 private slots:
-    void handleFocusGained();
-    void handleFocusLost();
+    void handleThumbnailReady(QPixmap thumbnail, void *clientData, int id, int errorCode);
 
 private: // data
     HbToolBar *mStillToolbar;
@@ -125,6 +132,9 @@ private: // data
 
     bool mDeleteNoteOpen;
 
+    QString mFilename;
+
+    ThumbnailManager *mThumbnailManager;
 };
 
 #endif // CXUIPOSTCAPTUREVIEW_H

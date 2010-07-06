@@ -34,11 +34,8 @@ private slots:
     void init();
     void cleanup();
     
-    void testSupportedKeys();
-    void testConfiguredValuesEmptyData();
-    void testConfiguredValuesFalseKey();
-    void testConfiguredValuesTrueKeyAndData();
-    void testConfiguredValuesFalseData();
+    void testIsFeatureSupported();
+    void testconfiguredValues();
     
 private:
     CxeFakeSettingsModel *mFakeSettingsModel;

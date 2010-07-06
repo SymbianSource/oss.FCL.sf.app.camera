@@ -37,7 +37,6 @@
             <item string="txt_cam_list_sepia"    value="1" icon="" />
             <item string="txt_cam_list_white"    value="3" icon="" />
             <item string="txt_cam_list_vivid"    value="4" icon="" />
-            <item string="txt_cam_list_negative" value="2" icon="" />
         </setting_list>
 
         <!-- Video scene modes -->
@@ -51,6 +50,16 @@
             <item string="txt_cam_list_night_video"       value="video_scene_night"        icon="qtg_mono_night" />
         </setting_list>
         
+        <!-- GeoTagging (setting list) -->
+        <setting_list id="geotagging"
+                      heading="txt_cam_title_geotagging"
+                      preview="0"
+                      type="SingleLineListBox"
+                      setting_icon="">
+            <item string="txt_cam_list_geotagging_on"   value="1" icon="" />
+            <item string="txt_cam_list_geotagging_off"    value="0" icon="" />
+        </setting_list>        
+
         <!-- Exposure compensation (setting slider) -->
         <setting_slider id="ev_compensation_value" heading="txt_cam_title_exposure_compensation" setting_icon="">
             <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" l1Value="2" minorStep="0.5" majorStep="1"/>

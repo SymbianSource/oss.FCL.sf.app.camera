@@ -40,8 +40,10 @@ namespace
     const int    SECONDARY_CAMERA_DISPLAY_ID = 3;
 
     const int    ONE_MILLION    = 1000000;
-    const qreal  ASPECT_16_BY_9 = (16/9.0);
-    const qreal  DELTA_ERROR    = 0.20;
+
+    const QSize ASPECT_RATIO_SIZE_4BY3  = QSize(4,3);
+    const QSize ASPECT_RATIO_SIZE_16BY9 = QSize(16, 9);
+    const QSize ASPECT_RATIO_SIZE_11BY9 = QSize(11, 9);
 
     // ICM "camcorderVisible" parameter value below this means sharing aka mms quality.
     const int    MMS_QUALITY_CAMCORDERVISIBLE_LIMIT = 200;
@@ -305,14 +307,20 @@ Cxe::AspectRatio CxeQualityPresetsSymbian::calculateAspectRatio(int width, int h
 {
     Cxe::AspectRatio aspectRatio = Cxe::AspectRatio4to3;
 
-    qreal ratio = 0;
-    if (height != 0) {
-        ratio = (1.0 * width) / height;
-
-        qreal delta16by9 = ratio - ASPECT_16_BY_9;
-        if (abs(delta16by9) < DELTA_ERROR) {
-            aspectRatio = Cxe::AspectRatio16to9;
-        }
+    // calculate delta error for the resolution against supported aspect ratio's
+    int delta16by9 = abs((width * ASPECT_RATIO_SIZE_16BY9.height()) - (height * ASPECT_RATIO_SIZE_16BY9.width()));
+    int delta11by9 = abs((width * ASPECT_RATIO_SIZE_11BY9.height()) - (height * ASPECT_RATIO_SIZE_11BY9.width()));
+    int delta4by3  = abs((width * ASPECT_RATIO_SIZE_4BY3.height()) - (height * ASPECT_RATIO_SIZE_4BY3.width()));
+    
+    // get the closest aspect ratio
+    int minValue = qMin(qMin(delta16by9, delta11by9), delta4by3);
+    
+    if (minValue == delta16by9) {
+        aspectRatio = Cxe::AspectRatio16to9;
+    } else if (minValue == delta11by9) {
+        aspectRatio = Cxe::AspectRatio11to9;
+    } else if (minValue == delta4by3) {
+        aspectRatio = Cxe::AspectRatio4to3;
     }
 
     return aspectRatio;

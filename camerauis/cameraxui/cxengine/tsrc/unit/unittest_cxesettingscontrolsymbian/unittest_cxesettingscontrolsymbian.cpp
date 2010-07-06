@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -96,7 +96,7 @@ void UnitTestCxeSettingsControlSymbian::testHandleSceneChanged()
 
     CxeScene videoScene;
 
-    videoScene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::VIDEO_SCENE_AUTO);
+    videoScene.insert(CxeSettingIds::SCENE_ID, Cxe::VIDEO_SCENE_AUTO);
     videoScene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Hyperfocal);
     videoScene.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     videoScene.insert(CxeSettingIds::EXPOSURE_MODE, ExposureAuto);
@@ -109,7 +109,7 @@ void UnitTestCxeSettingsControlSymbian::testHandleSceneChanged()
 
     CxeScene imageScene;
 
-    imageScene.insert(CxeSettingIds::SCENE_ID, CxeSettingIds::IMAGE_SCENE_NIGHT);
+    imageScene.insert(CxeSettingIds::SCENE_ID, Cxe::IMAGE_SCENE_NIGHT);
     imageScene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Auto);
     imageScene.insert(CxeSettingIds::WHITE_BALANCE, WhitebalanceAutomatic);
     imageScene.insert(CxeSettingIds::EXPOSURE_MODE, ExposureNight);

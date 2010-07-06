@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -92,9 +92,11 @@ CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
     initializeStates();
 
     mVideoStopSoundPlayer = new
-             CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::VideoCaptureStop);
+             CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::VideoCaptureStop,
+                                   mSettings);
     mVideoStartSoundPlayer = new
-             CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::VideoCaptureStart);
+             CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::VideoCaptureStart,
+                                   mSettings);
 
     // If camera is already allocated, call the slot ourselves.
     if (mCameraDevice.camera()) {
@@ -115,8 +117,8 @@ CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
             this, SLOT(handleSoundPlayed()));
 
     // connect snapshot ready signal
-    connect(&mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&)),
-            this, SLOT(handleSnapshotReady(CxeError::Id, const QPixmap&)));
+    connect(&mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QImage&)),
+            this, SLOT(handleSnapshotReady(CxeError::Id, const QImage&)));
 
     // enabling setting change callbacks to videocapturecontrol
     connect(&mSettings, SIGNAL(settingValueChanged(const QString&,QVariant)),
@@ -164,7 +166,7 @@ void CxeVideoCaptureControlSymbian::init()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/*
+/*!
 * Releases all resources
 */
 void CxeVideoCaptureControlSymbian::deinit()
@@ -330,7 +332,7 @@ void CxeVideoCaptureControlSymbian::prepare()
         // Prepare snapshot. Snapshot control throws error if problems.
         QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
                                 mViewfinderControl.deviceDisplayResolution(),
-                                QSize(mCurrentVideoDetails.mWidth, mCurrentVideoDetails.mHeight));
+                                mCurrentVideoDetails.mAspectRatio);
         mSnapshotControl.start(snapshotSize);
 
         // Prepare zoom only when there are no errors during prepare.
@@ -709,7 +711,7 @@ void CxeVideoCaptureControlSymbian::updateRemainingRecordingTimeCounter()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/*
+/*!
 * calculates remaining video recording time.
 */
 void CxeVideoCaptureControlSymbian::remainingTime(int &time)
@@ -793,13 +795,13 @@ void CxeVideoCaptureControlSymbian::handleSoundPlayed()
 * @param status Status code for getting the snapshot.
 * @param snapshot Snapshot pixmap. Empty if error code reported.
 */
-void CxeVideoCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot)
+void CxeVideoCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, const QImage &snapshot)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     if (mCameraDeviceControl.mode() == Cxe::VideoMode) {
         // Need to store snapshot for ui to be able to get it also later.
-        mSnapshot = snapshot;
+        mSnapshot = QPixmap::fromImage(snapshot);
         emit snapshotReady(status, snapshot, filename());
     }
 

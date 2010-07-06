@@ -180,15 +180,27 @@ void CxeFileSaveThreadSymbian::handleVideoSaved(CxeError::Id status, const QStri
         // Use a dummy "image data item" with empty data and saved state for videos.
         // We just need to harvest the file and provide snapshot to Thumbnail Manager.
         QByteArray empty;
-        CxeImageDataItem* item = new CxeImageDataItemSymbian(empty, filename, CxeStillImage::INVALID_ID, CxeImageDataItem::Saved);
-        if(item) {
+        CxeImageDataItem* item = new CxeImageDataItemSymbian(empty,
+                                                             filename,
+                                                             CxeStillImage::INVALID_ID,
+                                                             false,
+                                                             CxeImageDataItem::Saved);
+        if (item) {
             save(item);
         }
     }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeFileSaveThreadSymbian::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, const QString& filename)
+/*!
+ * Handles snapshot event from CxeStillCaptureControl and CxeVideoCaptureControl.
+ *
+ * @param status Status of snapshot creation. CxeError::None if no error, otherwise contains the error code
+ * @param snapshot Snapshot as QImage
+ * @param filename Name of the file that the snapshot is from
+ */
+void CxeFileSaveThreadSymbian::handleSnapshotReady(CxeError::Id status, const QImage& snapshot, const QString& filename)
 {
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG(("[INFO] current thread 0x%x", QThread::currentThreadId()));
@@ -199,8 +211,6 @@ void CxeFileSaveThreadSymbian::handleSnapshotReady(CxeError::Id status, const QP
         if (!snapshot.isNull()) {
             // QMutexLocker handles locking and unlocking automaticly.
             QMutexLocker lock(&mSnapshotsMutex);
-
-            //!@todo: Store as QImage once TNM API is fixed.
             mSnapshots.insert(filename, snapshot);
         }
     }
@@ -208,7 +218,14 @@ void CxeFileSaveThreadSymbian::handleSnapshotReady(CxeError::Id status, const QP
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeFileSaveThreadSymbian::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, int id)
+/*!
+ * Handles snapshot event from CxeStillCaptureControl and CxeVideoCaptureControl.
+ *
+ * @param status Status of snapshot creation. CxeError::None if no error, otherwise contains the error code
+ * @param snapshot Snapshot as QImage
+ * @param id Id of the file that the snapshot is from
+ */
+void CxeFileSaveThreadSymbian::handleSnapshotReady(CxeError::Id status, const QImage& snapshot, int id)
 {
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG(("[INFO] current thread 0x%x", QThread::currentThreadId()));
@@ -316,13 +333,13 @@ void CxeFileSaveThreadSymbian::saveNow()
                 // so we can find the snapshot when harvesting is ready.
                 QString idString(QString::number(item->id()));
                 if (mSnapshots.contains(idString)) {
-                    const QPixmap& snapshot(mSnapshots[idString]);
+                    QImage snapshot(mSnapshots[idString]);
                     mSnapshots.remove(idString);
                     mSnapshots.insert(path, snapshot);
                 }
             }
 
-            harvestFile(path);
+            harvestFile(path, qobject_cast<CxeImageDataItemSymbian*>(item)->isLocationEnabled());
         }
 
         // Delete item, since we own it
@@ -337,7 +354,7 @@ void CxeFileSaveThreadSymbian::saveNow()
 * Harvest one file.
 * @param filename Path of the file to be harvested.
 */
-void CxeFileSaveThreadSymbian::harvestFile(const QString& filename)
+void CxeFileSaveThreadSymbian::harvestFile(const QString& filename, bool addLocation)
 {
     CX_DEBUG_ENTER_FUNCTION();
     if (mHarvesterControl) {
@@ -345,8 +362,8 @@ void CxeFileSaveThreadSymbian::harvestFile(const QString& filename)
         QMutexLocker lock(&mSnapshotsMutex);
 
         // harvest file ( filename, add to album, album id )
-        CX_DEBUG(("Requesting harvesting for file: %s", filename.toAscii().constData()));
-        CxeError::Id status = mHarvesterControl->harvestFile(filename, false, MDS_CAPTURED_ALBUM_ID);
+        CX_DEBUG(("Requesting harvesting for file: %s addLocation = %d", filename.toAscii().constData(), addLocation));
+        CxeError::Id status = mHarvesterControl->harvestFile(filename, addLocation, MDS_CAPTURED_ALBUM_ID);
         CX_DEBUG(("Status for starting harvesting: %d", status));
 
         // If there were errors, release any snapshot stored for this file.
