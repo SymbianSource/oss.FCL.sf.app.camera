@@ -25,6 +25,9 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#ifdef Q_OS_SYMBIAN
+#include <ProfileEngineSDKCRKeys.h>
+#endif
 
 #include "xqsettingsmanager.h" // Settings Manager API
 #include "xqsettingskey.h"
@@ -35,10 +38,11 @@
 #include "cxeerror.h"
 #include "cxecenrepkeys.h"
 
-
-#ifdef Q_OS_SYMBIAN
-#include <ProfileEngineSDKCRKeys.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cxesettingscenrepstoreTraces.h"
 #endif
+
 
 using namespace CxeSettingIds;
 
@@ -49,6 +53,7 @@ using namespace CxeSettingIds;
 CxeSettingsCenRepStore::CxeSettingsCenRepStore()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXESETTINGSCENREPSTORE_1, "msg: e_CX_SETTINGSSTORE_CREATE 1");
 
     // map keys of type "string" to cenrep ids
     mapKeys();
@@ -56,13 +61,13 @@ CxeSettingsCenRepStore::CxeSettingsCenRepStore()
 	// we create settings handle, scope user::scope
     mSettingsManager = new XQSettingsManager(this);
 
-    bool ok = false;
-    ok = connect(mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
-                 this, SLOT(handleValueChanged(XQSettingsKey, QVariant)));
-    CX_DEBUG_ASSERT(ok);
+    bool ok = connect(mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
+                      this, SLOT(handleValueChanged(XQSettingsKey, QVariant)));
+    CX_ASSERT_ALWAYS(ok);
 
     CX_DEBUG(("CxeSettingsCenRepStore - mSettingsManager ptr = %d", mSettingsManager));
 
+    OstTrace0(camerax_performance, CXESETTINGSCENREPSTORE_2, "msg: e_CX_SETTINGSSTORE_CREATE 0");
 	CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -81,7 +86,7 @@ CxeSettingsCenRepStore::~CxeSettingsCenRepStore()
 
 /*!
 * Generates XQSettingsKey from given setting/runtime key
-* \param key Name of the setting from which to generate the XQSettingsKey 
+* \param key Name of the setting from which to generate the XQSettingsKey
 * \param[out] error Error code. CxeError::None if everything went fine.
 */
 XQSettingsKey
@@ -119,6 +124,7 @@ CxeSettingsCenRepStore::generateXQSettingsKey(const QString& key, CxeError::Id& 
 QHash<QString, QVariantList> CxeSettingsCenRepStore::loadRuntimeSettings(QList<QString>& runtimeKeys)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXESETTINGSCENREPSTORE_LOADRUNTIME_1, "msg: e_CX_SETTINGSSTORE_LOAD_RUNTIME 1");
 
     QHash<QString, QVariantList> settings;
 	CxeError::Id err = CxeError::None;
@@ -152,6 +158,7 @@ QHash<QString, QVariantList> CxeSettingsCenRepStore::loadRuntimeSettings(QList<Q
 
     CX_DEBUG_EXIT_FUNCTION();
 
+    OstTrace0(camerax_performance, CXESETTINGSCENREPSTORE_LOADRUNTIME_2, "msg: e_CX_SETTINGSSTORE_LOAD_RUNTIME 0");
     return settings;
 }
 
@@ -216,14 +223,20 @@ void CxeSettingsCenRepStore::startMonitoring(long int uid,
     }
 
 	XQSettingsKey settingsKey(keyType, uid, key);
-    CX_DEBUG(("reading values from XQSettingsManager.."));
+    CX_DEBUG(("reading value from XQSettingsManager.."));
     value = mSettingsManager->readItemValue(settingsKey);
 
     // start monitoring changes for the key
     // both P&S and Repository keys are monitored
-    bool ok = false;
-    ok = mSettingsManager->startMonitoring(settingsKey);
-    CX_DEBUG_ASSERT(ok);
+    bool ok = mSettingsManager->startMonitoring(settingsKey);
+    if (!ok) {
+        XQSettingsManager::Error error = mSettingsManager->error();
+        CX_DEBUG(("CxeSettingsCenRepStore - got error %d trying to start listening", error));
+        // If we try to start listening one key more than once,
+        // we get this error. We can safely ignore it.
+        ok = (XQSettingsManager::AlreadyExistsError == error);
+    }
+    CX_ASSERT_ALWAYS(ok);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -284,6 +297,8 @@ void CxeSettingsCenRepStore::reset()
 void CxeSettingsCenRepStore::mapKeys()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXESETTINGSCENREPSTORE_MAPKEYS_1, "msg: e_CX_SETTINGSSTORE_INIT_MAPPING 1");
+
     mKeyMapping.clear();
 
     // mapping setting keys
@@ -322,7 +337,7 @@ void CxeSettingsCenRepStore::mapKeys()
     addKeyMapping(CxeSettingIds::VIDEO_MUTE_SETTING,
                   AudioMuteCr,
                   XQSettingsManager::TypeInt);
-    
+
     addKeyMapping(CxeSettingIds::GEOTAGGING,
                   GeoTaggingCr,
                   XQSettingsManager::TypeInt);
@@ -346,7 +361,7 @@ void CxeSettingsCenRepStore::mapKeys()
     addKeyMapping(CxeSettingIds::CAPTURE_SOUND_ALWAYS_ON,
                   CaptureSoundAlwaysOnCr,
                   XQSettingsManager::TypeInt);
-				  
+
     addKeyMapping(CxeSettingIds::CAMERA_MODE,
                   CameraModeCr,
                   XQSettingsManager::TypeInt);
@@ -386,6 +401,7 @@ void CxeSettingsCenRepStore::mapKeys()
                   XQSettingsManager::TypeString,
                   true);
 
+    OstTrace0(camerax_performance, CXESETTINGSCENREPSTORE_MAPKEYS_2, "msg: e_CX_SETTINGSSTORE_INIT_MAPPING 0");
 	CX_DEBUG_EXIT_FUNCTION();
 }
 

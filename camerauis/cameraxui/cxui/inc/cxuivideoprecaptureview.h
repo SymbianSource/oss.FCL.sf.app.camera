@@ -45,27 +45,13 @@ public:
 
 public:
 
-    /**
-     * Construct-method handles initialisation tasks for this class.
-     * @param mainwindow
-     * @param engine
-     * @param documentLoader
-     * @param keyHandler
-     */
     void construct(HbMainWindow *mainwindow, CxeEngine *engine,
                    CxuiDocumentLoader *documentLoader,
                    CxuiCaptureKeyHandler *keyHandler,
                    HbActivityManager *activityManager);
 
-    /**
-     * Loads widgets that are needed right from the start.
-     */
     virtual void loadDefaultWidgets();
 
-    /**
-     * Loads widgets that are not part of the default section in layouts xml.
-     * Widgets are created at the time they are first loaded.
-     */
     virtual void loadWidgets();
 
     void restoreActivity(const QString &activityId, const QVariant &data);
@@ -117,6 +103,9 @@ protected:
 
     // from QObject
     bool eventFilter(QObject *object, QEvent *event);
+
+private:
+    void reloadIndicatorWidgets();
 
 protected:
     QTimer mElapsedTimer;

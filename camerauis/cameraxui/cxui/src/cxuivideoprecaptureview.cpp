@@ -18,6 +18,7 @@
 #include <e32keys.h>
 
 #include <QApplication>
+#include <QGraphicsLayout>
 
 #include <hbmainwindow.h>
 #include <hbaction.h>
@@ -45,11 +46,12 @@
 #include "cxuizoomslider.h"
 #include "cxuicapturekeyhandler.h"
 #include "cxuidocumentloader.h"
+#include "cxuiserviceprovider.h"
+
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuivideoprecaptureviewTraces.h"
 #endif
-#include "cxuiserviceprovider.h"
 
 
 using namespace Cxe;
@@ -95,6 +97,13 @@ CxuiVideoPrecaptureView::~CxuiVideoPrecaptureView()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Construct-method handles initialisation tasks for this class.
+ * @param mainwindow
+ * @param engine
+ * @param documentLoader
+ * @param keyHandler
+ */
 void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
                                         CxuiDocumentLoader *documentLoader,
                                         CxuiCaptureKeyHandler *keyHandler,
@@ -133,34 +142,105 @@ void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
 
 }
 
+/*!
+ * Loads widgets that are needed right from the start.
+ */
 void CxuiVideoPrecaptureView::loadDefaultWidgets()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CX_DEBUG_ASSERT(mDocumentLoader);
+    CX_ASSERT_ALWAYS(mDocumentLoader);
 
     // get pointers to ui components from the layout data
     QGraphicsWidget *widget = NULL;
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_VIEWFINDER);
     mViewfinder = qobject_cast<HbTransparentWindow *> (widget);
-    CX_DEBUG_ASSERT(mViewfinder);
+    CX_ASSERT_ALWAYS(mViewfinder);
 
-    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_QUALITY_ICON);
-    mQualityIcon = qobject_cast<HbLabel *> (widget);
-    CX_DEBUG_ASSERT(mQualityIcon);
-
-    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_INDICATOR_CONTAINER_TOP);
-    mIndicators = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(mIndicators);
-    // Create background graphics for indicator container
-    createWidgetBackgroundGraphic(mIndicators, TRANSPARENT_BACKGROUND_GRAPHIC);
+    reloadIndicatorWidgets();
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Loads default indicators from docml and modifies the visibility 
+ * according to current settings.
+ */
+void CxuiVideoPrecaptureView::reloadIndicatorWidgets()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_ASSERT_ALWAYS(mDocumentLoader);
+
+    bool ok = false;
+    mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_INDICATORS_SECTION, &ok);
+    CX_ASSERT_ALWAYS(ok);
+
+    QGraphicsWidget *widget = NULL;
+    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_QUALITY_ICON);
+    mQualityIcon = qobject_cast<HbLabel *> (widget);
+    CX_ASSERT_ALWAYS(mQualityIcon);
+
+    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_VIDEOAUDIOMUTE_INDICATOR_ICON);
+    HbLabel *videoaudiomuteIndicatorIcon = qobject_cast<HbLabel *>(widget);
+    CX_ASSERT_ALWAYS(videoaudiomuteIndicatorIcon);
+
+    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_STABILITY_INDICATOR_ICON);
+    HbLabel *videoStabilityIndicatorIcon = qobject_cast<HbLabel *>(widget);
+    CX_ASSERT_ALWAYS(videoStabilityIndicatorIcon);
+
+    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_INDICATOR_CONTAINER_TOP);
+    mIndicators = qobject_cast<HbWidget *>(widget);
+    CX_ASSERT_ALWAYS(mIndicators);
+
+    QGraphicsLayout *layout = mIndicators->layout();
+    QGraphicsLayoutItem *graphicsLayoutItem = NULL;
+    QGraphicsItem *graphicsItem = NULL;
+    QString key = "";
+    int currentSettingValue = -1;
+    bool isSettingOff = false;
+    // Go through the items in the layout to check whether they should be
+    // shown or not in the indicator pane. Start from the last towards
+    // the first, so that removing items from between works correctly.
+    for (int i = layout->count() - 1; i >= 0; i--) {
+        graphicsLayoutItem = layout->itemAt(i);
+        isSettingOff = false;
+        if (graphicsLayoutItem) {
+            graphicsItem = graphicsLayoutItem->graphicsItem();
+            currentSettingValue = -1;
+            if (graphicsItem == videoaudiomuteIndicatorIcon) {
+                key = CxeSettingIds::VIDEO_MUTE_SETTING;
+                mEngine->settings().get(key, currentSettingValue);
+                // video mute implementation does not use 
+                // enum for on/off values but instead 
+                // 0 for off and 1 for on.
+                if (currentSettingValue == 0) {
+                    isSettingOff = true;
+                }
+            } else if (graphicsItem == videoStabilityIndicatorIcon) {
+                // remove video stability indicator.
+                isSettingOff = true;
+            }
+            if (isSettingOff) {
+                layout->removeAt(i);
+            }
+        }
+    }
+
+    // Create background graphics for indicator container
+    createWidgetBackgroundGraphic(mIndicators, TRANSPARENT_BACKGROUND_GRAPHIC);
+
+    mIndicators->setVisible(true);
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Loads widgets that are not part of the default section in layouts xml.
+ * Widgets are created at the time they are first loaded.
+ */
 void CxuiVideoPrecaptureView::loadWidgets()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CX_DEBUG_ASSERT(mDocumentLoader);
+    CX_ASSERT_ALWAYS(mDocumentLoader);
 
     if (mWidgetsLoaded) {
         CX_DEBUG(("Widgets already loaded"));
@@ -176,17 +256,17 @@ void CxuiVideoPrecaptureView::loadWidgets()
 
     // load widgets section (creates the widgets)
     mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_WIDGETS_SECTION, &ok);
-    Q_ASSERT_X(ok, "camerax ui", "error in xml file parsing");
+    CX_ASSERT_ALWAYS(ok);
     if (CxuiServiceProvider::isCameraEmbedded()) {
         mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_EMBEDDED_SECTION, &ok);
     } else {
         mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_STANDALONE_SECTION, &ok);
     }
-    Q_ASSERT_X(ok, "camerax ui", "error in xml file parsing");
+    CX_ASSERT_ALWAYS(ok);
     // get needed pointers to some of the widgets
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_ZOOM_SLIDER);
     mSlider = qobject_cast<CxuiZoomSlider *> (widget);
-    CX_DEBUG_ASSERT(mSlider);
+    CX_ASSERT_ALWAYS(mSlider);
 
     //Let's add a plus and minus buttons to the slider
     mSlider->addZoomButtons();
@@ -201,9 +281,9 @@ void CxuiVideoPrecaptureView::loadWidgets()
 
     mToolbar = mToolbarIdle;
 
-    CX_DEBUG_ASSERT(mToolbarIdle);
-    CX_DEBUG_ASSERT(mToolbarRec);
-    CX_DEBUG_ASSERT(mToolbarPaused);
+    CX_ASSERT_ALWAYS(mToolbarIdle);
+    CX_ASSERT_ALWAYS(mToolbarRec);
+    CX_ASSERT_ALWAYS(mToolbarPaused);
 
     hideControls();
 
@@ -240,20 +320,20 @@ void CxuiVideoPrecaptureView::loadWidgets()
     HbWidget *indicatorContainer;
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_INDICATOR_CONTAINER_BOTTOM);
     indicatorContainer = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(indicatorContainer);
+    CX_ASSERT_ALWAYS(indicatorContainer);
     createWidgetBackgroundGraphic(indicatorContainer, TRANSPARENT_BACKGROUND_GRAPHIC);
 
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_ELAPSED_TIME_LABEL);
     mElapsedTimeText = qobject_cast<HbLabel *> (widget);
-    CX_DEBUG_ASSERT(mElapsedTimeText);
+    CX_ASSERT_ALWAYS(mElapsedTimeText);
 
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_REMAINING_TIME_LABEL);
     mRemainingTimeText = qobject_cast<HbLabel *> (widget);
-    CX_DEBUG_ASSERT(mRemainingTimeText);
+    CX_ASSERT_ALWAYS(mRemainingTimeText);
 
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_RECORDING_ICON);
     mRecordingIcon = qobject_cast<HbLabel *> (widget);
-    CX_DEBUG_ASSERT(mRecordingIcon);
+    CX_ASSERT_ALWAYS(mRecordingIcon);
 
     mWidgetsLoaded = true;
 
@@ -391,7 +471,7 @@ void CxuiVideoPrecaptureView::updateSceneIcon(const QString& sceneId)
 
             if (mDocumentLoader) {
                 QObject *obj = mDocumentLoader->findObject(iconObjectName);
-                CX_DEBUG_ASSERT(obj);
+                CX_ASSERT_ALWAYS(obj);
                 qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
             }
         } else {
@@ -556,13 +636,12 @@ void CxuiVideoPrecaptureView::enableFeedback()
 void CxuiVideoPrecaptureView::goToStill()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0( camerax_performance, DUP1_CXUIVIDEOPRECAPTUREVIEW_GOTOSTILL, "msg: e_CX_GO_TO_STILL_MODE 1" );
+    OstTrace0( camerax_performance, CXUIVIDEOPRECAPTUREVIEW_GOTOSTILL, "msg: e_CX_GO_TO_STILL_MODE 1" );
 
     hideControls();
     mEngine->initMode(ImageMode);
     emit changeToPrecaptureView();
 
-    OstTrace0( camerax_performance, DUP2_CXUIVIDEOPRECAPTUREVIEW_GOTOSTILL, "msg: e_CX_GO_TO_STILL_MODE 0" );
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -646,7 +725,7 @@ bool CxuiVideoPrecaptureView::getElapsedTime()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    TBool status = mVideoCaptureControl->elapsedTime(mTimeElapsed);
+    bool status = mVideoCaptureControl->elapsedTime(mTimeElapsed);
     CX_DEBUG(("Elapsed time: %d", mTimeElapsed));
     CX_DEBUG(("status: %d", status));
 
@@ -863,6 +942,10 @@ void CxuiVideoPrecaptureView::handleSettingValueChanged(const QString& key, QVar
 
             // update video remaining time counter when video quality is changed
             updateTimeLabels();
+        } else if (key == CxeSettingIds::GEOTAGGING) {
+            reloadIndicatorWidgets();
+        } else if (key == CxeSettingIds::VIDEO_MUTE_SETTING) {
+            reloadIndicatorWidgets();
         }
     }
 

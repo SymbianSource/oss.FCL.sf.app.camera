@@ -98,7 +98,7 @@ void CxeEngineSymbian::createControls()
 
     // Check we do this only once.
     if (!mSettingsModel) {
-        OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_IN, "e_CX_ENGINE_CREATE_CONTROLS 1");
+        OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_IN, "msg: e_CX_ENGINE_CREATE_CONTROLS 1");
 
         CxeCameraDeviceControlSymbian *deviceControl = new CxeCameraDeviceControlSymbian();
         mCameraDeviceControl = deviceControl;
@@ -122,8 +122,8 @@ void CxeEngineSymbian::createControls()
 
         mSettings = new CxeSettingsImp(*mSettingsModel);
 
-        // Loading current camera mode value from settings store and updating 
-		// devicecontrol        
+        // Loading current camera mode value from settings store and updating
+		// devicecontrol
         Cxe::CameraMode cameraMode = Cxe::ImageMode;
         int value;
         CxeError::Id err = mSettings->get(CxeSettingIds::CAMERA_MODE, value);
@@ -132,7 +132,7 @@ void CxeEngineSymbian::createControls()
         }
         // set current camera mode to devicecontrol.
         mCameraDeviceControl->setMode(cameraMode);
-        
+
         //! @todo a temporary hack to change the startup sequence to avoid GOOM problems
         static_cast<CxeSettingsImp*>(mSettings)->loadSettings(mode());
 
@@ -163,7 +163,7 @@ void CxeEngineSymbian::createControls()
 
         mSnapshotControl = new CxeSnapshotControl(*mCameraDevice);
 
-        mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice, 
+        mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice,
 		                            *mSettings);
 
         mFileSaveThread = CxeFileSaveThreadFactory::createFileSaveThread();
@@ -186,7 +186,7 @@ void CxeEngineSymbian::createControls()
                                                   *mVideoCaptureControl,
                                                   *mSettings);
 
-        OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_OUT, "e_CX_ENGINE_CREATE_CONTROLS 0");
+        OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_OUT, "msg: e_CX_ENGINE_CREATE_CONTROLS 0");
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -198,7 +198,7 @@ void CxeEngineSymbian::createControls()
 void CxeEngineSymbian::connectSignals()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_IN, "e_CX_ENGINE_CONNECT_SIGNALS 1");
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_IN, "msg: e_CX_ENGINE_CONNECT_SIGNALS 1");
 
     // enabling scene setting change callbacks to Autofocus control
     connect(mSettings,
@@ -280,7 +280,7 @@ void CxeEngineSymbian::connectSignals()
             SLOT(stop()),
             Qt::UniqueConnection);
 
-    OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_OUT, "e_CX_ENGINE_CONNECT_SIGNALS 0");
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_OUT, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -288,10 +288,10 @@ void CxeEngineSymbian::connectSignals()
 CxeEngineSymbian::~CxeEngineSymbian()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    
+
     // Saving current camera mode to cenrep
     saveMode();
-    
+
     delete mGeoTaggingTrail;
     delete mAutoFocusControl;
     delete mZoomControl;
@@ -356,7 +356,7 @@ CxeSettings &CxeEngineSymbian::settings()
     return *mSettings;
 }
 
-/*! 
+/*!
 Returns the sensor event  handle
 */
 CxeSensorEventHandler &CxeEngineSymbian::sensorEventHandler()
@@ -415,7 +415,7 @@ bool CxeEngineSymbian::isEngineReady()
 void CxeEngineSymbian::doInit()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXEENGINESYMBIAN_DOINIT_IN, "e_CX_ENGINE_DO_INIT 1");
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_DOINIT_IN, "msg: e_CX_ENGINE_DO_INIT 1");
 
     mFilenameGenerator->init(mode());
     // load settings whenever we change mode or start camera or switch camera
@@ -438,7 +438,7 @@ void CxeEngineSymbian::doInit()
         mVideoCaptureControl->init();
     }
 
-    OstTrace0(camerax_performance, CXEENGINESYMBIAN_DOINIT_OUT, "e_CX_ENGINE_DO_INIT 0");
+    OstTrace0(camerax_performance, CXEENGINESYMBIAN_DOINIT_OUT, "msg: e_CX_ENGINE_DO_INIT 0");
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -526,6 +526,7 @@ bool CxeEngineSymbian::startViewfinderNeeded()
 void CxeEngineSymbian::initMode(Cxe::CameraMode cameraMode)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEENGINE_INITMODE_IN, "msg: e_CX_ENGINE_INIT_MODE 1");
 
     if (mode() == cameraMode) {
         CX_DEBUG(("initMode() called for current mode"));
@@ -577,6 +578,7 @@ void CxeEngineSymbian::initMode(Cxe::CameraMode cameraMode)
         }
     }
 
+    OstTrace0(camerax_performance, CXEENGINE_INITMODE_OUT, "msg: e_CX_ENGINE_INIT_MODE 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -611,7 +613,8 @@ void CxeEngineSymbian::saveMode()
 void CxeEngineSymbian::startGeotaggingTrail()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    
+    OstTrace0(camerax_performance, CXEENGINE_START_GEO_IN, "msg: e_CX_ENGINE_START_GEOTAGGING 1");
+
     if (mGeoTaggingTrail && mSettings) {
         // location trail is limited to image mode only for now.
         int value = Cxe::GeoTaggingDisclaimerDisabled;
@@ -622,7 +625,8 @@ void CxeEngineSymbian::startGeotaggingTrail()
             mGeoTaggingTrail->start();
         }
     }
-    
+
+    OstTrace0(camerax_performance, CXEENGINE_START_GEO_OUT, "msg: e_CX_ENGINE_START_GEOTAGGING 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 

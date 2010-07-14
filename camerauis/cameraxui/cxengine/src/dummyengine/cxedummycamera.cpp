@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -43,6 +43,8 @@ namespace
         TSize(640,480)
         };
     static const int IMAGE_CAPTURE_SIZE_COUNT = sizeof(IMAGE_CAPTURE_SIZES)/sizeof(TSize);
+
+    _LIT( PANICDUMMYCAMERA, "DummyCamera" );
 }
 
 
@@ -78,7 +80,11 @@ CxeDummyCamera::~CxeDummyCamera()
 
 void CxeDummyCamera::doCommand( TCxeDummyCommand aCmd )
 {
-    iCommandBuf.Insert( aCmd, 0 );
+    TInt status = iCommandBuf.Insert( aCmd, 0 );
+    if ( status != KErrNone )
+        {
+        User::Panic(PANICDUMMYCAMERA, 1);
+        }
     if ( !iCommandTimer->IsActive() )
         {
         iCommandTimer->Start(100, 100, TCallBack(CxeDummyCamera::callBack, this));

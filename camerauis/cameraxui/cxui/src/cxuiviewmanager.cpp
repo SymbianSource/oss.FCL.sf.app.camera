@@ -17,7 +17,6 @@
 #include <QDebug>
 #include <QTimer>
 #include <hbmainwindow.h>
-#include <coemain.h>
 #include <QGraphicsSceneEvent>
 #include <hbstyleloader.h>
 #include <hbactivitymanager.h>
@@ -43,10 +42,15 @@
 #include "cxuiserviceprovider.h"
 #include "cxuiscenemodeview.h"
 
+
+#ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
+
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuiviewmanagerTraces.h"
 #endif
+
+#endif //Q_OS_SYMBIAN
 
 
 using namespace Cxe;
@@ -68,8 +72,7 @@ CxuiViewManager::CxuiViewManager(CxuiApplication &application, HbMainWindow &mai
     mKeyHandler(NULL),
     mCameraDocumentLoader(NULL),
     mApplicationState(NULL),
-    mErrorManager(NULL),
-    mSceneModeView(NULL)
+    mErrorManager(NULL)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -77,18 +80,18 @@ CxuiViewManager::CxuiViewManager(CxuiApplication &application, HbMainWindow &mai
     mDocmlFilesByView.insert(STILL_PRE_CAPTURE_VIEW, STILL_1ST_XML);
     mDocmlFilesByView.insert(VIDEO_PRE_CAPTURE_VIEW, VIDEO_1ST_XML);
     mDocmlFilesByView.insert(POSTCAPTURE_VIEW, POSTCAPTURE_XML);
-    mDocmlFilesByView.insert(STILL_SCENES_VIEW, SCENEMODE_SETTING_XML);
+    mDocmlFilesByView.insert(SCENE_MODE_VIEW, SCENEMODE_SETTING_XML);
 
     // Key handler
     mKeyHandler = new CxuiCaptureKeyHandler(mEngine);
 
     // Document loader
-    OstTrace0( camerax_performance, CXUIVIEWMANAGER_CXUIVIEWMANAGER, "msg: e_CX_VIEWMANAGER_CREATE_DOCLOADER 1" );
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_CXUIVIEWMANAGER_1, "msg: e_CX_VIEWMANAGER_CREATE_DOCLOADER 1");
     mCameraDocumentLoader = new CxuiDocumentLoader(&engine);
-    OstTrace0( camerax_performance, DUP1_CXUIVIEWMANAGER_CXUIVIEWMANAGER, "msg: e_CX_VIEWMANAGER_CREATE_DOCLOADER 0" );
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_CXUIVIEWMANAGER_2, "msg: e_CX_VIEWMANAGER_CREATE_DOCLOADER 0");
 
     // Application state
-    mApplicationState = new CxuiApplicationState(mApplication, mEngine.settings(), *mKeyHandler, mCameraDocumentLoader);
+    mApplicationState = new CxuiApplicationState(mApplication, mEngine.settings(), mCameraDocumentLoader);
     CX_ASSERT_ALWAYS(mApplicationState);
     bool ok = connect(mApplicationState, SIGNAL(stateChanged(CxuiApplicationState::State, CxuiApplicationState::State)),
                       this, SLOT(handleApplicationStateChanged(CxuiApplicationState::State, CxuiApplicationState::State)));
@@ -217,6 +220,7 @@ void CxuiViewManager::handleExitingNormalState()
     disconnectSignals(view);
     // Make sure standby timer is not running.
     stopStandbyTimer();
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -238,28 +242,6 @@ void CxuiViewManager::stopStandbyTimer()
     CX_DEBUG_ENTER_FUNCTION();
     mStandbyTimer.stop();
     CX_DEBUG_EXIT_FUNCTION();
-}
-
-/**
- * Init engine to correct mode based on activity being restored.
- */
-void CxuiViewManager::initEngine()
-{
-    Cxe::CameraMode mode = Cxe::ImageMode;
-    QString activityId = mApplication.activateId();
-    if (activityId == CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY ||
-        activityId == CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY) {
-        mode = Cxe::VideoMode;
-    }
-    if (activityId == CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY ||
-        activityId == CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY) {
-        // init engine only if going to pre-capture
-        mEngine.initMode(mode);
-    } else {
-        // in post-capture don't init but set the correct mode to engine
-        // so init can be done later
-        mEngine.setMode(mode);
-    }
 }
 
 /*!
@@ -287,7 +269,7 @@ void CxuiViewManager::initStartupView()
         connect(&mEngine.videoCaptureControl(), SIGNAL(videoPrepareComplete(CxeError::Id)),
                 this, SLOT(changeToPrecaptureView()));
 
-    } else if (mApplication.activateReason() == Hb::ActivationReasonActivity ) {
+    } else if (mApplication.activateReason() == Hb::ActivationReasonActivity) {
         // restoring activity, read startup view from stored activity
 
         // view to start in
@@ -355,7 +337,7 @@ CxuiView* CxuiViewManager::createView(const QString &viewName)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    OstTrace0( camerax_performance, CXUIVIEWMANAGER_CREATEVIEW, "msg: e_CX_CREATE_VIEW 1" );
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_IN, "msg: e_CX_CREATE_VIEW 1");
 
     CX_DEBUG(("View name: %s", viewName.toAscii().data()));
 
@@ -366,53 +348,35 @@ CxuiView* CxuiViewManager::createView(const QString &viewName)
         // Use document loader to create widgets and layouts
         // (non-sectioned parts are parsed and loaded)
         QString docmlFile = mDocmlFilesByView[viewName];
-        CX_DEBUG_ASSERT(mCameraDocumentLoader);
+        CX_ASSERT_ALWAYS(mCameraDocumentLoader);
         CX_ASSERT_ALWAYS(!docmlFile.isNull());
 
-        OstTrace0( camerax_performance, DUP2_CXUIVIEWMANAGER_ADDPRECAPTUREVIEWS, "msg: e_CX_DOCLOADER_LOAD 1" );
-
+        OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_2, "msg: e_CX_DOCUMENTLOADER_LOAD 1");
         mCameraDocumentLoader->load(docmlFile, &ok);
-
+        OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_4, "msg: e_CX_DOCUMENTLOADER_LOAD 0");
         Q_ASSERT_X(ok, "createView", "error in xml file parsing");
 
-        OstTrace0( camerax_performance, DUP2_CXUIVIEWMANAGER_CREATEVIEW, "msg: e_CX_DOCLOADER_LOAD 0" );
-
-        OstTrace0( camerax_performance, DUP4_CXUIVIEWMANAGER_ADDVIEWS, "msg: e_CX_DOCLOADER_FINDWIDGET 1" );
+        OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_6, "msg: e_CX_DOCUMENTLOADER_FINDWIDGET 1");
         QGraphicsWidget *widget = NULL;
         // ask for the view widget pointer
         widget = mCameraDocumentLoader->findWidget(viewName);
         view = qobject_cast<CxuiView *> (widget);
-        CX_DEBUG_ASSERT(view);
-        OstTrace0( camerax_performance, DUP5_CXUIVIEWMANAGER_ADDVIEWS, "msg: e_CX_DOCLOADER_FINDWIDGET 0" );
+        CX_ASSERT_ALWAYS(view);
+        OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_8, "msg: e_CX_DOCUMENTLOADER_FINDWIDGET 1");
 
         // call for needed consturction methods
         view->construct(&mMainWindow, &mEngine, mCameraDocumentLoader, mKeyHandler, mApplication.activityManager());
         // .. and add to main window (which also takes ownership)
-        OstTrace0( camerax_performance, DUP1_CXUIVIEWMANAGER_MAINWINDOW_ADDVIEW, "msg: e_CX_MAINWINDOW_ADDVIEW 1" );
+        OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_10, "msg: e_CX_MAINWINDOW_ADDVIEW 1");
         mMainWindow.addView(view);
         mViews.insert(viewName, view);
-
-        OstTrace0( camerax_performance, DUP2_CXUIVIEWMANAGER_MAINWINDOW_ADDVIEW, "msg: e_CX_MAINWINDOW_ADDVIEW 0" );
-        OstTrace0( camerax_performance, DUP1_CXUIVIEWMANAGER_CREATEVIEW, "msg: e_CX_CREATE_STILLPRECAPTUREVIEW 0" );
-
+        OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_12, "msg: e_CX_MAINWINDOW_ADDVIEW 0");
     }
+
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_OUT, "msg: e_CX_CREATE_VIEW 0");
 
     CX_DEBUG_EXIT_FUNCTION();
     return view;
-}
-
-/*!
-* Create scene mode view.
-*/
-CxuiView* CxuiViewManager::createSceneModesView()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    mSceneModeView = qobject_cast<CxuiSceneModeView*>(createView(STILL_SCENES_VIEW));
-    mSceneModeView->loadBackgroundImages();
-
-    CX_DEBUG_EXIT_FUNCTION();
-    return mSceneModeView;
 }
 
 /*!
@@ -425,14 +389,11 @@ void CxuiViewManager::showScenesView()
     // Disconnect signals from old view.
     disconnectSignals();
 
-    if (!mSceneModeView) {
-        createSceneModesView();
-    }
-    else {
-        mSceneModeView->loadBackgroundImages();
-    }
-    CX_DEBUG_ASSERT(mSceneModeView);
-    mMainWindow.setCurrentView(mSceneModeView, false);
+    CxuiSceneModeView *view = qobject_cast<CxuiSceneModeView*>(createView(SCENE_MODE_VIEW));
+    CX_ASSERT_ALWAYS(view);
+    view->loadBackgroundImages();
+
+    mMainWindow.setCurrentView(view, false);
     stopStandbyTimer();
     connectSceneModeSignals();
 
@@ -462,23 +423,6 @@ CxuiViewManager::getPrecaptureView(Cxe::CameraMode mode, Cxe::CameraIndex camera
         return qobject_cast<CxuiPrecaptureView*>(createView(VIDEO_PRE_CAPTURE_VIEW));
     }
 }
-
-/*!
-* Get a pointer to the document loader instance.
-*/
-CxuiDocumentLoader *CxuiViewManager::documentLoader()
-{
-    return mCameraDocumentLoader;
-}
-
-/*!
-* Get reference to application state instance.
-*/
-CxuiApplicationState &CxuiViewManager::applicationState()
-{
-    return *mApplicationState;
-}
-
 
 /*!
 * Move to post-capture view.
@@ -530,11 +474,16 @@ void CxuiViewManager::changeToPrecaptureView()
             mEngine.cameraDeviceControl().cameraIndex());
         mMainWindow.setCurrentView(view, false);
 
-        if (mSceneModeView){
-            mViews.remove(STILL_SCENES_VIEW);
-            delete mSceneModeView;
-            mSceneModeView = NULL;
+        // Release resources needed by scene view.
+        HbView *sceneView = mViews.take(SCENE_MODE_VIEW);
+        if (sceneView) {
+            // This will not delete the view.
+            mMainWindow.removeView(sceneView);
+            // We can get to this slot from scene view, so don't delete the object too early.
+            sceneView->deleteLater();
+            sceneView = NULL;
         }
+
         // connecting necessary pre-capture view signals
         connectPreCaptureSignals();
 
@@ -631,15 +580,19 @@ bool CxuiViewManager::eventFilter(QObject *object, QEvent *event)
 void CxuiViewManager::connectSignals(QObject *view)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_CONNECTSIGNALS_1, "msg: e_CX_VIEWMANAGER_CONNECT_SIGNALS 1");
+
     if (view) {
         if (view == mViews[POSTCAPTURE_VIEW]) {
             connectPostCaptureSignals();
-        } else if (view == mSceneModeView) {
+        } else if (view == mViews[SCENE_MODE_VIEW]) {
             connectSceneModeSignals();
         } else {
             connectPreCaptureSignals();
         }
     }
+
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_CONNECTSIGNALS_2, "msg: e_CX_VIEWMANAGER_CONNECT_SIGNALS 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -651,6 +604,7 @@ void CxuiViewManager::connectSignals(QObject *view)
 void CxuiViewManager::disconnectSignals(QObject *view)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_DISCONNECT_1, "msg: e_CX_VIEWMANAGER_DISCONNECT_SIGNALS 1");
 
     // Disconnect all existing capture key signals
     mKeyHandler->disconnect();
@@ -668,6 +622,7 @@ void CxuiViewManager::disconnectSignals(QObject *view)
         disconnect(this, 0, view, 0);
     }
 
+    OstTrace0(camerax_performance, CXUIVIEWMANAGER_DISCONNECT_2, "msg: e_CX_VIEWMANAGER_DISCONNECT_SIGNALS 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -724,6 +679,7 @@ void CxuiViewManager::connectPostCaptureSignals()
     disconnectSignals();
     QObject *currentView = mMainWindow.currentView();
     if (currentView == mViews[POSTCAPTURE_VIEW]) {
+
         connect(currentView, SIGNAL(changeToPrecaptureView()), this, SLOT(changeToPrecaptureView()), Qt::UniqueConnection);
 
         // Standby signals
@@ -745,15 +701,19 @@ void CxuiViewManager::connectSceneModeSignals()
     CX_DEBUG_ENTER_FUNCTION();
     disconnectSignals();
 
-    connectCaptureKeySignals();
+    HbView *currentView = mMainWindow.currentView();
 
-    // Standby signals for releasing camera
-    connect(this, SIGNAL(normalStateEntered()), mSceneModeView, SLOT(exitStandby()));
-    connect(this, SIGNAL(normalStateExited()), mSceneModeView, SLOT(enterStandby()));
+    if (currentView == mViews[SCENE_MODE_VIEW]) {
 
-    // Moving back to pre-capture view
-    connect(mSceneModeView, SIGNAL(viewCloseEvent()), this, SLOT(changeToPrecaptureView()));
+        connectCaptureKeySignals();
 
+        // Standby signals for releasing camera
+        connect(this, SIGNAL(normalStateEntered()), currentView, SLOT(exitStandby()));
+        connect(this, SIGNAL(normalStateExited()), currentView, SLOT(enterStandby()));
+
+        // Moving back to pre-capture view
+        connect(currentView, SIGNAL(viewCloseEvent()), this, SLOT(changeToPrecaptureView()));
+    }
     CX_DEBUG_EXIT_FUNCTION();
 }
 

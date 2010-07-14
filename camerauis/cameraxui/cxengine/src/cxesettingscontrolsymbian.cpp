@@ -31,6 +31,12 @@
 #include "cxesettingsmappersymbian.h"
 #include "cxesettingscontrolsymbian.h"
 
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cxesettingscontrolsymbianTraces.h"
+#endif
+
+
 /*!
 * Constructor
 */
@@ -103,6 +109,8 @@ void CxeSettingsControlSymbian::handleSettingValueChanged(const QString& setting
 void CxeSettingsControlSymbian::handleSceneChanged(CxeScene& scene)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXESETTINGSCONTROL_SCENE_1, "msg: e_CX_SCENE_SETTINGS_TO_CAMERA 1");
+
     CX_DEBUG(("CxeSettingsControlSymbian <> new scene [%s]",
               scene[CxeSettingIds::SCENE_ID].value<QString>().toAscii().constData()));
 
@@ -110,6 +118,7 @@ void CxeSettingsControlSymbian::handleSceneChanged(CxeScene& scene)
         handleSettingValueChanged(settingId, scene[settingId]);
     }
 
+    OstTrace0(camerax_performance, CXESETTINGSCONTROL_SCENE_2, "msg: e_CX_SCENE_SETTINGS_TO_CAMERA 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -167,6 +167,7 @@ void CxeImageDataItemSymbian::renameImage( const TDesC& newPath )
 CxeError::Id CxeImageDataItemSymbian::save()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_SAVE_IN, "msg: e_CX_IMAGEDATAITEM_SAVE 1");
 
     mError = KErrNone;
 
@@ -227,7 +228,7 @@ CxeError::Id CxeImageDataItemSymbian::save()
 
     mFile.Close(); //~400us
     mFs.Close();   //~450us
-    OstTrace0(camerax_performance, CXEIMAGEDATAIMTEMSYMBIAN_SAVED, "msg: e_CX_SHOT_TO_SAVE 0");
+    OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_SAVED, "msg: e_CX_SHOT_TO_SAVE 0");
 
     if (mError == KErrNone) {
         setState(CxeImageDataItem::Saved);
@@ -236,7 +237,7 @@ CxeError::Id CxeImageDataItemSymbian::save()
     }
     emit imageSaved(CxeErrorHandlingSymbian::map(mError), mPath, mId);
 
-    CX_DEBUG(("mError: %d", mError));
+    OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_SAVE_OUT, "msg: e_CX_IMAGEDATAITEM_SAVE 0");
     CX_DEBUG_EXIT_FUNCTION();
     return CxeErrorHandlingSymbian::map(mError);
 }

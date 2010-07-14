@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -209,7 +209,7 @@ void CxeZoomControlSymbian::prepareZoomForVideo()
     if (mCameraDeviceControl.state() == CxeCameraDeviceControl::Ready) {
         init();
         // if CxeCameraDeviceControl is ready, this pointer is valid
-        CX_ASSERT_ALWAYS(mCameraDevice.advancedSettings())
+        CX_ASSERT_ALWAYS(mCameraDevice.advancedSettings());
         int error = KErrNone;
         TRAP(error,
                 mCameraDevice.advancedSettings()->GetDigitalZoomStepsL(mDigitalZoomValues, mDigitalZoomValueInfo);
@@ -256,7 +256,7 @@ void CxeZoomControlSymbian::finalizeZoomPreparation(int error)
             mMaxZoomLevel = cameraInfo.iMaxDigitalZoom;
         }
         // change the state, since zoom is now ready
-        setState(Ready, KErrNone);
+        setState(Ready);
 
         mCameraDevice.advancedSettings()->SetDigitalZoom(mDigitalZoomValues[mCurrentZoomLevel]);
 

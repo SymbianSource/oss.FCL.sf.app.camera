@@ -120,7 +120,7 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
                                    HbActivityManager *activityManager)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0( camerax_performance, CXUIPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_PRECAPVIEW_CONST 1" );
+    OstTrace0(camerax_performance, CXUIPRECAPTUREVIEW_CONSTRUCT_1, "msg: e_CX_PRECAPVIEW_CONSTRUCT 1");
 
     CxuiView::construct(mainWindow, engine, documentLoader, keyHandler, activityManager);
 
@@ -160,7 +160,7 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
         setNavigationAction(exitAction);
     }
 
-    OstTrace0( camerax_performance, DUP1_CXUIPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_PRECAPVIEW_CONST 0" );
+    OstTrace0(camerax_performance, CXUIPRECAPTUREVIEW_CONSTRUCT_2, "msg: e_CX_PRECAPVIEW_CONSTRUCT 0");
 
     QCoreApplication::instance()->installEventFilter(this);
     CX_DEBUG_EXIT_FUNCTION();
@@ -886,28 +886,14 @@ void CxuiPrecaptureView::launchGeoTaggingDisclaimerDialog()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    QString ftuMsg = hbTrId("txt_cam_info_captured_photos_and_videos_will_be_ta");
-    QString actionOkTxt = hbTrId("txt_common_button_ok");
-    QString actionSettingsTxt = hbTrId("txt_cam_opt_general_settings");
+    HbMessageBox *ftuMessageBox = new HbMessageBox(hbTrId("txt_cam_info_captured_photos_and_videos_will_be_ta"),
+                                                   HbMessageBox::MessageTypeInformation);
 
-    HbDialog *dialog = new HbDialog();
-    HbLabel *label = new HbLabel();
-
-    // initializing dialog's content widget
-    label->setPlainText(ftuMsg);
-    label->setTextWrapping(Hb::TextWordWrap);
-    label->setElideMode(Qt::ElideNone);
-    label->setMaximumWidth(350);
-    dialog->setContentWidget(label);
-
-    // initializing dialog's actions
-    HbAction *okAction = new HbAction(actionOkTxt, dialog);
-    HbAction *settingsAction = new HbAction(actionSettingsTxt, dialog);
-    dialog->addAction(okAction);
-    dialog->addAction(settingsAction);
+    HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
+    HbAction *settingsAction = new HbAction(hbTrId("txt_cam_opt_general_settings"));
 
     // connecting signals for dialog's actions
-    connect(okAction,
+    connect(okAction, 
             SIGNAL(triggered()),
             this,
             SLOT(disableGeotaggingDisclaimer()));
@@ -917,11 +903,13 @@ void CxuiPrecaptureView::launchGeoTaggingDisclaimerDialog()
             this,
             SLOT(launchGeoTaggingSetting()));
 
-    // initializing dialog's properties
-    dialog->setTimeout(HbDialog::NoTimeout);
-    dialog->setDismissPolicy(HbPopup::NoDismiss);
-    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
-    dialog->show();
+    // adding buttons to the information message
+    ftuMessageBox->setStandardButtons(HbMessageBox::NoButton);
+    ftuMessageBox->addAction(okAction);
+    ftuMessageBox->addAction(settingsAction);
+
+    ftuMessageBox->setAttribute(Qt::WA_DeleteOnClose, true);
+    ftuMessageBox->show();
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -941,7 +929,7 @@ void CxuiPrecaptureView::disableGeotaggingDisclaimer()
 
 
 /*!
-* Slot that accepts "Geotagging first-time use" note and launches geotagging setting dialog.
+* Slot that launches geotagging setting dialog. 
 */
 void CxuiPrecaptureView::launchGeoTaggingSetting()
 {

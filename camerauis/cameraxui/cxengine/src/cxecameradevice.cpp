@@ -148,6 +148,7 @@ CxeError::Id CxeCameraDevice::initResources()
         TRAPD(errorImgPr, mImageProcessor =
               CCamera::CCameraImageProcessing::NewL(*mCamera));
         CX_DEBUG(("CCameraImageProcessing status: %d", errorImgPr));
+        Q_UNUSED(errorImgPr); // Avoid release build unused variable warning.
 
         TRAPD(errorSnap, mCameraSnapshot =
               CCamera::CCameraSnapshot::NewL(*mCamera));

@@ -33,7 +33,7 @@
 
 */
 CxuiApplication::CxuiApplication(int &argc, char *argv[])
-    : HbApplication(argc, argv, Hb::NoSplash)
+    : HbApplication(argc, argv, Hb::SplashFixedHorizontal)
 {
     CX_DEBUG_IN_FUNCTION();
 }

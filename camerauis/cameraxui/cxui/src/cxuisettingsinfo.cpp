@@ -208,9 +208,9 @@ void CxuiSettingsInfo::getImageQualitySettings(RadioButtonListParams &settings)
 
     // get the localized possible strings for each image quality setting
     QString vga = "txt_cam_dblist_vga";
-    QString normal = "txt_cam_dblist_l1_mpix";
+    QString normal = "txt_cam_dblist_ln_mpix";
     QString imagesLeft = "txt_cam_dblist_hd_720p_val_ln_images_left";
-    QString widescreen = "txt_cam_dblist_l1_mpix_widescreen";
+    QString widescreen = "txt_cam_dblist_ln_mpix_widescreen";
 
     foreach(CxeImageDetails quality, list) {
         // mapping the right value for each quality

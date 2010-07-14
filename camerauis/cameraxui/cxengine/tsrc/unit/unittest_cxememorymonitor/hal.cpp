@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,17 +11,13 @@
 *
 * Contributors:
 *
-* Description:
+* Description: Stub implementation of the HAL class for testing purposes
 *
 */
 
-#ifndef CAMERAXRESOURCES_IBY
-#define CAMERAXRESOURCES_IBY
+#include "hal.h"
 
-#include <data_caging_paths_for_iby.hrh>
-
-data=DATAZ_\QT_TRANSLATIONS_DIR\camera.qm QT_TRANSLATIONS_DIR\camera.qm
-
-S60_APP_RESOURCE(cxui)
-
-#endif // CAMERAXRESOURCES_IBY
+TInt HAL::Get(TAttribute /*aAttribute*/, TInt& /*aValue*/)
+{
+    return KErrNone;
+}

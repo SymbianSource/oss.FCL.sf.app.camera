@@ -31,13 +31,9 @@ class HbMainWindow;
 class CxuiApplication;
 class CxuiCaptureKeyHandler;
 class CxuiPrecaptureView;
-class CxuiStillPrecaptureView;
-class CxuiVideoPrecaptureView;
-class CxuiPostcaptureView;
 class CxeEngine;
 class CxuiDocumentLoader;
-class CxuiErrorManager; // class that handles all errors in ui.
-class CxuiSceneModeView;
+class CxuiErrorManager;
 class CxuiView;
 
 class CxuiViewManager : public QObject
@@ -48,11 +44,6 @@ public:
     CxuiViewManager(CxuiApplication &application, HbMainWindow &mainWindow, CxeEngine &engine);
     ~CxuiViewManager();
 
-    CxuiDocumentLoader *documentLoader();
-
-    CxuiApplicationState &applicationState();
-
-    void initEngine();
 public slots:
     void changeToPostcaptureView();
     void changeToPrecaptureView();
@@ -80,8 +71,6 @@ private:
     CxuiView *createView(const QString &viewName);
     CxuiPrecaptureView* getPrecaptureView(Cxe::CameraMode mode, Cxe::CameraIndex camera);
 
-    CxuiView *createSceneModesView();
-
     void connectSignals(QObject *view);
     void disconnectSignals(QObject *view = NULL);
     void connectPreCaptureSignals();
@@ -105,7 +94,6 @@ private:
     CxuiDocumentLoader *mCameraDocumentLoader;
     CxuiApplicationState *mApplicationState;
     CxuiErrorManager *mErrorManager;
-    CxuiSceneModeView *mSceneModeView;
     QTimer mStandbyTimer;
 };
 

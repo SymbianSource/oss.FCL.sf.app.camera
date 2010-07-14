@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,13 +15,15 @@
 *
 */
 
-#ifndef CAMERAXRESOURCES_IBY
-#define CAMERAXRESOURCES_IBY
+#ifndef CXEDISKMONITORPRIVATEUNIT_H
+#define CXEDISKMONITORPRIVATEUNIT_H
 
-#include <data_caging_paths_for_iby.hrh>
+// Include files
 
-data=DATAZ_\QT_TRANSLATIONS_DIR\camera.qm QT_TRANSLATIONS_DIR\camera.qm
+#include "cxediskmonitorprivate.h"
 
-S60_APP_RESOURCE(cxui)
+class CxeDiskMonitorPrivateUnit;
 
-#endif // CAMERAXRESOURCES_IBY
+
+
+#endif // CXEDISKMONITORPRIVATEUNIT_H

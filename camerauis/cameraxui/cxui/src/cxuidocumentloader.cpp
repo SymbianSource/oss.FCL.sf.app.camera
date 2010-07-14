@@ -45,7 +45,7 @@ CxuiDocumentLoader::CxuiDocumentLoader(CxeEngine *engine) : HbDocumentLoader(), 
 
 QObject *CxuiDocumentLoader::createObject(const QString& type, const QString &name)
 {
-    OstTrace0( camerax_performance, CXUIDOCUMENTLOADER_CREATEOBJECT, "msg: e_CX_DOCLOADER_CREATEOBJECT 1" );
+    OstTrace0(camerax_performance, CXUIDOCUMENTLOADER_1, "msg: e_CX_DOCUMENTLOADER_CREATEOBJECT 1");
     QObject *object = NULL;
 
     if (type == "HbView") {
@@ -55,7 +55,7 @@ QObject *CxuiDocumentLoader::createObject(const QString& type, const QString &na
             object = new CxuiVideoPrecaptureView();
         } else if (name == CxUiLayout::POSTCAPTURE_VIEW) {
             object = new CxuiPostcaptureView();
-        } else if (name == CxUiLayout::STILL_SCENES_VIEW) {
+        } else if (name == CxUiLayout::SCENE_MODE_VIEW) {
             object = new CxuiSceneModeView(NULL);
         }
     } else if (type == "HbDialog") {
@@ -72,7 +72,7 @@ QObject *CxuiDocumentLoader::createObject(const QString& type, const QString &na
         }
     } else if (type == "HbRadioButtonList") {
         if (name == CxUiLayout::SETTINGS_DIALOG_CONTENT_WIDGET
-         || name == CxUiLayout::SCENE_VIEW_RADIOBUTTONS) {
+         || name == CxUiLayout::SCENE_MODE_VIEW_RADIOBUTTONS) {
             object = new CxuiSettingRadioButtonList(NULL, mEngine);
         }
     }
@@ -83,7 +83,7 @@ QObject *CxuiDocumentLoader::createObject(const QString& type, const QString &na
         object = HbDocumentLoader::createObject(type, name);
     }
 
-    OstTrace0( camerax_performance, DUP1_CXUIDOCUMENTLOADER_CREATEOBJECT, "msg: e_CX_DOCLOADER_CREATEOBJECT 0" );
+    OstTrace0(camerax_performance, CXUIDOCUMENTLOADER_2, "msg: e_CX_DOCUMENTLOADER_CREATEOBJECT 0");
     return object;
 }
 

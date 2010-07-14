@@ -64,6 +64,7 @@ public:
     void restoreActivity(const QString &activityId, const QVariant &data);
     void saveActivity();
     void clearActivity();
+
 protected:
 
     void showEvent(QShowEvent *event);
@@ -110,6 +111,9 @@ protected:
     void updateQualityIcon();
     void closeDialogs();
     void updateFaceTrackingIcon();
+
+private:
+    void reloadIndicatorWidgets();
 
 protected:
     CxuiSelfTimer *mSelfTimer;

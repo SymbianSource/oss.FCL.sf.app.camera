@@ -29,7 +29,6 @@
 #include <hbtoolbar.h>
 #include <hbaction.h>
 #include <hbmessagebox.h>
-#include <hbnotificationdialog.h>
 #include <hbactivitymanager.h>
 
 #include <shareui.h>
@@ -50,10 +49,12 @@
 #include "cxenamespace.h"
 #include "cxuiserviceprovider.h"
 
+#ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuipostcaptureviewTraces.h"
 #endif
+#endif //Q_OS_SYMBIAN
 
 
 using namespace CxUiLayout;
@@ -64,14 +65,12 @@ namespace {
     const QString FILENAME_KEY = "filename";
     const int CXUI_STOP_VIEWFINDER_TIMEOUT = 5000; //  5 seconds
     const int CXUI_RELEASE_CAMERA_TIMEOUT = 60000; // 60 seconds
-};
+}
 
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::CxuiPostcaptureView
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Constructor.
+*/
 CxuiPostcaptureView::CxuiPostcaptureView(QGraphicsItem *parent) :
     CxuiView(parent),
     mStillToolbar(NULL),
@@ -93,11 +92,9 @@ CxuiPostcaptureView::CxuiPostcaptureView(QGraphicsItem *parent) :
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::~CxuiPostcaptureView
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Destructor.
+*/
 CxuiPostcaptureView::~CxuiPostcaptureView()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -108,16 +105,15 @@ CxuiPostcaptureView::~CxuiPostcaptureView()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::construct
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Second phase construction.
+*/
 void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
                                     CxuiDocumentLoader *documentLoader,
                                     CxuiCaptureKeyHandler *keyHandler,
                                     HbActivityManager *activityManager)
 {
+    Q_UNUSED(keyHandler);
     CX_DEBUG_ENTER_FUNCTION();
 
     CxuiView::construct(mainwindow, engine, documentLoader, NULL, activityManager);
@@ -181,11 +177,9 @@ void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::handleCaptureKeyPressed
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Handle pressing capture key.
+*/
 void CxuiPostcaptureView::handleCaptureKeyPressed()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -197,11 +191,9 @@ void CxuiPostcaptureView::handleCaptureKeyPressed()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::handleAutofocusKeyPressed
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Handle pressing auto focus key.
+*/
 void CxuiPostcaptureView::handleAutofocusKeyPressed()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -251,48 +243,41 @@ void CxuiPostcaptureView::playVideo()
 
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::showDeleteNote
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Show delete query.
+*/
 void CxuiPostcaptureView::showDeleteNote()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     hideControls();
 
-    if (mEngine->mode() == Cxe::VideoMode) {
-        HbMessageBox::question(hbTrId("txt_cam_other_delete_video_clip"),
-                               this,
-                               SLOT(handleDeleteDialogClosed(HbAction*)));
-    } else {
-        HbMessageBox::question(hbTrId("txt_cam_other_delete_image"),
-                               this,
-                               SLOT(handleDeleteDialogClosed(HbAction*)));
-    }
+    QString text(mEngine->mode() == Cxe::VideoMode
+               ? hbTrId("txt_cam_other_delete_video_clip")
+               : hbTrId("txt_cam_other_delete_image"));
+
+    HbMessageBox::question(text,
+                           this,
+                           SLOT(handleDeleteDialogClosed(int)),
+                           HbMessageBox::Yes | HbMessageBox::No);
 
     mDeleteNoteOpen = true;
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::handleDeleteDialogClosed
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPostcaptureView::handleDeleteDialogClosed(HbAction *action)
+/*!
+* Handle closing delete query dialog.
+* @param action HbMessageBox::Yes if user accepted the delete query, HbMessageBox::No if not.
+*/
+void CxuiPostcaptureView::handleDeleteDialogClosed(int action)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     hideControls();
     mDeleteNoteOpen = false;
 
-    HbMessageBox *dlg = qobject_cast<HbMessageBox*>(sender());
-
-    // check that it was "primary action" that closed the dialog
-    if (dlg && dlg->actions().at(0) == action) {
-        // User confirmed delete
+    // Check that user confirmed delete
+    if (action == HbMessageBox::Yes) {
         QString filename = getCurrentFilename();
         QFileInfo fileInfo(filename);
         if (fileInfo.exists()) {
@@ -303,7 +288,7 @@ void CxuiPostcaptureView::handleDeleteDialogClosed(HbAction *action)
             // is being harvested by MdS etc.
             QDir dir = fileInfo.absolutePath();
             bool ok = dir.remove(fileInfo.fileName());
-            CX_DEBUG(("Delete file [%s], status %d", fileInfo.fileName().toAscii().constData(), ok));
+            CX_DEBUG(("Delete file [%s], status %d", qPrintable(fileInfo.fileName()), ok));
 
             // Go back to precapture view
             goToPrecaptureView();
@@ -333,11 +318,9 @@ void CxuiPostcaptureView::launchShare()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::goToPrecaptureView
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Go to pre-capture view.
+*/
 void CxuiPostcaptureView::goToPrecaptureView()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -359,11 +342,9 @@ void CxuiPostcaptureView::goToPrecaptureView()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::stopViewfinder
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Stop viewfinder.
+*/
 void CxuiPostcaptureView::stopViewfinder()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -394,11 +375,10 @@ void CxuiPostcaptureView::hideToolbar()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::eventFilter
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Handle events.
+* Needed for restarting timers.
+*/
 bool CxuiPostcaptureView::eventFilter(QObject *object, QEvent *event)
 {
     Q_UNUSED(object)
@@ -438,6 +418,7 @@ void CxuiPostcaptureView::paint(QPainter *painter, const QStyleOptionGraphicsIte
  */
 void CxuiPostcaptureView::restoreActivity(const QString &activityId, const QVariant &data)
 {
+    Q_UNUSED(activityId);
     CX_DEBUG_ENTER_FUNCTION();
 
     // get filename. if filename is not found (toString() returns empty string)
@@ -489,11 +470,10 @@ void CxuiPostcaptureView::clearActivity()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::showEvent
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Show event for this view.
+* Update snapshot and start timers.
+*/
 void CxuiPostcaptureView::showEvent(QShowEvent *event)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -512,11 +492,10 @@ void CxuiPostcaptureView::showEvent(QShowEvent *event)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::hideEvent
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+* Hide event.
+* Release snapshot and stop timers.
+*/
 void CxuiPostcaptureView::hideEvent(QHideEvent *event)
 {
     CX_DEBUG_ENTER_FUNCTION();

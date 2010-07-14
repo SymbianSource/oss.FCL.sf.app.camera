@@ -86,6 +86,9 @@ void CxuiView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
     connect(&mHideControlsTimeout, SIGNAL(timeout()), this, SLOT(hideControls()));
     mHideControlsTimeout.setSingleShot(true);
     mHideControlsTimeout.setInterval(CXUI_HIDE_CONTROLS_TIMEOUT);
+    
+    mControlsFeedback.setOwningWindow(mMainWindow);
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
@@ -455,11 +458,9 @@ void CxuiView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     //! @todo temporary workaround for title bar mouse event handling bug
     if (event->type() == QEvent::GraphicsSceneMouseRelease && event->scenePos().y() > 70 &&
-        isFeedbackEnabled()) {
-        // todo: sound disabling doesn't work in orbit yet so don't do feedback on release
-        // needs to be enabled when orbit support is done
-        //mControlsFeedback.setModalities(HbFeedback::Tactile);
-        //mControlsFeedback.play();
+        isFeedbackEnabled()) {        
+        mControlsFeedback.setModalities(HbFeedback::Tactile);
+        mControlsFeedback.play();
         toggleControls();
         event->accept();
     }

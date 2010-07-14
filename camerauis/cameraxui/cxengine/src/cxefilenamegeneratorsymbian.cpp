@@ -28,6 +28,11 @@
 #include "cxeerror.h"
 #include "cxeerrormappingsymbian.h"
 
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "cxefilenamegeneratorsymbianTraces.h"
+#endif
+
 
 using namespace Cxe;
 
@@ -79,6 +84,7 @@ CxeFilenameGeneratorSymbian::CxeFilenameGeneratorSymbian(CxeSettings &settings, 
          mCurrentMode(mode)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATOR_1, "msg: e_CX_FILENAMEGENERATOR_NEW 1");
 
     // Set default values (used in case of error retrieving values)
     mCurrentMonth = "";
@@ -92,6 +98,7 @@ CxeFilenameGeneratorSymbian::CxeFilenameGeneratorSymbian(CxeSettings &settings, 
     mSettings.get(CxeSettingIds::FNAME_IMAGE_COUNTER, mImageCounter);
     mSettings.get(CxeSettingIds::FNAME_VIDEO_COUNTER, mVideoCounter);
 
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATOR_2, "msg: e_CX_FILENAMEGENERATOR_NEW 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -152,6 +159,7 @@ CxeError::Id CxeFilenameGeneratorSymbian::nextImageFilenameInSequence(QString &q
 CxeError::Id CxeFilenameGeneratorSymbian::generateFilename(QString &qfName, const QString &fileExt)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_GENERATENAME_1, "msg: e_CX_GENERATE_FILENAME 1");
 
     // Make sure that the path for images/videos exists
     QString path;
@@ -167,6 +175,7 @@ CxeError::Id CxeFilenameGeneratorSymbian::generateFilename(QString &qfName, cons
         }
     }
 
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_GENERATENAME_2, "msg: e_CX_GENERATE_FILENAME 0");
     CX_DEBUG_EXIT_FUNCTION();
     return CxeErrorHandlingSymbian::map(err);
 }
@@ -353,6 +362,7 @@ int CxeFilenameGeneratorSymbian::computeMonthCounter(QString &path, QString& mon
 int CxeFilenameGeneratorSymbian::selectFolder(QString &suggestedPath)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_SELECTFOLDER_1, "msg: e_CX_SELECT_FOLDER 1");
 
     // Compose the path string and select counter based on mode.
     QString basePath = "%1%2\\";
@@ -428,6 +438,7 @@ int CxeFilenameGeneratorSymbian::selectFolder(QString &suggestedPath)
         }
     }
 
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_SELECTFOLDER_2, "msg: e_CX_SELECT_FOLDER 0");
     CX_DEBUG_EXIT_FUNCTION();
 
     // We fallback to basePath in case of unknown errors,
@@ -444,6 +455,7 @@ int CxeFilenameGeneratorSymbian::selectFolder(QString &suggestedPath)
 int CxeFilenameGeneratorSymbian::initMonthFolders()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_INITFOLDERS_1, "msg: e_CX_INIT_MONTH_FOLDER 1");
 
     // Month folder: YYYYMM, with suffix: YYYYMMXX
     QString monthFolder = QDate::currentDate().toString("yyyyMM");
@@ -489,6 +501,7 @@ int CxeFilenameGeneratorSymbian::initMonthFolders()
         CX_DEBUG(("[FATAL] - Could not create month folder, error %d", status));
     }
 
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_INITFOLDERS_2, "msg: e_CX_INIT_MONTH_FOLDER 0");
     CX_DEBUG_EXIT_FUNCTION();
     return status;
 }
@@ -596,6 +609,7 @@ void CxeFilenameGeneratorSymbian::resetCounters(QString &monthFolder)
 CxeError::Id CxeFilenameGeneratorSymbian::init(Cxe::CameraMode mode)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_INIT_1, "msg: e_CX_FILENAMEGENERATOR_INIT 1");
 
     mCurrentMode = mode;
     int err = KErrNone;
@@ -620,6 +634,7 @@ CxeError::Id CxeFilenameGeneratorSymbian::init(Cxe::CameraMode mode)
         }
     }
 
+    OstTrace0(camerax_performance, CXEFILENAMEGENERATORSYMBIAN_INIT_2, "msg: e_CX_FILENAMEGENERATOR_INIT 0");
     CX_DEBUG_EXIT_FUNCTION();
     return CxeErrorHandlingSymbian::map(err);
 }

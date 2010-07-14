@@ -47,6 +47,18 @@
             <widget name="video_viewfinder_widget" type="HbTransparentWindow">
                 <real name="z" value="0"/>
             </widget>
+            <layout type="anchor">
+                <anchoritem dst="video_viewfinder_widget" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="video_viewfinder_widget" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="video_viewfinder_widget" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                <anchoritem dst="video_viewfinder_widget" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+        <string locid="txt_cam_title_camera" name="title" value="Camera"/>
+        <bool name="contentFullScreen" value="TRUE"/>
+    </widget>
+    <section name="video_capture_indicators">
+        <widget name="video_container" role="HbView:widget" type="HbWidget">
             <widget name="video_indicator_container_top" type="HbWidget">
                 <widget name="video_mode_indicator" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
@@ -84,17 +96,11 @@
                 </layout>
             </widget>
             <layout type="anchor">
-                <anchoritem dst="video_indicator_container_top" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
+                <anchoritem dst="video_indicator_container_top" dstEdge="LEFT" spacing="11un" src="" srcEdge="LEFT"/>
                 <anchoritem dst="video_indicator_container_top" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
-                <anchoritem dst="video_viewfinder_widget" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="video_viewfinder_widget" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
-                <anchoritem dst="video_viewfinder_widget" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
-                <anchoritem dst="video_viewfinder_widget" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
-        <string locid="txt_cam_title_camera" name="title" value="Camera"/>
-        <bool name="contentFullScreen" value="TRUE"/>
-    </widget>
+    </section>
     <section name="video_capture_with_widgets">
         <widget name="video_capture_view" type="HbView">
             <widget name="video_view_menu" role="HbView:menu" type="HbMenu"/>
@@ -140,7 +146,7 @@
                     <widget name="video_remaining_time" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                         <sizehint height="var(hb-param-graphic-size-function)" type="PREFERRED"/>
-                        <string name="textColor" value="#ff0000"/>
+                        <string name="textColor" value="#ffffff"/>
                         <string name="plainText" value="00:00"/>
                         <fontspec name="fontSpec" role="Undefined" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
@@ -161,8 +167,6 @@
                     </layout>
                 </widget>
                 <layout type="anchor">
-                    <anchoritem dst="video_indicator_container_top" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                    <anchoritem dst="video_indicator_container_top" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
                     <anchoritem dst="video_viewfinder_widget" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
                     <anchoritem dst="video_viewfinder_widget" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
                     <anchoritem dst="video_viewfinder_widget" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
@@ -184,6 +188,8 @@
                     <anchoritem dst="video_viewfinder_widget" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
                     <anchoritem dst="video_viewfinder_widget" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
                     <anchoritem dst="video_viewfinder_widget" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+                    <anchoritem dst="video_indicator_container_top" dstEdge="LEFT" spacing="11un" src="" srcEdge="LEFT"/>
+                    <anchoritem dst="video_indicator_container_top" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
                 </layout>
             </widget>
         </widget>
@@ -261,6 +267,9 @@
     <section name="video_paused">
         <widget name="video_elapsed_time" type="HbLabel">
             <bool name="visible" value="TRUE"/>
+        </widget>
+        <widget name="video_remaining_time" type="HbLabel">
+            <string name="textColor" value="#ffffff"/>
         </widget>
         <widget name="video_recording_icon" type="HbLabel">
             <icon iconName="qtg_mono_pause" name="icon"/>

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -19,14 +19,18 @@
 #include "unittest_cxestatemachine.h"
 #include "cxestate.h"
 #include "cxestatemachineunit.h"
-#include "cxeerrormappingsymbian.h" // CxeErrorHandlingSymbian
 
 // -----------------------------------
 // CxsStateMachine
 // -----------------------------------
 UnitTestCxeStateMachine::UnitTestCxeStateMachine()
-: mStateMachine(NULL), mStartState(NULL), mMiddleState(NULL), mEndState(NULL), mIsolatedState(NULL)
+: mStateMachine(NULL),
+  mStartState(NULL),
+  mMiddleState(NULL),
+  mEndState(NULL),
+  mIsolatedState(NULL)
 {
+    qRegisterMetaType<CxeError::Id>("CxeError::Id");
 }
 
 UnitTestCxeStateMachine::~UnitTestCxeStateMachine()
@@ -106,25 +110,25 @@ void UnitTestCxeStateMachine::testSetState()
     // set state, when initial state is not set -> NOK
     // check that handleStateChange is not called
     // current state is undefined
-    QVERIFY(!mStateMachine->setState(StartId, 2));
+    QVERIFY(!mStateMachine->setState(StartId));
     QCOMPARE(mStateMachine->mHandleStateChangedCounter, 0);
-    QCOMPARE(mStateMachine->stateId(), 0);
+    QCOMPARE(mStateMachine->stateId(), 0); // 0 - undefined state
 
     // set start state as initial state, change to another state (allowed change) -> OK
     // (there should be a call to state change, check the error code)
     mStateMachine->setInitialState(StartId);
-    QVERIFY(mStateMachine->setState(MiddleId, 0));
+    QVERIFY(mStateMachine->setState(MiddleId, CxeError::None));
     QCOMPARE(mStateMachine->mHandleStateChangedCounter, 1);
     QVERIFY(mStateMachine->mStateChangeStateId == MiddleId);
-    QVERIFY(mStateMachine->mStateChangeErrorId == CxeErrorHandlingSymbian::map(0));
+    QCOMPARE(mStateMachine->mStateChangeErrorId, CxeError::None);
     QVERIFY(mStateMachine->stateId() == MiddleId);
 
     // set another state (allowed change) -> OK
-    // check the error code is correct one (return value is mapped error value)
-    QVERIFY(mStateMachine->setState(EndId, -1));
+    // check the error code is correct one
+    QVERIFY(mStateMachine->setState(EndId, CxeError::NotFound));
     QCOMPARE(mStateMachine->mHandleStateChangedCounter, 2);
     QVERIFY(mStateMachine->mStateChangeStateId == EndId);
-    QVERIFY(mStateMachine->mStateChangeErrorId == CxeErrorHandlingSymbian::map(-1));
+    QCOMPARE(mStateMachine->mStateChangeErrorId, CxeError::NotFound);
     QVERIFY(mStateMachine->stateId() == EndId);
 
     // reset the counter for handleStateChanged slot
@@ -132,7 +136,7 @@ void UnitTestCxeStateMachine::testSetState()
 
     // set same state again -> OK
     // but state change should not be called
-    QVERIFY(mStateMachine->setState(EndId, 0));
+    QVERIFY(mStateMachine->setState(EndId, CxeError::None));
     QCOMPARE(mStateMachine->mHandleStateChangedCounter, 0);
 
     // setstate to a state that does not exists -> NOK

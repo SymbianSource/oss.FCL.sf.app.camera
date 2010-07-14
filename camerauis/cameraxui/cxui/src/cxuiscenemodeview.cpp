@@ -105,18 +105,18 @@ void CxuiSceneModeView::loadDefaultWidgets()
 
     QGraphicsWidget *widget = NULL;
 
-    widget = mDocumentLoader->findWidget(SCENE_VIEW_CONTAINER);
+    widget = mDocumentLoader->findWidget(SCENE_MODE_VIEW_CONTAINER);
     mScenesContainer = qobject_cast<HbWidget *> (widget);
 
     mScenesHeading = qobject_cast<HbLabel *>(
-        mDocumentLoader->findWidget(SCENE_VIEW_HEADING_WIDGET));
+        mDocumentLoader->findWidget(SCENE_MODE_VIEW_HEADING_WIDGET));
     CX_ASSERT_ALWAYS(mScenesHeading);
 
     //Now let's retreive the pointer to icon widget
-    widget = mDocumentLoader->findWidget(SCENE_VIEW_BG_IMAGE);
+    widget = mDocumentLoader->findWidget(SCENE_MODE_VIEW_BG_IMAGE);
     mScenesBackground = qobject_cast<HbLabel *> (widget);
 
-    widget = mDocumentLoader->findWidget(SCENE_VIEW_BG_IMAGE2);
+    widget = mDocumentLoader->findWidget(SCENE_MODE_VIEW_BG_IMAGE2);
     mScenesBackground2 = qobject_cast<HbLabel *> (widget);
 
     //Assuming that the automatic scene mode is always the default one
@@ -125,7 +125,7 @@ void CxuiSceneModeView::loadDefaultWidgets()
     background.setMirroringMode(HbIcon::LayoutDirection);
     mScenesBackground->setIcon(background);
 
-    widget = mDocumentLoader->findWidget(SCENE_VIEW_RADIOBUTTONS);
+    widget = mDocumentLoader->findWidget(SCENE_MODE_VIEW_RADIOBUTTONS);
     mScenesList = qobject_cast<CxuiSettingRadioButtonList *> (widget);
 
     mTransitionAnimation = new QPropertyAnimation(mScenesBackground2, "opacity");

@@ -299,7 +299,7 @@ void CxeVideoCaptureControlSymbian::prepare()
         return;
     }
 
-    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_VIDCAPCONT_PREPARE 1");
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROL_PREPARE_1, "msg: e_CX_VIDCAPCONT_PREPARE 1");
     QSize frameSize(mCurrentVideoDetails.mWidth, mCurrentVideoDetails.mHeight);
 
     int muteSetting = 0; // audio enabled
@@ -343,7 +343,7 @@ void CxeVideoCaptureControlSymbian::prepare()
         handlePrepareFailed();
     }
 
-    OstTrace0(camerax_performance, DUP1_CXEVIDEOCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_VIDCAPCONT_PREPARE 0");
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROL_PREPARE_2, "msg: e_CX_VIDCAPCONT_PREPARE 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -354,6 +354,7 @@ void
 CxeVideoCaptureControlSymbian::getVideoQualityDetails(CxeVideoDetails &videoInfo)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROL_GETQUALITYDETAILS_1, "msg: e_CX_GET_QUALITY_DETAILS 1" );
 
     int quality(0);
 
@@ -369,6 +370,7 @@ CxeVideoCaptureControlSymbian::getVideoQualityDetails(CxeVideoDetails &videoInfo
     // get video quality details
     videoInfo = mIcmSupportedVideoResolutions.at(quality);
 
+    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROL_GETQUALITYDETAILS_2, "msg: e_CX_GET_QUALITY_DETAILS 0" );
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -800,9 +802,13 @@ void CxeVideoCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, con
     CX_DEBUG_ENTER_FUNCTION();
 
     if (mCameraDeviceControl.mode() == Cxe::VideoMode) {
+        OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROL_HANDLESNAPSHOT_1, "msg: e_CX_HANDLE_SNAPSHOT 1");
+
         // Need to store snapshot for ui to be able to get it also later.
         mSnapshot = QPixmap::fromImage(snapshot);
         emit snapshotReady(status, snapshot, filename());
+
+        OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROL_HANDLESNAPSHOT_2, "msg: e_CX_HANDLE_SNAPSHOT 0");
     }
 
     CX_DEBUG_EXIT_FUNCTION();

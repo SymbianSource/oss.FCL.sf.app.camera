@@ -18,13 +18,11 @@ LIBS *= -lplatformenv
 SOURCES *= unittest_cxestatemachine.cpp \
             cxestatemachineunit.cpp \
             cxestatemachinebase.cpp \
-            cxeerrormappingsymbian.cpp \
             cxestate.cpp
 
 HEADERS *= unittest_cxestatemachine.h \
             cxestatemachineunit.h \
             cxestatemachinebase.h \
-            cxeerrormappingsymbian.h \
             cxestate.h \
             cxeerror.h
 

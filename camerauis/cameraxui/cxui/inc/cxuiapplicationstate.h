@@ -49,7 +49,6 @@ public:
 
     CxuiApplicationState(CxuiApplication &application,
                          CxeSettings &settings,
-                         CxuiCaptureKeyHandler &keyHandler,
                          CxuiDocumentLoader *documentLoader);
     ~CxuiApplicationState();
 

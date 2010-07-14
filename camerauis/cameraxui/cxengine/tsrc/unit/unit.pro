@@ -44,6 +44,8 @@ SUBDIRS = cxeunitrunner \
           unittest_cxeharvestercontrolsymbian \
           unittest_cxesettingscontrolsymbian \
           unittest_cxesnapshotcontrol \
-          unittest_cxegeotaggingtrail
+          unittest_cxegeotaggingtrail \
+          unittest_cxediskmonitor \
+          unittest_cxememorymonitor
 
 CONFIG *= ordered

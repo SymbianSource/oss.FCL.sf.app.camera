@@ -163,6 +163,8 @@ void CxeViewfinderControlSymbian::stop()
 CxeError::Id CxeViewfinderControlSymbian::start()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEVIEWFINDERCONTROL_START_1, "msg: e_CX_VIEWFINDER_START 1");
+
     TInt err = KErrNone;
 
     if ( state() == Running ) {
@@ -211,7 +213,7 @@ CxeError::Id CxeViewfinderControlSymbian::start()
                 CCoeEnv::Static()->WsSession(),
                 *CCoeEnv::Static()->ScreenDevice(),
                 *mVideoWindow, activeViewfinderRect));
-            OstTrace0(camerax_performance, CXEVIEWFINDERCONTROLSYMBIAN_START, "msg: e_CX_STARTUP 0");
+            OstTrace0(camerax_performance, CXEVIEWFINDERCONTROL_STARTUP, "msg: e_CX_STARTUP 0");
             setState(Running);
             break;
             }
@@ -248,7 +250,7 @@ CxeError::Id CxeViewfinderControlSymbian::start()
         // vf already running. nothing to do
     }
 
-    CX_DEBUG( ("CxeViewfinderControlSymbian::start symbian error code : %d", err ) );
+    OstTrace0(camerax_performance, CXEVIEWFINDERCONTROL_START_2, "msg: e_CX_VIEWFINDER_START 0");
     CX_DEBUG_EXIT_FUNCTION();
     return CxeErrorHandlingSymbian::map(err);
 }
@@ -260,6 +262,7 @@ CxeError::Id CxeViewfinderControlSymbian::start()
 int CxeViewfinderControlSymbian::initViewfinder()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEVIEWFINDERCONTROL_INIT_1, "msg: e_CX_VIEWFINDER_INIT 1");
 
     TInt err = KErrNone;
     if (state() != Uninitialized) {
@@ -298,6 +301,7 @@ int CxeViewfinderControlSymbian::initViewfinder()
     setState( Ready );
 #endif
 
+    OstTrace0(camerax_performance, CXEVIEWFINDERCONTROL_INIT_2, "msg: e_CX_VIEWFINDER_INIT 0");
     CX_DEBUG_EXIT_FUNCTION();
     return err;
 }
@@ -309,6 +313,7 @@ int CxeViewfinderControlSymbian::initViewfinder()
 void CxeViewfinderControlSymbian::createViewfinderWindowL()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEVIEWFINDERCONTROL_CREATE_WINDOW_1, "msg: e_CX_VIEWFINDER_CREATE_WINDOW 1");
 
     if (!mUiWindow) {
         CX_DEBUG( ( "mUiWindow not set - cannot create VF window!" ) );
@@ -339,6 +344,7 @@ void CxeViewfinderControlSymbian::createViewfinderWindowL()
     CX_DEBUG(("mVideoWindow ordinal position is: %d", mVideoWindow->OrdinalPosition()));
     CX_DEBUG(("mUiWindow ordinal position is: %d", mUiWindow->OrdinalPosition()));
 
+    OstTrace0(camerax_performance, CXEVIEWFINDERCONTROL_CREATE_WINDOW_2, "msg: e_CX_VIEWFINDER_CREATE_WINDOW 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 

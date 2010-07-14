@@ -209,7 +209,7 @@ void CxeStillCaptureControlSymbian::deinit()
         return;
     }
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_IN, "msg: e_CX_STILL_CAPCONT_DEINIT 1" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_IN, "msg: e_CX_STILLCAPCONT_DEINIT 1" );
 
     // Stop monitoring disk space.
     mDiskMonitor.stop();
@@ -229,7 +229,7 @@ void CxeStillCaptureControlSymbian::deinit()
 
     setState(Uninitialized);
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_OUT, "msg: e_CX_STILL_CAPCONT_DEINIT 0" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_OUT, "msg: e_CX_STILLCAPCONT_DEINIT 0" );
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -246,7 +246,7 @@ void CxeStillCaptureControlSymbian::prepare()
         return;
     }
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_IN, "msg: e_CX_STILLCAPCONT_PREPARE 1" );
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_IN, "msg: e_CX_STILLCAPCONT_PREPARE 1");
 
     int err = KErrNone;
     CxeError::Id cxErr = getImageQualityDetails(mCurrentImageDetails);
@@ -271,9 +271,9 @@ void CxeStillCaptureControlSymbian::prepare()
 
         // Prepare Image capture
         CCamera::TFormat imgFormat = supportedStillFormat(mCameraDeviceControl.cameraIndex());
-        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_MID1, "msg: e_CX_PREPARE_IMAGE_CAPTURE 1");
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_MID1, "msg: e_CX_PREPARE_IMAGE_CAPTURE 1");
         TRAP(err, mCameraDevice.camera()->PrepareImageCaptureL(imgFormat, ecamStillResolutionIndex));
-        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_MID2, "msg: e_CX_PREPARE_IMAGE_CAPTURE 0");
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_MID2, "msg: e_CX_PREPARE_IMAGE_CAPTURE 0");
 
         CX_DEBUG(("PrepareImageCaptureL done, err=%d, resolution index = %d", err, ecamStillResolutionIndex));
 
@@ -318,7 +318,8 @@ void CxeStillCaptureControlSymbian::prepare()
     // Inform interested parties that image mode has been prepared for capture
     emit imagePrepareComplete(CxeErrorHandlingSymbian::map(err));
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPARE_OUT, "msg: e_CX_STILLCAPCONT_PREPARE 0" );
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_GOTOSTILL, "msg: e_CX_GO_TO_STILL_MODE 0");
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_OUT, "msg: e_CX_STILLCAPCONT_PREPARE 0");
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -332,7 +333,7 @@ void CxeStillCaptureControlSymbian::prepare()
 int CxeStillCaptureControlSymbian::prepareStillSnapshot()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0( camerax_performance, DUP4_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_SNAPSHOT 1" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_PREPARESNAP_1, "msg: e_CX_PREPARE_SNAPSHOT 1" );
 
     int status(KErrNone);
     try {
@@ -343,7 +344,7 @@ int CxeStillCaptureControlSymbian::prepareStillSnapshot()
     } catch (...) {
         status = KErrGeneral;
     }
-    OstTrace0( camerax_performance, DUP5_CXESTILLCAPTURECONTROLSYMBIAN_PREPARE, "msg: e_CX_PREPARE_SNAPSHOT 0" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_PREPARESNAP_2, "msg: e_CX_PREPARE_SNAPSHOT 0" );
 
     CX_DEBUG_EXIT_FUNCTION();
     return status;
@@ -357,6 +358,7 @@ int CxeStillCaptureControlSymbian::prepareStillSnapshot()
 CxeError::Id CxeStillCaptureControlSymbian::getImageQualityDetails(CxeImageDetails &imageInfo)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_GETQUALITYDETAILS_1, "msg: e_CX_GET_QUALITY_DETAILS 1" );
 
     int imageQuality = 0;
     CxeError::Id err = CxeError::None;
@@ -378,6 +380,7 @@ CxeError::Id CxeStillCaptureControlSymbian::getImageQualityDetails(CxeImageDetai
        imageInfo = mIcmSupportedImageResolutions.at(imageQuality);
     }
 
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_GETQUALITYDETAILS_2, "msg: e_CX_GET_QUALITY_DETAILS 0" );
     CX_DEBUG_EXIT_FUNCTION();
     return err;
 }
@@ -452,7 +455,7 @@ void CxeStillCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, con
     CX_DEBUG_ENTER_FUNCTION();
     if (mCameraDeviceControl.mode() == Cxe::ImageMode) {
 
-        OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 1" );
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_HANDLESNAPSHOT_1, "msg: e_CX_HANDLE_SNAPSHOT 1");
 
         QPixmap ss = QPixmap::fromImage(snapshot);
         // Get image container for current snapshot index.
@@ -471,7 +474,7 @@ void CxeStillCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, con
             prepareFilename(stillImage);
         }
 
-        OstTrace0( camerax_performance, DUP1_CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 0" );
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_HANDLESNAPSHOT_2, "msg: e_CX_HANDLE_SNAPSHOT 0");
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -744,6 +747,8 @@ CxeImageDataQueue &CxeStillCaptureControlSymbian::imageDataQueue()
 CxeError::Id
 CxeStillCaptureControlSymbian::prepareFilename(CxeStillImageSymbian *stillImage)
 {
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPAREFILENAME_1, "msg: e_CX_PREPARE_FILENAME 1" );
+
     CxeError::Id err = CxeError::None;
     if (stillImage->filename().isEmpty()) {
         QString path;
@@ -767,6 +772,8 @@ CxeStillCaptureControlSymbian::prepareFilename(CxeStillImageSymbian *stillImage)
             CX_DEBUG(("ERROR in filename generation. err:%d", err));
         }
     }
+
+    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_PREPAREFILENAME_2, "msg: e_CX_PREPARE_FILENAME 0" );
     return err;
 }
 

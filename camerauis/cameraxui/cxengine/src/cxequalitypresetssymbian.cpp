@@ -64,6 +64,7 @@ CxeQualityPresetsSymbian::CxeQualityPresetsSymbian(CxeSettings &settings)
     : mSettings(settings)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEQUALITYPRESETSSYMBIAN_1, "msg: e_CX_QUALITYPRESETS_NEW 1");
 
     TRAPD(err,  mIcm = CImagingConfigManager::NewL());
 
@@ -72,8 +73,8 @@ CxeQualityPresetsSymbian::CxeQualityPresetsSymbian(CxeSettings &settings)
         mIcm = NULL;
     }
 
+    OstTrace0(camerax_performance, CXEQUALITYPRESETSSYMBIAN_2, "msg: e_CX_QUALITYPRESETS_NEW 0");
     CX_DEBUG_EXIT_FUNCTION();
-
 }
 
 /* !
@@ -311,10 +312,10 @@ Cxe::AspectRatio CxeQualityPresetsSymbian::calculateAspectRatio(int width, int h
     int delta16by9 = abs((width * ASPECT_RATIO_SIZE_16BY9.height()) - (height * ASPECT_RATIO_SIZE_16BY9.width()));
     int delta11by9 = abs((width * ASPECT_RATIO_SIZE_11BY9.height()) - (height * ASPECT_RATIO_SIZE_11BY9.width()));
     int delta4by3  = abs((width * ASPECT_RATIO_SIZE_4BY3.height()) - (height * ASPECT_RATIO_SIZE_4BY3.width()));
-    
+
     // get the closest aspect ratio
     int minValue = qMin(qMin(delta16by9, delta11by9), delta4by3);
-    
+
     if (minValue == delta16by9) {
         aspectRatio = Cxe::AspectRatio16to9;
     } else if (minValue == delta11by9) {

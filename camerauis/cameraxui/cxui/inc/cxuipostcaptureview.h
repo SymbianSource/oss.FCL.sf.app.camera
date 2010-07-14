@@ -83,7 +83,7 @@ protected slots:
     void playVideo();
     void showDeleteNote();
 
-    void handleDeleteDialogClosed(HbAction *action);
+    void handleDeleteDialogClosed(int action);
 
 private:
     QString getCurrentFilename();

@@ -32,7 +32,6 @@ namespace
 */
 CxuiApplicationState::CxuiApplicationState(CxuiApplication &application,
                                            CxeSettings &settings,
-                                           CxuiCaptureKeyHandler &keyHandler,
                                            CxuiDocumentLoader *documentLoader)
     : mState(Background), mApplicationMonitor(NULL), mErrorManager(NULL), mEventLog(NULL)
 {

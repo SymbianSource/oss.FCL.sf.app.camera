@@ -58,7 +58,9 @@ namespace CxUiLayout
     static const char *TRANSPARENT_BACKGROUND_GRAPHIC = "qtg_fr_popup_trans";
 
     // Sections
+    static const char *STILL_PRE_CAPTURE_INDICATORS_SECTION = "still_capture_indicators";
     static const char *STILL_PRE_CAPTURE_WIDGETS_SECTION = "still_capture_with_widgets";
+    static const char *VIDEO_PRE_CAPTURE_INDICATORS_SECTION = "video_capture_indicators";
     static const char *VIDEO_PRE_CAPTURE_WIDGETS_SECTION = "video_capture_with_widgets";
     static const char *POST_CAPTURE_WIDGETS_SECTION = "post_capture_with_widgets";
     static const char *STILL_PRE_CAPTURE_EMBEDDED_SECTION = "still_embedded_mode";
@@ -73,7 +75,6 @@ namespace CxUiLayout
     // Widgets
     // In order to be able to refer to a widget, we need to know its object name.
     static const char *STILL_PRE_CAPTURE_VIEW = "still_capture_view";
-    static const char *STILL_SCENES_VIEW = "settings_scenes_view";
     static const char *STILL_PRE_CAPTURE_TOOLBAR = "toolbar";
     static const char *STILL_PRE_CAPTURE_FLASH_ACTION = "cxui_action_flash";
     static const char *STILL_PRE_CAPTURE_SCENE_MODE_ACTION = "cxui_action_scenemodes";
@@ -89,6 +90,7 @@ namespace CxUiLayout
     static const char *STILL_PRE_CAPTURE_INDICATOR_CONTAINER = "indicatorContainer";
     static const char *STILL_PRE_CAPTURE_IMAGES_LEFT_CONTAINER = "images_left_container";
     static const char *STILL_PRE_CAPTURE_GEOTAGGING_INDICATOR_ICON = "still_geotagging_indicator";
+    static const char *STILL_PRE_CAPTURE_FLASHBLINK_INDICATOR_ICON = "flash_indicator";
 
     static const char *STILL_PRE_CAPTURE_SELFTIMER_CONTAINER = "still_precapture_selftimer_container";
     static const char *STILL_PRE_CAPTURE_SELFTIMER_COUNTER = "still_selftimer_counter";
@@ -119,6 +121,8 @@ namespace CxUiLayout
 
     static const char *VIDEO_PRE_CAPTURE_QUALITY_ICON = "video_quality_indicator";
     static const char *VIDEO_PRE_CAPTURE_GEOTAGGING_INDICATOR_ICON = "video_geotagging_indicator";
+    static const char *VIDEO_PRE_CAPTURE_VIDEOAUDIOMUTE_INDICATOR_ICON = "video_audio_mute_indicator";
+    static const char *VIDEO_PRE_CAPTURE_STABILITY_INDICATOR_ICON = "video_stability_indicator";
 
     // standby
     static const char *STANDBY_POPUP = "standbymode_popup";
@@ -152,14 +156,15 @@ namespace CxUiLayout
     static const char *SETTINGS_SLIDER_DIALOG_HEADING_WIDGET = "slider_settings_dialog_heading";
     static const char *SETTINGS_SLIDER_DIALOG_CONTENT_WIDGET = "settings_dialog_slider";
 
-    // scene setting
-    static const char *SCENE_VIEW_CONTAINER  = "scene_view_container";
-    static const char *SCENE_VIEW_BG_IMAGE  = "scene_view_bg_icon";
-    static const char *SCENE_VIEW_BG_IMAGE2  = "scene_view_bg_icon2";
-    static const char *SCENE_VIEW_RADIOBUTTONS  = "scene_view_radioButtonList";
-    static const char *SCENE_VIEW_OK_BUTTON  = "scene_ok_button";
-    static const char *SCENE_VIEW_CANCEL_BUTTON  = "scene_cancel_button";
-    static const char *SCENE_VIEW_HEADING_WIDGET = "scene_title";
+    // scene mode view
+    static const char *SCENE_MODE_VIEW = "settings_scenes_view";
+    static const char *SCENE_MODE_VIEW_CONTAINER = "scene_view_container";
+    static const char *SCENE_MODE_VIEW_BG_IMAGE = "scene_view_bg_icon";
+    static const char *SCENE_MODE_VIEW_BG_IMAGE2 = "scene_view_bg_icon2";
+    static const char *SCENE_MODE_VIEW_RADIOBUTTONS = "scene_view_radioButtonList";
+    static const char *SCENE_MODE_VIEW_OK_BUTTON = "scene_ok_button";
+    static const char *SCENE_MODE_VIEW_CANCEL_BUTTON = "scene_cancel_button";
+    static const char *SCENE_MODE_VIEW_HEADING_WIDGET = "scene_title";
 }
 
 namespace CxUiInternal

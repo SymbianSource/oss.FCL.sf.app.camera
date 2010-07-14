@@ -73,7 +73,7 @@ void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
         // Store the original setting value and focus matching item.
         QString value;
         mEngine->settings().get(mSettingId, value);
-        CX_DEBUG(("CxuiSettingRadioButtonList - original value: [%s]", value.toAscii().data()));
+        CX_DEBUG(("CxuiSettingRadioButtonList - original value: [%s]", qPrintable(value)));
         setOriginalSelectedItemByValue(QVariant(value));
     }
 }
@@ -87,15 +87,21 @@ void CxuiSettingRadioButtonList::setOriginalSelectedItemByValue(const QVariant &
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    // Find the index of given value among setting values.
+    // Default to first item, if given value is not found.
     int index = mSettingValues.indexOf(QVariant(value));
-    if (index >= 0) {
-        mOriginalIndex = index;
-        setSelected(index);
-        // ensure that currently selected item is visible
-        scrollTo(currentIndex());
-    } else {
-        CX_DEBUG(("[WARNING] Value %s not found, defaulting to first item", value.toString().toAscii().data()));
+    if (index < 0) {
+        CX_DEBUG(("[WARNING] Value [%s] not found, selecting first item", qPrintable(value.toString())));
+        index = 0;
     }
+
+    // Store the original value.
+    mOriginalIndex = index;
+    // Select the index with current value item.
+    setSelected(index);
+    // Ensure that currently selected item is visible.
+    scrollTo(currentIndex());
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -190,12 +196,12 @@ void CxuiSettingRadioButtonList::commit(int index)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    CX_DEBUG(("id: %s", mSettingId.toAscii().data()));
+    CX_DEBUG(("CxuiSettingRadioButtonList - id: %s", qPrintable(mSettingId)));
 
     if (!mSettingId.isEmpty() && !mSettingValues.isEmpty()) {
         QVariant value = mSettingValues.at(index);
         if (value.type() == QVariant::Int) {
-            CX_DEBUG(("index:%d value:%d", index, value.toInt()));
+            CX_DEBUG(("CxuiSettingRadioButtonList - index:%d value:%d", index, value.toInt()));
 
             // Don't set the value again, if it is the current value.
             // For e.g. video quality it would result in re-preparation etc.
@@ -209,11 +215,11 @@ void CxuiSettingRadioButtonList::commit(int index)
             emit valueSelected(value.toInt());
 
         } else if (value.type() == QVariant::String) {
-            CX_DEBUG(("index:%d value:[%s]", index, value.toString().toAscii().constData()));
+            CX_DEBUG(("CxuiSettingRadioButtonList - index:%d value:[%s]", index, qPrintable(value.toString())));
 
             QString current;
             CxeError::Id status(mEngine->settings().get(mSettingId, current));
-            CX_DEBUG(("settings model value:[%s]", current.toAscii().constData()));
+            CX_DEBUG(("CxuiSettingRadioButtonList - settings model value:[%s]", qPrintable(current)));
 
             if (status != CxeError::None || current != value.toString()) {
                 mEngine->settings().set(mSettingId, value.toString());

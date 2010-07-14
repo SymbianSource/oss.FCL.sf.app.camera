@@ -14,14 +14,16 @@
 * Description:
 *
 */
+#include <QVariant>
+#include <QMetaType>
+#include <QGraphicsLayout>
+
 #include <hbpushbutton.h>
 #include <hblabel.h>
 #include <hbtoolbar.h>
 #include <hbaction.h>
 #include <hbmainwindow.h>
 #include <hbtransparentwindow.h>
-#include <QVariant>
-#include <QMetaType>
 #include <hbslider.h>
 #include <hblistwidget.h>
 #include <hbdialog.h>
@@ -123,7 +125,7 @@ void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
 
     int value = Cxe::GeoTaggingDisclaimerDisabled;
     mEngine->settings().get(CxeSettingIds::GEOTAGGING_DISCLAIMER, value);
-    if(value == Cxe::GeoTaggingDisclaimerEnabled) {
+    if (value == Cxe::GeoTaggingDisclaimerEnabled) {
         launchGeoTaggingDisclaimerDialog();
     }
 
@@ -137,31 +139,96 @@ void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
 void CxuiStillPrecaptureView::loadDefaultWidgets()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CX_DEBUG_ASSERT(mDocumentLoader);
+    CX_ASSERT_ALWAYS(mDocumentLoader);
 
     // get pointer to the viewfinder
     QGraphicsWidget *widget = NULL;
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_VIEWFINDER);
     mViewfinder = qobject_cast<HbTransparentWindow *>(widget);
-    CX_DEBUG_ASSERT(mViewfinder);
+    CX_ASSERT_ALWAYS(mViewfinder);
 
+    reloadIndicatorWidgets();
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Loads default indicators from docml and modifies the visibility
+ * according to current settings.
+ */
+void CxuiStillPrecaptureView::reloadIndicatorWidgets()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_ASSERT_ALWAYS(mDocumentLoader);
+    
+    bool ok = false;
+    mDocumentLoader->load(STILL_1ST_XML, STILL_PRE_CAPTURE_INDICATORS_SECTION, &ok);
+    CX_ASSERT_ALWAYS(ok);
+
+    QGraphicsWidget *widget = NULL;
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_QUALITY_ICON);
     mQualityIcon = qobject_cast<HbLabel *>(widget);
-    CX_DEBUG_ASSERT(mQualityIcon);
+    CX_ASSERT_ALWAYS(mQualityIcon);
+    
+    widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_FLASHBLINK_INDICATOR_ICON);
+    HbLabel *flashBlinkingIcon = qobject_cast<HbLabel *>(widget);
+    CX_ASSERT_ALWAYS(flashBlinkingIcon);
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_GEOTAGGING_INDICATOR_ICON);
     mGeoTaggingIndicatorIcon = qobject_cast<HbLabel *>(widget);
-    CX_DEBUG_ASSERT(mGeoTaggingIndicatorIcon);
+    CX_ASSERT_ALWAYS(mGeoTaggingIndicatorIcon);
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_FACE_TRACKING_ICON);
     mFaceTrackingIcon = qobject_cast<HbLabel *>(widget);
-    CX_DEBUG_ASSERT(mFaceTrackingIcon);
+    CX_ASSERT_ALWAYS(mFaceTrackingIcon);
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_INDICATOR_CONTAINER);
     mIndicators = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(mIndicators);
+    CX_ASSERT_ALWAYS(mIndicators);
+    
+    QGraphicsLayout *layout = mIndicators->layout();
+    QGraphicsLayoutItem *graphicsLayoutItem = NULL;
+    QGraphicsItem *graphicsItem = NULL;
+    QString key = "";
+    int currentSettingValue = -1;
+    bool isSettingOff = false;
+    // Go through the items in the layout to check whether they should be
+    // shown or not in the indicator pane. Start from the last towards
+    // the first, so that removing items from between works correctly.
+    for (int i = layout->count() - 1; i >= 0; i--) {
+        graphicsLayoutItem = layout->itemAt(i);
+        isSettingOff = false;
+        if (graphicsLayoutItem) {
+            graphicsItem = graphicsLayoutItem->graphicsItem();
+            currentSettingValue = -1;
+            if (graphicsItem == mGeoTaggingIndicatorIcon) {
+                key = CxeSettingIds::GEOTAGGING;
+                mEngine->settings().get(key, currentSettingValue);
+                if (currentSettingValue == Cxe::GeoTaggingOff) {
+                    isSettingOff = true;
+                }
+            } else if (graphicsItem == mFaceTrackingIcon) {
+                key = CxeSettingIds::FACE_TRACKING;
+                mEngine->settings().get(key, currentSettingValue);
+                // facetracking implementation does not use 
+                // enum for on/off values but instead 
+                // 0 for off and 1 for on.
+                if (currentSettingValue == 0) {
+                    isSettingOff = true;
+                }
+            } else if (graphicsItem == flashBlinkingIcon) {
+                //remove flash indicator
+                isSettingOff = true;
+            }
+            if (isSettingOff) {
+                layout->removeAt(i);
+            }
+        }
+    }
+    
     // create background for indicator container
     createWidgetBackgroundGraphic(mIndicators, TRANSPARENT_BACKGROUND_GRAPHIC);
+    
+    mIndicators->setVisible(true);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -173,7 +240,7 @@ void CxuiStillPrecaptureView::loadDefaultWidgets()
 void CxuiStillPrecaptureView::loadWidgets()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CX_DEBUG_ASSERT(mDocumentLoader);
+    CX_ASSERT_ALWAYS(mDocumentLoader);
 
     if( mWidgetsLoaded ) {
         CX_DEBUG(("Widgets already loaded"));
@@ -187,14 +254,14 @@ void CxuiStillPrecaptureView::loadWidgets()
 
     OstTrace0( camerax_performance, DUP4_CXUISTILLPRECAPTUREVIEW_LOADWIDGETS, "msg: e_CX_DOCUMENTLOADER_LOAD 1" );
     mDocumentLoader->load(STILL_1ST_XML, STILL_PRE_CAPTURE_WIDGETS_SECTION, &ok);
-    Q_ASSERT_X(ok, "camerax ui", "error in xml file parsing");
+    CX_ASSERT_ALWAYS(ok);
     if (CxuiServiceProvider::isCameraEmbedded()) {
         mDocumentLoader->load(STILL_1ST_XML, STILL_PRE_CAPTURE_EMBEDDED_SECTION, &ok);
     } else {
         mDocumentLoader->load(STILL_1ST_XML, STILL_PRE_CAPTURE_STANDALONE_SECTION, &ok);
     }
     OstTrace0( camerax_performance, DUP5_CXUISTILLPRECAPTUREVIEW_LOADWIDGETS, "msg: e_CX_DOCUMENTLOADER_LOAD 0" );
-    Q_ASSERT_X(ok, "camerax ui", "error in xml file parsing");
+    CX_ASSERT_ALWAYS(ok);
 
     // get pointers to ui components from the layout data
     QGraphicsWidget *widget = NULL;
@@ -202,7 +269,7 @@ void CxuiStillPrecaptureView::loadWidgets()
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_ZOOM_SLIDER);
     mSlider = qobject_cast<CxuiZoomSlider *>(widget);
-    CX_DEBUG_ASSERT(mSlider);
+    CX_ASSERT_ALWAYS(mSlider);
     mSlider->addZoomButtons();
     createWidgetBackgroundGraphic(mSlider, TRANSPARENT_BACKGROUND_GRAPHIC);
 
@@ -216,30 +283,30 @@ void CxuiStillPrecaptureView::loadWidgets()
     HbWidget *container = NULL;
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_SELFTIMER_CONTAINER);
     container = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(container);
+    CX_ASSERT_ALWAYS(container);
     createWidgetBackgroundGraphic(container, TRANSPARENT_BACKGROUND_GRAPHIC);
 
     // connect selftimer start button to hide controls
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_SELFTIMER_START_BUTTON);
     HbPushButton *startButton = qobject_cast<HbPushButton *>(widget);
-    CX_DEBUG_ASSERT(startButton);
+    CX_ASSERT_ALWAYS(startButton);
     connect(startButton, SIGNAL(released()), this, SLOT(hideControls()));
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_TOOLBAR);
     mToolbar = qobject_cast<HbToolBar *>(widget);
-    CX_DEBUG_ASSERT(mToolbar);
+    CX_ASSERT_ALWAYS(mToolbar);
 
     object = mDocumentLoader->findObject(STILL_PRE_CAPTURE_FLASH_ACTION);
     mFlashSetting = qobject_cast<HbAction *>(object);
-    CX_DEBUG_ASSERT(mFlashSetting);
+    CX_ASSERT_ALWAYS(mFlashSetting);
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_IMAGES_LEFT_LABEL);
     mImagesLeft = qobject_cast<HbLabel *>(widget);
-    CX_DEBUG_ASSERT(mImagesLeft);
+    CX_ASSERT_ALWAYS(mImagesLeft);
 
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_IMAGES_LEFT_CONTAINER);
     mImagesLeftContainer = qobject_cast<HbWidget *>(widget);
-    CX_DEBUG_ASSERT(mImagesLeftContainer);
+    CX_ASSERT_ALWAYS(mImagesLeftContainer);
     createWidgetBackgroundGraphic(mImagesLeftContainer, TRANSPARENT_BACKGROUND_GRAPHIC);
     updateImagesLeftLabel();
 
@@ -421,7 +488,7 @@ void CxuiStillPrecaptureView::updateSceneIcon(const QString& sceneId)
 
             if (mDocumentLoader) {
                 QObject *obj = mDocumentLoader->findObject(iconObjectName);
-                CX_DEBUG_ASSERT(obj);
+                CX_ASSERT_ALWAYS(obj);
                 qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
             }
         } else {
@@ -860,7 +927,10 @@ void CxuiStillPrecaptureView::handleSettingValueChanged(const QString& key, QVar
             // update images left when quality values are changed
             updateImagesLeftLabel();
         } else if (key == CxeSettingIds::FACE_TRACKING) {
+            reloadIndicatorWidgets();
             updateFaceTrackingIcon();
+        } else if (key == CxeSettingIds::GEOTAGGING) {
+            reloadIndicatorWidgets();
         }
 
         // update toolbar flash icon
