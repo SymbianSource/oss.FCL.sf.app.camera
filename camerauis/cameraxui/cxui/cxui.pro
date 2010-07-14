@@ -31,6 +31,12 @@ symbian {
     MMP_RULES           += "USERINCLUDE traces"
 }
 
+# export sound file
+symbian {
+    CXUI_DIR = $$section(PWD,":",1)
+    BLD_INF_RULES.prj_exports += "$$CXUI_DIR/data/selftimer.wav    /epoc32/data/z/system/sounds/digital/selftimer.wav"
+}
+
 DEPENDPATH += ../cxengine/inc/api
 VPATH += src \
     inc
@@ -45,7 +51,6 @@ LIBS += -lecam  \
     -lcxengine \
     -lapmime \
     -lcommonui \
-    -lxqsettingsmanager \
     -lxqutils \
     -lxqservice \
     -lxqserviceutil \

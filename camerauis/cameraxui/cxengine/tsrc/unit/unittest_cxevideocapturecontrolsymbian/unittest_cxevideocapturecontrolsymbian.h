@@ -23,6 +23,7 @@
 
 class CxeFakeCameraDevice;
 class CxeFakeViewfinderControl;
+class CxeSnapshotControl;
 class CxeFakeCameraDeviceControl;
 class CxeFakeSettings;
 class CxeFakeFilenameGenerator;
@@ -53,7 +54,7 @@ private slots:
     void testReset();
     void testFilename();
     void testSnapshot();
-    void testHandleSnapshotEvent();
+    void testHandleSnapshotReady();
     void testInit();
     void testDeinit();
     void testHandleSoundPlayed();
@@ -70,6 +71,7 @@ private:
     CxeVideoCaptureControlSymbianUnit *mCxeVideoCaptureControlSymbian;
     CxeFakeCameraDevice *mCameraDevice;
     CxeFakeViewfinderControl *mViewfinderControl;
+    CxeSnapshotControl *mSnapshotControl;
     CxeFakeCameraDeviceControl *mCameraDeviceControl;
     CxeFakeSettings *mSettings;
     CxeFakeFilenameGenerator *mFilenameGeneratorSymbian;

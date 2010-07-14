@@ -74,6 +74,7 @@ public slots:
     // from CxuiPrecaptureView
     virtual void handleSettingValueChanged(const QString& key, QVariant newValue);
 
+    void handleSceneChanged(CxeScene &scene);
     void handleQuitClicked();
 
 protected slots:
@@ -82,7 +83,6 @@ protected slots:
     void record();
     void pause();
     void stop();
-    void stopAndPrepareNewVideo();
     void goToStill();
     void showEvent(QShowEvent *event);
     void handleVideoStateChanged(CxeVideoCaptureControl::State newState, CxeError::Id error);
@@ -123,6 +123,7 @@ protected:
 
     // from QObject
     bool eventFilter(QObject *object, QEvent *event);
+
 protected:
     QTimer mElapsedTimer;
     int mTimeElapsed;

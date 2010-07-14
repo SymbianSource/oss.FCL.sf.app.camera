@@ -98,10 +98,11 @@ private:
     void getVideoQualitySettings(CxUiSettings::RadioButtonListParams &settings);
     void handleQualitySettings(const QString &key, CxUiSettings::RadioButtonListParams &settings);
 
-private slots:
-    void initForCurrentMode(CxeError::Id status);
+private:
+    void checkMode();
 
 private: // data members
+    int mMode;
     CxeEngine *mEngine;
     CxuiSettingXmlReader *mXmlReader;
 };

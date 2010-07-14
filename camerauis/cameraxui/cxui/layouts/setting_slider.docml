@@ -15,8 +15,9 @@
         </widget>
         <widget name="slider_dialog_container" role="HbDialog:contentWidget" type="HbWidget">
             <widget name="settings_dialog_slider" type="HbSlider">
+                <enums name="orientation" value="Horizontal"/>
                 <bool name="visible" value="TRUE"/>
-                <string name="orientation" value="Horizontal"/>
+                <bool name="trackFilled" value="FALSE"/>
             </widget>
             <layout orientation="Horizontal" type="linear">
                 <linearitem itemname="settings_dialog_slider"/>

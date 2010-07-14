@@ -28,7 +28,7 @@ public: // From base class
     virtual ~CxeFakeQualityPresets();
     QList<CxeImageDetails> imageQualityPresets(Cxe::CameraIndex cameraId);
     QList<CxeVideoDetails> videoQualityPresets(Cxe::CameraIndex cameraId);
-    qreal avgVideoBitRateScaler();
+    int recordingTimeAvailable(const CxeVideoDetails& details, qint64 space);
 public:
     static CxeImageDetails fakeImageDetails();
     static CxeVideoDetails fakeVideoDetails();

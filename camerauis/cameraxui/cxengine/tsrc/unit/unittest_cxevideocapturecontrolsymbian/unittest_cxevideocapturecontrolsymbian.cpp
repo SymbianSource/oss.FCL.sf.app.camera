@@ -21,6 +21,7 @@
 #include "unittest_cxevideocapturecontrolsymbian.h"
 #include "cxevideocapturecontrolsymbian.h"
 #include "cxevideocapturecontrolsymbianunit.h"
+#include "cxesnapshotcontrol.h"
 #include "cxefakefilenamegenerator.h"
 #include "cxedummycamera.h"
 #include "cxefakecameradevice.h"
@@ -65,6 +66,7 @@ void UnitTestCxeVideoCaptureControlSymbian::initTestCase()
     mCameraDeviceControl->setMode(Cxe::VideoMode);
     mCameraDevice = new CxeFakeCameraDevice();
     mViewfinderControl = new CxeFakeViewfinderControl();
+    mSnapshotControl = new CxeSnapshotControl(*mCameraDevice);
     mSettings = new CxeFakeSettings();
     mSettings->set(CxeSettingIds::VIDEO_SHOWCAPTURED, -1);
     mFilenameGeneratorSymbian = new CxeFakeFilenameGenerator();
@@ -73,6 +75,7 @@ void UnitTestCxeVideoCaptureControlSymbian::initTestCase()
     mDiskMonitor = new CxeDiskMonitor(*mSettings);
     mCxeVideoCaptureControlSymbian = new CxeVideoCaptureControlSymbianUnit(*mCameraDevice,
                                                                        *mViewfinderControl,
+                                                                       *mSnapshotControl,
                                                                        *mCameraDeviceControl,
                                                                        *mFilenameGeneratorSymbian,
                                                                        *mSettings,
@@ -102,6 +105,8 @@ void UnitTestCxeVideoCaptureControlSymbian::cleanupTestCase()
     mFilenameGeneratorSymbian = 0;
     delete mViewfinderControl;
     mViewfinderControl = 0;
+    delete mSnapshotControl;
+    mSnapshotControl = 0;
     delete mCameraDeviceControl;
     mCameraDeviceControl = 0;
     delete mCameraDevice;
@@ -230,21 +235,22 @@ void UnitTestCxeVideoCaptureControlSymbian::testSnapshot()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void UnitTestCxeVideoCaptureControlSymbian::testHandleSnapshotEvent()
+void UnitTestCxeVideoCaptureControlSymbian::testHandleSnapshotReady()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    QPixmap snapshot;
 
     QSignalSpy spy(mCxeVideoCaptureControlSymbian, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&, const QString&)));
     mCxeVideoCaptureControlSymbian->deinit();
     doPrepareStuff();
-    mCxeVideoCaptureControlSymbian->handleSnapshotEvent(CxeError::OutOfMemory);
+    mCxeVideoCaptureControlSymbian->handleSnapshotReady(CxeError::OutOfMemory, snapshot);
     QCOMPARE(mCxeVideoCaptureControlSymbian->state(), CxeVideoCaptureControl::Ready);
 
     // check that we receive this signal once the snapshot is ready
     QVERIFY(CxeTestUtils::waitForSignal(spy, 1000));
 
     doPrepareStuff();
-    mCxeVideoCaptureControlSymbian->handleSnapshotEvent(CxeError::None);
+    mCxeVideoCaptureControlSymbian->handleSnapshotReady(CxeError::None, snapshot);
     QVERIFY(CxeTestUtils::waitForSignal(spy, 1000));
 
     CX_DEBUG_EXIT_FUNCTION();

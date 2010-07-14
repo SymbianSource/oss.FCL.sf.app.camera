@@ -35,7 +35,7 @@ CxeFakeAutoFocusControl::~CxeFakeAutoFocusControl()
     CX_DEBUG_IN_FUNCTION();
 }
 
-CxeError::Id CxeFakeAutoFocusControl::start()
+CxeError::Id CxeFakeAutoFocusControl::start(bool soundEnabled)
 {
     CX_DEBUG_IN_FUNCTION();
     return CxeError::None;
@@ -60,6 +60,11 @@ CxeAutoFocusControl::Mode CxeFakeAutoFocusControl::mode() const
 }
 
 bool CxeFakeAutoFocusControl::supported() const
+{
+    return true;
+}
+
+bool CxeFakeAutoFocusControl::isSoundEnabled() const
 {
     return true;
 }

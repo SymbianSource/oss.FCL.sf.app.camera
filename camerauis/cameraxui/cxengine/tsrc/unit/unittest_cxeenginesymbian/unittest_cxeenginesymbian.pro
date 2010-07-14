@@ -102,7 +102,10 @@ SOURCES *= unittest_cxeenginesymbian.cpp \
            cxediskmonitor.cpp \
            cxediskmonitorprivate.cpp \
            cxememorymonitor.cpp \
-           cxememorymonitorprivate.cpp
+           cxememorymonitorprivate.cpp \
+           cxesnapshotcontrol.cpp \
+           cxesnapshotcontrolprivate.cpp \
+           cxefakesettingsmodel.cpp
 
 
 
@@ -174,4 +177,7 @@ HEADERS *= unittest_cxeenginesymbian.h \
            cxediskmonitor.h \
            cxediskmonitorprivate.h \
            cxememorymonitor.h \
-           cxememorymonitorprivate.h
+           cxememorymonitorprivate.h \
+           cxesnapshotcontrol.h \
+           cxesnapshotcontrolprivate.h \
+           cxefakesettingsmodel.h

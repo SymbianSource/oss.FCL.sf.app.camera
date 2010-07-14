@@ -24,6 +24,7 @@
 class CxeCameraDevice;
 class CxeCameraDeviceControl;
 class CxeViewfinderControl;
+class CxeSnapshotControl;
 class CxeStillCaptureControl;
 class CxeVideoCaptureControl;
 class CxeSettingsControlSymbian;
@@ -50,6 +51,7 @@ public:
 
     CxeCameraDeviceControl &cameraDeviceControl();
     CxeViewfinderControl &viewfinderControl();
+    CxeSnapshotControl &snapshotControl();
     CxeStillCaptureControl &stillCaptureControl();
     CxeVideoCaptureControl &videoCaptureControl();
     CxeAutoFocusControl &autoFocusControl();
@@ -62,6 +64,8 @@ public:
     void initMode(Cxe::CameraMode cameraMode);
     bool isEngineReady();
 
+    void construct();
+
 signals:
     void reserveStarted();
 
@@ -69,7 +73,6 @@ protected:
     virtual void createControls();
 
 private slots:
-    void construct();
     void doInit();
 
 private:
@@ -83,6 +86,7 @@ protected:
     CxeCameraDeviceControl *mCameraDeviceControl;
     CxeCameraDevice *mCameraDevice; // not own
     CxeViewfinderControl *mViewfinderControl;
+    CxeSnapshotControl *mSnapshotControl;
     CxeStillCaptureControl *mStillCaptureControl;
     CxeVideoCaptureControl *mVideoCaptureControl;
     CxeSettingsControlSymbian *mSettingsControl;

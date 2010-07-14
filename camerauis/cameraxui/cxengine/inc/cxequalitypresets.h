@@ -23,8 +23,8 @@
 
 /**!
 * Interface Class for CxeQualityPresetsSymbian
-* Queries supported image and video qualities from ICM and creates the related 
-* data and wraps up the quality settings for the client. 
+* Queries supported image and video qualities from ICM and creates the related
+* data and wraps up the quality settings for the client.
 */
 class CxeQualityPresets
 {
@@ -32,7 +32,7 @@ public:
     virtual ~CxeQualityPresets() {};
     virtual QList<CxeImageDetails> imageQualityPresets(Cxe::CameraIndex cameraId) = 0;
     virtual QList<CxeVideoDetails> videoQualityPresets(Cxe::CameraIndex cameraId) = 0;
-    virtual qreal avgVideoBitRateScaler() = 0;
+    virtual int recordingTimeAvailable(const CxeVideoDetails& details, qint64 space) = 0;
 };
 
 #endif  // CXEQUALITYPRESETS_H

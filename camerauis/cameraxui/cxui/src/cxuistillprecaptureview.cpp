@@ -240,21 +240,22 @@ void CxuiStillPrecaptureView::loadWidgets()
 
     }
 
-    // update toolbar flash icon
+    // Setting widgets loaded here so updating icons works.
+    mWidgetsLoaded = true;
+
+    // Update toolbar flash mode icon
     int flash;
     if (mEngine->settings().get(CxeSettingIds::FLASH_MODE, flash) == CxeError::None) {
         handleSettingValueChanged(CxeSettingIds::FLASH_MODE, flash);
     }
 
-    // update toolbar scene mode
-    QString scene;
-    if (mEngine->settings().get(CxeSettingIds::IMAGE_SCENE, scene) == CxeError::None) {
-        handleSettingValueChanged(CxeSettingIds::IMAGE_SCENE, scene);
+    // Update toolbar scene mode icon
+    QString sceneId;
+    if (mEngine->settings().get(CxeSettingIds::SCENE_ID, sceneId) == CxeError::None) {
+        updateSceneIcon(sceneId);
     }
 
     hideControls();
-
-    mWidgetsLoaded = true;
 
     OstTrace0( camerax_performance, DUP1_CXUISTILLPRECAPTUREVIEW_LOADWIDGETS, "msg: e_CX_STILLPRECAPTUREVIEW_LOADWIDGETS 0" );
     CX_DEBUG_EXIT_FUNCTION();
@@ -271,31 +272,31 @@ void CxuiStillPrecaptureView::initializeSettingsGrid()
         // Initialize settings grid
         mSettingsGrid = new HbToolBarExtension;
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_mono_exposure.svg"), hbTrId("txt_cam_button_exposure_compensation"), this, SLOT(launchSliderSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_exposure"), hbTrId("txt_cam_button_exposure_compensation"), this, SLOT(launchSliderSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::EV_COMPENSATION_VALUE);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_mono_iso.svg"), hbTrId("txt_cam_button_iso"), this, SLOT(launchSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_iso"), hbTrId("txt_cam_button_iso"), this, SLOT(launchSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::LIGHT_SENSITIVITY);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_small_rgb.svg"), hbTrId("txt_cam_button_color_tone"), this, SLOT(launchSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_small_rgb"), hbTrId("txt_cam_button_color_tone"), this, SLOT(launchSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::COLOR_TONE);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_mono_white_balance.svg"), hbTrId("txt_cam_button_white_balance"), this, SLOT(launchSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_white_balance"), hbTrId("txt_cam_button_white_balance"), this, SLOT(launchSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::WHITE_BALANCE);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_mono_sharpness.svg"), hbTrId("txt_cam_grid_sharpness"), this, SLOT(launchSliderSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_sharpness"), hbTrId("txt_cam_grid_sharpness"), this, SLOT(launchSliderSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::SHARPNESS);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_mono_contrast.svg"), hbTrId("txt_cam_button_contrast"), this, SLOT(launchSliderSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_contrast"), hbTrId("txt_cam_button_contrast"), this, SLOT(launchSliderSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::CONTRAST);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        mSettingsGrid->addAction(HbIcon("qtg_mono_face_tracking.svg"), hbTrId("txt_cam_button_face_tracking"), this, SLOT(launchNotSupportedNotification()));
+        mSettingsGrid->addAction(HbIcon("qtg_mono_face_tracking"), hbTrId("txt_cam_button_face_tracking"), this, SLOT(launchNotSupportedNotification()));
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
         connect(mKeyHandler, SIGNAL(autofocusKeyPressed()), mSettingsGrid, SLOT(close()));
@@ -700,13 +701,7 @@ void CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
     if (mEngine->mode() == Cxe::ImageMode) {
 
         // update toolbar scene mode icon
-        QString icon = getSettingItemIcon(CxeSettingIds::IMAGE_SCENE, scene[CxeSettingIds::SCENE_ID]);
-        CX_DEBUG((("New scene mode icon: %s"), icon.toAscii().constData()));
-        if (mDocumentLoader) {
-            QObject *obj = mDocumentLoader->findObject(STILL_PRE_CAPTURE_SCENE_MODE_ACTION);
-            CX_DEBUG_ASSERT(obj);
-            qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
-        }
+        updateSceneIcon(scene[CxeSettingIds::SCENE_ID].toString());
 
         // for now, we are only interested in flashmode change
         if (scene.contains(CxeSettingIds::FLASH_MODE)) {

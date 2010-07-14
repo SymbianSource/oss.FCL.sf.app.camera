@@ -83,21 +83,12 @@ SliderParams& SliderParams::operator=(const SliderParams& other)
 * CxuiSettingsInfo::CxuiSettingsInfo
 */
 CxuiSettingsInfo::CxuiSettingsInfo(CxeEngine *engine)
-: mEngine(engine)
+    : mMode(-1), mEngine(engine)
 {
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(engine);
 
     mXmlReader = new CxuiSettingXmlReader();
-
-    // Initialize for the mode already so that the UI
-    // can already use the settings info even if engine isn't ready yet.
-    initForCurrentMode(CxeError::None);
-
-    // Follow engine mode changes
-    connect(&engine->cameraDeviceControl(), SIGNAL(initModeComplete(CxeError::Id)),
-            this, SLOT(initForCurrentMode(CxeError::Id)));
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -124,6 +115,9 @@ bool CxuiSettingsInfo::getSettingsContent(const QString &key,
                                           RadioButtonListParams &settings)
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    // Check that right content is loaded. Load now if not.
+    checkMode();
 
     bool found(false);
 
@@ -153,6 +147,9 @@ bool CxuiSettingsInfo::getSettingsContent(const QString &key,
                                           SliderParams &settings)
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    // Check that right content is loaded. Load now if not.
+    checkMode();
 
     bool found(false);
 
@@ -326,23 +323,33 @@ void CxuiSettingsInfo::getVideoQualitySettings(RadioButtonListParams &settings)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
-* Load new setting content based on the new mode.
+/*!
+* Check that the right content for current mode is loaded.
+*
+* UI gets "settings changed" / "scene changed" events quite
+* early when switching mode (image / video). We cannot rely
+* on CxeCameraDeviceControl::initModeComplete signal since
+* that would be coming too late. (We would be using setting XML
+* for the old mode, and setting keys/values/icons would not
+* be found.) Better check this whenever UI requests for
+* content for a setting, and reload the XML when needed.
+* @see CxuiSettingsInfo::getSettingsContent(const QString &, RadioButtonListParams &)
+* @see CxuiSettingsInfo::getSettingsContent(const QString &, SliderParams &)
+* @see CxeCameraDeviceControl::initModeComplete(CxeError::Id)
 */
-void CxuiSettingsInfo::initForCurrentMode(CxeError::Id status)
+void CxuiSettingsInfo::checkMode()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (status == CxeError::None) {
+    int oldMode = mMode;
+    mMode = mEngine->cameraDeviceControl().mode();
+    if (mMode != oldMode) {
         // Select the setting XML file based on mode.
         QString sourceXml(mEngine->cameraDeviceControl().mode() == Cxe::ImageMode
                          ? CxUiSettings::IMAGE_SETTING_MAPPING_FILE
                          : CxUiSettings::VIDEO_SETTING_MAPPING_FILE);
 
         mXmlReader->setXmlSource(sourceXml);
-    } else {
-        // Clear XML reader content on error.
-        mXmlReader->setXmlSource(QString());
     }
 
     CX_DEBUG_EXIT_FUNCTION();

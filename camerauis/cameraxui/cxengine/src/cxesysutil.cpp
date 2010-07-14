@@ -154,12 +154,6 @@ qint64 CxeSysUtil::spaceAvailable(RFs &fs, int index, CxeSettings &settings)
         CX_DEBUG(("status getting volume info: %d", status));
         qt_symbian_throwIfError(status);
 
-        CX_DEBUG(("TVolumeInfo.iDrive.iType:     %d", volumeInfo.iDrive.iType));
-        CX_DEBUG(("  EMediaNotPresent:           %d", EMediaNotPresent));
-        CX_DEBUG(("  EMediaUnknown:              %d", EMediaUnknown));
-        CX_DEBUG(("TVolumeInfo.iDrive.iMediaAtt: %d", volumeInfo.iDrive.iMediaAtt));
-        CX_DEBUG(("  KMediaAttLocked:            %d", KMediaAttLocked));
-
         // Get critical treshold for free space on the drive.
         // We must leave the free space above this.
         QVariant criticalThreshold;
@@ -174,6 +168,7 @@ qint64 CxeSysUtil::spaceAvailable(RFs &fs, int index, CxeSettings &settings)
         freeSpace = 0;
     }
 
+    CX_DEBUG(("CxeSysUtil - free space: %d", freeSpace));
     CX_DEBUG_EXIT_FUNCTION();
     return freeSpace;
 }

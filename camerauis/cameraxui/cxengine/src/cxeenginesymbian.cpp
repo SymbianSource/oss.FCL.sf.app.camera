@@ -23,6 +23,7 @@
 #include "cxevideocapturecontrolsymbian.h"
 #include "cxesettingscontrolsymbian.h"
 #include "cxeviewfindercontrolsymbian.h"
+#include "cxesnapshotcontrol.h"
 #include "cxefilenamegeneratorsymbian.h"
 #include "cxeautofocuscontrolsymbian.h"
 #include "cxezoomcontrolsymbian.h"
@@ -51,6 +52,7 @@ CxeEngineSymbian::CxeEngineSymbian()
     : mCameraDeviceControl(NULL),
       mCameraDevice(NULL),
       mViewfinderControl(NULL),
+      mSnapshotControl(NULL),
       mStillCaptureControl(NULL),
       mVideoCaptureControl(NULL),
       mSettingsControl(NULL),
@@ -62,27 +64,11 @@ CxeEngineSymbian::CxeEngineSymbian()
       mFilenameGenerator(NULL),
       mSensorEventHandler(NULL),
       mQualityPresets(NULL),
-      mFileSaveThread(NULL)
+      mFileSaveThread(NULL),
+      mDiskMonitor(NULL),
+      mMemoryMonitor(NULL)
 {
-    CX_DEBUG_ENTER_FUNCTION();
-
-    // Do secondary construction during reserve call.
-    //! @todo temporarily commented as part of a hack to change the startup sequence
-    // to avoid GOOM issues
-   // connect(this, SIGNAL(reserveStarted()), this, SLOT(construct()));
-
-    CxeCameraDeviceControlSymbian *deviceControl = new CxeCameraDeviceControlSymbian();
-    mCameraDeviceControl = deviceControl;
-    mCameraDevice = deviceControl->cameraDevice();
-    CX_ASSERT_ALWAYS(mCameraDeviceControl);
-    CX_ASSERT_ALWAYS(mCameraDevice);
-
-    mCameraDeviceControl->init();
-    //! @todo calling construct here is a hack to change the startup sequence
-    // to avoid GOOM issues
-    construct();
-    
-    CX_DEBUG_EXIT_FUNCTION();
+    CX_DEBUG_IN_FUNCTION();
 }
 
 
@@ -111,6 +97,15 @@ void CxeEngineSymbian::createControls()
     // Check we do this only once.
     if (!mSettingsModel) {
         OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_IN, "e_CX_ENGINE_CREATE_CONTROLS 1");
+
+        CxeCameraDeviceControlSymbian *deviceControl = new CxeCameraDeviceControlSymbian();
+        mCameraDeviceControl = deviceControl;
+        mCameraDevice = deviceControl->cameraDevice();
+
+        CX_ASSERT_ALWAYS(mCameraDeviceControl);
+        CX_ASSERT_ALWAYS(mCameraDevice);
+
+        mCameraDeviceControl->init();
 
         CxeSettingsCenRepStore *settingsStore(NULL);
         if (XQServiceUtil::isService()) {
@@ -153,20 +148,22 @@ void CxeEngineSymbian::createControls()
         mViewfinderControl = new CxeViewfinderControlSymbian(*mCameraDevice,
             *mCameraDeviceControl);
 
+        mSnapshotControl = new CxeSnapshotControl(*mCameraDevice);
+
         mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice);
 
         mFileSaveThread = CxeFileSaveThreadFactory::createFileSaveThread();
 
         mStillCaptureControl = new CxeStillCaptureControlSymbian(
-            *mCameraDevice, *mViewfinderControl, *mCameraDeviceControl,
+            *mCameraDevice, *mViewfinderControl, *mSnapshotControl, *mCameraDeviceControl,
             *mFilenameGenerator, *mSensorEventHandler, *mAutoFocusControl,
             *mSettings, *mQualityPresets, *mFileSaveThread, *mDiskMonitor);
 
-        mZoomControl = new CxeZoomControlSymbian( *mCameraDevice,
-            *mCameraDeviceControl, *mSettings, *mFeatureManager);
+        mZoomControl = new CxeZoomControlSymbian(
+            *mCameraDevice, *mCameraDeviceControl, *mSettings, *mFeatureManager);
 
         mVideoCaptureControl = new CxeVideoCaptureControlSymbian(
-            *mCameraDevice, *mViewfinderControl, *mCameraDeviceControl,
+            *mCameraDevice, *mViewfinderControl, *mSnapshotControl, *mCameraDeviceControl,
             *mFilenameGenerator, *mSettings, *mQualityPresets, *mDiskMonitor);
 
         mSettingsControl = new CxeSettingsControlSymbian(*mCameraDevice, *mSettings);
@@ -200,7 +197,7 @@ void CxeEngineSymbian::connectSignals()
     // Connect signals for ECam events
     connect(mCameraDeviceControl,
             SIGNAL(cameraEvent(int,int)),
-            mVideoCaptureControl,
+            mSnapshotControl,
             SLOT(handleCameraEvent(int,int)));
 
     connect(mCameraDeviceControl,
@@ -266,6 +263,7 @@ CxeEngineSymbian::~CxeEngineSymbian()
     delete mSettingsControl;
     delete mStillCaptureControl;
     delete mVideoCaptureControl;
+    delete mSnapshotControl;
     delete mViewfinderControl;
     delete mFilenameGenerator;
     delete mDiskMonitor;
@@ -288,6 +286,11 @@ CxeCameraDeviceControl &CxeEngineSymbian::cameraDeviceControl()
 CxeViewfinderControl &CxeEngineSymbian::viewfinderControl()
 {
     return *mViewfinderControl;
+}
+
+CxeSnapshotControl &CxeEngineSymbian::snapshotControl()
+{
+    return *mSnapshotControl;
 }
 
 CxeStillCaptureControl &CxeEngineSymbian::stillCaptureControl()

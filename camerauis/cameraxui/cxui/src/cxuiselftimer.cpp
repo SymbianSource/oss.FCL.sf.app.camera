@@ -37,8 +37,11 @@ using namespace CxUiLayout;
 */
 
 // constants
+
 const int CONTINUOUS_POSTCAPTURE    = -1;
 const int UNKNOWN                   = -99;
+
+const static QString SELFTIMER_SOUND = "z:\\system\\sounds\\digital\\selftimer.wav";
 
 CxuiSelfTimer::CxuiSelfTimer(CxeSettings &settings)
 :  mDelay(-1),
@@ -49,7 +52,8 @@ CxuiSelfTimer::CxuiSelfTimer(CxeSettings &settings)
    mTimerLabel(NULL),
    mCancelButton(NULL),
    mStartButton(NULL),
-   mSettings(settings)
+   mSettings(settings),
+   mSound(SELFTIMER_SOUND)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -173,9 +177,13 @@ void CxuiSelfTimer::timeout()
     // so the UI seems to update smoother.
     updateWidgets();
 
+    playSound();
+
     // Check if timer ran out
     if (mCounter >= mDelay) {
         mTimer.stop();
+        mSound.stop();
+        hideWidgets();
         emit timerFinished();
     }
 
@@ -183,14 +191,32 @@ void CxuiSelfTimer::timeout()
 }
 
 /*!
-    Slot for resetting the selftimer countdown. Countdown is stopped,
-    and set back to starting value. Start button is set enabled.
-
+ * Play selftimer sound.
  */
-void CxuiSelfTimer::reset()
+void CxuiSelfTimer::playSound()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    reset(true);
+
+    int timeLeft = mDelay - mCounter;
+
+    if (timeLeft <= 3) {
+        // play as fast as we can
+        if (mSound.isFinished()) {
+            mSound.setLoops(-1);
+            mSound.play();
+        }
+    } else if (timeLeft <= 10) {
+        // play every second
+        mSound.setLoops(1);
+        mSound.play();
+    } else {
+        // play once every two seconds
+        if (mCounter%2) {
+            mSound.setLoops(1);
+            mSound.play();
+        }
+    }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -221,6 +247,7 @@ void CxuiSelfTimer::startTimer()
 
     // start countdown
     mCounter = 0;
+    playSound();
     mTimer.start(1000); // 1000 milliseconds == 1 second
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -262,6 +289,7 @@ void CxuiSelfTimer::reset(bool update)
 {
     // Stop timer and reset counter.
     mTimer.stop();
+    mSound.stop();
     mCounter = 0;
 
     // Set start buttonback to enabled.

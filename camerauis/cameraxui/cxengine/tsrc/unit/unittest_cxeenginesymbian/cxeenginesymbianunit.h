@@ -27,6 +27,7 @@ public:
     CxeEngineSymbianUnit();
     virtual ~CxeEngineSymbianUnit();
 
+protected:
     void createControls();
 };
 

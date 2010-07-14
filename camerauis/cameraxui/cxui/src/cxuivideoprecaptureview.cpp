@@ -110,6 +110,8 @@ void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
             this, SLOT(handleSnapshot(CxeError::Id)));
     connect(mVideoCaptureControl, SIGNAL(stateChanged(CxeVideoCaptureControl::State, CxeError::Id)),
             this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
+    connect(&(mEngine->settings()), SIGNAL(sceneChanged(CxeScene&)),
+            this, SLOT(handleSceneChanged(CxeScene&)));
     connect(mVideoCaptureControl, SIGNAL(remainingTimeChanged()),
             this, SLOT(updateTimeLabels()));
 
@@ -262,8 +264,16 @@ void CxuiVideoPrecaptureView::loadWidgets()
     mRecordingAnimation->setLoopCount(-1);
     mRecordingAnimation->setEasingCurve(QEasingCurve::OutInQuad);
 
+
+    // Update toolbar scene mode icon.
+    QString sceneId;
+    if (mEngine->settings().get(CxeSettingIds::SCENE_ID, sceneId) == CxeError::None) {
+        updateSceneIcon(sceneId);
+    }
+
     // Initialize the video time counters.
     updateTimeLabels();
+
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -278,15 +288,15 @@ void CxuiVideoPrecaptureView::initializeSettingsGrid()
 
         mSettingsGrid = new HbToolBarExtension;
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_mono_exposure.svg"), hbTrId("txt_cam_button_exposure_compensation"), this, SLOT(launchSliderSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_exposure"), hbTrId("txt_cam_button_exposure_compensation"), this, SLOT(launchSliderSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::EV_COMPENSATION_VALUE);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_small_rgb.svg"), hbTrId("txt_cam_button_color_tone"), this, SLOT(launchSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_small_rgb"), hbTrId("txt_cam_button_color_tone"), this, SLOT(launchSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::COLOR_TONE);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        action = mSettingsGrid->addAction(HbIcon("qtg_mono_white_balance.svg"), hbTrId("txt_cam_button_white_balance"), this, SLOT(launchSetting()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_white_balance"), hbTrId("txt_cam_button_white_balance"), this, SLOT(launchSetting()));
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::WHITE_BALANCE);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
@@ -335,44 +345,16 @@ void CxuiVideoPrecaptureView::pause()
 void CxuiVideoPrecaptureView::stop()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    if (isPostcaptureOn()) {
-        CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
-        if (state == CxeVideoCaptureControl::Recording ||
-            state == CxeVideoCaptureControl::Paused) {
-            mVideoCaptureControl->stop();
-            // Continue in handleVideoStateChanged().
-        }
-    } else {
-        // no postcapture
-        stopAndPrepareNewVideo();
-    }
 
+    CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
+    if (state == CxeVideoCaptureControl::Recording ||
+        state == CxeVideoCaptureControl::Paused) {
+        mVideoCaptureControl->stop();
+        // Continue in handleVideoStateChanged().
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
-
-// CxuiVideoPrecaptureView::stopAndPrepareNewVideo()
-// A version of stop that doesn't go to post-capture. When
-// not going to post-capture, we need to prepare new video
-void CxuiVideoPrecaptureView::stopAndPrepareNewVideo()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    mVideoCaptureControl->stop();
-    mElapsedTimer.stop();
-    hideControls();
-
-    if (mMenu) {
-        setMenu(mMenu);
-        mMenu = NULL;
-    }
-
-    // prepare new video when old one is ready
-    connect(mVideoCaptureControl, SIGNAL(videoComposed(CxeError::Id, const QString&)),
-            this, SLOT(prepareNewVideo(CxeError::Id)));
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 
 // CxuiPrecaptureView::showToolbar()
 // Shows toolbar. Calls the base class implementation if not recording
@@ -604,20 +586,21 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         }
         enableFeedback();
 
+        mElapsedTimer.stop();
+        hideControls();
+
+        if (mMenu) {
+            setMenu(mMenu);
+            mMenu = NULL;
+        }
+
         if (isPostcaptureOn()) {
-            mElapsedTimer.stop();
-            hideControls();
-
-            if (mRecordingAnimation && mRecordingIcon) {
-                mRecordingAnimation->stop();
-                mRecordingIcon->setOpacity(0);
-            }
-            if (mMenu) {
-                setMenu(mMenu);
-                mMenu = NULL;
-            }
-
             emit changeToPostcaptureView();
+        } else {
+            // post capture off, we need prepare new video
+            // do the prepare when the previous video is ready
+            connect(mVideoCaptureControl, SIGNAL(videoComposed(CxeError::Id, const QString&)),
+                    this, SLOT(prepareNewVideo(CxeError::Id)));
         }
         break;
     default:
@@ -778,6 +761,24 @@ void CxuiVideoPrecaptureView::handleSettingValueChanged(const QString& key, QVar
 }
 
 /*!
+* Handle scene mode change.
+* @param scene The new active scene mode.
+*/
+void CxuiVideoPrecaptureView::handleSceneChanged(CxeScene &scene)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    // Ignore if not in video mode.
+    if (mEngine->mode() == Cxe::VideoMode) {
+        // Update toolbar scene mode icon.
+        updateSceneIcon(scene[CxeSettingIds::SCENE_ID].toString());
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+
+/*!
     Sets the visibility of recording icon and elapsed time text.
     \param visible True if widgets are to be shown, false if not.
 */
@@ -815,7 +816,5 @@ bool CxuiVideoPrecaptureView::eventFilter(QObject *object, QEvent *event)
     }
     return CxuiPrecaptureView::eventFilter(object, event);
 }
-
-
 
 //end of file

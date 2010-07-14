@@ -19,7 +19,7 @@
 #include <hbmainwindow.h>
 #include <coemain.h>
 #include <QGraphicsSceneEvent>
-
+#include <hbstyleloader.h>
 
 #include "cxuiapplication.h"
 #include "cxuiapplicationframeworkmonitor.h"
@@ -144,6 +144,10 @@ CxuiViewManager::CxuiViewManager(CxuiApplication &application, HbMainWindow &mai
         mStandbyHandler->startTimer();
     }
 
+    // Register stylesheet. It will be automatically destroyed on application
+    // exit.
+    HbStyleLoader::registerFilePath(":/camerax/cxui.css");
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -227,25 +231,26 @@ void CxuiViewManager::createSceneModesView()
 
     bool ok = false;
     CX_DEBUG_ASSERT(mCameraDocumentLoader);
-
+    CxuiDocumentLoader *documentLoader = new CxuiDocumentLoader(&mEngine);
     // Use document loader to create widgets and layouts
     // (non-sectioned parts are parsed and loaded)
-    mCameraDocumentLoader->load(SCENEMODE_SETTING_XML, &ok);
+    documentLoader->load(SCENEMODE_SETTING_XML, &ok);
 
     QGraphicsWidget *widget = NULL;
 
     // ask for the scenes mode view widget pointer
-    widget = mCameraDocumentLoader->findWidget(STILL_SCENES_VIEW);
+    widget = documentLoader->findWidget(STILL_SCENES_VIEW);
     Q_ASSERT_X(ok && (widget != 0), "camerax ui", "invalid xml file");
     mSceneModeView = qobject_cast<CxuiSceneModeView *> (widget);
 
     // call for needed construction methods
-    mSceneModeView->construct(&mMainWindow, &mEngine, mCameraDocumentLoader, mKeyHandler);
+    mSceneModeView->construct(&mMainWindow, &mEngine, documentLoader, mKeyHandler);
     // .. and add to main window (which also takes ownership)
     mMainWindow.addView(widget);
     mSceneModeView->loadBackgroundImages();
 
     connect(mSceneModeView, SIGNAL(viewCloseEvent()), this, SLOT(changeToPrecaptureView()));
+    delete documentLoader;
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -417,6 +422,10 @@ void CxuiViewManager::changeToPrecaptureView()
     mMainWindow.setCurrentView(view, false);
     mMainWindow.blockSignals(false);
 
+    if (mSceneModeView){
+        delete mSceneModeView;
+        mSceneModeView = NULL;
+    }
     // connecting necessary pre-capture view signals
     connectPreCaptureSignals();
     emit startStandbyTimer();

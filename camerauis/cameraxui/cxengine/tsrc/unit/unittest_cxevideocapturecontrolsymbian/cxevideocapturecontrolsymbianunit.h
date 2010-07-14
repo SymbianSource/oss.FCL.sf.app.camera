@@ -27,13 +27,14 @@
  * CxeCameraDeviceControlSymbian except for that CxeFakeCameraDevice is used
  * instead of the real implementation.
  */
-class CxeVideoCaptureControlSymbianUnit : public CxeVideoCaptureControlSymbian 
+class CxeVideoCaptureControlSymbianUnit : public CxeVideoCaptureControlSymbian
 {
 	Q_OBJECT
 public:
 
     CxeVideoCaptureControlSymbianUnit(CxeCameraDevice &cameraDevice,
                                    CxeViewfinderControl &viewfinderControl,
+                                   CxeSnapshotControl &snapshotControl,
                                    CxeCameraDeviceControl &cameraDeviceControl,
                                    CxeFilenameGenerator &nameGenerator,
                                    CxeSettings &settings,

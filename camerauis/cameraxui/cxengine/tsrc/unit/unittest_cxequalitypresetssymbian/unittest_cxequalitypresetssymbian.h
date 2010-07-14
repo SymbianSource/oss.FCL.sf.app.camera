@@ -39,6 +39,7 @@ private slots:
 
     void testImageQualityPresets();
     void testVideoQualityPresets();
+    void testRecordingTimeAvailable();
 
 private:
     //data members

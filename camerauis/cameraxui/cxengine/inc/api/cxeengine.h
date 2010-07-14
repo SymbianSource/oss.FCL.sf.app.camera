@@ -22,6 +22,7 @@
 
 class CxeCameraDeviceControl;
 class CxeViewfinderControl;
+class CxeSnapshotControl;
 class CxeStillCaptureControl;
 class CxeVideoCaptureControl;
 class CxeAutoFocusControl;
@@ -57,6 +58,11 @@ public:
      * Access the viewfinder control.
      */
     virtual CxeViewfinderControl &viewfinderControl() = 0;
+
+    /**
+     * Access the snapshot control.
+     */
+    virtual CxeSnapshotControl &snapshotControl() = 0;
 
     /**
      * Access the still capture control.

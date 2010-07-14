@@ -30,6 +30,7 @@ data = DATAZ_\system\sounds\digital\capture.wav      system\sounds\digital\captu
 data = DATAZ_\system\sounds\digital\videoStart.wav   system\sounds\digital\videoStart.wav
 data = DATAZ_\system\sounds\digital\videoStop.wav    system\sounds\digital\videoStop.wav
 data = DATAZ_\system\sounds\digital\autoFocus.wav    system\sounds\digital\autoFocus.wav
+data = DATAZ_\system\sounds\digital\selftimer.wav    system\sounds\digital\selftimer.wav
 
 // CR key files
 data = DATAZ_\private\10202be9\20027017.txt    private\10202be9\20027017.txt

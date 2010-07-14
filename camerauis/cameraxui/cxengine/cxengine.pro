@@ -156,6 +156,8 @@ HEADERS += cxecameradevicecontrol.h \
            cxememorymonitorprivate.h \
            cxediskmonitor.h \
            cxediskmonitorprivate.h \
+           cxesnapshotcontrol.h \
+           cxesnapshotcontrolprivate.h \
            sensor/xqsensor.h \
            sensor/xqaccsensor.h \
            sensor/xqdeviceorientation.h \
@@ -202,6 +204,8 @@ SOURCES += cxecameradevicecontrolsymbian.cpp \
            cxememorymonitorprivate.cpp \
            cxediskmonitor.cpp \
            cxediskmonitorprivate.cpp \
+           cxesnapshotcontrol.cpp \
+           cxesnapshotcontrolprivate.cpp \
            sensor/xqsensor.cpp \
            sensor/xqaccsensor.cpp \
            sensor/xqdeviceorientation.cpp \

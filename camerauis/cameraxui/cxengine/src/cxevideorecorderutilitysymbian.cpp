@@ -17,6 +17,22 @@
 #include "cxevideorecorderutilitysymbian.h"
 #include "cxenamespace.h"
 #include "cxutils.h"
+#include <AudioPreference.h>
+
+namespace
+{
+    // Controller UId, can be used by the client to identify the controller, e.g. if the custom command can be used
+    const TUid KCamCControllerImplementationUid = {0x101F8503};
+
+    // Custom command for setting a new filename without closing & reopening the controller
+    enum TCamCControllerCustomCommands
+        {
+        ECamCControllerCCNewFilename = 0,
+        ECamCControllerCCVideoStopAsync
+        };
+
+    const uint KOneMillion = 1000000;
+}
 
 
 CxeVideoRecorderUtilitySymbian::~CxeVideoRecorderUtilitySymbian()
@@ -27,121 +43,296 @@ CxeVideoRecorderUtilitySymbian::~CxeVideoRecorderUtilitySymbian()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-CxeVideoRecorderUtilitySymbian::CxeVideoRecorderUtilitySymbian(MVideoRecorderUtilityObserver& aObserver,
-                              TInt aPriority,
-                              TMdaPriorityPreference aPref)
+CxeVideoRecorderUtilitySymbian::CxeVideoRecorderUtilitySymbian(MVideoRecorderUtilityObserver& aObserver)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    TRAPD(initErr, mVideoRecorder = CVideoRecorderUtility::NewL(aObserver, aPriority, aPref));
-    mStartuperror = initErr;
+    QT_TRAP_THROWING(mVideoRecorder =
+            CVideoRecorderUtility::NewL(aObserver,
+                                        KAudioPriorityVideoRecording,
+                                        TMdaPriorityPreference(KAudioPrefVideoRecording)));
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-TInt CxeVideoRecorderUtilitySymbian::CustomCommandSync(const TMMFMessageDestinationPckg& aDestination,
-                       TInt aFunction,
-                       const TDesC8& aDataTo1,
-                       const TDesC8& aDataTo2)
-{
-    CX_DEBUG_IN_FUNCTION();
-    return mVideoRecorder->CustomCommandSync(aDestination, aFunction, aDataTo1, aDataTo2);
-}
-
-void CxeVideoRecorderUtilitySymbian::OpenFileL(const TDesC& aFileName,
-				TInt aCameraHandle,
-				TUid aControllerUid,
-				TUid aVideoFormat,
-				const TDesC8& aVideoType,
-				TFourCC aAudioType)
+/*!
+* Open new file for recording.
+* @param cameraHandle Handle for camera.
+* @param filename Full filename of the video file to open.
+* @param fileMimeType MIME type for the video file.
+* @param supplier Preferred supplier.
+* @param videoType Video codec MIME type.
+* @param audioType Audio FourCC type.
+*/
+void CxeVideoRecorderUtilitySymbian::open(int cameraHandle,
+                                          const QString &filename,
+                                          const QString &fileMimeType,
+                                          const QString &supplier,
+                                          const QString &videoType,
+                                          const QString &audioType)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mVideoRecorder->OpenFileL(aFileName, aCameraHandle, aControllerUid, aVideoFormat, aVideoType, aAudioType);
+    CX_DEBUG(("CxeVideoRecorderUtilitySymbian - filename     [%s]", filename.toAscii().constData()));
+    CX_DEBUG(("CxeVideoRecorderUtilitySymbian - file mime    [%s]", fileMimeType.toAscii().constData()));
+    CX_DEBUG(("CxeVideoRecorderUtilitySymbian - supplier     [%s]", supplier.toAscii().constData()));
+    CX_DEBUG(("CxeVideoRecorderUtilitySymbian - codec mime   [%s]", videoType.toAscii().constData()));
+    CX_DEBUG(("CxeVideoRecorderUtilitySymbian - audio FourCC [%s]", audioType.toAscii().constData()));
+
+    QByteArray bytes = videoType.toLatin1();
+    TPtrC8 videoTypeDesC(reinterpret_cast<const TUint8*>(bytes.constData()), bytes.size());
+    TPtrC16 filenameDesC(reinterpret_cast<const TUint16*>(filename.utf16()));
+
+    TUid controllerId;
+    TUid formatId;
+    QT_TRAP_THROWING({
+        // Find the video controller id and video format id.
+        findControllerL(fileMimeType, supplier, controllerId, formatId);
+
+        // Try to open new video file with given parameters.
+        mVideoRecorder->OpenFileL(filenameDesC, cameraHandle, controllerId,
+                                  formatId, videoTypeDesC, audioFourCC(audioType));
+    });
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::SetVideoFrameSizeL(TSize aSize)
+/*!
+* Set frame size.
+* @param size The video frame size.
+*/
+void CxeVideoRecorderUtilitySymbian::setVideoFrameSize(const QSize &size)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mVideoRecorder->SetVideoFrameSizeL(aSize);
+    TSize frameSize(size.width(), size.height());
+    QT_TRAP_THROWING(mVideoRecorder->SetVideoFrameSizeL(frameSize));
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::SetVideoFrameRateL(TInt aRate)
+/*!
+* Set video frame rate.
+* @param rate The video frame rate.
+*/
+void CxeVideoRecorderUtilitySymbian::setVideoFrameRate(int rate)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mVideoRecorder->SetVideoFrameRateL(aRate);
+    QT_TRAP_THROWING(mVideoRecorder->SetVideoFrameRateL(rate));
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::SetVideoBitRateL(TInt aRate)
+/*!
+* Set video bit rate.
+* @param The video bit rate.
+*/
+void CxeVideoRecorderUtilitySymbian::setVideoBitRate(int rate)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mVideoRecorder->SetVideoBitRateL(aRate);
+    QT_TRAP_THROWING(mVideoRecorder->SetVideoBitRateL(rate));
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::SetAudioEnabledL(TBool aEnable)
+/*!
+* Set if audio recording is on or not.
+* @param enabled Is audio recording enabled.
+*/
+void CxeVideoRecorderUtilitySymbian::setAudioEnabled(bool enabled)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mVideoRecorder->SetAudioEnabledL(aEnable);
+    QT_TRAP_THROWING(mVideoRecorder->SetAudioEnabledL(enabled));
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::SetMaxClipSizeL(TInt aClipSizeInBytes)
+/*!
+* Set maximum video clip size in bytes.
+* @param sizeInBytes Video clip size limit.
+*/
+void CxeVideoRecorderUtilitySymbian::setVideoMaxSize(int sizeInBytes)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    if (aClipSizeInBytes <= 0) {
-        aClipSizeInBytes = KMMFNoMaxClipSize;
+    if (sizeInBytes <= 0) {
+        sizeInBytes = KMMFNoMaxClipSize;
     }
-    mVideoRecorder->SetMaxClipSizeL(aClipSizeInBytes);
+    QT_TRAP_THROWING(mVideoRecorder->SetMaxClipSizeL(sizeInBytes));
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::Close()
+/*!
+* Close video recorder, freeing its resources.
+*/
+void CxeVideoRecorderUtilitySymbian::close()
 {
     CX_DEBUG_ENTER_FUNCTION();
     mVideoRecorder->Close();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::Prepare()
+/*!
+* Prepare for video recording.
+*/
+void CxeVideoRecorderUtilitySymbian::prepare()
 {
     CX_DEBUG_ENTER_FUNCTION();
     mVideoRecorder->Prepare();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxeVideoRecorderUtilitySymbian::Record()
+/*!
+* Start recording.
+*/
+void CxeVideoRecorderUtilitySymbian::record()
 {
     CX_DEBUG_ENTER_FUNCTION();
     mVideoRecorder->Record();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-int CxeVideoRecorderUtilitySymbian::Stop()
-{
-    CX_DEBUG_IN_FUNCTION();
-    return mVideoRecorder->Stop();
-}
-
-void CxeVideoRecorderUtilitySymbian::PauseL()
+/*!
+* Stop recording.
+* @param asynchronous Use asynchronous (true) or synchronous (false) stopping.
+*/
+void CxeVideoRecorderUtilitySymbian::stop(bool asynchronous)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mVideoRecorder->PauseL();
+
+    if (asynchronous) {
+        TMMFMessageDestination dest(KCamCControllerImplementationUid, KMMFObjectHandleController);
+        qt_symbian_throwIfError(mVideoRecorder->CustomCommandSync(
+                                    dest, ECamCControllerCCVideoStopAsync, KNullDesC8, KNullDesC8));
+    } else {
+        qt_symbian_throwIfError(mVideoRecorder->Stop());
+    }
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-TTimeIntervalMicroSeconds CxeVideoRecorderUtilitySymbian::RecordTimeAvailable()
+/*!
+* Pause recording.
+*/
+void CxeVideoRecorderUtilitySymbian::pause()
 {
-    CX_DEBUG_IN_FUNCTION();
-    return mVideoRecorder->RecordTimeAvailable();
+    CX_DEBUG_ENTER_FUNCTION();
+    QT_TRAP_THROWING(mVideoRecorder->PauseL());
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
-TTimeIntervalMicroSeconds CxeVideoRecorderUtilitySymbian::DurationL()
+/*!
+* Get estimated available recording time.
+* @return Available recording time estimate in seconds.
+*/
+int CxeVideoRecorderUtilitySymbian::availableRecordingTime()
 {
     CX_DEBUG_IN_FUNCTION();
-    return mVideoRecorder->DurationL();
+    // Convert microseconds to seconds.
+    return mVideoRecorder->RecordTimeAvailable().Int64() * 1.0 / KOneMillion;
 }
 
+/*!
+* Get elapsed duration of the recorded video.
+* @return Duration of the video in seconds.
+*/
+int CxeVideoRecorderUtilitySymbian::duration()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    int time(0);
+    // Convert microseconds to seconds.
+    QT_TRAP_THROWING(time = mVideoRecorder->DurationL().Int64() * 1.0 / KOneMillion);
+    CX_DEBUG_EXIT_FUNCTION();
+    return time;
+}
+
+/*!
+* Find video controller and format UIDs based on file mime type and preferred supplier.
+* @param fileMimeType MIME type for the video file.
+* @param supplier Preferred supplier.
+* @param controllerId Returns found controller UID.
+* @param formatId Returns found format UID.
+*/
+void CxeVideoRecorderUtilitySymbian::findControllerL(const QString& fileMimeType,
+                                                     const QString& supplier,
+                                                     TUid& controllerId,
+                                                     TUid& formatId)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // Retrieve a list of possible controllers from ECOM.
+    // Controller must support recording the requested mime type.
+    // Controller must be provided by preferred supplier.
+    controllerId = KNullUid;
+    formatId = KNullUid;
+
+    QByteArray bytes = fileMimeType.toLatin1();
+    TPtrC8 mimeTPtr(reinterpret_cast<const TUint8*>(bytes.constData()), bytes.size());
+    TPtrC16 supplierTPtr(reinterpret_cast<const TUint16*>(supplier.utf16()));
+
+    CMMFControllerPluginSelectionParameters* cSelect(NULL);
+    CMMFFormatSelectionParameters* fSelect(NULL);
+    RMMFControllerImplInfoArray controllers;
+
+    cSelect = CMMFControllerPluginSelectionParameters::NewLC();
+    fSelect = CMMFFormatSelectionParameters::NewLC();
+
+    fSelect->SetMatchToMimeTypeL(mimeTPtr);
+    cSelect->SetRequiredRecordFormatSupportL(*fSelect);
+    cSelect->SetPreferredSupplierL(supplierTPtr,
+                                   CMMFPluginSelectionParameters::EOnlyPreferredSupplierPluginsReturned);
+    cSelect->ListImplementationsL(controllers);
+    CleanupResetAndDestroyPushL(controllers);
+
+    if (controllers.Count() <= 0) {
+        CX_DEBUG(("CxeVideoRecorderUtilitySymbian - zero controllers found, leaving!"));
+        User::Leave(KErrNotFound);
+    }
+
+    // Inquires the controller about supported formats.
+    // We use the first controller found having index 0.
+    const RMMFFormatImplInfoArray& formats = controllers[0]->RecordFormats();
+
+    // Get the first format that supports our mime type.
+    int count(formats.Count());
+    for (int i=0; i<count; i++) {
+        if (formats[i]->SupportsMimeType(mimeTPtr)) {
+            CX_DEBUG(("CxeVideoRecorderUtilitySymbian - found controller"));
+            // Store the format UID
+            formatId = formats[i]->Uid();
+            // Store the controller UID
+            controllerId = controllers[0]->Uid();
+            break;
+        }
+    }
+
+    // Check that we found the uids.
+    if (controllerId == KNullUid) {
+        CX_DEBUG(("CxeVideoRecorderUtilitySymbian - no matching controller found, leaving!"));
+        User::Leave(KErrNotFound);
+    }
+
+    CleanupStack::PopAndDestroy(3); // controllers, fSelect, cSelect
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Helper method to convert QString to TFourCC.
+* @param str String to convert.
+*/
+TFourCC CxeVideoRecorderUtilitySymbian::audioFourCC(const QString& str)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    QByteArray audioType = str.toAscii();
+
+    quint8 char1(' ');
+    quint8 char2(' ');
+    quint8 char3(' ');
+    quint8 char4(' ');
+
+    if (audioType.count() > 3) {
+        char1 = audioType[0];
+        char2 = audioType[1];
+        char3 = audioType[2];
+
+        if (audioType.count() == 4) {
+            char4 = audioType[3];
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+    return TFourCC(char1, char2, char3, char4);
+}
 
 
 // end of file

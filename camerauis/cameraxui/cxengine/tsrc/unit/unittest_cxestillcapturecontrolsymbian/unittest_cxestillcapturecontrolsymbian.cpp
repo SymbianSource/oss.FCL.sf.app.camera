@@ -26,6 +26,7 @@
 #include "cxestillcapturecontrolsymbian.h"
 #include "unittest_cxestillcapturecontrolsymbian.h"
 #include "cxefakeviewfindercontrol.h"
+#include "cxesnapshotcontrol.h"
 #include "cxesettingsmodel.h"
 #include "cxesensoreventhandlersymbian.h"
 #include "cxefilenamegeneratorsymbian.h"
@@ -64,20 +65,21 @@ void UnitTestCxeStillCaptureControlSymbian::initTestCase()
     mFakeCameraDeviceControl = new CxeFakeCameraDeviceControl();
     mFakeCameraDevice = new CxeFakeCameraDevice();
     mFakeCameraDevice->newCamera(mFakeCameraDeviceControl->cameraIndex(), mFakeCameraDeviceControl);
-
     mViewfinderControl = new CxeFakeViewfinderControl();
+    mSnapshotControl = new CxeSnapshotControl(*mFakeCameraDevice);
     mFilenameGenerator = new CxeFakeFilenameGenerator();
     mSensorEventHandler = new CxeFakeSensorEventHandler();
     mFakeAutoFocusControl = new CxeFakeAutoFocusControl();
     mFakeQualityPresets = new CxeFakeQualityPresets();
     mFakeFileSaveThread = new CxeFakeFileSaveThread();
-    
+
     mDiskMonitor = new CxeDiskMonitor(*mFakeSettings);
 
 
     mStillCaptureControl = new CxeStillCaptureControlSymbian(
             *mFakeCameraDevice,
             *mViewfinderControl,
+            *mSnapshotControl,
             *mFakeCameraDeviceControl,
             *mFilenameGenerator,
             *mSensorEventHandler,
@@ -106,6 +108,8 @@ void UnitTestCxeStillCaptureControlSymbian::cleanupTestCase()
     mFilenameGenerator = 0;
     delete mViewfinderControl;
     mViewfinderControl = 0;
+    delete mSnapshotControl;
+    mSnapshotControl = 0;
     delete mFakeCameraDeviceControl;
     mFakeCameraDeviceControl = 0;
     delete mFakeCameraDevice;
