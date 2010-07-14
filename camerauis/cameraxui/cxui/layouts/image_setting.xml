@@ -19,8 +19,8 @@
                       setting_icon="">
             <item string="txt_cam_list_automatic_flash" value="0" icon="qtg_mono_autoflash" />
             <item string="txt_cam_list_reduce_red_eye"  value="1" icon="qtg_mono_redeye" />
-            <item string="txt_cam_list_on_flash"        value="2" icon="qtg_mono_flash" />
-            <item string="txt_cam_list_off_flash"       value="3" icon="qtg_mono_flash_off" />
+            <item string="txt_cam_list_flash_on"        value="2" icon="qtg_mono_flash" />
+            <item string="txt_cam_list_flash_off"       value="3" icon="qtg_mono_flash_off" />
         </setting_list>
 
         <!-- Still Show post-capture (setting list) -->
@@ -32,7 +32,7 @@
             <lnItem string="txt_cam_list_ln_sec" lnValue="2"  value="2000" icon="" />
             <lnItem string="txt_cam_list_ln_sec" lnValue="10" value="10000" icon="" />
             <item   string="txt_cam_list_continuous" value="-1" icon="" />
-            <item   string="txt_cam_list_not"        value="0"  icon="" />
+            <item   string="txt_cam_list_never"        value="0"  icon="" />
         </setting_list>
 
         <!-- self timer (setting list) -->
@@ -41,7 +41,7 @@
                       preview="0"
                       type="SingleLineListBox"
                       setting_icon="">
-            <item string="txt_cam_list_off_timer" value="0" icon="" />
+            <item string="txt_cam_list_off_timer" value="-1" icon="" />
             <lnItem string="txt_cam_list_ln_seconds" lnValue="2"  value="2" icon="" />
             <lnItem string="txt_cam_list_ln_seconds" lnValue="10" value="10" icon="" />
             <lnItem string="txt_cam_list_ln_seconds" lnValue="20" value="20" icon="" />
@@ -80,25 +80,25 @@
                       type="SingleLineListBox"
                       setting_icon="">
             <item string="txt_cam_list_automatic_lightsens" value="0" icon="" />
-            <lnItem string="txt_cam_list_iso_l1" lnValue="100"  value="100" icon="" />
-            <lnItem string="txt_cam_list_iso_l1" lnValue="200"  value="200" icon="" />
-            <lnItem string="txt_cam_list_iso_l1" lnValue="400"  value="400" icon="" />
-            <lnItem string="txt_cam_list_iso_l1" lnValue="800"  value="800" icon="" />
+            <l1Item string="txt_cam_list_iso_l1" l1Value="100"  value="100" icon="" />
+            <l1Item string="txt_cam_list_iso_l1" l1Value="200"  value="200" icon="" />
+            <l1Item string="txt_cam_list_iso_l1" l1Value="400"  value="400" icon="" />
+            <l1Item string="txt_cam_list_iso_l1" l1Value="800"  value="800" icon="" />
         </setting_list>
 
         <!-- Exposure compensation (setting slider) -->
         <setting_slider id="ev_compensation_value" heading="txt_cam_title_exposure_compensation" setting_icon="">
-            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" lnValue="2" minorStep="0.5" majorStep="1"/>
+            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" l1Value="2" minorStep="0.5" majorStep="1"/>
         </setting_slider>
 
         <!-- Contrast (setting slider) -->
         <setting_slider id="contrast" heading="txt_cam_title_contrast" setting_icon="">
-            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" lnValue="2" minorStep="0.5" majorStep="1"/>
+            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" l1Value="2" minorStep="0.5" majorStep="1"/>
         </setting_slider>
 
         <!-- Sharpness (setting slider) -->
         <setting_slider id="sharpness" heading="txt_cam_title_sharpness" setting_icon="">
-            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" lnValue="2" minorStep="0.5" majorStep="1"/>
+            <setup min="txt_cam_slidervalue_l1_minus" max="txt_cam_slidervalue_l1_plus" l1Value="2" minorStep="0.5" majorStep="1"/>
         </setting_slider>
 
         <!-- Still scene modes -->

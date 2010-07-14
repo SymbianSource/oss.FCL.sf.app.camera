@@ -64,7 +64,6 @@
         <string name="title" value="Scene modes"/>
         <bool name="contentFullScreen" value="TRUE"/>
         <enums name="focusDelegation" value="FocusDelegationNone"/>
-        <enums name="titleBarFlags" value="TitleBarMinimized|TitleBarHidden"/>
     </widget>
     <connect receiver="settings_scenes_view" sender="scene_ok_button" signal="released()" slot="handleOkButtonPress()"/>
     <connect receiver="settings_scenes_view" sender="scene_cancel_button" signal="released()" slot="handleCancelButtonPress()"/>

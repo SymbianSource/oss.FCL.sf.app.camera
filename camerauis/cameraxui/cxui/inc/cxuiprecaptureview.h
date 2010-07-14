@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -27,6 +27,7 @@
 #include "cxezoomcontrol.h"
 #include "cxeviewfindercontrol.h"
 #include "cxuidisplaypropertyhandler.h"
+#include "cxuiview.h"
 
 
 class HbAction;
@@ -50,7 +51,7 @@ class CxuiZoomSlider;
 /**
  * Pre-capture view
  */
-class CxuiPrecaptureView : public HbView
+class CxuiPrecaptureView : public CxuiView
 {
     Q_OBJECT
 
@@ -61,13 +62,6 @@ public:
 
 public:
 
-    /**
-     * Construct-method handles initialisation tasks for this class.
-     * @param mainwindow
-     * @param engine
-     * @param documentLoader
-     * @param keyHandler
-     */
     virtual void construct(HbMainWindow *mainWindow, CxeEngine *engine,
                            CxuiDocumentLoader *documentLoader,
                            CxuiCaptureKeyHandler *keyHandler);
@@ -78,11 +72,9 @@ public:
      */
     virtual void loadWidgets() = 0;
     void prepareWindow();
-    virtual void updateOrientation(Qt::Orientation orient) = 0;
 
 public slots:
 
-    void releaseCamera();
     void initCamera();
     void requestCameraSwitch();
 
@@ -104,21 +96,11 @@ protected slots:
     // UI: Zoom slider change notification
     void zoomTo(int value);
 
-    // Control visibility of all UI items at the same time: toolbar, zoom and titlepane items
-    virtual void hideControls();
-    virtual void showControls();
-    void toggleControls();
-
     void disableControlsTimeout();
 
     void toggleZoom();
-    void hideToolbar();
-
-    void launchPhotosApp();
-    void launchVideosApp();
 
     // Settings related
-    void launchNotSupportedNotification();
     void launchDiskFullNotification();
     void showSettingsGrid();
     void hideSettingsGrid();
@@ -127,17 +109,11 @@ protected slots:
     void prepareToCloseDialog(HbAction *action);
 
 protected:
-
-   virtual void initializeSettingsGrid() = 0;
-
-    void hideZoom();
-    void showZoom();
-    void hideIndicators();
-    void showIndicators();
+    void toggleControls();
+    virtual void initializeSettingsGrid() = 0;
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    virtual void showToolbar();
     bool eventFilter(QObject *object, QEvent *event);
     void launchSettingsDialog(QObject *action);
     bool isPostcaptureOn() const;
@@ -145,10 +121,7 @@ protected:
     QString getSettingItemIcon(const QString &key, QVariant value);
     void updateQualityIcon();
     void updateSceneIcon(const QString& sceneId);
-    void createWidgetBackgroundGraphic(HbWidget *widget,
-                                       const QString &graphicName,
-                                       HbFrameDrawer::FrameType frameType =
-                                       HbFrameDrawer::NinePieces);
+
 
 signals:
 
@@ -165,26 +138,15 @@ signals:
 
     // signal to report error to ErrorManager for further actions.
     void reportError(CxeError::Id errorId);
-    void showScenesView();
 
 protected:
-    CxeEngine *mEngine; // not own
     HbTransparentWindow *mViewfinder; // not own, owned by the graphics scene
-    HbMainWindow *mMainWindow; // not own
-    CxuiDocumentLoader *mDocumentLoader; // not own
     CxuiDisplayPropertyHandler *mDisplayHandler;
-    bool   mControlsVisible;
-    QTimer mHideControlsTimeout;
-    CxuiZoomSlider *mSlider; // zoom slider, not own, owned by the graphics scene
-    HbToolBar *mToolBar; // not own, owned by the graphics scene
     HbToolBarExtension *mSettingsGrid;
-    bool mZoomVisible;
     bool mWidgetsLoaded;
     CxuiSettingDialog *mSettingsDialog;
     CxuiSettingRadioButtonList *mSettingsDialogList;
-    CxuiCaptureKeyHandler *mKeyHandler;
     HbLabel *mQualityIcon;
-    HbWidget *mIndicators;
 
 private:
     CxuiSettingDialog* createSettingsDialog();

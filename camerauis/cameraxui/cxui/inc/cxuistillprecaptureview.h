@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -75,12 +75,10 @@ public:
      */
     virtual void loadWidgets();
 
-    void updateOrientation(Qt::Orientation orientation);
-
 protected:
 
     void showEvent(QShowEvent *event);
-    virtual void showToolbar();
+    virtual bool allowShowControls() const;
 
 public slots:
 
@@ -97,7 +95,6 @@ protected slots:
     void setCapturePending();
     void goToVideo();
 
-    void launchSceneModesPopup();
 
     // Key events
     void handleCaptureKeyPressed();
@@ -117,14 +114,11 @@ protected slots:
      */
     void resetCapturePendingFlag();
 
-    void showControls();
-
     /**
      * Application focus slots are called if focus state is changed.
      * Camera is released or reserved according to new state.
      */
     void handleFocusLost();
-    void handleFocusGained();
     void launchSetting();
     void updateImagesLeftLabel();
 

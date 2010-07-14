@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -61,12 +61,6 @@
 #include "cxuiserviceprovider.h"
 #include "cxuizoomslider.h"
 
-
-// CONSTANTS
-const int CXUI_HIDE_CONTROLS_TIMEOUT     = 6000; // 6 seconds
-const QString PhotosAppExe = "photos.exe";
-const QString VideosAppExe = "videoplayer.exe";
-
 using namespace CxUiLayout;
 using namespace CxUiSettings;
 using namespace CxUiInternal;
@@ -79,24 +73,14 @@ using namespace CxUiInternal;
 // ---------------------------------------------------------------------------
 //
 CxuiPrecaptureView::CxuiPrecaptureView(QGraphicsItem *parent) :
-    HbView(parent),
-    mEngine(0),
+    CxuiView(parent),
     mViewfinder(0),
-    mMainWindow(0),
-    mDocumentLoader(0),
     mDisplayHandler(0),
-    mControlsVisible(false),
-    mHideControlsTimeout(this),
-    mSlider(0),
-    mToolBar(0),
     mSettingsGrid(0),
-    mZoomVisible(false),
     mWidgetsLoaded(false),
     mSettingsDialog(NULL),
     mSettingsDialogList(NULL),
-    mKeyHandler(NULL),
     mQualityIcon(NULL),
-    mIndicators(NULL),
     mSettingsDialogHeading(NULL),
     mSliderSettingsDialog(NULL),
     mSliderSettingsDialogHeading(NULL),
@@ -118,7 +102,14 @@ CxuiPrecaptureView::~CxuiPrecaptureView()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
+/**
+ * CxuiPrecaptureView::construct
+ * Construct-method handles initialisation tasks for this class.
+ * @param mainwindow
+ * @param engine
+ * @param documentLoader
+ * @param keyHandler
+ */
 void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
                                    CxuiDocumentLoader *documentLoader,
                                    CxuiCaptureKeyHandler * keyHandler)
@@ -126,14 +117,7 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0( camerax_performance, CXUIPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_PRECAPVIEW_CONST 1" );
 
-    CX_ASSERT_ALWAYS(mainWindow);
-    CX_ASSERT_ALWAYS(engine);
-    CX_ASSERT_ALWAYS(documentLoader);
-
-    mMainWindow = mainWindow;
-    mEngine = engine;
-    mDocumentLoader = documentLoader;
-    mKeyHandler = keyHandler;
+    CxuiView::construct(mainWindow, engine, documentLoader, keyHandler);
 
     mSettingsInfo = new CxuiSettingsInfo(engine);
     CX_DEBUG_ASSERT(mSettingsInfo);
@@ -240,93 +224,6 @@ void CxuiPrecaptureView::zoomTo(int value)
 }
 
 // ---------------------------------------------------------------------------
-// CxuiPrecaptureView::hideControls
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::hideControls()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    hideItems(Hb::AllItems);
-    hideZoom();
-    mControlsVisible = false;
-    if (mHideControlsTimeout.isActive()) {
-        mHideControlsTimeout.stop();
-    }
-    hideToolbar();
-
-    // show indicators when controls are hidden
-    showIndicators();
-
-    // give the keyboard focus back to the view
-    // for the view to receive key events
-    setFocus();
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::hideToolbar
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::hideToolbar()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    if (mToolBar) {
-        mToolBar->hide();
-    }
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::hideZoom
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::hideZoom()
-{
-    if (mSlider) {
-        mSlider->hide();
-    }
-    mZoomVisible = false;
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::showZoom
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::showZoom()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    if (mSlider) {
-
-        // if maxVal has not been set yet, ask for new parameters from engine
-        if (mSlider->maximum() <= 0) {
-
-            // get the zoom range
-            int min = mEngine->zoomControl().min();
-            int max = mEngine->zoomControl().max();
-
-            // only change values if they are acceptable and have changed
-            if ((max - min > 0) && ((mSlider->maximum() != max) || (mSlider->minimum() != min))) {
-                mSlider->setRange(min, max);
-            }
-        }
-
-        // show zoom only if the slider has acceptable value
-        if (mSlider->maximum() > 0) {
-            mSlider->show();
-        }
-    }
-
-    mZoomVisible = true;
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-// ---------------------------------------------------------------------------
 // CxuiPrecaptureView::toggleZoom
 //
 // ---------------------------------------------------------------------------
@@ -338,77 +235,6 @@ void CxuiPrecaptureView::toggleZoom()
     } else {
         showZoom();
     }
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::hideIndicators
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::hideIndicators()
-{
-    if (mIndicators) {
-        mIndicators->hide();
-    }
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::showIndicators
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::showIndicators()
-{
-    if (mIndicators) {
-        mIndicators->show();
-    }
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::showControls
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::showControls()
-{
-    if (mEngine) {
-        bool videoCases = (mEngine->videoCaptureControl().state() == CxeVideoCaptureControl::Recording ||
-                           mEngine->videoCaptureControl().state() == CxeVideoCaptureControl::Paused);
-
-        if (mEngine->isEngineReady() || videoCases) {
-            // show toolbar
-            showToolbar();
-            // show zoom
-            showZoom();
-            // show titlepane
-            showItems(Hb::AllItems);
-
-            // hide indicators when controls are shown
-            hideIndicators();
-
-            mHideControlsTimeout.start();
-            mControlsVisible = true;
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::showToolbar
-// shows toolbar
-// ---------------------------------------------------------------------------
-//
-void CxuiPrecaptureView::showToolbar()
-{
-
-    CX_DEBUG_ENTER_FUNCTION();
-
-    // toolbar pointer is missing if widgets for the view have not been loaded
-    // from the DocML
-    if (mToolBar) {
-        mToolBar->show();
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
 }
 
 
@@ -453,11 +279,7 @@ void CxuiPrecaptureView::toggleControls()
         loadWidgets();
     }
 
-    if (mControlsVisible) {
-        hideControls();
-    } else {
-        showControls();
-    }
+    CxuiView::toggleControls();
 }
 
 
@@ -582,16 +404,6 @@ void CxuiPrecaptureView::disableControlsTimeout()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-// ---------------------------------------------------------------------------
-// CxuiPrecaptureView::releaseCamera
-// ---------------------------------------------------------------------------
-void CxuiPrecaptureView::releaseCamera()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    mEngine->cameraDeviceControl().release();
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 
 // ---------------------------------------------------------------------------
 // CxuiPrecaptureView::initCamera
@@ -689,6 +501,16 @@ void CxuiPrecaptureView::prepareToCloseDialog(HbAction *action)
     if (mSliderSettingsDialog) {
         mSliderSettingsDialog->setStarterAction(NULL);
     }
+
+    // Dialog will be deleted automatically when closed
+    // The pointers may become invalid at any time
+    mSettingsDialog = NULL;
+    mSettingsDialogList = NULL;
+    mSettingsDialogHeading = NULL;
+
+    mSliderSettingsDialog = NULL;
+    mSliderSettingsDialogHeading = NULL;
+    mSettingsSlider = NULL;
 }
 
 
@@ -796,7 +618,9 @@ void CxuiPrecaptureView::launchSettingsDialog(QObject* action)
 
             // Adjust position and show the dialog.
             mSettingsDialog->setPreferredPos(getDialogPosition(), HbPopup::BottomRightCorner);
+            mSettingsDialog->setAttribute(Qt::WA_DeleteOnClose, true);
             mSettingsDialog->show();
+
         }
     } else {
         launchNotSupportedNotification();
@@ -907,38 +731,14 @@ void CxuiPrecaptureView::launchSliderSetting()
             // Adjust position and show the dialog.
             mSliderSettingsDialog->setFrameType(HbPopup::Weak);
             mSliderSettingsDialog->setPreferredPos(getDialogPosition(), HbPopup::BottomRightCorner);
+            mSliderSettingsDialog->setAttribute(Qt::WA_DeleteOnClose, true);
             mSliderSettingsDialog->show();
+
         }
     } else {
         launchNotSupportedNotification();
     }
 
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-void CxuiPrecaptureView::launchPhotosApp()
-{
-    QProcess::startDetached(PhotosAppExe);
-}
-
-/*!
- * Launching Videos application as a separate process
- */
-void CxuiPrecaptureView::launchVideosApp()
-{
-    //Releasing cameda device in order to free
-    //graphical memory
-    releaseCamera();
-    QProcess::startDetached(VideosAppExe);
-}
-
-/*!
-* Show "not supported" notification.
-*/
-void CxuiPrecaptureView::launchNotSupportedNotification()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    HbNotificationDialog::launchDialog("Notification", "Not supported yet");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -1012,50 +812,6 @@ bool CxuiPrecaptureView::isPostcaptureOn() const
 
     CX_DEBUG_EXIT_FUNCTION();
     return showPostcapture != 0; // 0 == no postcapture
-}
-
-/*!
-* Adding zoom buttons to the slider
-* \param slider Pointer to the slider object, where the buttons will be added
-*/
-void CxuiPrecaptureView::addIncreaseDecreaseButtons(CxuiZoomSlider *slider)
-{
-    // get current slider elements
-    QList<QVariant> elements = slider->sliderElements();
-
-    // add increase and decrease elements to the slider
-    elements << HbSlider::IncreaseElement << HbSlider::DecreaseElement;
-    slider->setSliderElements(elements);
-
-    // set icons for the increase and decrease element
-    slider->setElementIcon(HbSlider::DecreaseElement , HbIcon("qtg_mono_minus"));
-    slider->setElementIcon(HbSlider::IncreaseElement , HbIcon("qtg_mono_plus"));
-}
-
-
-/*!
-* Function can be used to create a graphics item and setting it as a background
-* item for HbWidget. graphicName refers to system wide graphic name. Given graphic
-* can consist of one, three or nine pieces. Nine piece graphics are used by default.
-* See HbFrameDrawer documentation for graphic naming.
-*/
-void CxuiPrecaptureView::createWidgetBackgroundGraphic(HbWidget *widget,
-                                                       const QString &graphicName,
-                                                       HbFrameDrawer::FrameType frameType)
-{
-    if (widget) {
-        HbFrameDrawer *drawer = new HbFrameDrawer(graphicName, frameType);
-
-        if (drawer) {
-            HbFrameItem *backgroundItem = new HbFrameItem(drawer, widget);
-            if (backgroundItem) {
-                // set item to fill the whole widget
-                backgroundItem->setGeometry(QRectF(QPointF(0, 0), widget->size()));
-                backgroundItem->setZValue(0);
-                widget->setBackgroundItem(backgroundItem);
-            }
-        }
-    }
 }
 
 /*!

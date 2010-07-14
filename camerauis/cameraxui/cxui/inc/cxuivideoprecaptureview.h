@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -67,8 +67,6 @@ public:
      */
     virtual void loadWidgets();
 
-    void updateOrientation(Qt::Orientation orientation);
-
 public slots:
 
     // from CxuiPrecaptureView
@@ -114,6 +112,7 @@ protected:
     void setVideoTime(HbLabel* label, int time);
     bool getElapsedTime();
     void getRemainingTime();
+    virtual bool allowShowControls() const;
     virtual void showToolbar();
     void disableFeedback();
     void enableFeedback();
@@ -133,9 +132,9 @@ protected:
     HbLabel *mRemainingTimeText; // not own
     HbLabel *mRecordingIcon; // not own
     HbAction *mGoToStillAction; // not own
-    HbToolBar *mToolBarIdle; // not own
-    HbToolBar *mToolBarRec; // not own
-    HbToolBar *mToolBarPaused; // not own
+    HbToolBar *mToolbarIdle; // not own
+    HbToolBar *mToolbarRec; // not own
+    HbToolBar *mToolbarPaused; // not own
     HbDialog *mVideoScenePopup;
     CxeVideoCaptureControl *mVideoCaptureControl;
     HbMenu *mMenu;    // own

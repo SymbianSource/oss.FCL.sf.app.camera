@@ -18,6 +18,11 @@
 #ifndef CXUISETTINGSINFO_H
 #define CXUISETTINGSINFO_H
 
+/*!
+* @file
+* @brief CxUi settings related classes and constants.
+*/
+
 #include <QObject>
 #include <QMap>
 #include <QPair>
@@ -31,11 +36,22 @@
 class CxeEngine;
 class CxuiSettingXmlReader;
 
+/*!
+* @namespace CxUiSettings
+* @brief Namespace for UI settings related constants and classes.
+*/
 namespace CxUiSettings
 {
-    // Setting mappings
+    /*! Image setting definitions. */
     static const char *IMAGE_SETTING_MAPPING_FILE = ":/xml/image_setting.xml";
+    /*! Video setting definitions. */
     static const char *VIDEO_SETTING_MAPPING_FILE = ":/xml/video_setting.xml";
+
+    /*!
+    * Character used to separate lines within a single string.
+    * E.g. SettingItem::mItem can be split with this character to get multi-line item.
+    */
+    static const char NEW_LINE_CHAR = '\n';
 
     struct SettingItem
     {

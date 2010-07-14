@@ -19,6 +19,7 @@
 
 #include "cxutils.h" // debug
 #include "cxuienums.h"
+#include "cxuisettingsinfo.h"
 #include "cxuisettingradiobuttonlist.h"
 #include "cxuisettingradiobuttonlistmodel.h"
 
@@ -79,10 +80,12 @@ QVariant CxuiSettingRadioButtonListModel::data(const QModelIndex &index, int rol
             CX_DEBUG(("CxuiSettingRadioButtonListModel: Listbox type is TwoLineListBox"));
             // two line list box
             // get the two strings
-            QStringList lines = setting.split(",");
-            QString first = lines[0];
-            QString second = lines[1];
-            list << first << second ;
+            QStringList lines = setting.split(CxUiSettings::NEW_LINE_CHAR);
+            // Split returns always atleast a single element list.
+            list << lines[0];
+            if (lines.size() > 1) {
+                list << lines[1];
+            }
         } else {
             CX_DEBUG(("CxuiSettingRadioButtonListModel: Listbox type is SingleLine"));
             list << setting;

@@ -28,6 +28,9 @@ const unsigned long int  VideoShowCapturedCr            = 0x6;
 const unsigned long int  ImageQualityCr                 = 0x7;
 const unsigned long int  VideoQualityCr                 = 0x8;
 const unsigned long int  AudioMuteCr                    = 0x9;
+const unsigned long int  GeoTaggingCr                   = 0xA;
+const unsigned long int  FacetrackingCr                 = 0xB;
+const unsigned long int  CaptureSoundAlwaysOnCr         = 0xC;
 
 const unsigned long int  CxRuntimeFeaturesCrUid         =  {0x20027018};
 

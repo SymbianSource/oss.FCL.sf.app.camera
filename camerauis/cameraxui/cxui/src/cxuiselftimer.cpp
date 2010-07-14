@@ -128,6 +128,14 @@ bool CxuiSelfTimer::isOngoing()
     return mTimer.isActive();
 }
 
+/*!
+   Returns current timeout value of selftimer.
+ */
+int CxuiSelfTimer::getTimeout() const
+{
+    return mDelay;
+}
+
 /*! Slot for canceling the selftimer.
     Disables selftimer, sets back the postcapturetimeout if it
     has been changed by selftimer and emits signal to notify interested

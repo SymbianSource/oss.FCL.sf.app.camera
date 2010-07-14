@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="1.0">
+<hbdocument version="1.1">
     <object name="cxui_video_action_record" type="HbAction">
         <icon iconName="qtg_small_record" name="icon"/>
     </object>
@@ -48,7 +48,7 @@
         <string locid="txt_cam_opt_go_to_videos" name="text" value="Go to Videos"/>
     </object>
     <widget name="video_capture_view" type="HbView">
-    	<widget name="video_view_menu" role="HbView:menu" type="HbMenu"/>
+        <widget name="video_view_menu" role="HbView:menu" type="HbMenu"/>
         <widget name="video_container" role="HbView:widget" type="HbWidget">
             <widget name="video_viewfinder_widget" type="HbTransparentWindow">
                 <real name="z" value="0"/>
@@ -100,7 +100,6 @@
         </widget>
         <string locid="txt_cam_title_camera" name="title" value="Camera"/>
         <bool name="contentFullScreen" value="TRUE"/>
-        <enums name="titleBarFlags" value="TitleBarHidden"/>
     </widget>
     <section name="video_capture_with_widgets">
         <widget name="video_capture_view" type="HbView">
@@ -112,23 +111,23 @@
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
                     <sizehint type="PREFERRED" width="var(hb-param-widget-toolbar-height)"/>
                     <enums name="orientation" value="Vertical"/>
-                    <ref object="cxui_video_action_record" role="HbToolBar:addAction"/>
-                    <ref object="cxui_video_action_light" role="HbToolBar:addAction"/>
-                    <ref object="cxui_video_action_scene" role="HbToolBar:addAction"/>
-                    <ref object="cxui_video_action_gotostill" role="HbToolBar:addAction"/>
+                    <ref object="cxui_video_action_record" role="HbWidget:addAction"/>
+                    <ref object="cxui_video_action_light" role="HbWidget:addAction"/>
+                    <ref object="cxui_video_action_scene" role="HbWidget:addAction"/>
+                    <ref object="cxui_video_action_gotostill" role="HbWidget:addAction"/>
                 </widget>
                 <widget name="video_toolbar_recording" type="HbToolBar">
                     <enums name="layoutDirection" value="RightToLeft"/>
                     <sizehint type="PREFERRED" width="var(hb-param-widget-toolbar-height)"/>
                     <enums name="orientation" value="Vertical"/>
                     <bool name="visible" value="FALSE"/>
-                    <ref object="cxui_video_action_pause" role="HbToolBar:addAction"/>
-                    <ref object="cxui_video_action_light" role="HbToolBar:addAction"/>
-                    <ref object="cxui_video_action_stop" role="HbToolBar:addAction"/>
+                    <ref object="cxui_video_action_pause" role="HbWidget:addAction"/>
+                    <ref object="cxui_video_action_light" role="HbWidget:addAction"/>
+                    <ref object="cxui_video_action_stop" role="HbWidget:addAction"/>
                 </widget>
                 <widget name="video_zoom" type="HbSlider">
                     <real name="z" value="8"/>
-                    <sizehint height="40un" type="PREFERRED"/>
+                    <sizehint height="40un" type="PREFERRED" width="9un"/>
                     <enums name="orientation" value="Vertical"/>
                 </widget>
                 <widget name="video_toolbar_paused" type="HbToolBar">
@@ -136,9 +135,9 @@
                     <sizehint type="PREFERRED" width="var(hb-param-widget-toolbar-height)"/>
                     <enums name="orientation" value="Vertical"/>
                     <bool name="visible" value="FALSE"/>
-                    <ref object="cxui_video_action_resume" role="HbToolBar:addAction"/>
-                    <ref object="cxui_video_action_light" role="HbToolBar:addAction"/>
-                    <ref object="cxui_video_action_stop" role="HbToolBar:addAction"/>
+                    <ref object="cxui_video_action_resume" role="HbWidget:addAction"/>
+                    <ref object="cxui_video_action_light" role="HbWidget:addAction"/>
+                    <ref object="cxui_video_action_stop" role="HbWidget:addAction"/>
                 </widget>
                 <widget name="video_indicator_container_bottom" type="HbWidget">
                     <widget name="video_recording_icon" type="HbLabel">
@@ -196,7 +195,6 @@
                     <anchoritem dst="video_viewfinder_widget" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
                 </layout>
             </widget>
-            <enums name="titleBarFlags" value="TitleBarTransparent"/>
         </widget>
         <connect receiver="video_capture_view" sender="video_view_menu" signal="aboutToShow()" slot="disableControlsTimeout()"/>
         <connect receiver="video_capture_view" sender="video_view_menu" signal="aboutToHide()" slot="hideControls()"/>
@@ -216,62 +214,49 @@
     </section>
     <section name="video_standalone_mode">
         <widget name="video_view_menu" role="HbView:menu" type="HbMenu">
-            <ref object="cxui_video_action_gotovideos" role="HbMenu:addAction"/>
-            <ref object="cxui_video_action_settings" role="HbMenu:addAction"/>
+            <ref object="cxui_video_action_gotovideos" role="HbWidget:addAction"/>
+            <ref object="cxui_video_action_settings" role="HbWidget:addAction"/>
             <widget name="video_submenu_general" role="HbMenu:menu" type="HbMenu">
                 <string locid="txt_cam_opt_general_settings" name="title" value="General settings"/>
-                <ref object="cxui_video_action_showcapturedvideo" role="HbMenu:addAction"/>
-                <ref object="cxui_video_action_quality" role="HbMenu:addAction"/>
+                <ref object="cxui_video_action_showcapturedvideo" role="HbWidget:addAction"/>
+                <ref object="cxui_video_action_quality" role="HbWidget:addAction"/>
             </widget>
         </widget>
     </section>
     <section name="video_embedded_mode">
         <widget name="video_view_menu" role="HbView:menu" type="HbMenu">
-            <ref object="cxui_video_action_settings" role="HbMenu:addAction"/>
+            <ref object="cxui_video_action_settings" role="HbWidget:addAction"/>
             <widget name="video_submenu_general" role="HbMenu:menu" type="HbMenu">
                 <string locid="txt_cam_opt_general_settings" name="title" value="General settings"/>
-                <ref object="cxui_video_action_quality" role="HbMenu:addAction"/>
+                <ref object="cxui_video_action_quality" role="HbWidget:addAction"/>
             </widget>
         </widget>
     </section>
     <section name="video_idle">
-        <widget name="video_recording_icon" type="HbLabel">
-            <bool name="visible" value="FALSE"/>
-        </widget>
-        <widget name="video_indicator_container_bottom" type="HbWidget">
-            <bool name="visible" value="TRUE"/>
-            <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
-                <contentsmargins bottom="var(hb-param-margin-gene-middle-vertical)" left="var(hb-param-margin-gene-middle-horizontal)" right="var(hb-param-margin-gene-middle-horizontal)" top="var(hb-param-margin-gene-middle-vertical)"/>
-                <linearitem itemname="video_remaining_time"/>
-            </layout>
-        </widget>
         <widget name="video_elapsed_time" type="HbLabel">
             <bool name="visible" value="FALSE"/>
         </widget>
-    </section>
-    <section name="video_recording">
         <widget name="video_recording_icon" type="HbLabel">
-            <bool name="visible" value="TRUE"/>
+            <bool name="visible" value="FALSE"/>
         </widget>
         <widget name="video_indicator_container_bottom" type="HbWidget">
             <bool name="visible" value="TRUE"/>
             <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
                 <contentsmargins bottom="var(hb-param-margin-gene-middle-vertical)" left="var(hb-param-margin-gene-middle-horizontal)" right="var(hb-param-margin-gene-middle-horizontal)" top="var(hb-param-margin-gene-middle-vertical)"/>
-                <linearitem itemname="video_recording_icon"/>
-                <linearitem itemname="video_elapsed_time"/>
                 <linearitem itemname="video_remaining_time"/>
             </layout>
         </widget>
+    </section>
+    <section name="video_recording">
         <widget name="video_elapsed_time" type="HbLabel">
             <bool name="visible" value="TRUE"/>
         </widget>
         <widget name="video_remaining_time" type="HbLabel">
             <bool name="visible" value="TRUE"/>
         </widget>
-    </section>
-    <section name="video_paused">
         <widget name="video_recording_icon" type="HbLabel">
-            <bool name="visible" value="FALSE"/>
+            <bool name="visible" value="TRUE"/>
+            <icon iconName="qtg_small_record" name="icon"/>
         </widget>
         <widget name="video_indicator_container_bottom" type="HbWidget">
             <bool name="visible" value="TRUE"/>
@@ -282,11 +267,26 @@
                 <linearitem itemname="video_remaining_time"/>
             </layout>
         </widget>
+    </section>
+    <section name="video_paused">
         <widget name="video_elapsed_time" type="HbLabel">
             <bool name="visible" value="TRUE"/>
         </widget>
+        <widget name="video_recording_icon" type="HbLabel">
+            <icon iconName="qtg_mono_pause" name="icon"/>
+            <bool name="visible" value="TRUE"/>
+        </widget>
+        <widget name="video_indicator_container_bottom" type="HbWidget">
+            <bool name="visible" value="TRUE"/>
+            <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
+                <contentsmargins bottom="var(hb-param-margin-gene-middle-vertical)" left="var(hb-param-margin-gene-middle-horizontal)" right="var(hb-param-margin-gene-middle-horizontal)" top="var(hb-param-margin-gene-middle-vertical)"/>
+                <linearitem itemname="video_recording_icon"/>
+                <linearitem itemname="video_elapsed_time"/>
+                <linearitem itemname="video_remaining_time"/>
+            </layout>
+        </widget>
     </section>
-    <metadata activeUIState="Recording" display="NHD landscape" unit="un">
+    <metadata activeUIState="Paused" display="NHD-3.2-inch_landscape" unit="un">
         <uistate name="Common ui state" sections="#common"/>
         <uistate name="All widgets" sections="#common video_capture_with_widgets"/>
         <uistate name="video_standalone_mode" sections="#common video_capture_with_widgets video_standalone_mode"/>

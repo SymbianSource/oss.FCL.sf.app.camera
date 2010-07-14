@@ -49,13 +49,9 @@ const QString CXUI_SCENES_LOW_LIGHT_IMAGE=":/camerax/scene_lowlight.png";
 * Constructor
 */
 CxuiSceneModeView::CxuiSceneModeView(QGraphicsItem *parent) :
-    HbView(parent),
-    mMainWindow(NULL),
+    CxuiView(parent),
     mSettingsInfo(NULL),
-    mEngine(NULL),
-    mDocumentLoader(NULL),
-    mCaptureKeyHandler(NULL),
-	mScenesBackground(NULL)
+    mScenesBackground(NULL)
 {
     CX_DEBUG_IN_FUNCTION();
 }
@@ -83,17 +79,15 @@ void CxuiSceneModeView::construct(HbMainWindow *mainwindow,
                                CxuiCaptureKeyHandler *keyHandler)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    CxuiView::construct(mainwindow, engine, documentLoader, keyHandler);
 
-    mMainWindow = mainwindow;
-    mDocumentLoader = documentLoader;
-    mCaptureKeyHandler = keyHandler;
-    mEngine = engine;
     mSettingsInfo = new CxuiSettingsInfo(mEngine);
     setContentFullScreen(true);
     loadDefaultWidgets();
 
-    mCameraReleaseTimer.setInterval(CXUI_SCENES_CAMERA_TIMEOUT);    
-    connect(&mCameraReleaseTimer, SIGNAL(timeout()), this, SLOT(releaseCameraHw()), Qt::UniqueConnection);
+    mCameraReleaseTimer.setInterval(CXUI_SCENES_CAMERA_TIMEOUT);
+    mCameraReleaseTimer.setSingleShot(true);
+    connect(&mCameraReleaseTimer, SIGNAL(timeout()), this, SLOT(releaseCamera()), Qt::UniqueConnection);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -130,6 +124,10 @@ void CxuiSceneModeView::loadDefaultWidgets()
 
     createWidgetBackgroundGraphic(mScenesContainer, TRANSPARENT_BACKGROUND_GRAPHIC);
 
+    //!@todo: View flags property is missing from HbView,
+    //        so can't properly hide title bar / status bar there.
+    hideControls();
+
     connectSignals();
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -142,31 +140,6 @@ void CxuiSceneModeView::connectSignals()
 {
     connect(mScenesList, SIGNAL(itemSelected(int)), this, SLOT(handleSceneRadiobuttonPress(int)));
     connect(mTransitionAnimation, SIGNAL(finished()), this, SLOT(finishScenesTransition()));
-}
-
-/*!
-* Function can be used to create a graphics item and setting it as a background
-* item for HbWidget. graphicName refers to system wide graphic name. Given graphic
-* can consist of one, three or nine pieces. Nine piece graphics are used by default.
-* See HbFrameDrawer documentation for graphic naming.
-*/
-void CxuiSceneModeView::createWidgetBackgroundGraphic(HbWidget *widget,
-                                                       const QString &graphicName,
-                                                       HbFrameDrawer::FrameType frameType)
-{
-    if (widget) {
-        HbFrameDrawer *drawer = new HbFrameDrawer(graphicName, frameType);
-
-        if (drawer) {
-            HbFrameItem *backgroundItem = new HbFrameItem(drawer, widget);
-            if (backgroundItem) {
-                // set item to fill the whole widget
-                backgroundItem->setGeometry(QRectF(QPointF(0, 0), widget->size()));
-                backgroundItem->setZValue(0);
-                widget->setBackgroundItem(backgroundItem);
-            }
-        }
-    }
 }
 
 /*!
@@ -302,6 +275,15 @@ void CxuiSceneModeView::showEvent(QShowEvent *event)
 }
 
 /*!
+* Allow showing UI controls?
+* Title bar and other UI chrome is never shown in scene mode view.
+*/
+bool CxuiSceneModeView::allowShowControls() const
+{
+    return false;
+}
+
+/*!
 * Slot to handle capture key full press.
 */
 void CxuiSceneModeView::handleCaptureKeyPressed()
@@ -332,17 +314,6 @@ void CxuiSceneModeView::closeView()
     // Make sure engine prepares for new image/video if necessary
     mEngine->initMode(mEngine->mode());
     emit viewCloseEvent();
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-/*!
-* Slot to handle camera hw release timeout
-*/
-void CxuiSceneModeView::releaseCameraHw()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    mCameraReleaseTimer.stop();
-    mEngine->cameraDeviceControl().release();
     CX_DEBUG_EXIT_FUNCTION();
 }
 

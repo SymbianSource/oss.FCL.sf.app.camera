@@ -18,6 +18,7 @@
 #include <QSize>
 #include <QMetaType>
 #include <QVariant>
+#include <hbparameterlengthlimiter.h>
 
 #include "cxutils.h"
 #include "cxuienums.h"
@@ -206,30 +207,31 @@ void CxuiSettingsInfo::getImageQualitySettings(RadioButtonListParams &settings)
     int index = 0;
 
     // get the localized possible strings for each image quality setting
-    QString vga = hbTrId("txt_cam_dblist_vga");
-    QString normal = hbTrId("txt_cam_dblist_ln_mpix");
-    QString imagesLeft = hbTrId("txt_cam_dblist_hd_720p_val_ln_images_left");
-    QString widescreen = hbTrId("txt_cam_dblist_ln_mpix_widescreen");
+    QString vga = "txt_cam_dblist_vga";
+    QString normal = "txt_cam_dblist_l1_mpix";
+    QString imagesLeft = "txt_cam_dblist_hd_720p_val_ln_images_left";
+    QString widescreen = "txt_cam_dblist_l1_mpix_widescreen";
 
     foreach(CxeImageDetails quality, list) {
         // mapping the right value for each quality
 
         QString settingString;
         QString qualityIcon = "";
+        qreal pxCount = quality.mMpxCount.toDouble();
 
         if (quality.mWidth == KResVGA.width() && quality.mHeight == KResVGA.height()) {
-            settingString.append(vga);
+            settingString.append(hbTrId(vga.toAscii().constData()));
             settingString.append(" ");
         }
 
         if (quality.mAspectRatio == Cxe::AspectRatio16to9) {
-            settingString.append(widescreen.arg(quality.mMpxCount));
+             settingString.append(hbTrId(widescreen.toAscii().constData()).arg(pxCount,0,'g',3));
         } else {
-            settingString.append(normal.arg(quality.mMpxCount));
+            settingString.append(hbTrId(normal.toAscii().constData()).arg(pxCount,0,'g',3));
         }
 
-        settingString.append(",");
-        settingString.append(imagesLeft.arg(quality.mPossibleImages));
+        settingString.append(NEW_LINE_CHAR);
+        settingString.append(HbParameterLengthLimiter(imagesLeft.toAscii().constData(), quality.mPossibleImages));
         CX_DEBUG(( "Image quality setting string: %s", settingString.toAscii().constData()));
 
         if (quality.mMpxCount == "12") {
@@ -304,7 +306,7 @@ void CxuiSettingsInfo::getVideoQualitySettings(RadioButtonListParams &settings)
             qualityIcon = "qtg_mono_vga_wide";
         }
 
-        settingString.append(",");
+        settingString.append(NEW_LINE_CHAR);
         time.sprintf("%02d:%02d", quality.mRemainingTime / 60, quality.mRemainingTime % 60);
         settingString.append(timeleft.arg(time));
 

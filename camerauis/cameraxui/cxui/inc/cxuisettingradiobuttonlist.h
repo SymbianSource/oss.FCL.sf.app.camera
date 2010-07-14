@@ -43,7 +43,7 @@ public:
     explicit CxuiSettingRadioButtonList(QGraphicsItem *parent, CxeEngine *engine);
     void init(CxUiSettings::RadioButtonListParams *data);
 
-
+    void setOriginalSelectedItemByValue(const QVariant &value);
 signals:
     void valueSelected(int value);
     void selectionCommitted();
@@ -56,7 +56,6 @@ protected slots:
     void handleItemSelected(int index);
 
 protected:
-   void showEvent(QShowEvent *event); // From QGraphicsWidget
     virtual void initOriginalSelectedItem();
 
 private:

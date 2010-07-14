@@ -30,6 +30,9 @@ public:
     explicit CxuiZoomSlider(QGraphicsItem *parentItem = NULL);
     ~CxuiZoomSlider();
 
+public:
+    void addZoomButtons();
+
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
 

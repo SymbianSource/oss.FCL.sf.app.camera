@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -91,25 +91,28 @@ CxeAutoFocusControlSymbian::~CxeAutoFocusControlSymbian()
 */
 CxeError::Id CxeAutoFocusControlSymbian::start(bool soundEnabled)
 {
-    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <> state: %d, sound enabled: %d",
-               state(), soundEnabled ) );
-    mSoundEnabled = soundEnabled;
-    int err = KErrNone;
-
     CX_ASSERT_ALWAYS(mAdvancedSettings);
 
-    if ( state() != CxeAutoFocusControl::InProgress && state() != CxeAutoFocusControl::Canceling  ) {
-        CX_DEBUG(("CxeAutoFocusControlSymbian::start() calling SetAutoFocusType"));
-        mCancelled = false;
-        setState(InProgress);
-        setFocusRange(mAFRange);
-        setFocusType(CCamera::CCameraAdvancedSettings::EAutoFocusTypeSingle);
-    } else { // AF was started earlier, can't start until it completes
-        err = KErrInUse;
+    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <> state: %d, sound enabled: %d",
+               state(), soundEnabled ) );
+
+    mSoundEnabled = soundEnabled;
+    CxeError::Id error = CxeError::None;
+
+    if (!isFixedFocusMode(mode())) {
+        if ( state() != CxeAutoFocusControl::InProgress && state() != CxeAutoFocusControl::Canceling  ) {
+            CX_DEBUG(("CxeAutoFocusControlSymbian::start() calling SetAutoFocusType"));
+            mCancelled = false;
+            setState(InProgress);
+            setFocusRange(mAFRange);
+            setFocusType(CCamera::CCameraAdvancedSettings::EAutoFocusTypeSingle);
+        } else { // AF was started earlier, can't start until it completes
+            error = CxeError::InUse;
+        }
     }
 
-    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <= err : %d", err ) );
-    return CxeErrorHandlingSymbian::map(err);
+    CX_DEBUG( ("CxeAutoFocusControlSymbian::start() <= error: %d", error ) );
+    return error;
 }
 
 
@@ -123,7 +126,7 @@ void CxeAutoFocusControlSymbian::cancel()
 
     CX_DEBUG_ASSERT(mAdvancedSettings);
 
-    if (!mCancelled) {
+    if (!mCancelled && !isFixedFocusMode(mode())) {
         if (state() == CxeAutoFocusControl::InProgress) {
             // Need to stop current AF first. Wait for AF event to proceed.
             setState(CxeAutoFocusControl::Canceling);
@@ -171,6 +174,14 @@ CxeAutoFocusControl::Mode CxeAutoFocusControlSymbian::mode() const
     return mAfMode;
 }
 
+/**
+* Is the given mode a fixed focus mode?
+*/
+bool CxeAutoFocusControlSymbian::isFixedFocusMode(CxeAutoFocusControl::Mode mode) const
+{
+    return (mode == CxeAutoFocusControl::Hyperfocal
+         || mode == CxeAutoFocusControl::Infinity);
+}
 
 /*
 * To check if Autofocus is supported
@@ -389,7 +400,15 @@ void CxeAutoFocusControlSymbian::handleSceneChanged(CxeScene& scene)
 
     // we are interested only in the AF range.
     if(scene.contains(CxeSettingIds::FOCAL_RANGE) && supported() ) {
+
         setMode(static_cast<CxeAutoFocusControl::Mode>(scene[CxeSettingIds::FOCAL_RANGE].toInt()));
+
+        if (isFixedFocusMode(mode())) {
+            // Focus now if a fixed focus mode is used.
+            setFocusType(CCamera::CCameraAdvancedSettings::EAutoFocusTypeSingle);
+            // Set state to InProgress, so we know to set it ready in ECAM callback.
+            setState(CxeAutoFocusControl::InProgress);
+        }
     }
 
     CX_DEBUG_EXIT_FUNCTION();

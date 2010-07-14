@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -48,6 +48,7 @@ public:
     void cancel();
     void setMode( CxeAutoFocusControl::Mode newMode );
     CxeAutoFocusControl::Mode mode() const;
+    bool isFixedFocusMode(CxeAutoFocusControl::Mode mode) const;
 
     CxeAutoFocusControl::State state() const;
     bool supported() const;

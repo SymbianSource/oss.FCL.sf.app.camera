@@ -67,8 +67,33 @@ void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
 
         setSettingId(data->mSettingId);
         setListBoxType(data->mListboxType);
+
+        initOriginalSelectedItem();
+        // ensure that currently selected item is visible
+        scrollTo(currentIndex());
     }
 
+}
+
+/*!
+ * Sets the original selection of list by value. Can be used to override value read from
+ * CxeSettings or used to remember previously selected value in case of setting that is
+ * not read from CxeSettings (e.g. selftimer)
+ */
+void CxuiSettingRadioButtonList::setOriginalSelectedItemByValue(const QVariant &value)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    int index = mSettingValues.indexOf(QVariant(value));
+    if (index >= 0) {
+        mOriginalIndex = index;
+        setSelected(index);
+        // ensure that currently selected item is visible
+        scrollTo(currentIndex());
+    } else {
+        CX_DEBUG(("Value %s not found", value.toString().toAscii().data()));
+    }
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 void CxuiSettingRadioButtonList::setItems(const QStringList &values)
@@ -101,19 +126,6 @@ void CxuiSettingRadioButtonList::handleItemSelected(int index)
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
-
-void CxuiSettingRadioButtonList::showEvent(QShowEvent *event)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    initOriginalSelectedItem();
-    // ensure that currently selected item is visible
-    scrollTo(currentIndex());
-    QGraphicsWidget::showEvent(event);
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
 
 /*!
 *  Get the value currently active in settings.

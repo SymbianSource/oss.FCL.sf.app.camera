@@ -55,6 +55,10 @@ HbLabel#video_remaining_time::text
 {
 color: var(qtc_popup_trans_normal);
 }
+HbWidget#video_indicator_container_bottom > HbLabel::icon
+{
+color: var(qtc_popup_trans_normal);
+}
 /* 
 Zoom sliders
 Decrement and increase icons both 

@@ -39,6 +39,7 @@ public:
     bool isEnabled();
     bool isOngoing();
 
+    int getTimeout() const;
 signals:
     void timerFinished();
     void cancelled();

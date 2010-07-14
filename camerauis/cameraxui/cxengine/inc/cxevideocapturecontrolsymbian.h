@@ -125,6 +125,7 @@ private: // helper methods
     void generateFilename();
     void handlePrepareFailed();
     void handleComposeFailed(int error);
+    void emulateNormalStopping();
 
 protected: // protected data
     //! Video Recorder
