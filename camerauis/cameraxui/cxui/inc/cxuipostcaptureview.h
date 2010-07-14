@@ -27,6 +27,7 @@ class QGraphicsRectItem;
 class HbMainWindow;
 class HbAction;
 class HbLabel;
+class ShareUi;
 
 class CxeEngine;
 class CxuiDocumentLoader;
@@ -55,7 +56,6 @@ public slots:
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
     void showEvent(QShowEvent *event);
     void hideEvent(QHideEvent *event);
     void showToolbar();
@@ -94,6 +94,8 @@ private: // data
     HbToolBar *mEmbeddedToolbar;
     QGraphicsRectItem *mBackgroundItem;
     HbLabel *mImageLabel;
+
+    ShareUi *mShareUi;
 
     /**
      * Timer used to stop viewfinder after a delay if the user remains in

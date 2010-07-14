@@ -23,6 +23,7 @@
 #include <hbview.h>
 #include <hbmainwindow.h>
 #include <hbframedrawer.h>
+#include <hbinstantfeedback.h>
 
 class CxuiDocumentLoader;
 class CxuiCaptureKeyHandler;
@@ -67,6 +68,8 @@ protected:
                                        HbFrameDrawer::FrameType frameType =
                                        HbFrameDrawer::NinePieces);
 
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 protected slots:
     virtual void launchNotSupportedNotification();
     virtual void launchPhotosApp();
@@ -100,6 +103,7 @@ protected: //common data
     bool   mZoomVisible;
     QTimer mHideControlsTimeout;
 
+    HbInstantFeedback mControlsFeedback;
 };
 
 #endif // CXUIVIEW_H

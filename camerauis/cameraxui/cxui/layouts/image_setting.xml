@@ -115,6 +115,16 @@
             <item string="txt_cam_list_night"           value="image_scene_night"          icon="qtg_mono_night" />
             <item string="txt_cam_list_night_portrait"  value="image_scene_night_portrait" icon="qtg_mono_night_portrait" />
         </setting_list>
+        
+        <!-- Face tracking (setting list) -->
+        <setting_list id="face_tracking"
+                      heading="txt_cam_title_facetracking"
+                      preview="1"
+                      type="SingleLineListBox"
+                      setting_icon="">
+            <item string="txt_cam_list_facetracking_on" value="1" icon="qtg_mono_face_tracking" />
+            <item string="txt_cam_list_facetracking_off" value="0" icon="" />
+        </setting_list>
 
     </settings>
 </cxui>

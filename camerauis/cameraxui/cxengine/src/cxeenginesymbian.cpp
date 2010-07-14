@@ -119,11 +119,11 @@ void CxeEngineSymbian::createControls()
         CX_DEBUG_ASSERT(mSettingsModel);
 
         mSettings = new CxeSettingsImp(*mSettingsModel);
-        
+
         //! @todo a temporary hack to change the startup sequence to avoid GOOM problems
         static_cast<CxeSettingsImp*>(mSettings)->loadSettings(mode());
-        
-        
+
+
         // Connect P&S key updates to settings signal.
         connect(settingsStore, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
                 mSettings, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)));
@@ -150,7 +150,8 @@ void CxeEngineSymbian::createControls()
 
         mSnapshotControl = new CxeSnapshotControl(*mCameraDevice);
 
-        mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice);
+        mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice, 
+		                            *mSettings);
 
         mFileSaveThread = CxeFileSaveThreadFactory::createFileSaveThread();
 
@@ -203,6 +204,11 @@ void CxeEngineSymbian::connectSignals()
     connect(mCameraDeviceControl,
             SIGNAL(cameraEvent(int,int)),
             mAutoFocusControl,
+            SLOT(handleCameraEvent(int,int)));
+
+    connect(mCameraDeviceControl,
+            SIGNAL(cameraEvent(int,int)),
+            mStillCaptureControl,
             SLOT(handleCameraEvent(int,int)));
 
     // Connect signal for device ready events

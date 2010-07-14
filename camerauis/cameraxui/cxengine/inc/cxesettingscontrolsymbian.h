@@ -51,8 +51,8 @@ private:
     void updateBrightnessSetting(QVariant newValue);
     void updateExposureModeSetting(QVariant newValue);
     void updateExposureCompensationSetting(QVariant newValue);
-
     void updateFlashSetting(QVariant newValue);
+    void updateFaceTrackingSetting(QVariant newValue);
 
 private:
     CxeCameraDevice &mCameraDevice;

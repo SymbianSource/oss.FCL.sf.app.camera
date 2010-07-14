@@ -25,14 +25,19 @@
 #include <eikenv.h>
 #include <avkondomainpskeys.h>  // keyguard state
 #include <hwrmpowerstatesdkpskeys.h> // battery status
+#include <UsbWatcherInternalPSKeys.h> // usb status
+#include <usbman.h>
+#include <usbpersonalityids.h>
 
 #include <QMetaEnum>
 #include <QString>
 #include <QVariant>
 #include <qsymbianevent.h>
+
 #endif // Q_OS_SYMBIAN
 
 #include "cxutils.h"
+#include "cxuieventlog.h"
 #include "cxuiapplication.h"
 #include "cxesettings.h"
 #include "cxuiapplicationframeworkmonitorprivate.h"
@@ -64,6 +69,11 @@ namespace
         return convertTDesC2QString(name);
     }
 
+    inline QString bitString(int number, char fill = '0', int width = 32)
+    {
+        return QString::number(number, 2).rightJustified(width, fill);
+    }
+
     //!@todo: Avkon UIDs not needed once device dialogs fully implemented in Orbit.
 
     // AknCapServer
@@ -75,6 +85,10 @@ namespace
     static const unsigned int UID_TASKSWITCHER    = 0x2002677D;
     // Dialog server
     static const unsigned int UID_DIALOGAPPSERVER = 0x20022FC5;
+
+    // Log event types
+    static const char *EVENT_USB        = "usb";
+    static const char *EVENT_FOREGROUND = "foreground";
 }
 #endif // Q_OS_SYMBIAN
 
@@ -82,8 +96,11 @@ namespace
 /*!
 * Constructor
 */
-CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(CxuiApplication &application, CxeSettings& settings)
-    :  mApplication(application),
+CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(CxuiApplicationFrameworkMonitor *parent,
+                                                                               CxuiApplication &application,
+                                                                               CxeSettings& settings)
+    :  q(parent),
+       mApplication(application),
        mSettings(settings),
 #ifdef Q_OS_SYMBIAN
        mWsSession(CCoeEnv::Static()->WsSession()),
@@ -92,17 +109,18 @@ CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(C
        mWindowGroupName(),
        mKeyLockState(EKeyguardNotActive),
        mBatteryStatus(EBatteryStatusUnknown),
+       mUsbPersonality(0),
+       mEventLog(NULL),
 #endif // Q_OS_SYMBIAN
        mState(CxuiApplicationFrameworkMonitor::ForegroundOwned)
 {
     CX_DEBUG_ENTER_FUNCTION();
-
 #ifdef Q_OS_SYMBIAN
     mWindowGroup.EnableFocusChangeEvents();
     mWindowGroupName = windowGroupName(mWsSession, mWindowGroupId);
+    mEventLog = new CxuiEventLog("CxuiApplicationFrameworkMonitorPrivate");
     init();
 #endif // Q_OS_SYMBIAN
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -111,7 +129,11 @@ CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(C
 */
 CxuiApplicationFrameworkMonitorPrivate::~CxuiApplicationFrameworkMonitorPrivate()
 {
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_ENTER_FUNCTION();
+#ifdef Q_OS_SYMBIAN
+    delete mEventLog;
+#endif // Q_OS_SYMBIAN
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
@@ -122,6 +144,24 @@ CxuiApplicationFrameworkMonitor::ForegroundState CxuiApplicationFrameworkMonitor
 {
     return mState;
 }
+
+/*!
+* Is USB connected in mass memory mode?
+* @return True if USB mass memory mode is active and connected, false otherwise.
+*/
+bool CxuiApplicationFrameworkMonitorPrivate::isUsbMassMemoryModeActive() const
+{
+    bool active(false);
+#ifdef Q_OS_SYMBIAN
+    // Mass memory mode activity can be seen from the KUsbWatcherSelectedPersonality property.
+    // When USB is connected in Mass Memory Mode, we get KUsbPersonalityIdMS as personality id.
+    // If USB is not connected, personality id is KUsbWatcherSelectedPersonalityNone.
+    active = (mUsbPersonality == KUsbPersonalityIdMS);
+#endif // Q_OS_SYMBIAN
+    return active;
+}
+
+
 
 #ifdef Q_OS_SYMBIAN
 /*!
@@ -153,7 +193,7 @@ void CxuiApplicationFrameworkMonitorPrivate::handlePropertyEvent(long int uid, u
     CX_DEBUG_ENTER_FUNCTION();
 
     if (uid == KPSUidAvkonDomain.iUid && key == KAknKeyguardStatus) {
-        CX_DEBUG(("CxuiApplicationFrameworkMonitor - keylock status changed: %d -> %d", value.toInt(), mKeyLockState));
+        CX_DEBUG(("CxuiApplicationFrameworkMonitor - keylock status changed: %d -> %d", mKeyLockState, value.toInt()));
 
         // Check if the keylock value has actually changed
         const int newKeyLockState = value.toInt();
@@ -163,7 +203,7 @@ void CxuiApplicationFrameworkMonitorPrivate::handlePropertyEvent(long int uid, u
             setState(getCurrentState());
         }
     } else if (uid == KPSUidHWRMPowerState.iUid && key == KHWRMBatteryStatus ) {
-        CX_DEBUG(("CxuiApplicationFrameworkMonitor - battery status changed: %d -> %d", value.toInt(), mBatteryStatus));
+        CX_DEBUG(("CxuiApplicationFrameworkMonitor - battery status changed: %d -> %d", mBatteryStatus, value.toInt() ));
 
         // If status changed, check if battery is going empty.
         const int newBatteryStatus = value.toInt();
@@ -172,8 +212,29 @@ void CxuiApplicationFrameworkMonitorPrivate::handlePropertyEvent(long int uid, u
 
             // Notify that battery is almost empty,
             // need to stop any recordings etc.
-            if( mBatteryStatus == EBatteryStatusEmpty ) {
-                emit batteryEmpty();
+            if(mBatteryStatus == EBatteryStatusEmpty) {
+                emit q->batteryEmpty();
+            }
+        }
+    } else if (uid == KPSUidUsbWatcher.iUid && key == KUsbWatcherSelectedPersonality) {
+        CX_DEBUG(("CxuiApplicationFrameworkMonitor - usb personality changed: %d -> %d", mUsbPersonality, value.toInt()));
+
+        const int newUsbPersonality(value.toInt());
+        if (newUsbPersonality != mUsbPersonality) {
+            // Check before saving the new state if mass memory mode was active,
+            // so we know when to emit the unactivated signal.
+            const bool wasUsbMassMemoryModeActive(isUsbMassMemoryModeActive());
+            // Store new state.
+            mUsbPersonality = newUsbPersonality;
+
+            // Save state to log.
+            if (mEventLog) {
+                mEventLog->append(EVENT_USB, QString::number(mUsbPersonality));
+            }
+
+            // Check if mass memory mode activity changed.
+            if (wasUsbMassMemoryModeActive != isUsbMassMemoryModeActive()) {
+                emit q->usbMassMemoryModeToggled(isUsbMassMemoryModeActive());
             }
         }
     }
@@ -201,6 +262,10 @@ void CxuiApplicationFrameworkMonitorPrivate::init()
     mSettings.get(KPSUidAvkonDomain.iUid, KAknKeyguardStatus, Cxe::PublishAndSubscribe, value);
     mKeyLockState = value.toInt();
 
+    // Get current USB personality
+    mSettings.get(KPSUidUsbWatcher.iUid, KUsbWatcherSelectedPersonality, Cxe::PublishAndSubscribe, value);
+    mUsbPersonality = value.toInt();
+
     bool ok = connect(&mSettings, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
                       this, SLOT(handlePropertyEvent(long int, unsigned long int, QVariant)));
     CX_DEBUG_ASSERT(ok);
@@ -215,7 +280,7 @@ void CxuiApplicationFrameworkMonitorPrivate::init()
 * Helper method to handle Symbian event that specificly is of type QSymbianEvent::WindowServerEvent.
 * @param event Symbian event to be handled. (Ownership not taken.)
 */
-bool CxuiApplicationFrameworkMonitorPrivate::handleWindowServerEvent(const QSymbianEvent *event)
+void CxuiApplicationFrameworkMonitorPrivate::handleWindowServerEvent(const QSymbianEvent *event)
     {
     // We receive tons of these events, so function start and end traces
     // are intentionally left out.
@@ -242,13 +307,13 @@ bool CxuiApplicationFrameworkMonitorPrivate::handleWindowServerEvent(const QSymb
             const TWsVisibilityChangedEvent *visibilityEvent = wsEvent->VisibilityChanged();
             if (visibilityEvent) {
                 CX_DEBUG(("CxuiApplicationFrameworkMonitor - EFullyVisible: bits[%s]",
-                    QString::number(TWsVisibilityChangedEvent::EFullyVisible, 2).toAscii().constData() ));
+                    bitString(TWsVisibilityChangedEvent::EFullyVisible).toAscii().constData() ));
                 CX_DEBUG(("CxuiApplicationFrameworkMonitor - EPartiallyVisible: bits[%s]",
-                    QString::number(TWsVisibilityChangedEvent::EPartiallyVisible, 2).toAscii().constData() ));
+                    bitString(TWsVisibilityChangedEvent::EPartiallyVisible).toAscii().constData() ));
                 CX_DEBUG(("CxuiApplicationFrameworkMonitor - ENotVisible: bits[%s]",
-                    QString::number(TWsVisibilityChangedEvent::ENotVisible, 2).toAscii().constData() ));
+                    bitString(TWsVisibilityChangedEvent::ENotVisible).toAscii().constData() ));
                 CX_DEBUG(("CxuiApplicationFrameworkMonitor - event:       bits[%s]",
-                    QString::number(visibilityEvent->iFlags, 2).toAscii().constData() ));
+                    bitString(visibilityEvent->iFlags).toAscii().constData() ));
             }
             break;
         }
@@ -256,8 +321,6 @@ bool CxuiApplicationFrameworkMonitorPrivate::handleWindowServerEvent(const QSymb
             break;
         }
     }
-
-    return false;
 }
 
 /*!
@@ -287,14 +350,17 @@ void CxuiApplicationFrameworkMonitorPrivate::setState(CxuiApplicationFrameworkMo
         }
 
         if (mState != original) {
-            CX_DEBUG(("CxuiApplicationFrameworkMonitor - state change [%s] -> [%s]",
-                CxuiApplicationFrameworkMonitor::staticMetaObject.enumerator(
-                    CxuiApplicationFrameworkMonitor::staticMetaObject.indexOfEnumerator("ForegroundState")).valueToKey(original),
-                CxuiApplicationFrameworkMonitor::staticMetaObject.enumerator(
-                    CxuiApplicationFrameworkMonitor::staticMetaObject.indexOfEnumerator("ForegroundState")).valueToKey(mState) ));
+            // Print the event log with this foreground event included.
+            if (mEventLog) {
+                mEventLog->append(
+                    EVENT_FOREGROUND,
+                    CxuiApplicationFrameworkMonitor::staticMetaObject.enumerator(
+                        CxuiApplicationFrameworkMonitor::staticMetaObject.indexOfEnumerator("ForegroundState")).valueToKey(mState));
+                mEventLog->print();
+            }
 
             // If state was changed, signal it to listeners.
-            emit foregroundStateChanged(mState);
+            emit q->foregroundStateChanged(mState);
         }
     }
 }
@@ -312,6 +378,7 @@ CxuiApplicationFrameworkMonitor::ForegroundState CxuiApplicationFrameworkMonitor
 
     if (mKeyLockState != EKeyguardNotActive) {
         // Keylock enabled is the same as if other application is in foreground.
+        CX_DEBUG(("CxuiApplicationFrameworkMonitor - key lock on"));
         state = CxuiApplicationFrameworkMonitor::ForegroundFullyLost;
     } else if (focusWindowGroupId == mWindowGroupId) {
         // If our window group has focus, we clearly are the foreground owning application.
@@ -374,7 +441,6 @@ unsigned int CxuiApplicationFrameworkMonitorPrivate::focusedApplicationUid()
 
 #ifdef CX_DEBUG
     QString name(windowGroupName(mWsSession, focusWgId));
-
     CX_DEBUG(("CxuiApplicationFrameworkMonitor - Own window group id:     0x%08x", mWindowGroupId));
     CX_DEBUG(("CxuiApplicationFrameworkMonitor - Focused window group id: 0x%08x", focusWgId));
     CX_DEBUG(("CxuiApplicationFrameworkMonitor - Own window group name:        [%s]", mWindowGroupName.toAscii().constData()));

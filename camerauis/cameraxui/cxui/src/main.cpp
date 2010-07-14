@@ -20,7 +20,7 @@
 #include <QApplication>
 #include <QGraphicsProxyWidget>
 // needed for localization
-#include <QTranslator>
+#include <HbTranslator>
 #include <QLocale>
 #include <hbmainwindow.h>
 #include <xqserviceutil.h>
@@ -40,9 +40,8 @@
 using namespace Cxe;
 
 // CONSTANTS
-const QString TRANSLATIONS_PATH = "z:/resource/qt/translations/";
-const QString TRANSLATIONS_FILE_NAME = "camera_";
-const QString COMMON_TRANSLATIONS_FILE_NAME = "common_";
+const QString TRANSLATIONS_PATH = "/resource/qt/translations/";
+const QString TRANSLATIONS_FILE = "camera";
 
 int main(int argc, char *argv[])
 {
@@ -82,24 +81,14 @@ int main(int argc, char *argv[])
         OstTrace0( camerax_performance, DUP10__MAIN, "msg: e_CX_INIT_ENGINE 0" );
     }
 
-    // Load the language specific localization files: application + common
+    // Load language specific application localization file, e.g. "camera_en.qm"
+    CX_DEBUG(("CxUI: Load translations.."));
     OstTrace0( camerax_performance, DUP3__MAIN, "msg: e_CX_LOAD_TRANSLATIONS 1" );
-    QTranslator translator;
-    QString lang = QLocale::system().name();
-
-    CX_DEBUG(("CxUI: loading translation"));
-    bool ret = false;
-    ret = translator.load(TRANSLATIONS_PATH + TRANSLATIONS_FILE_NAME + lang);
-    CX_DEBUG(("load ok=%d", ret));
-    app.installTranslator( &translator );
-
-    QTranslator commonTranslator;
-    CX_DEBUG(("CxUI: loading common translation"));
-    ret = false;
-    ret = commonTranslator.load(TRANSLATIONS_PATH + COMMON_TRANSLATIONS_FILE_NAME + lang);
-    CX_DEBUG(("load ok=%d", ret));
-    app.installTranslator(&commonTranslator);
+    HbTranslator* trans = new HbTranslator(TRANSLATIONS_PATH, TRANSLATIONS_FILE);
+    // Load language specific common localization file
+    trans->loadCommon();
     OstTrace0( camerax_performance, DUP4__MAIN, "msg: e_CX_LOAD_TRANSLATIONS 0" );
+    CX_DEBUG(("CxUI: ..translations loaded"));
 
     OstTrace0( camerax_performance, DUP5__MAIN, "msg: e_CX_MAINWINDOW_CREATION 1" );
     HbMainWindow *mainWindow = new HbMainWindow(0, Hb::WindowFlagTransparent |
@@ -124,8 +113,11 @@ int main(int argc, char *argv[])
     OstTrace0( camerax_performance, DUP18__MAIN, "msg: e_CX_PREPAREWINDOW 0" );
     //! @todo initMode call added here as a temporary hack to change the startup sequence
 	// in order to avoid GOOM issues
-	  User::After(2000000);
-    eng->initMode(Cxe::ImageMode);
+	if (viewManager->proceedStartup()) {
+    	User::After(2000000);
+        eng->initMode(Cxe::ImageMode);
+    }
+
     int returnValue = app.exec();
 
     // delete service provider instance
@@ -133,6 +125,7 @@ int main(int argc, char *argv[])
 
     delete viewManager;
     delete mainWindow;
+    delete trans;
     delete eng;
 
     return returnValue;

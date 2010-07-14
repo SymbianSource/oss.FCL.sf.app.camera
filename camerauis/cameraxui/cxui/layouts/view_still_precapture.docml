@@ -47,18 +47,24 @@
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                     <icon iconName="qtg_mono_camera" name="icon"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
                 </widget>
                 <widget name="quality_indicator" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
                     <bool name="visible" value="TRUE"/>
                 </widget>
                 <widget name="flash_indicator" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
+                    <bool name="visible" value="TRUE"/>
+                </widget>
+                <widget name="face_tracking_indicator" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+                    <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
                     <bool name="visible" value="TRUE"/>
                 </widget>
                 <real name="z" value="5"/>
@@ -68,6 +74,7 @@
                     <linearitem itemname="mode_indicator"/>
                     <linearitem itemname="quality_indicator"/>
                     <linearitem itemname="flash_indicator"/>
+                    <linearitem itemname="face_tracking_indicator"/>
                 </layout>
             </widget>
             <layout type="anchor">

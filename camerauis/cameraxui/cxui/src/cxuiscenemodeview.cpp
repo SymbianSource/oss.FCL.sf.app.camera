@@ -51,7 +51,8 @@ const QString CXUI_SCENES_LOW_LIGHT_IMAGE=":/camerax/scene_lowlight.png";
 CxuiSceneModeView::CxuiSceneModeView(QGraphicsItem *parent) :
     CxuiView(parent),
     mSettingsInfo(NULL),
-    mScenesBackground(NULL)
+    mScenesBackground(NULL),
+    mScenesHeading(NULL)
 {
     CX_DEBUG_IN_FUNCTION();
 }
@@ -105,6 +106,10 @@ void CxuiSceneModeView::loadDefaultWidgets()
     widget = mDocumentLoader->findWidget(SCENE_VIEW_CONTAINER);
     mScenesContainer = qobject_cast<HbWidget *> (widget);
 
+    mScenesHeading = qobject_cast<HbLabel *>(
+        mDocumentLoader->findWidget(SCENE_VIEW_HEADING_WIDGET));
+    CX_ASSERT_ALWAYS(mScenesHeading);
+
     //Now let's retreive the pointer to icon widget
     widget = mDocumentLoader->findWidget(SCENE_VIEW_BG_IMAGE);
     mScenesBackground = qobject_cast<HbLabel *> (widget);
@@ -156,6 +161,10 @@ void CxuiSceneModeView::loadBackgroundImages()
     }
     mSettingPairList = data.mSettingPairList;
     mScenesList->init(&data);
+
+    if (mScenesHeading) {
+        mScenesHeading->setPlainText(data.mHeading);
+    }
 
     if (mScenesBackground) {
         QString sceneId;
@@ -311,6 +320,7 @@ void CxuiSceneModeView::closeView()
     CX_DEBUG_ENTER_FUNCTION();
     mScenesList->handleClose();
     mScenesBackground->setIcon(HbIcon());
+    mScenesHeading = NULL;
     // Make sure engine prepares for new image/video if necessary
     mEngine->initMode(mEngine->mode());
     emit viewCloseEvent();

@@ -40,11 +40,14 @@
 /*
 * CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian
 */
-CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDevice)
+CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDevice,
+                                                       CxeSettings &settings)
     : CxeStateMachine("CxeAutoFocusControlSymbian"),
       mCameraDevice(cameraDevice),
       mAdvancedSettings(NULL),
-      mCancelled(false)
+      mSettings(settings),
+      mCancelled(false),
+      mFaceTrackingOverride(false)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -65,6 +68,13 @@ CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDe
     QObject::connect( &cameraDevice,
                       SIGNAL(prepareForRelease()),
                       this,SLOT(prepareForRelease()) );
+
+    // connect scene / setting change callbacks to settings control
+    QObject::connect(&mSettings,
+            SIGNAL(settingValueChanged(const QString&,QVariant)),
+            this,
+            SLOT(handleSettingValueChanged(const QString&,QVariant)));
+
     OstTrace0(camerax_performance, CXEAUTOFOCUSCONTROLSYMBIAN_CREATE_MID2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     initializeResources();
@@ -474,6 +484,42 @@ void CxeAutoFocusControlSymbian::handleAfEvent(int eventUid, int error)
 bool CxeAutoFocusControlSymbian::isSoundEnabled() const
 {
     return mSoundEnabled;
+}
+
+/*!
+* Handle new setting value.
+* New value is set to camera.
+* \param settingId The id of the updated setting
+* \param newValue A new value for the updated setting
+*/
+void CxeAutoFocusControlSymbian::handleSettingValueChanged(const QString& settingId, QVariant newValue)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    if (settingId == CxeSettingIds::FACE_TRACKING) {
+        // Updating AF mode when face tracking is activated
+        // in scene mode which doesn't support face tracking
+        if (newValue.toInt()) {
+            //Face tracking enabled
+            if(mAfMode == CxeAutoFocusControl::Infinity ||
+               mAfMode == CxeAutoFocusControl::Hyperfocal) {
+                mPreviousAFMode = mAfMode;
+                setMode(CxeAutoFocusControl::Auto);
+                mFaceTrackingOverride = true;
+            }
+        } else {
+            //Face tracking disabled
+            if (mFaceTrackingOverride) {
+                mAfMode = mPreviousAFMode;
+                setMode(mAfMode);
+                mFaceTrackingOverride = false;
+            }
+        }
+
+    } else {
+        // do nothing
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 // end of file

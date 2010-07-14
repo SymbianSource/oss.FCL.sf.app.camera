@@ -99,6 +99,7 @@ private:
     HbPushButton* mScenesOkButton;
     HbPushButton* mScenesCancelButton;
     HbWidget* mScenesContainer;
+    HbLabel *mScenesHeading;
 
     QTimer mCameraReleaseTimer;
 

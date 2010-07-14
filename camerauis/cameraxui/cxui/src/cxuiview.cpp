@@ -17,6 +17,7 @@
 
 #include <QGraphicsItem>
 #include <QProcess>
+#include <QGraphicsSceneEvent>
 #include <hbtoolbar.h>
 #include <hbnotificationdialog.h>
 #include <hbframeitem.h>
@@ -45,7 +46,8 @@ CxuiView::CxuiView(QGraphicsItem *parent) :
         mSlider(NULL),
         mToolbar(NULL),
         mIndicators(NULL),
-        mHideControlsTimeout(this)
+        mHideControlsTimeout(this),
+        mControlsFeedback(HbFeedback::BasicItem)
 {
     CX_DEBUG_IN_FUNCTION();
 }
@@ -357,4 +359,36 @@ void CxuiView::createWidgetBackgroundGraphic(HbWidget *widget,
     }
 }
 
+/*!
+ * Handle mouse press events on this view. Needed to implement toggling of
+ * controls and playing feedback.
+ * \param event event to be handled
+ */
+void CxuiView::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    //! @todo temporary workaround for title bar mouse event handling bug
+    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70) {
+        mControlsFeedback.setModalities(HbFeedback::All);
+        mControlsFeedback.play();
+        event->accept();
+    }
+}
+
+/*!
+ * Handle mouse release events on this view. Needed to implement toggling of
+ * controls and playing feedback.
+ * \param event to be handled
+ */
+void CxuiView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    //! @todo temporary workaround for title bar mouse event handling bug
+    if (event->type() == QEvent::GraphicsSceneMouseRelease && event->scenePos().y() > 70) {
+        // todo: sound disabling doesn't work in orbit yet so don't do feedback on release
+        // needs to be enabled when orbit support is done
+        //mControlsFeedback.setModalities(HbFeedback::Tactile);
+        //mControlsFeedback.play();
+        toggleControls();
+        event->accept();
+    }
+}
 // End of file

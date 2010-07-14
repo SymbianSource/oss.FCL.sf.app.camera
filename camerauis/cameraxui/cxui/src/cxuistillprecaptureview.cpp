@@ -130,6 +130,10 @@ void CxuiStillPrecaptureView::loadDefaultWidgets()
     mQualityIcon = qobject_cast<HbLabel *>(widget);
     CX_DEBUG_ASSERT(mQualityIcon);
 
+    widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_FACE_TRACKING_ICON);
+    mFaceTrackingIcon = qobject_cast<HbLabel *>(widget);
+    CX_DEBUG_ASSERT(mFaceTrackingIcon);
+
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_INDICATOR_CONTAINER);
     mIndicators = qobject_cast<HbWidget *>(widget);
     CX_DEBUG_ASSERT(mIndicators);
@@ -296,7 +300,8 @@ void CxuiStillPrecaptureView::initializeSettingsGrid()
         action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::CONTRAST);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
-        mSettingsGrid->addAction(HbIcon("qtg_mono_face_tracking"), hbTrId("txt_cam_button_face_tracking"), this, SLOT(launchNotSupportedNotification()));
+        action = mSettingsGrid->addAction(HbIcon("qtg_mono_face_tracking"), hbTrId("txt_cam_button_face_tracking"), this, SLOT(launchSetting()));
+        action->setProperty(PROPERTY_KEY_SETTING_ID, CxeSettingIds::FACE_TRACKING);
         action->setProperty(PROPERTY_KEY_SETTING_GRID, PROPERTY_KEY_TRUE);
 
         connect(mCaptureKeyHandler, SIGNAL(autofocusKeyPressed()), mSettingsGrid, SLOT(close()));
@@ -555,6 +560,7 @@ void CxuiStillPrecaptureView::showEvent(QShowEvent *event)
 
     updateImagesLeftLabel();
     updateQualityIcon();
+    updateFaceTrackingIcon();
 
     // cancel selftimer when returning to precapture
     // since selftimer needs to be turned off after capturing an image
@@ -704,6 +710,8 @@ void CxuiStillPrecaptureView::handleSettingValueChanged(const QString& key, QVar
             updateQualityIcon();
             // update images left when quality values are changed
             updateImagesLeftLabel();
+        } else if (key == CxeSettingIds::FACE_TRACKING) {
+            updateFaceTrackingIcon();
         }
 
         // update toolbar flash icon
@@ -787,6 +795,28 @@ void CxuiStillPrecaptureView::updateImagesLeftLabel()
 
         CX_DEBUG(("Images left %d", images));
         mImagesLeft->setPlainText(hbTrId("txt_cam_fullscreen_imagesleft").arg(images));
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+    Update the face tracking icon
+*/
+void CxuiStillPrecaptureView::updateFaceTrackingIcon()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    if (mFaceTrackingIcon && mEngine) {
+        QString key = "";
+        QString icon = "";
+        int currentValue = -1;
+
+        key = CxeSettingIds::FACE_TRACKING;
+
+        mEngine->settings().get(key, currentValue);
+        icon = getSettingItemIcon(key, currentValue);
+
+        mFaceTrackingIcon->setIcon(HbIcon(icon));
     }
 
     CX_DEBUG_EXIT_FUNCTION();

@@ -382,8 +382,9 @@ CxeError::Id CxeStillCaptureControlSymbian::getImageQualityDetails(CxeImageDetai
     return err;
 }
 
-/**
+/*!
  * Command to start image capture now.
+ * @sa handleCameraEvent
  */
 void CxeStillCaptureControlSymbian::capture()
 {
@@ -392,10 +393,10 @@ void CxeStillCaptureControlSymbian::capture()
 
     // Start the image capture as fast as possible to minimize lag.
     // Check e.g. space available *after* this.
+    // Capture sound will be played when we receive "image capture event" from ECAM.
     mCameraDevice.camera()->CaptureImage();
 
     if (imagesLeft() > 0) {
-        mCaptureSoundPlayer->play();
         setState(Capturing);
 
         //! @todo: NOTE: This call may not stay here. It can move depending on the implementation for burst capture.
@@ -471,6 +472,23 @@ void CxeStillCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, con
 
     CX_DEBUG_EXIT_FUNCTION();
 }
+
+/*!
+* Handle ECAM events.
+* Needed only for capture sound synchronization.
+* @param eventUid ECAM event id.
+* @param error Error code. KErrNone if operation has been successful.
+*/
+void CxeStillCaptureControlSymbian::handleCameraEvent(int eventUid, int error)
+{
+    if (eventUid == KUidECamEventImageCaptureEventUidValue && error == KErrNone) {
+        CX_DEBUG(("CxeStillCaptureControlSymbian::handleCameraEvent - image capture event"));
+        if (state() == CxeStillCaptureControl::Capturing) {
+            mCaptureSoundPlayer->play();
+        }
+    }
+}
+
 
 /**
  * handleImageData: Image data received from ECam

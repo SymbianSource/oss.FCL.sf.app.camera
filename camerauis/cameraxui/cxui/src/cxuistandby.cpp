@@ -20,6 +20,7 @@
 #include <QGraphicsSceneEvent>
 #include <hblabel.h>
 #include <hbdialog.h>
+#include <hbinstantfeedback.h>
 #include <QGraphicsRectItem>
 #include <QColor>
 
@@ -35,15 +36,16 @@
 
 
 
-/*
-* CxuiStandby::CxuiStandby
-*/
+/*!
+ * Constructor
+ */
 CxuiStandby::CxuiStandby(CxuiCaptureKeyHandler &keyHandler,CxuiDocumentLoader *documentLoader, CxeEngine *engine)
 : mKeyHandler(keyHandler),
   mDocumentLoader(documentLoader),
   mEngine(engine),
   mStandbyPopup(NULL),
-  mStandbyDialogVisible(false)
+  mStandbyDialogVisible(false),
+  mAllowDismiss(true)
 {
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(engine);
@@ -55,7 +57,7 @@ CxuiStandby::CxuiStandby(CxuiCaptureKeyHandler &keyHandler,CxuiDocumentLoader *d
     QCoreApplication::instance()->installEventFilter(this);
 
     CX_ASSERT_ALWAYS(mStandbyTimer);
-    connect(mStandbyTimer, SIGNAL(timeout()), this, SLOT(toStandby()));
+    connect(mStandbyTimer, SIGNAL(timeout()), this, SLOT(enterStandby()));
     mStandbyTimer->setSingleShot(true);
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -63,9 +65,9 @@ CxuiStandby::CxuiStandby(CxuiCaptureKeyHandler &keyHandler,CxuiDocumentLoader *d
 
 
 
-/*
-* CxuiStandby::~CxuiStandby()
-*/
+/*!
+ * Destructor
+ */
 CxuiStandby::~CxuiStandby()
 {
     CX_DEBUG_IN_FUNCTION();
@@ -76,9 +78,41 @@ CxuiStandby::~CxuiStandby()
 }
 
 
-/*
-* stops standby timer
+/*!
+* Allow dismissing standby mode with AF or capture key?
+* @param allow Is dismissing allowed.
 */
+void CxuiStandby::allowDismiss(bool allow)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mAllowDismiss = allow;
+    if (allow) {
+        if (mStandbyDialogVisible) {
+            // Reconnect the close signals if dialog is visible
+            connect(&mKeyHandler, SIGNAL(autofocusKeyPressed()), mStandbyPopup, SLOT(close()), Qt::UniqueConnection);
+            connect(&mKeyHandler, SIGNAL(captureKeyPressed()),   mStandbyPopup, SLOT(close()), Qt::UniqueConnection);
+        }
+    } else {
+        disconnect(&mKeyHandler, SIGNAL(autofocusKeyPressed()), mStandbyPopup, SLOT(close()));
+        disconnect(&mKeyHandler, SIGNAL(captureKeyPressed()),   mStandbyPopup, SLOT(close()));
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* Is standby mode active?
+* @return True, if standby mode is active, false if not.
+*/
+bool CxuiStandby::isActive() const
+{
+    return mStandbyDialogVisible;
+}
+
+/*!
+ * stops standby timer
+ */
 void CxuiStandby::stopTimer()
 {
     if(mStandbyTimer) {
@@ -86,9 +120,9 @@ void CxuiStandby::stopTimer()
     }
 }
 
-/*
-* starts standby timer
-*/
+/*!
+ * starts standby timer
+ */
 void CxuiStandby::startTimer()
 {
     if(mStandbyTimer) {
@@ -96,19 +130,37 @@ void CxuiStandby::startTimer()
     }
 }
 
-
-/*
-* handles mouse press events
-* returns if mouse key press is consumed.
-*/
-bool CxuiStandby::handleMouseEvent()
+/*!
+ * Handles mouse press events
+ * returns if mouse key press is consumed.
+ * \param event event to be handled
+ * \return boolean to indicate whether the event was handled or not
+ */
+bool CxuiStandby::handleMouseEvent(QEvent *event)
 {
     bool keyHandled = false;
 
     // close the dialog if it's visible
     if (mStandbyDialogVisible && mStandbyPopup) {
-        CX_DEBUG(( "closing the popup mStandbyDialogVisible = : %d", mStandbyDialogVisible ));
-        mStandbyPopup->close();
+        HbInstantFeedback feedback(HbFeedback::BasicItem);
+        switch (event->type()) {
+            case QEvent::GraphicsSceneMousePress:
+                feedback.play();
+                break;
+            case QEvent::GraphicsSceneMouseRelease:
+                if (mAllowDismiss) {
+                    CX_DEBUG(( "closing the popup mStandbyDialogVisible = : %d", mStandbyDialogVisible ));
+                    // todo: sound disabling doesn't work in orbit yet so don't do feedback on release
+                    // needs to be enabled when orbit support is done
+                    //feedback.setModalities(HbFeedback::Tactile);
+                    //feedback.play();
+                    exitStandby();
+                }
+                break;
+            default:
+                break;
+        }
+        // eat all mouse events when standby is active
         keyHandled = true;
     } else if (mStandbyTimer && mStandbyTimer->isActive()) {
         // restart the timer only if it's running
@@ -119,10 +171,10 @@ bool CxuiStandby::handleMouseEvent()
 }
 
 
-/*
-* switching to standby.
-*/
-void CxuiStandby::toStandby()
+/*!
+ * switching to standby.
+ */
+void CxuiStandby::enterStandby()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -165,17 +217,31 @@ void CxuiStandby::toStandby()
 
         mStandbyPopup->show();
         // connecting half press or full press key signal to dismiss standby
-        connect(&mKeyHandler, SIGNAL(autofocusKeyPressed()), mStandbyPopup, SLOT(close()));
-        connect(&mKeyHandler, SIGNAL(captureKeyPressed()),   mStandbyPopup, SLOT(close()));
+        connect(&mKeyHandler, SIGNAL(autofocusKeyPressed()), mStandbyPopup, SLOT(close()), Qt::UniqueConnection);
+        connect(&mKeyHandler, SIGNAL(captureKeyPressed()),   mStandbyPopup, SLOT(close()), Qt::UniqueConnection);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Close the standby dialog.
+*/
+void CxuiStandby::exitStandby()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mAllowDismiss && mStandbyDialogVisible && mStandbyPopup) {
+        mStandbyPopup->close();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 
-/*
-* dismisses standby
-*/
+/*!
+ * dismisses standby
+ */
 void CxuiStandby::dismissStandby()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -194,17 +260,16 @@ void CxuiStandby::dismissStandby()
 
 
 
-/*
-* checks if we can swtich to standby
-*/
+/*!
+ * checks if we can switch to standby
+ */
 bool CxuiStandby::proceedToStandy()
 {
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(mEngine);
 
     bool ok = false;
-    if(!mStandbyDialogVisible &&
-        mEngine->isEngineReady()) {
+    if (!mStandbyDialogVisible) {
         CX_DEBUG(("show standby dialog"));
         ok = true;
     }
@@ -216,10 +281,9 @@ bool CxuiStandby::proceedToStandy()
 
 
 
-/*
-*  Event filter which filters application wide mouse events.
-*/
-
+/*!
+ *  Event filter which filters application wide mouse events.
+ */
 bool CxuiStandby::eventFilter(QObject *object, QEvent *event)
 {
     Q_UNUSED(object);
@@ -229,7 +293,7 @@ bool CxuiStandby::eventFilter(QObject *object, QEvent *event)
         case QEvent::GraphicsSceneMouseMove:
         case QEvent::GraphicsSceneMousePress:
         case QEvent::GraphicsSceneMouseRelease:
-            eventWasConsumed = handleMouseEvent();
+            eventWasConsumed = handleMouseEvent(event);
             break;
         default:
             break;

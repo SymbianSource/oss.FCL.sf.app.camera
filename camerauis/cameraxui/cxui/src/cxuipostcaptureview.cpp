@@ -17,7 +17,6 @@
 #include <QDebug>
 #include <QPixmap>
 #include <QTimer>
-#include <QGraphicsSceneEvent>
 #include <QFileInfo>
 #include <QApplication>
 #include <QGraphicsRectItem>
@@ -76,6 +75,7 @@ CxuiPostcaptureView::CxuiPostcaptureView(QGraphicsItem *parent) :
     mEmbeddedToolbar(NULL),
     mBackgroundItem(NULL),
     mImageLabel(NULL),
+    mShareUi(NULL),
     mStopViewfinderTimer(this),
     mReleaseCameraTimer(this),
     mPostcaptureTimer(this),
@@ -97,6 +97,7 @@ CxuiPostcaptureView::~CxuiPostcaptureView()
     CX_DEBUG_ENTER_FUNCTION();
     QCoreApplication::instance()->removeEventFilter(this);
     stopTimers();
+    delete mShareUi;
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -125,6 +126,8 @@ void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
     widget = mDocumentLoader->findWidget(POST_CAPTURE_SNAPSHOT_LABEL);
     mImageLabel = qobject_cast<HbLabel *>(widget);
     CX_DEBUG_ASSERT(mImageLabel);
+
+    mShareUi = new ShareUi();
 
     // get toolbar pointers from the documentloader
     widget = mDocumentLoader->findWidget(STILL_POST_CAPTURE_TOOLBAR);
@@ -206,7 +209,7 @@ void CxuiPostcaptureView::handleAutofocusKeyPressed()
  */
 void CxuiPostcaptureView::playVideo()
 {
-
+    
     launchNotSupportedNotification();
     //! @todo needs an implementation
     CX_DEBUG_IN_FUNCTION();
@@ -285,16 +288,12 @@ void CxuiPostcaptureView::launchShare()
 
     stopTimers();
     releaseCamera();
-
+    hideControls();
     QString filename = getCurrentFilename();
-
     QStringList filelist;
     filelist.append(filename);
 
-    ShareUi dialog;
-    dialog.send(filelist, true);
-
-    showControls();
+    mShareUi->send(filelist, true);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -395,22 +394,6 @@ void CxuiPostcaptureView::paint(QPainter *painter, const QStyleOptionGraphicsIte
 {
         OstTrace0(camerax_performance, CXUIPOSTCAPTUREVIEW_SNAPSHOT_DRAW, "msg: e_CX_SHOT_TO_SNAPSHOT 0");
         QGraphicsWidget::paint(painter, option, widget);
-}
-
-// ---------------------------------------------------------------------------
-// CxuiPostcaptureView::mousePressEvent
-//
-// ---------------------------------------------------------------------------
-//
-void CxuiPostcaptureView::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-
-    if (event->type() == QEvent::GraphicsSceneMousePress) {
-        mPostcaptureTimer.stop();
-        toggleControls();
-        event->accept();
-    }
-
 }
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -33,7 +33,9 @@ SOURCES *= unittest_cxeautofocuscontrolsymbian.cpp \
     cxecameradevice.cpp \
     cxefakecameradevice.cpp \
     cxecameradevicecontrolsymbian.cpp \
-    cxefakecameradevicecontrol.cpp
+    cxefakecameradevicecontrol.cpp \
+    cxefakesettings.cpp
+
 HEADERS *= unittest_cxeautofocuscontrolsymbian.h \
     cxeautofocuscontrol.h \
     cxeautofocuscontrolsymbian.h \
@@ -48,4 +50,6 @@ HEADERS *= unittest_cxeautofocuscontrolsymbian.h \
     cxecameradevicecontrol.h \
     cxecameradevicecontrolsymbian.h \
     cxefakecameradevicecontrol.h \
-    cxutils.h
+    cxutils.h \
+    cxefakesettings.h \
+    cxesettings.h

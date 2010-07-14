@@ -23,13 +23,15 @@
 #include "cxetestutils.h"
 #include "cxefakecameradevicecontrol.h"
 #include "cxefakecameradevice.h"
+#include "cxefakesettings.h"
 #include "cxeautofocuscontrolsymbian.h"
 #include "unittest_cxeautofocuscontrolsymbian.h"
 
 UnitTestCxeAutoFocusControlSymbian::UnitTestCxeAutoFocusControlSymbian()
-    : mAutoFocusControl(0),
-      mCameraDeviceControl(0),
-      mCameraDevice(0)
+    : mAutoFocusControl(NULL),
+      mCameraDeviceControl(NULL),
+      mCameraDevice(NULL),
+      mFakeSettings(NULL)
 {
 }
 
@@ -43,11 +45,13 @@ void UnitTestCxeAutoFocusControlSymbian::init()
 {
     qDebug() << "UnitTestCxeAutoFocusControlSymbian::init =>";
 
+    mFakeSettings = new CxeFakeSettings();
+
     mCameraDeviceControl = new CxeFakeCameraDeviceControl();
     mCameraDevice = new CxeFakeCameraDevice();
     mCameraDevice->newCamera(mCameraDeviceControl->cameraIndex(), mCameraDeviceControl);
 
-    mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice);
+    mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice, *mFakeSettings);
     //mAutoFocusControl->initializeResources();
 
     connect(mCameraDeviceControl, SIGNAL(cameraEvent(int,int)),
@@ -61,15 +65,18 @@ void UnitTestCxeAutoFocusControlSymbian::cleanup()
 {
     qDebug() << "UnitTestCxeAutoFocusControlSymbian::cleanup =>";
     delete mAutoFocusControl;
-    mAutoFocusControl = 0;
+    mAutoFocusControl = NULL;
 
     delete mCameraDeviceControl;
-    mCameraDeviceControl = 0;
+    mCameraDeviceControl = NULL;
 
     delete mCameraDevice;
-    mCameraDevice = 0;
-    qDebug() << "UnitTestCxeAutoFocusControlSymbian::cleanup <=";
+    mCameraDevice = NULL;
 
+    delete mFakeSettings;
+    mFakeSettings = NULL;
+
+    qDebug() << "UnitTestCxeAutoFocusControlSymbian::cleanup <=";
 }
 
 

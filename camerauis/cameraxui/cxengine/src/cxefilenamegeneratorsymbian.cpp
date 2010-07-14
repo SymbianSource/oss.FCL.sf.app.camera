@@ -48,7 +48,10 @@ const char DIGIT_OFFSET = '0';
 const char MAX_CHAR = 'Z';
 
 const TInt64 KMinRequiredSpaceImage = 2000000;
-const TInt64 KMinRequiredSpaceVideo = 4000000;
+
+// Whether there's enough space for video or not is handled lower in the SW stack
+// so this is set to 0 to fix an error
+const TInt64 KMinRequiredSpaceVideo = 0;
 
 
 

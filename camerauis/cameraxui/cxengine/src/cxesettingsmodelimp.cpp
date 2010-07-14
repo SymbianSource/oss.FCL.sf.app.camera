@@ -499,6 +499,7 @@ void CxeSettingsModelImp::loadImageScenes()
     imgSceneAuto.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
     imgSceneAuto.insert(CxeSettingIds::BRIGHTNESS, 0);
     imgSceneAuto.insert(CxeSettingIds::FLASH_MODE, FlashAuto);
+    imgSceneAuto.insert(CxeSettingIds::FACE_TRACKING, 1);
 
     mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_AUTO, imgSceneAuto);
 
@@ -516,6 +517,7 @@ void CxeSettingsModelImp::loadImageScenes()
     imgSceneSports.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
     imgSceneSports.insert(CxeSettingIds::BRIGHTNESS, 0);
     imgSceneSports.insert(CxeSettingIds::FLASH_MODE, FlashOff);
+    imgSceneSports.insert(CxeSettingIds::FACE_TRACKING, 0);
 
     mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_SPORTS, imgSceneSports);
 
@@ -533,6 +535,7 @@ void CxeSettingsModelImp::loadImageScenes()
     imgSceneCloseUp.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
     imgSceneCloseUp.insert(CxeSettingIds::BRIGHTNESS, 0);
     imgSceneCloseUp.insert(CxeSettingIds::FLASH_MODE, FlashAuto);
+    imgSceneCloseUp.insert(CxeSettingIds::FACE_TRACKING, 0);
 
     mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_MACRO, imgSceneCloseUp);
 
@@ -549,6 +552,7 @@ void CxeSettingsModelImp::loadImageScenes()
     imgPortraitscene.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
     imgPortraitscene.insert(CxeSettingIds::BRIGHTNESS, 0);
     imgPortraitscene.insert(CxeSettingIds::FLASH_MODE, FlashAntiRedEye);
+    imgPortraitscene.insert(CxeSettingIds::FACE_TRACKING, 1);
 
     mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_PORTRAIT, imgPortraitscene);
 
@@ -565,6 +569,7 @@ void CxeSettingsModelImp::loadImageScenes()
     imglandscapescene.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
     imglandscapescene.insert(CxeSettingIds::BRIGHTNESS, 0);
     imglandscapescene.insert(CxeSettingIds::FLASH_MODE, FlashOff);
+    imglandscapescene.insert(CxeSettingIds::FACE_TRACKING, 0);
 
     mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_SCENERY, imglandscapescene);
 
@@ -582,6 +587,7 @@ void CxeSettingsModelImp::loadImageScenes()
     imgNightscene.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
     imgNightscene.insert(CxeSettingIds::BRIGHTNESS, 0);
     imgNightscene.insert(CxeSettingIds::FLASH_MODE, FlashOff);
+    imgNightscene.insert(CxeSettingIds::FACE_TRACKING, 1);
 
     mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_NIGHT, imgNightscene);
 
@@ -598,6 +604,7 @@ void CxeSettingsModelImp::loadImageScenes()
     imgNightpotraitscene.insert(CxeSettingIds::EV_COMPENSATION_VALUE, 0);
     imgNightpotraitscene.insert(CxeSettingIds::BRIGHTNESS, 0);
     imgNightpotraitscene.insert(CxeSettingIds::FLASH_MODE, FlashAntiRedEye);
+    imgNightpotraitscene.insert(CxeSettingIds::FACE_TRACKING, 1);
 
     mImageSceneModes.insert(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, imgNightpotraitscene);
 

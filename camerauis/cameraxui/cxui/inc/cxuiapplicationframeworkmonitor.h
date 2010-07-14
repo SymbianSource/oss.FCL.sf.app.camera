@@ -46,11 +46,12 @@ public:
     };
 
 public:
-    CxuiApplicationFrameworkMonitor(CxuiApplication &application, CxeSettings& settings);
+    CxuiApplicationFrameworkMonitor(CxuiApplication &application, CxeSettings &settings);
     virtual ~CxuiApplicationFrameworkMonitor();
 
 public:
     ForegroundState foregroundState() const;
+    bool isUsbMassMemoryModeActive() const;
 
 signals:
     /*!
@@ -64,8 +65,18 @@ signals:
     */
     void batteryEmpty();
 
+    /*!
+    * USB mass memory mode was just activated or deactivated.
+    * @param active If true, mass memory mode was activated, and mass memory cannot be accessed.
+    * Otherwise mass memory mode was deactivated, and mass memory is again accessible.
+    */
+    void usbMassMemoryModeToggled(bool active);
+
+
 private:
-    CxuiApplicationFrameworkMonitorPrivate* p;
+    CxuiApplicationFrameworkMonitorPrivate *p;
+
+    friend class CxuiApplicationFrameworkMonitorPrivate;
 };
 
 #endif // CXUIAPPLICATIONFRAMEWORKMONITOR_H
