@@ -22,9 +22,12 @@
 #include "unittest_cxeharvestercontrolsymbian.h"
 #include "cxeharvestercontrolsymbian.h"
 #include "cxutils.h"
+#include "cxeerror.h"
 
 UnitTestCxeHarvesterControlSymbian::UnitTestCxeHarvesterControlSymbian()
+    : mHarvesterControl(NULL)
 {
+    qRegisterMetaType<CxeError::Id>("CxeError::Id");
 }
 
 
@@ -49,35 +52,30 @@ void UnitTestCxeHarvesterControlSymbian::testHarvestFile()
 {
     CX_DEBUG_ENTER_FUNCTION();
     
-    QSignalSpy harvestCompleteSpy(mHarvesterControl, SIGNAL(fileHarvested(const QString&, int)));
+    QSignalSpy harvestCompleteSpy(mHarvesterControl, SIGNAL(fileHarvested(CxeError::Id, const QString&)));
     QString filename;
+    QVariantList initModeArguments;
 
     QVERIFY(harvestCompleteSpy.isValid()); 
 
     // case 1: testing with wrong dummy file, we should get an error code with harvestcomplete
     // since filename is invalid
     mHarvesterControl->harvestFile(filename, 0, 0);
- 
     QCOMPARE( harvestCompleteSpy.count(), 1 );
-    if (harvestCompleteSpy.count() > 0) {
-        QList<QVariant> initModeArguments = harvestCompleteSpy.takeFirst();
-        // we are only interested in error code in this case 1
-        QCOMPARE(initModeArguments.at(1).toInt(), KErrNotFound);
-    }
-
+    initModeArguments = harvestCompleteSpy.takeFirst();
+    // we are only interested in error code in this case 1
+    QCOMPARE(initModeArguments.at(0).value<CxeError::Id>(), CxeError::NotFound);
     
     // case 2: testing with real filename, harvesting should go fine, callback without errors
     filename = QString("test.jpg");
     mHarvesterControl->harvestFile(filename, 0, 0);
  
     QCOMPARE( harvestCompleteSpy.count(), 1 );
-    if (harvestCompleteSpy.count() > 0) {
-        QList<QVariant> initModeArguments = harvestCompleteSpy.takeFirst();
-        // we check both the filename, since in this case harvesting should go fine
-        // and error returned is KErrNone.
-        QCOMPARE(initModeArguments.at(1).toString(), filename);
-        QCOMPARE(initModeArguments.at(1).toInt(), KErrNone);
-    }
+    initModeArguments = harvestCompleteSpy.takeFirst();
+    // we check both the filename, since in this case harvesting should go fine
+    // and error returned is KErrNone.
+    QCOMPARE(initModeArguments.at(0).value<CxeError::Id>(), CxeError::None);
+    QCOMPARE(initModeArguments.at(1).toString(), filename);
 
     CX_DEBUG_EXIT_FUNCTION();
 }

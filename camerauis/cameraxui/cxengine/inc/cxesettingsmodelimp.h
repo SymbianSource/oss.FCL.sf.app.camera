@@ -62,7 +62,7 @@ private:
     void loadImageScenes();
     void loadVideoScenes();
 
-    void loadSceneData(CxeScene &currentScene, CxeScene &sceneDefaultSettings);
+    CxeError::Id loadSceneData(const QString &newScene, CxeScene &currentSceneSettings);
     CxeError::Id sceneSettingValue(const QString &key, QVariant &value);
     CxeError::Id setSceneSettingValue(const QString &key, QVariant newValue);
 
@@ -70,6 +70,10 @@ private:
 
     CxeError::Id videoScene(const QString &sceneId, CxeScene &sceneSettings);
     CxeError::Id imageScene(const QString &sceneId, CxeScene &sceneSettings);
+    
+    void restoreImageSettings();
+    void restoreVideoSettings();
+    
 
 private:
 

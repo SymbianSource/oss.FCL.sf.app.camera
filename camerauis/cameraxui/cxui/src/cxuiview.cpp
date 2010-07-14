@@ -65,7 +65,8 @@ CxuiView::~CxuiView()
 */
 void CxuiView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
                          CxuiDocumentLoader *documentLoader,
-                         CxuiCaptureKeyHandler * keyHandler)
+                         CxuiCaptureKeyHandler * keyHandler,
+                         HbActivityManager *activityManager)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -73,17 +74,31 @@ void CxuiView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
     CX_ASSERT_ALWAYS(mainWindow);
     CX_ASSERT_ALWAYS(engine);
     CX_ASSERT_ALWAYS(documentLoader);
+    CX_ASSERT_ALWAYS(activityManager);
 
     mMainWindow = mainWindow;
     mDocumentLoader = documentLoader;
     mCaptureKeyHandler = keyHandler;
     mEngine = engine;
+    mActivityManager = activityManager;
 
     // adjust the timer, and connect it to correct slot
     connect(&mHideControlsTimeout, SIGNAL(timeout()), this, SLOT(hideControls()));
     mHideControlsTimeout.setSingleShot(true);
     mHideControlsTimeout.setInterval(CXUI_HIDE_CONTROLS_TIMEOUT);
 }
+
+/*!
+* Is standby mode supported / needed by this view.
+* Default implementation returns false.
+* Inherited classes need to re-implement this if standby mode is needed.
+* @return True if standby mode is supported, false otherwise.
+*/
+bool CxuiView::isStandbyModeSupported() const
+{
+    return false;
+}
+
 
 /*!
 * CxuiView::updateOrientation
@@ -106,11 +121,46 @@ void CxuiView::updateOrientation(Qt::Orientation orientation)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+
+/*!
+ * Restore view state from activity. Default implementation does nothing.
+ */
+void CxuiView::restoreActivity(const QString &activityId, const QVariant &data)
+{
+    Q_UNUSED(activityId);
+    Q_UNUSED(data);
+}
+
+/*!
+ * Save view state to activity. Default implementation does nothing.
+ */
+void CxuiView::saveActivity()
+{
+
+}
+
+/*!
+ * Clear activity from activity manager. Default implementation does nothing.
+ */
+void CxuiView::clearActivity()
+{
+
+}
+
 /*!
 * Allow showing UI controls?
 * Default behaviour is that controls can be shown at any time.
 */
 bool CxuiView::allowShowControls() const
+{
+    return true;
+}
+
+/*!
+ * Play feedback when touching view outside of any widget?
+ * Default behaviour is that feedback is always played.
+ */
+bool CxuiView::isFeedbackEnabled() const
 {
     return true;
 }
@@ -129,6 +179,26 @@ void CxuiView::toggleControls()
     }
 
     CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Slot for entering standby mode.
+* By default, release camera.
+*/
+void CxuiView::enterStandby()
+{
+    CX_DEBUG_IN_FUNCTION();
+    releaseCamera();
+    CX_DEBUG_IN_FUNCTION();
+}
+
+/*!
+* Slot for exiting standby mode.
+* By default, no action needed.
+*/
+void CxuiView::exitStandby()
+{
+    CX_DEBUG_IN_FUNCTION();
 }
 
 /*!
@@ -158,6 +228,8 @@ void CxuiView::launchScenesView()
  */
 void CxuiView::launchPhotosApp()
 {
+    // Release camera device in order to free resources for Photos application
+    releaseCamera();
     QProcess::startDetached(PhotosAppExe);
 }
 
@@ -167,8 +239,7 @@ void CxuiView::launchPhotosApp()
  */
 void CxuiView::launchVideosApp()
 {
-    //Releasing cameda device in order to free
-    //graphical memory
+    // Release camera device in order to free resources for Videos application
     releaseCamera();
     QProcess::startDetached(VideosAppExe);
 }
@@ -367,7 +438,8 @@ void CxuiView::createWidgetBackgroundGraphic(HbWidget *widget,
 void CxuiView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     //! @todo temporary workaround for title bar mouse event handling bug
-    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70) {
+    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70 &&
+        isFeedbackEnabled()) {
         mControlsFeedback.setModalities(HbFeedback::All);
         mControlsFeedback.play();
         event->accept();
@@ -382,7 +454,8 @@ void CxuiView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 void CxuiView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     //! @todo temporary workaround for title bar mouse event handling bug
-    if (event->type() == QEvent::GraphicsSceneMouseRelease && event->scenePos().y() > 70) {
+    if (event->type() == QEvent::GraphicsSceneMouseRelease && event->scenePos().y() > 70 &&
+        isFeedbackEnabled()) {
         // todo: sound disabling doesn't work in orbit yet so don't do feedback on release
         // needs to be enabled when orbit support is done
         //mControlsFeedback.setModalities(HbFeedback::Tactile);
@@ -391,4 +464,5 @@ void CxuiView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         event->accept();
     }
 }
+
 // End of file

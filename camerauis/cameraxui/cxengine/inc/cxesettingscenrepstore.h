@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -31,14 +31,15 @@ class XQSettingsManager;
 class XQSettingsKey;
 
 
-/*
-* Settings store intrerface.
+/*!
+* \class CxeSettingsStore 
+* \brief Settings store intrerface.
 */
 class CxeSettingsStore
 {
 public:
 
-    /**
+    /*!
     * This needs to be here to be able to delete an object
     * of inherited class through mixin pointer.
     * If this is not defined, deleting through the mixin pointer
@@ -46,35 +47,35 @@ public:
     */
     virtual ~CxeSettingsStore() {};
 
-    /*
+    /*!
     * resets the cenrep store
     */
     virtual void reset() = 0;
     
-    /*
+    /*!
     * Reads a value from cenrep
     * @param "key"   - setting key
     * @param "value" - setting value read from cenrep
     */
 	virtual CxeError::Id get(const QString& key, QVariant &value) = 0;
 
-    /*
-    * Reads a value from cenrep
+    /*!
+    * Reads a value from cenrep and starts monitoring changes
     * @param "uid"   - UID of the component that own setting key
     * @param "key"   - setting key id
     * @param "type"  - type of setting key
     * @param "value" - setting value read from cenrep
     */
-	virtual void get(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value) = 0;
+	virtual void startMonitoring(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value) = 0;
 	
-	/*
+	/*!
     * Sets a new value to cenrep
     * @param "key"   - setting key
     * @param "newValue" - new value set to the key in cenrep
     */
 	virtual CxeError::Id set(const QString& key,const QVariant newValue) = 0;
 	    
-	/*
+	/*!
     * Reads/loads all run-time settings values from cenrep
     * @param QList<QString> contains list of all runtime key ids which we use to load values from cenrep.
     * returns: QHash container, "contains" values associated with each key that are read from cenrep
@@ -87,8 +88,9 @@ public:
 
 
 
-/*
-* CxeSettingsCenRepStore class implements CxeSettingsStore.
+/*!
+* \class CxeSettingsCenRepStore 
+* \brief Class implements CxeSettingsStore.
 * This class uses CenRep key mechanism for storing and retrieving settings information.
 */
 class CxeSettingsCenRepStore : public QObject,
@@ -103,51 +105,18 @@ public:
 	~CxeSettingsCenRepStore();
 
 public: // from base class
-    /*
-    * resets the cenrep store
-    */
-    void reset();
-    
-    /*
-    * Reads a value from cenrep
-    * @param "key"   - setting key
-    * @param "value" - setting value read from cenrep
-    */
-	CxeError::Id get(const QString& key, QVariant &value);
 
-    /*
-    * Reads a value from cenrep
-    * @param "uid"   - UID of the component that own setting key
-    * @param "key"   - setting key id
-    * @param "type"  - type of setting key
-    * @param "value" - setting value read from cenrep
-    */
-    void get(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value);
-	
-	/*
-    * Sets a new value to cenrep
-    * @param "key"   - setting key
-    * @param "newValue" - new value set to the key in cenrep
-    */
+    void reset();
+	CxeError::Id get(const QString& key, QVariant &value);
+    void startMonitoring(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value);
 	CxeError::Id set(const QString& key,const QVariant newValue);
-	    
-	/*
-    * Reads/loads all run-time settings values from cenrep
-    * @param QList<QString> contains list of all runtime key ids which we use to load values from cenrep.
-    * returns: QHash container, "contains" values associated with each key that are read from cenrep
-    * NOTE: loading runtime settings should be done only ONCE at start-up. Its an overhead to read runtime keys
-    *       unnecessarily multiple times as the values of the runtime keys are not changed.
-    *       Runtime keys are only used to configure camerax application.
-    */
 	QHash<QString, QVariantList> loadRuntimeSettings(QList<QString>& settingKeys);
 
 
 signals:
-
     void settingValueChanged(long int uid, unsigned long int key, QVariant value);
 
 private slots:
-
     void handleValueChanged(XQSettingsKey key, QVariant value);
 
 private:
@@ -163,22 +132,13 @@ private:
     };
 
 private:
-    
-    /*
-     *  add's key mapping to the hash container.
-     */
+
     void addKeyMapping(QString key,
                        unsigned long int keyid,
                        XQSettingsManager::Type type,
                        bool readOnly = false);
-    /*
-    * Generates XQSettingsKey from given setting/runtime key
-    */
-    XQSettingsKey generateXQSettingsKey(const QString& key,CxeError::Id& error);
     
-    /*
-    * maps "string" type setting key ids to cenrep key ids that XQSettingsManager understands
-    */
+    XQSettingsKey generateXQSettingsKey(const QString& key,CxeError::Id& error);
 	void mapKeys();
 	
 protected:
@@ -191,8 +151,9 @@ private: // data
 };
 
 
-/*
- * Settings store that reads key values from cenrep and keeps
+/*!
+ * \class CxeSettingsLocalStore
+ * \brief Settings store that reads key values from cenrep and keeps
  * cached copies of them in memory. Doesn't write anything back
  * to cenrep.
  */
@@ -204,19 +165,9 @@ public:
      CxeSettingsLocalStore();
      ~CxeSettingsLocalStore();
 
-     /*
-     * Reads a value from local store.
-     * @param "key"   - setting key
-     * @param "value" - setting value read from cenrep
-     */
      CxeError::Id get(const QString& key, QVariant &value);
-
-     /*
-     * Sets a new value to local store
-     * @param "key"   - setting key
-     * @param "newValue" - new value set to the key in cenrep
-     */
      CxeError::Id set(const QString& key, const QVariant newValue);
+
 private:
 
      bool useValueFromCenrep(const QString &key) const;

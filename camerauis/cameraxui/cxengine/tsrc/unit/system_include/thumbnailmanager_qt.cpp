@@ -27,11 +27,15 @@
 * ThumbnailManager::ThumbnailManager
 */
 ThumbnailManager::ThumbnailManager(QObject* parentPtr)
+    : mTimer(this)
 {
     Q_UNUSED(parentPtr);
 
     mCurrentThumbnailId = 0;
     mThumbnailManagerIds.clear();
+    mTimer.setSingleShot(true);
+    connect(&mTimer, SIGNAL(timeout()),
+            this, SLOT(emulateThumbnailReady()));
 }
 
 
@@ -53,9 +57,33 @@ int ThumbnailManager::getThumbnail(const QString& filename, void * clientData, i
 
     Q_UNUSED(priority);
         
-    int status = KErrNone;
+    int id = 0;
 
     if (filename.isNull() || filename.isEmpty()) {
+        id = -1;
+    } else {
+        // generate thumbnail id
+        id = mCurrentThumbnailId;
+        mThumbnailManagerIds.append(mCurrentThumbnailId++);
+    }
+
+    // try emulating thumbnail ready
+    mTimer.start(1000);
+
+    CX_DEBUG_EXIT_FUNCTION();
+
+    return id;
+}
+
+int ThumbnailManager::setThumbnail( const QImage& source, const QString& fileName,
+      void *clientData, int priority)
+{
+    Q_UNUSED(clientData);
+    Q_UNUSED(priority);
+
+    int status = KErrNone;
+
+    if (fileName.isNull() || fileName.isEmpty()) {
         status = KErrNotFound;
     } else {
         // generate thumbnail id
@@ -65,13 +93,11 @@ int ThumbnailManager::getThumbnail(const QString& filename, void * clientData, i
     emit thumbnailReady(QPixmap(), clientData, mCurrentThumbnailId, status);
 
     mCurrentThumbnailId++;
-    
+
     CX_DEBUG_EXIT_FUNCTION();
 
-    return status;
+    return mCurrentThumbnailId;
 }
-
-
 
 /*!
 * start canceling creating thumbnail operation
@@ -80,3 +106,21 @@ bool ThumbnailManager::cancelRequest(int id)
 {
     return mThumbnailManagerIds.contains(id);
 }
+
+
+/*!
+* slot that emulates thumbnail ready
+*/
+void ThumbnailManager::emulateThumbnailReady()
+{
+    // get the current thumbnail id
+    int id = mCurrentThumbnailId - 1;
+    int status = KErrNone;
+    
+    if (id == -1) {
+        // if there are no valid thumbnails
+        status = KErrNotFound;
+    }
+    emit thumbnailReady(QPixmap(), 0, id, status);
+}
+

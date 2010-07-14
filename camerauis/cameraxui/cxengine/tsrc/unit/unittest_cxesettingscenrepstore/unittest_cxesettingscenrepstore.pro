@@ -10,18 +10,25 @@
 # Description:
 
 
+CONFIG *= cxeunit_no_system_paths
+
 include(../unittest.pri)
 
 TARGET = unittest_cxesettingscenrepstore
 
-LIBS *= -lxqsettingsmanager
+INCLUDEPATH *= ../system_include
+DEPENDPATH  *= ../system_include
 
 SOURCES *= unittest_cxesettingscenrepstore.cpp \
-           cxesettingscenrepstore.cpp
+           cxesettingscenrepstore.cpp \
+           xqsettingsmanager.cpp \
+           xqsettingskey.cpp
 
 HEADERS *= unittest_cxesettingscenrepstore.h \
            cxutils.h \
            cxeerror.h \
+           xqsettingskey.h \
+           xqsettingsmanager.h \
            cxenamespace.h \
            cxecenrepkeys.h \
            cxesettingscenrepstore.h \

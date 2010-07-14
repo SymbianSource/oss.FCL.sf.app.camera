@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -41,7 +41,6 @@ UnitTestCxeSettingsImp::~UnitTestCxeSettingsImp()
 void UnitTestCxeSettingsImp::init()
 {
     mSettingsModel = new CxeFakeSettingsModel;
-    mSettingsModel->initDefaultCameraSettings();
     mSettingsImp = new CxeSettingsImp(*mSettingsModel);
 }
 
@@ -164,43 +163,8 @@ void UnitTestCxeSettingsImp::testGet()
 
     err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE, stringValue);
     QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_AUTO, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_AUTO, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_MACRO, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_MACRO, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_NIGHT, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_NIGHT, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_PORTRAIT, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_PORTRAIT, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_SCENERY, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_SCENERY, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::IMAGE_SCENE_SPORTS, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_SPORTS, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
+    CxeScene scene = mSettingsModel->currentImageScene();
+    QCOMPARE(stringValue,  scene[CxeSettingIds::SCENE_ID].toString());
 
     err = mSettingsImp->get(CxeSettingIds::LIGHT_SENSITIVITY, stringValue);
     QCOMPARE(err, CxeError::None);
@@ -229,28 +193,8 @@ void UnitTestCxeSettingsImp::testGet()
 
     err = mSettingsImp->get(CxeSettingIds::VIDEO_SCENE, stringValue);
     QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::VIDEO_SCENE_AUTO, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_AUTO, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::VIDEO_SCENE_LOWLIGHT, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_LOWLIGHT, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::VIDEO_SCENE_NIGHT, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_NIGHT, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
-
-    err = mSettingsImp->get(CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT, stringValue);
-    QCOMPARE(err, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT, testValue);
-    QCOMPARE(stringValue, QString(testValue.toString()));
+    scene = mSettingsModel->currentVideoScene();
+    QCOMPARE(stringValue, scene[CxeSettingIds::SCENE_ID].toString());
 
     err = mSettingsImp->get(CxeSettingIds::WHITE_BALANCE, stringValue);
     QCOMPARE(err, CxeError::None);
@@ -392,7 +336,7 @@ void UnitTestCxeSettingsImp::testSet()
     mSettingsModel->getSettingValue(CxeSettingIds::FNAME_IMAGE_COUNTER, checkValue);
     QCOMPARE(int(checkValue.toInt()), range);
 
-    error = mSettingsImp->set(CxeSettingIds::FNAME_MONTH_FOLDER, string);
+    error = mSettingsImp->set(CxeSettingIds::FNAME_MONTH_FOLDER, range);
     QCOMPARE(error, CxeError::None);
     mSettingsModel->getSettingValue(CxeSettingIds::FNAME_MONTH_FOLDER, checkValue);
     QCOMPARE(int(checkValue.toInt()), range);
@@ -415,41 +359,6 @@ void UnitTestCxeSettingsImp::testSet()
     error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE,  range);
     QCOMPARE(error, CxeError::None);
     mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_AUTO,  range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_AUTO, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_MACRO,  range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_MACRO, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_NIGHT, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_NIGHT, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_PORTRAIT, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_PORTRAIT, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_SCENERY, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_SCENERY, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::IMAGE_SCENE_SPORTS, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::IMAGE_SCENE_SPORTS, checkValue);
     QCOMPARE(int(checkValue.toInt()), range);
 
     error = mSettingsImp->set(CxeSettingIds::LIGHT_SENSITIVITY, Cxe::LightSensitivityAutomatic);
@@ -505,26 +414,6 @@ void UnitTestCxeSettingsImp::testSet()
     error = mSettingsImp->set(CxeSettingIds::VIDEO_SCENE, range);
     QCOMPARE(error, CxeError::None);
     mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::VIDEO_SCENE_AUTO, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_AUTO, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::VIDEO_SCENE_LOWLIGHT, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_LOWLIGHT, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::VIDEO_SCENE_NIGHT, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_NIGHT, checkValue);
-    QCOMPARE(int(checkValue.toInt()), range);
-
-    error = mSettingsImp->set(CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT, range);
-    QCOMPARE(error, CxeError::None);
-    mSettingsModel->getSettingValue(CxeSettingIds::VIDEO_SCENE_NIGHTPORTRAIT, checkValue);
     QCOMPARE(int(checkValue.toInt()), range);
 
     error = mSettingsImp->set(CxeSettingIds::WHITE_BALANCE, Cxe::WhitebalanceAutomatic);

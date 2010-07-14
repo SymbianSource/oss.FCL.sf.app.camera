@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -93,7 +93,7 @@ QVariant CxuiSettingRadioButtonListModel::data(const QModelIndex &index, int rol
 
         data = QVariant(list);
     } else {
-        CX_DEBUG(("[WARNING] CxuiSettingRadioButtonListModel: role is not DisplayRole!"));
+        // No action
     }
 
     CX_DEBUG_EXIT_FUNCTION();

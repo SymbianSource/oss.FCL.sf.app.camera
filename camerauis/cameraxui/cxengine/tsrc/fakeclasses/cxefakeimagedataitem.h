@@ -26,7 +26,7 @@ class CxeFakeImageDataItem : public CxeImageDataItem
     Q_OBJECT
 
 public: // constructor and destructor
-    CxeFakeImageDataItem(int index, QByteArray data, QString filename, int id);
+    CxeFakeImageDataItem(int index, QByteArray data, QString filename, int id, bool addLocation);
     virtual ~CxeFakeImageDataItem();
 
 public: // from CxeImageDataItem
@@ -34,12 +34,14 @@ public: // from CxeImageDataItem
     CxeImageDataItem::State state() const;
     int id() const;
     QString path() const;
+    bool addLocation() const;
 
 private:
     int mId;
     int mIndex;
     QByteArray mData;
     QString mFileName;
+    bool mAddLocationInfo;
     CxeImageDataItem::State mState;
 };
 

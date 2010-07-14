@@ -61,8 +61,8 @@ CxeThumbnailManagerSymbian::~CxeThumbnailManagerSymbian()
 @param filename - name of the image/video filename
 @param snapshot - snapshot data from image/video
 */
-void CxeThumbnailManagerSymbian::createThumbnail(const QString& filename,
-                                                 QPixmap /*snapshot*/)
+void CxeThumbnailManagerSymbian::createThumbnail(const QString &filename,
+                                                 const QImage &snapshot)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -71,9 +71,7 @@ void CxeThumbnailManagerSymbian::createThumbnail(const QString& filename,
 
     if (mThumbnailManager) {
         CX_DEBUG(("creating thumbnails"));
-        //!@todo Thumbnail manager interface needs to be changed to use QImage
-        // instead of QPixmap for setThumbnail. Until then, using qetThumbnail.
-        int thumbnailId = mThumbnailManager->getThumbnail(filename, 0);
+        int thumbnailId = mThumbnailManager->setThumbnail(snapshot, filename);
         if (thumbnailId != -1) {
             CX_DEBUG(("Thumbnail ID = %d", thumbnailId));
             mThumbnailRequests.insert(filename, thumbnailId);
@@ -137,7 +135,6 @@ void CxeThumbnailManagerSymbian::thumbnailReady(QPixmap thumbnail, void * data, 
     if (mThumbnailRequests.contains(key)) {
         CX_DEBUG(("Thumbnail created for filename = %s", key.toAscii().constData()));
         mThumbnailRequests.remove(key);
-        emit thumbnailReady(thumbnail, error);
     }
 
     CX_DEBUG_EXIT_FUNCTION();

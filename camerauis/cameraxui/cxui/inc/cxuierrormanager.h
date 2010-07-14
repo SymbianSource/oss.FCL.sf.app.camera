@@ -23,7 +23,6 @@
 class HbAction;
 class HbDialog;
 class CxuiDocumentLoader;
-class CxuiCaptureKeyHandler;
 
 
 /*
@@ -35,18 +34,18 @@ class CxuiErrorManager : public QObject
 
 public:
 
-    CxuiErrorManager(CxuiCaptureKeyHandler &keyHandler,CxuiDocumentLoader *documentLoader);
+    CxuiErrorManager(CxuiDocumentLoader *documentLoader);
     ~CxuiErrorManager();
 
 signals:
 
-    void aboutToRecoverError();
-    void errorRecovered();
+    void errorPopupShown();
+    void errorPopupClosed();
 
 public slots:
 
-    void showPopup(CxeError::Id error);
-    void hidePopup(CxeError::Id error);
+    void check(CxeError::Id error);
+    void clear();
 
 private slots:
     void popupClosed(HbAction *action);
@@ -58,20 +57,18 @@ private:
     enum ErrorSeverity
     {
         None = 0,
-        Warning, // Low severity, just warning user needed
-        Severe, // when error cannot be recovered
-        Critical // when error can be recovered, but needs actions e.g. camera in use
+        Warning,
+        Error
     };
 
     void launchPopup(const QString &errorText, const QString &buttonText);
-    void showHighSeverityNote(const QString &errorText, const QString &buttonText);
-    void showLowSeverityNote(const QString &errorText);
+    void showErrorPopup(const QString &errorText, const QString &buttonText);
+    void showWarningPopup(const QString &errorText);
     void getErrorDetails(QString &errorText, QString &buttonText);
 
 private:
 
     //data
-    CxuiCaptureKeyHandler &mKeyHandler;
     CxuiDocumentLoader *mDocumentLoader; // not own
     HbDialog* mErrorMsgPopup;
     CxeError::Id mErrorId;

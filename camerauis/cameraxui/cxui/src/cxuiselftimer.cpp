@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,6 +17,10 @@
 #include <QGraphicsWidget>
 #include <hblabel.h>
 #include <hbpushbutton.h>
+
+#ifdef Q_OS_SYMBIAN
+#include <ProfileEngineSDKCRKeys.h>
+#endif
 
 #include "cxuiselftimer.h"
 #include "cxutils.h"
@@ -53,12 +57,36 @@ CxuiSelfTimer::CxuiSelfTimer(CxeSettings &settings)
    mCancelButton(NULL),
    mStartButton(NULL),
    mSettings(settings),
-   mSound(SELFTIMER_SOUND)
+   mSound(SELFTIMER_SOUND),
+   mUseSound(true)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(timeout()));
     mTimer.setSingleShot(false);
+
+    // connect to capture sound signal in order to monitor
+    // warning tone changes
+    connect(&mSettings,
+            SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
+            this, SLOT(enableSound(long int, unsigned long int, QVariant)));
+
+    // get initial warning tone value from profile
+    QVariant value(0);
+
+#ifdef Q_OS_SYMBIAN
+    // get current profile setting for using camerasound
+    // camera sound follows warning tone setting
+    unsigned long int key = KProEngActiveWarningTones;
+    long int uid = KCRUidProfileEngine.iUid;
+    mSettings.get(uid, key, Cxe::Repository, value);
+#endif
+
+    // possible values are:
+    // 0 -> warning tones off
+    // 1 -> warning tones on
+    mUseSound = (value.toInt() == 1);
+    CX_DEBUG(("Warning tones enabled [%d]", value.toInt()));
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -205,23 +233,28 @@ void CxuiSelfTimer::playSound()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    int timeLeft = mDelay - mCounter;
+    // play sounds only if warning tones are enabled
+    if (mUseSound) {
+        CX_DEBUG(("play"));
 
-    if (timeLeft <= 3) {
-        // play as fast as we can
-        if (mSound.isFinished()) {
-            mSound.setLoops(-1);
-            mSound.play();
-        }
-    } else if (timeLeft <= 10) {
-        // play every second
-        mSound.setLoops(1);
-        mSound.play();
-    } else {
-        // play once every two seconds
-        if (mCounter%2) {
+        int timeLeft = mDelay - mCounter;
+
+        if (timeLeft <= 3) {
+            // play as fast as we can
+            if (mSound.isFinished()) {
+                mSound.setLoops(-1);
+                mSound.play();
+            }
+        } else if (timeLeft <= 10) {
+            // play every second
             mSound.setLoops(1);
             mSound.play();
+        } else {
+            // play once every two seconds
+            if (mCounter%2) {
+                mSound.setLoops(1);
+                mSound.play();
+            }
         }
     }
 
@@ -356,6 +389,29 @@ void CxuiSelfTimer::hideWidgets()
         mWidgetContainer->hide();
     }
 
-
-
 }
+
+/*!
+ * Enables or disables the selftimer sound.
+ * \param uid UID of the changed setting
+ * \param key Key of the changed setting
+ * \param value New setting value
+ */
+void CxuiSelfTimer::enableSound(long int uid, unsigned long int key, QVariant value)
+{
+#ifdef Q_OS_SYMBIAN
+    // selftimer is only interested in warning tones
+    if (uid == KCRUidProfileEngine.iUid && key == KProEngActiveWarningTones) {
+        CX_DEBUG_IN_FUNCTION();
+        // possible values are:
+        // 0 -> warning tones off
+        // 1 -> warning tones on
+        mUseSound = (value.toInt() == 1);
+    }
+#else
+    Q_UNUSED(uid);
+    Q_UNUSED(key);
+    Q_UNUSED(value);
+#endif
+}
+

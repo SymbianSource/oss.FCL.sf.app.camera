@@ -72,7 +72,7 @@ void UnitTestCxeFileSaveThreadSymbian::testSave()
     // Case 0: Checking if a file is saved with all valid parameters
     const int index(2);
     const int id(7);
-    CxeImageDataItem *imageDataItem = new CxeFakeImageDataItem(index, QByteArray("unit test successful"), filename, id);
+    CxeImageDataItem *imageDataItem = new CxeFakeImageDataItem(index, QByteArray("unit test successful"), filename, id, false);
 
     QSignalSpy imageItemStateSpy(imageDataItem, SIGNAL(imageSaved(CxeError::Id, const QString&, int)));
 

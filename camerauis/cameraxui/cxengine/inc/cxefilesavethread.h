@@ -40,8 +40,8 @@ public:
 public slots:
 
     virtual void handleVideoSaved(CxeError::Id status, const QString& filename) = 0;
-    virtual void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, const QString& filename) = 0;
-    virtual void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, int id) = 0;
+    virtual void handleSnapshotReady(CxeError::Id status, const QImage& snapshot, const QString& filename) = 0;
+    virtual void handleSnapshotReady(CxeError::Id status, const QImage& snapshot, int id) = 0;
 
 protected:
 

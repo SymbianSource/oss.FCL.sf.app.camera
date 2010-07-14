@@ -113,7 +113,7 @@ protected slots:
     void handleImageData(MCameraBuffer *buffer, int error);
 
     // Snapshot event
-    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot);
+    void handleSnapshotReady(CxeError::Id status, const QImage &snapshot);
 
     // settings call back
     void handleSettingValueChanged(const QString& settingId,QVariant newValue);

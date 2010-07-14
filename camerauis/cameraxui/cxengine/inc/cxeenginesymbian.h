@@ -40,6 +40,7 @@ class CxeQualityPresets;
 class CxeFileSaveThread;
 class CxeDiskMonitor;
 class CxeMemoryMonitor;
+class CxeGeoTaggingTrail;
 
 
 class CxeEngineSymbian : public CxeEngine
@@ -60,7 +61,9 @@ public:
     CxeSensorEventHandler &sensorEventHandler();
     CxeFeatureManager &featureManager();
     CxeMemoryMonitor &memoryMonitor();
+    CxeGeoTaggingTrail &geoTaggingTrail();
     Cxe::CameraMode mode() const;
+    void setMode(Cxe::CameraMode mode);
     void initMode(Cxe::CameraMode cameraMode);
     bool isEngineReady();
 
@@ -81,6 +84,8 @@ private:
     bool initNeeded();
     bool startViewfinderNeeded();
     void reserve();
+    void saveMode();
+    void startGeotaggingTrail();
 
 protected:
     CxeCameraDeviceControl *mCameraDeviceControl;
@@ -101,6 +106,7 @@ protected:
     CxeFileSaveThread *mFileSaveThread;
     CxeDiskMonitor *mDiskMonitor;
     CxeMemoryMonitor *mMemoryMonitor;
+    CxeGeoTaggingTrail *mGeoTaggingTrail;
 };
 
 

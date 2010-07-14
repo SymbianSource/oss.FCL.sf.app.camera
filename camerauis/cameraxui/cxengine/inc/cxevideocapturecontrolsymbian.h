@@ -98,7 +98,7 @@ public slots:
     //! Notification that videocapture sound has been played
     void handleSoundPlayed();
     //! Snapshot has been received from adaptiation.
-    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot);
+    void handleSnapshotReady(CxeError::Id status, const QImage &snapshot);
 
 protected slots:
     // notifications when ECam reference is changed

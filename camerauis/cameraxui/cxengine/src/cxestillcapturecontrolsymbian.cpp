@@ -56,7 +56,7 @@ namespace
     const TInt64 KMinRequiredSpaceImage = 2000000;
 }
 
-/**
+/*!
  * Constructor.
  */
 CxeStillCaptureControlSymbian::CxeStillCaptureControlSymbian(
@@ -118,20 +118,20 @@ CxeStillCaptureControlSymbian::CxeStillCaptureControlSymbian(
     connect(&mCameraDeviceControl, SIGNAL(imageBufferReady(MCameraBuffer*,int)),
             this, SLOT(handleImageData(MCameraBuffer*,int)));
     // connect snapshot ready signal
-    connect(&mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&)),
-            this, SLOT(handleSnapshotReady(CxeError::Id, const QPixmap&)));
+    connect(&mSnapshotControl, SIGNAL(snapshotReady(CxeError::Id, const QImage&)),
+            this, SLOT(handleSnapshotReady(CxeError::Id, const QImage&)));
 
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_CREATE_MID2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     mImageDataQueue = new CxeImageDataQueueSymbian();
-    mAutoFocusSoundPlayer = new CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::AutoFocus);
-    mCaptureSoundPlayer = new CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::StillCapture);
+    mAutoFocusSoundPlayer = new CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::AutoFocus, mSettings);
+    mCaptureSoundPlayer = new CxeSoundPlayerSymbian(CxeSoundPlayerSymbian::StillCapture, mSettings);
 
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_CREATE_OUT, "msg: e_CX_STILLCAPTURECONTROL_NEW 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * Destructor.
  */
 CxeStillCaptureControlSymbian::~CxeStillCaptureControlSymbian()
@@ -149,7 +149,7 @@ CxeStillCaptureControlSymbian::~CxeStillCaptureControlSymbian()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * Return the current state.
  */
 CxeStillCaptureControl::State CxeStillCaptureControlSymbian::state() const
@@ -157,7 +157,7 @@ CxeStillCaptureControl::State CxeStillCaptureControlSymbian::state() const
     return static_cast<CxeStillCaptureControl::State>( stateId() );
 }
 
-/**
+/*!
  * Handle state changed event. Normally just emits the signal
  * for observers to react appropriately.
  */
@@ -166,7 +166,7 @@ void CxeStillCaptureControlSymbian::handleStateChanged( int newStateId, CxeError
     emit stateChanged( static_cast<State>( newStateId ), error );
 }
 
-/**
+/*!
  * Initialize the control states.
  */
 void CxeStillCaptureControlSymbian::initializeStates()
@@ -179,7 +179,7 @@ void CxeStillCaptureControlSymbian::initializeStates()
     setInitialState(Uninitialized);
 }
 
-/**
+/*!
  * Initialize the still image capture control.
  */
 void CxeStillCaptureControlSymbian::init()
@@ -197,7 +197,7 @@ void CxeStillCaptureControlSymbian::init()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * Un-initialize the image mode.
  */
 void CxeStillCaptureControlSymbian::deinit()
@@ -234,7 +234,7 @@ void CxeStillCaptureControlSymbian::deinit()
 }
 
 
-/**!
+/*!
  * Prepare still capture mode.
  */
 void CxeStillCaptureControlSymbian::prepare()
@@ -325,7 +325,7 @@ void CxeStillCaptureControlSymbian::prepare()
 
 
 
-/**!
+/*!
  Prepare still snapshot
  Returns symbian error code.
  */
@@ -338,7 +338,7 @@ int CxeStillCaptureControlSymbian::prepareStillSnapshot()
     try {
         QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
                                 mViewfinderControl.deviceDisplayResolution(),
-                                QSize(mCurrentImageDetails.mWidth, mCurrentImageDetails.mHeight));
+                                mCurrentImageDetails.mAspectRatio);
         mSnapshotControl.start(snapshotSize);
     } catch (...) {
         status = KErrGeneral;
@@ -350,7 +350,7 @@ int CxeStillCaptureControlSymbian::prepareStillSnapshot()
 }
 
 
-/**!
+/*!
  imageInfo contains image qualities details
  Returns CxeError error code.
  */
@@ -422,7 +422,7 @@ void CxeStillCaptureControlSymbian::capture()
 }
 
 
-/* !
+/*!
 @Param cameraIndex indicates which camera we are in use, primary/secondary
 Returns the format we use for specific camera index.
 */
@@ -439,23 +439,27 @@ CCamera::TFormat CxeStillCaptureControlSymbian::supportedStillFormat(Cxe::Camera
     return imgFormat;
 }
 
-/**
+/*!
  * Snapshot ready notification. Ask the snapshot from snapshot interface.
  * NB: Typically snapshot arrives before image data but can be in reverse
  * order as well.
+ *
+ * @param status Status of snapshot creation. CxeError::None if no error, otherwise contains the error code.
+ * @param snapshot Snapshot as QImage
  */
-void CxeStillCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot)
+void CxeStillCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, const QImage &snapshot)
 {
     CX_DEBUG_ENTER_FUNCTION();
     if (mCameraDeviceControl.mode() == Cxe::ImageMode) {
 
         OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_HANDLESNAPSHOTEVENT, "msg: e_CX_HANDLE_SNAPSHOT 1" );
 
+        QPixmap ss = QPixmap::fromImage(snapshot);
         // Get image container for current snapshot index.
         // Remember to increment counter.
         CxeStillImageSymbian* stillImage = getImageForIndex(mNextSnapshotIndex++);
         if (status == CxeError::None) {
-            stillImage->setSnapshot(snapshot);
+            stillImage->setSnapshot(ss);
         }
 
         // Emit snapshotReady signal in all cases (error or not)
@@ -490,7 +494,7 @@ void CxeStillCaptureControlSymbian::handleCameraEvent(int eventUid, int error)
 }
 
 
-/**
+/*!
  * handleImageData: Image data received from ECam
  */
 void CxeStillCaptureControlSymbian::handleImageData(MCameraBuffer* cameraBuffer, int error)
@@ -539,8 +543,15 @@ void CxeStillCaptureControlSymbian::handleImageData(MCameraBuffer* cameraBuffer,
         QByteArray byteArray( reinterpret_cast<const char*>( data->Ptr() ), data->Size() );
         data = NULL;
 
+        // get geotagging setting value and check if we have to add location trail to image data.
+        int value = Cxe::GeoTaggingOff;
+        mSettings.get(CxeSettingIds::GEOTAGGING, value);
+
         // Save the image data
-        CxeImageDataItemSymbian* dataItem = mImageDataQueue->startSave(byteArray, stillImage->filename(), stillImage->id());
+        CxeImageDataItemSymbian* dataItem = mImageDataQueue->startSave(byteArray,
+                                                                       stillImage->filename(),
+                                                                       stillImage->id(),
+                                                                       value == Cxe::GeoTaggingOn);
         stillImage->setDataItem(dataItem);
         mFileSaveThread.save(dataItem); // Saving thread takes ownership of dataItem.
     }
@@ -561,7 +572,7 @@ void CxeStillCaptureControlSymbian::handleImageData(MCameraBuffer* cameraBuffer,
 }
 
 
-/**
+/*!
  * Settings changed, needs updated
  */
 void CxeStillCaptureControlSymbian::handleSettingValueChanged(const QString& settingId, QVariant newValue)
@@ -606,7 +617,7 @@ void CxeStillCaptureControlSymbian::handleDiskSpaceChanged()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * ECam reference changing, release resources
  */
 void CxeStillCaptureControlSymbian::prepareForCameraDelete()
@@ -616,7 +627,7 @@ void CxeStillCaptureControlSymbian::prepareForCameraDelete()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * Camera being released. Cancel ongoing capture, if any.
  */
 void CxeStillCaptureControlSymbian::prepareForRelease()
@@ -626,7 +637,7 @@ void CxeStillCaptureControlSymbian::prepareForRelease()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  *  New camera available,
  */
 void CxeStillCaptureControlSymbian::handleCameraAllocated(CxeError::Id error)
@@ -660,7 +671,7 @@ void CxeStillCaptureControlSymbian::handleCameraAllocated(CxeError::Id error)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * Return number of images captured (during current capture operation only).
  */
 int CxeStillCaptureControlSymbian::imageCount() const
@@ -668,7 +679,7 @@ int CxeStillCaptureControlSymbian::imageCount() const
     return mImages.count();
 }
 
-/**
+/*!
  * Reset the image array.
  */
 void CxeStillCaptureControlSymbian::reset()
@@ -684,7 +695,7 @@ void CxeStillCaptureControlSymbian::reset()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * This should cancel any ongoing image captures.
  */
 void CxeStillCaptureControlSymbian::cancelAll()
@@ -693,7 +704,7 @@ void CxeStillCaptureControlSymbian::cancelAll()
     reset();
 }
 
-/**
+/*!
  * Sets the current capture mode: SingleImageCapture / BurstCapture.
  */
 void CxeStillCaptureControlSymbian::setMode( CaptureMode mode )
@@ -701,7 +712,7 @@ void CxeStillCaptureControlSymbian::setMode( CaptureMode mode )
     mMode = mode;
 }
 
-/**
+/*!
  * Returns the current capture mode.
  */
 CxeStillCaptureControl::CaptureMode CxeStillCaptureControlSymbian::mode() const
@@ -709,7 +720,7 @@ CxeStillCaptureControl::CaptureMode CxeStillCaptureControlSymbian::mode() const
     return mMode;
 }
 
-/**
+/*!
  * Operator [] - returns the indexed image from capture array.
  */
 CxeStillImage &CxeStillCaptureControlSymbian::operator[]( int index )
@@ -717,7 +728,7 @@ CxeStillImage &CxeStillCaptureControlSymbian::operator[]( int index )
     return *mImages[ index ];
 }
 
-/**
+/*!
  * Getter for image data queue.
  */
 CxeImageDataQueue &CxeStillCaptureControlSymbian::imageDataQueue()
@@ -725,7 +736,7 @@ CxeImageDataQueue &CxeStillCaptureControlSymbian::imageDataQueue()
     return *mImageDataQueue;
 }
 
-/**
+/*!
  * Generates a filename and sets it in the still image object.
  * Skips the process if filename already copied exists in the object. This
  * behaviour is required in rare cases where image data arrives before snapshot.
@@ -788,7 +799,7 @@ void CxeStillCaptureControlSymbian::setOrientation(QVariant sensorData)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/**
+/*!
  * Get the image container at given index or create a new one if needed.
  */
 CxeStillImageSymbian* CxeStillCaptureControlSymbian::getImageForIndex(int index)

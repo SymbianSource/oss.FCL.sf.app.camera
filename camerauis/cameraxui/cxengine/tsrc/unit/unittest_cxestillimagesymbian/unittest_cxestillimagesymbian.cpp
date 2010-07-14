@@ -118,7 +118,7 @@ void UnitTestCxeStillImageSymbian::testsetDataItem()
     QVERIFY(!mCxeStillImageSymbian->dataItem());
     QByteArray data("124343423423456e74576");
     QString path = "\\Images\\Camera\\blaah.jpg";
-    CxeImageDataItemSymbian* dataItem = new CxeImageDataItemSymbian(data, path, mCxeStillImageSymbian->id());
+    CxeImageDataItemSymbian* dataItem = new CxeImageDataItemSymbian(data, path, mCxeStillImageSymbian->id(), false);
     mCxeStillImageSymbian->setDataItem(dataItem);
     QVERIFY(mCxeStillImageSymbian->dataItem() == dataItem);
     CX_DEBUG_EXIT_FUNCTION();

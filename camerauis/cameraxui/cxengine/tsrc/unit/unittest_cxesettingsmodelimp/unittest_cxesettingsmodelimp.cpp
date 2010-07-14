@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -146,7 +146,7 @@ void UnitTestCxeSettingsModelImp::testImageSceneSettingValues()
     QCOMPARE(result.toInt(), 0);
 
     // case 1: setting a value to a valid key
-    error = mSettingsModel->set(CxeSettingIds::SHARPNESS, 100);
+    error = mSettingsModel->set(CxeSettingIds::SHARPNESS, QVariant(100));
     QVERIFY(error == CxeError::None);
 
     // case 2: testing if the value set is right to sharpness key
@@ -233,20 +233,23 @@ void UnitTestCxeSettingsModelImp::testImageScene()
 {
     CxeScene result;
     CxeError::Id error;
+
+    // do initialization
+    mSettingsModel->cameraModeChanged(Cxe::ImageMode);
+
     // case 1: check the default image scene sharpness value
     result = mSettingsModel->currentImageScene();
-    QVERIFY(result[CxeSettingIds::SCENE_ID] == CxeSettingIds::IMAGE_SCENE_AUTO);
+    QVERIFY(result[CxeSettingIds::SCENE_ID] == Cxe::IMAGE_SCENE_AUTO);
     QVERIFY(result[CxeSettingIds::SHARPNESS] == Cxe::SharpnessNormal);
 
-    QString key = CxeSettingIds::IMAGE_SCENE_PORTRAIT;
-
     // case 2: trying to set a new image scene
-    error = mSettingsModel->setImageScene(key);
+    QString sceneId = Cxe::IMAGE_SCENE_PORTRAIT;
+    error = mSettingsModel->setImageScene(sceneId);
     QVERIFY(error == CxeError::None);
 
     // case 3: testing if NIGHT image scene is set correctly. checking its sharpness value
     result = mSettingsModel->currentImageScene();
-    QVERIFY(result[CxeSettingIds::SCENE_ID] == key);
+    QVERIFY(result[CxeSettingIds::SCENE_ID] == sceneId);
     QVERIFY(result[CxeSettingIds::SHARPNESS] == Cxe::SharpnessSoft);
 
     // case 3: trying to set a image scene with invalid value
@@ -268,20 +271,23 @@ void UnitTestCxeSettingsModelImp::testVideoScene()
 {
     CxeScene result;
     CxeError::Id error;
+
+    // do initialization
+    mSettingsModel->cameraModeChanged(Cxe::VideoMode);
+
     // case 1: check the default image scene
     result = mSettingsModel->currentVideoScene();
-    QVERIFY(result[CxeSettingIds::SCENE_ID] == CxeSettingIds::VIDEO_SCENE_AUTO);
+    QVERIFY(result[CxeSettingIds::SCENE_ID] == Cxe::VIDEO_SCENE_AUTO);
     QVERIFY(result[CxeSettingIds::FRAME_RATE] == 0);
 
-    QString key = CxeSettingIds::VIDEO_SCENE_LOWLIGHT;
-
     // case 2: trying to set a new image scene
-    error = mSettingsModel->setVideoScene(key);
+    QString sceneId = Cxe::VIDEO_SCENE_LOWLIGHT;
+    error = mSettingsModel->setVideoScene(sceneId);
     QVERIFY(error == CxeError::None);
 
     // case 3: testing if NIGHT image scene is set correctly
     result = mSettingsModel->currentVideoScene();
-    QVERIFY(result[CxeSettingIds::SCENE_ID] == key);
+    QVERIFY(result[CxeSettingIds::SCENE_ID] == sceneId);
     QVERIFY(result[CxeSettingIds::FRAME_RATE] == 15);
 
     // case 3: trying to set a image scene with invalid value
@@ -296,5 +302,4 @@ void UnitTestCxeSettingsModelImp::testVideoScene()
 
 
 // main() function non-GUI testing
-QTEST_APPLESS_MAIN(UnitTestCxeSettingsModelImp)
-;
+QTEST_APPLESS_MAIN(UnitTestCxeSettingsModelImp);

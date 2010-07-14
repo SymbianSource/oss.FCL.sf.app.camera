@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -19,11 +19,13 @@
 
 #include <QObject>
 #include <QMetaType>
+#include <QVariant>
 #include <mdaaudiosampleplayer.h>
 #include "cxestatemachine.h"
 
 class CMdaAudioPlayerUtility;
 class CxeCameraDeviceControlSymbian;
+class CxeSettings;
 
 class CxeSoundPlayerSymbian : public QObject,
                               public CxeStateMachine,
@@ -31,7 +33,7 @@ class CxeSoundPlayerSymbian : public QObject,
 {
     Q_OBJECT
 public:
-    /**
+    /*!
      * CaptureSound enum defines different types of capture sounds
      */
     enum CaptureSound {
@@ -47,7 +49,7 @@ public:
         AutoFocus
     };
 
-    /*
+    /*!
      * Sound player states.
      */
     enum State {
@@ -64,20 +66,20 @@ public:
         Playing = 0x08
     };
 
-    CxeSoundPlayerSymbian(CaptureSound soundId);
+    CxeSoundPlayerSymbian(CaptureSound soundId, CxeSettings &settings);
     virtual ~CxeSoundPlayerSymbian();
 
-    /**
-     * Plays the currently open capture sound.
-     */
     void play();
+
+public slots:
+    void enableSound(long int uid, unsigned long int key, QVariant value);
 
 protected: // from CxeStateMachine
     void handleStateChanged(int newStateId, CxeError::Id error);
 
 signals:
-    /**
-     * playComlete signal is emitted when sound has been played.
+    /*!
+     * playComplete signal is emitted when sound has been played.
      * @param error Contains status information whether there was a problem with playing or not
      */
     void playComplete(int error);
@@ -89,26 +91,22 @@ protected: // from MMdaAudioPlayerCallback
     void MapcPlayComplete(TInt aStatus);
 
 private:
-    /**
-     * Get current sound player state.
-     */
     State state() const;
-
-    /**
-     *
-     */
     void doOpen();
-
-    /**
-     * Initialize CxeStateMachine.
-     */
     void initializeStates();
+    void checkCaptureSoundSettings();
 
     //! Own.
     CMdaAudioPlayerUtility *mAudioPlayer;
 
     //! Currently opened sound file
     CxeSoundPlayerSymbian::CaptureSound mSoundId;
+
+    bool mUseSound;
+    bool mCaptureSoundForced;
+
+    CxeSettings &mSettings;
+
 };
 
 Q_DECLARE_METATYPE(CxeSoundPlayerSymbian::State)

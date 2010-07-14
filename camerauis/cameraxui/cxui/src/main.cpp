@@ -23,12 +23,12 @@
 #include <HbTranslator>
 #include <QLocale>
 #include <hbmainwindow.h>
-#include <xqserviceutil.h>
 
 #include "cxeengine.h"
 #include "cxecameradevicecontrol.h"
 #include "cxuiapplication.h"
 #include "cxuiviewmanager.h"
+#include "cxuiapplicationstate.h"
 #include "cxutils.h"
 #include "cxuiserviceprovider.h"
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     CxeEngine *eng = CxeEngine::createEngine();
     OstTrace0( camerax_performance, DUP8__MAIN, "msg: e_CX_CREATE_ENGINE 0" );
 
-    if (XQServiceUtil::isService()) {
+    if (app.activateReason() == Hb::ActivationReasonService) {
         // Embedded mode.  Engine is inited to correct mode
         // by service provider when request arrives
         CX_DEBUG(("CxUI: creating serviceprovider"));
@@ -109,21 +109,31 @@ int main(int argc, char *argv[])
     OstTrace0( camerax_performance, DUP16__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 0" );
 
     OstTrace0( camerax_performance, DUP17__MAIN, "msg: e_CX_PREPAREWINDOW 1" );
-    viewManager->prepareWindow();
+    eng->viewfinderControl().setWindow(mainWindow->effectiveWinId());
     OstTrace0( camerax_performance, DUP18__MAIN, "msg: e_CX_PREPAREWINDOW 0" );
+
     //! @todo initMode call added here as a temporary hack to change the startup sequence
-	// in order to avoid GOOM issues
-	if (viewManager->proceedStartup()) {
+	// in order to avoid GOOM issues.
+	if (app.activateReason() != Hb::ActivationReasonService
+	 && viewManager->applicationState().currentState() == CxuiApplicationState::Normal) {
     	User::After(2000000);
-        eng->initMode(Cxe::ImageMode);
+    	if (app.activateReason() == Hb::ActivationReasonActivity) {
+    	    // when started by activity, let viewmanager init
+    	    // to correct mode
+    	    viewManager->initEngine();
+    	} else {
+    	    // normal start
+    	    eng->initMode(eng->mode());
+    	}
     }
 
     int returnValue = app.exec();
 
+    delete viewManager;
+
     // delete service provider instance
     CxuiServiceProvider::destroy();
 
-    delete viewManager;
     delete mainWindow;
     delete trans;
     delete eng;

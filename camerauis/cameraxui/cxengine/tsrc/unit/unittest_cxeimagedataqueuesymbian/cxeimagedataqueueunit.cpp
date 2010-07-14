@@ -32,5 +32,5 @@ CxeImageDataQueueUnit::~CxeImageDataQueueUnit()
 CxeImageDataItem *CxeImageDataQueueUnit::createDataItem( int index, const QByteArray& data, const QString& path ) const
 {
     static int id = 0;
-    return new CxeFakeImageDataItem(index, data, path, id++);
+    return new CxeFakeImageDataItem(index, data, path, id++, false);
 }

@@ -155,7 +155,7 @@ signals:
      * @param snapshot The snapshot image.
      * @param id       Id of the image this snapshot is for.
      */
-    void snapshotReady(CxeError::Id error, const QPixmap& snapshot, int id);
+    void snapshotReady(CxeError::Id error, const QImage &snapshot, int id);
     void imageCaptured(CxeError::Id error, int id);
 
     /**

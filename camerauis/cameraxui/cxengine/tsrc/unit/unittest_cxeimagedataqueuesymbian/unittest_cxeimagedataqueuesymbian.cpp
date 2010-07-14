@@ -83,8 +83,8 @@ void UnitTestCxeImageDataQueueSymbian::testClear2()
 {
     // Add some items
     QByteArray data("test");
-    mImageDataQueue->startSave(data, "C:\\Images\\unittest1.jpeg", 0);
-    mImageDataQueue->startSave(data, "C:\\Images\\unittest2.jpeg", 1);
+    mImageDataQueue->startSave(data, "C:\\Images\\unittest1.jpeg", 0, false);
+    mImageDataQueue->startSave(data, "C:\\Images\\unittest2.jpeg", 1, false);
 
     // Test that clearing works also with some content.
     mImageDataQueue->clear();
@@ -97,8 +97,8 @@ void UnitTestCxeImageDataQueueSymbian::testClear2()
 void UnitTestCxeImageDataQueueSymbian::testOperatorAtIndex()
 {
     QByteArray data("test");
-    CxeImageDataItemSymbian* itemIn1  = mImageDataQueue->startSave(data, "C:\\Images\\unittest1.jpeg", 0);
-    CxeImageDataItemSymbian* itemIn2  = mImageDataQueue->startSave(data, "C:\\Images\\unittest2.jpeg", 1);
+    CxeImageDataItemSymbian* itemIn1  = mImageDataQueue->startSave(data, "C:\\Images\\unittest1.jpeg", 0, false);
+    CxeImageDataItemSymbian* itemIn2  = mImageDataQueue->startSave(data, "C:\\Images\\unittest2.jpeg", 1, false);
     CxeImageDataItem&        itemOut1 = (*mImageDataQueue)[0];
     CxeImageDataItem&        itemOut2 = (*mImageDataQueue)[1];
     QVERIFY(itemIn1 == &itemOut1);
@@ -111,7 +111,7 @@ void UnitTestCxeImageDataQueueSymbian::testOperatorAtIndex()
 void UnitTestCxeImageDataQueueSymbian::testStartSave()
 {
     QByteArray data("test");
-    CxeImageDataItemSymbian* itemIn = mImageDataQueue->startSave(data, "C:\\Images\\unittest.jpeg", 0);
+    CxeImageDataItemSymbian* itemIn = mImageDataQueue->startSave(data, "C:\\Images\\unittest.jpeg", 0, false);
     QVERIFY(itemIn != NULL);
 }
 

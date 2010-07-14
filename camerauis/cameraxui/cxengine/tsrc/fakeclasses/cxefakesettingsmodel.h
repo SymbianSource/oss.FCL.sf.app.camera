@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,7 +17,7 @@
 #ifndef CXEFAKESETTINGSMODEL_H
 #define CXEFAKESETTINGSMODEL_H
 
-#include <QMap>
+#include <QHash>
 #include "cxesettingsmodel.h"
 
 class CxeFakeSettingsModel  : public CxeSettingsModel
@@ -34,15 +34,16 @@ public:
     CxeError::Id getRuntimeValue(const QString &key, QVariant &value);
 
     CxeError::Id set(const QString &key,const QVariant newValue);
-    CxeScene& currentImageScene() {return mDummyScene;}
-    CxeScene& currentVideoScene() {return mDummyScene;}
-    void cameraModeChanged(Cxe::CameraMode newMode) {mDummyCameraMode = newMode;}
+    CxeScene& currentImageScene();
+    CxeScene& currentVideoScene();
+    void cameraModeChanged(Cxe::CameraMode newMode);
     CxeError::Id setImageScene(const QString &newScene);
     CxeError::Id setVideoScene(const QString &newScene);
 
 public: // own helper methods
     void setRuntimeValues(QString &key, QList<QVariant> value);
     void initDefaultCameraSettings();
+    void initRuntimeSettings();
     void testSetCurrenImageScene();
     void testSetCurrenVideoScene();
 
@@ -50,9 +51,10 @@ public: // own helper methods
 
 private:
 
-    QMap<QString, QList<QVariant> > mStore;
     QHash<QString, QVariant> mSettingStore;
-    CxeScene mDummyScene;
+    QHash<QString, QVariantList> mRuntimeSettings;
+    CxeScene mDummyImageScene;
+    CxeScene mDummyVideoScene;
     Cxe::CameraMode mDummyCameraMode;
 };
 

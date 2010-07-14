@@ -30,9 +30,9 @@ public:
     void save(CxeImageDataItem *data);
 
 public slots:
-    void handleVideoSaved(CxeError::Id status, const QString& filename);
-    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, const QString& filename);
-    void handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, int id);
+    void handleVideoSaved(CxeError::Id status, const QString &filename);
+    void handleSnapshotReady(CxeError::Id status, const QImage &snapshot, const QString &filename);
+    void handleSnapshotReady(CxeError::Id status, const QImage &snapshot, int id);
 };
 
 #endif // CXEFAKEFILESAVETHREAD_H

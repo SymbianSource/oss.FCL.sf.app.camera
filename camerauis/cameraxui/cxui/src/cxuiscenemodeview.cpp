@@ -15,6 +15,7 @@
 *
 */
 #include <hbframeitem.h>
+#include <hbactivitymanager.h>
 
 #include "cxenamespace.h"
 #include "cxesettings.h"
@@ -77,10 +78,11 @@ CxuiSceneModeView::~CxuiSceneModeView()
 void CxuiSceneModeView::construct(HbMainWindow *mainwindow,
                                CxeEngine *engine,
                                CxuiDocumentLoader *documentLoader,
-                               CxuiCaptureKeyHandler *keyHandler)
+                               CxuiCaptureKeyHandler *keyHandler,
+                               HbActivityManager *activityManager)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CxuiView::construct(mainwindow, engine, documentLoader, keyHandler);
+    CxuiView::construct(mainwindow, engine, documentLoader, keyHandler, activityManager);
 
     mSettingsInfo = new CxuiSettingsInfo(mEngine);
     setContentFullScreen(true);
@@ -119,7 +121,9 @@ void CxuiSceneModeView::loadDefaultWidgets()
 
     //Assuming that the automatic scene mode is always the default one
     CX_DEBUG(("CxuiSceneModeView::loadDefaultWidgets -> Now setting default image"));
-    mScenesBackground->setIcon(HbIcon(CXUI_SCENES_AUTOMATIC_IMAGE));
+    HbIcon background(CXUI_SCENES_AUTOMATIC_IMAGE);
+    background.setMirroringMode(HbIcon::LayoutDirection);
+    mScenesBackground->setIcon(background);
 
     widget = mDocumentLoader->findWidget(SCENE_VIEW_RADIOBUTTONS);
     mScenesList = qobject_cast<CxuiSettingRadioButtonList *> (widget);
@@ -169,12 +173,36 @@ void CxuiSceneModeView::loadBackgroundImages()
     if (mScenesBackground) {
         QString sceneId;
         mEngine->settings().get(data.mSettingId, sceneId);
-        mScenesBackground->setIcon(HbIcon(backgroundForScene(sceneId)));
+        HbIcon background(backgroundForScene(sceneId));
+        background.setMirroringMode(HbIcon::LayoutDirection);
+        mScenesBackground->setIcon(background);
     } else {
         //First time displaying a list
         //Assuming that the automatic scene mode is always the default one and is on top of the list
         mScenesList->setSelected(0);
     }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Save view state to activity. Scene mode view doesn't have it's own activity, just save
+ * correct pre-capture view.
+ */
+void CxuiSceneModeView::saveActivity()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    QVariantMap data;
+    QVariantHash params;
+
+    //@todo: add pre-capture icon as screenshot
+    if (mEngine->mode() == Cxe::ImageMode) {
+        mActivityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
+        mActivityManager->addActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY, data, params);
+    } else {
+        mActivityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
+        mActivityManager->addActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY, data, params);
+    }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -187,7 +215,9 @@ void CxuiSceneModeView::handleSceneRadiobuttonPress(int index)
 
     CxUiSettings::SettingItem item = mSettingPairList.at(index);
     QString sceneId = item.mValue.toString();
-    mScenesBackground2->setIcon(HbIcon(backgroundForScene(sceneId)));
+    HbIcon background(backgroundForScene(sceneId));
+    background.setMirroringMode(HbIcon::LayoutDirection);
+    mScenesBackground2->setIcon(background);
     startBackgroundTransition();
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -200,25 +230,25 @@ void CxuiSceneModeView::handleSceneRadiobuttonPress(int index)
 QString CxuiSceneModeView::backgroundForScene(const QString& sceneId)
 {
     //!@todo: This mapping should be added to the setting xml.
-    if (sceneId == CxeSettingIds::IMAGE_SCENE_AUTO) {
+    if (sceneId == Cxe::IMAGE_SCENE_AUTO) {
         return CXUI_SCENES_AUTOMATIC_IMAGE;
-    } else if (sceneId == CxeSettingIds::IMAGE_SCENE_PORTRAIT) {
+    } else if (sceneId == Cxe::IMAGE_SCENE_PORTRAIT) {
         return CXUI_SCENES_PORTRAIT_IMAGE;
-    } else if (sceneId == CxeSettingIds::IMAGE_SCENE_SCENERY) {
+    } else if (sceneId == Cxe::IMAGE_SCENE_SCENERY) {
         return CXUI_SCENES_LANDSCAPE_IMAGE;
-    } else if (sceneId == CxeSettingIds::IMAGE_SCENE_MACRO) {
+    } else if (sceneId == Cxe::IMAGE_SCENE_MACRO) {
         return CXUI_SCENES_CLOSEUP_IMAGE;
-    } else if (sceneId == CxeSettingIds::IMAGE_SCENE_SPORTS) {
+    } else if (sceneId == Cxe::IMAGE_SCENE_SPORTS) {
         return CXUI_SCENES_SPORT_IMAGE;
-    } else if (sceneId == CxeSettingIds::IMAGE_SCENE_NIGHT) {
+    } else if (sceneId == Cxe::IMAGE_SCENE_NIGHT) {
         return CXUI_SCENES_NIGHT_IMAGE;
-    } else if (sceneId == CxeSettingIds::IMAGE_SCENE_NIGHTPORTRAIT) {
+    } else if (sceneId == Cxe::IMAGE_SCENE_NIGHTPORTRAIT) {
         return CXUI_SCENES_NIGHT_PORTRAIT_IMAGE;
-    } else if (sceneId == CxeSettingIds::VIDEO_SCENE_AUTO) {
+    } else if (sceneId == Cxe::VIDEO_SCENE_AUTO) {
         return CXUI_SCENES_AUTOMATIC_IMAGE;
-    } else if (sceneId == CxeSettingIds::VIDEO_SCENE_LOWLIGHT) {
+    } else if (sceneId == Cxe::VIDEO_SCENE_LOWLIGHT) {
         return CXUI_SCENES_LOW_LIGHT_IMAGE;
-    } else if (sceneId == CxeSettingIds::VIDEO_SCENE_NIGHT) {
+    } else if (sceneId == Cxe::VIDEO_SCENE_NIGHT) {
         return CXUI_SCENES_NIGHT_IMAGE;
     } else {
         return "";
@@ -293,6 +323,15 @@ bool CxuiSceneModeView::allowShowControls() const
 }
 
 /*!
+ * Play feedback when touching view outside of any widget?
+ * Feedback is not played in scene mode view.
+ */
+bool CxuiSceneModeView::isFeedbackEnabled() const
+{
+    return false;
+}
+
+/*!
 * Slot to handle capture key full press.
 */
 void CxuiSceneModeView::handleCaptureKeyPressed()
@@ -321,8 +360,6 @@ void CxuiSceneModeView::closeView()
     mScenesList->handleClose();
     mScenesBackground->setIcon(HbIcon());
     mScenesHeading = NULL;
-    // Make sure engine prepares for new image/video if necessary
-    mEngine->initMode(mEngine->mode());
     emit viewCloseEvent();
     CX_DEBUG_EXIT_FUNCTION();
 }

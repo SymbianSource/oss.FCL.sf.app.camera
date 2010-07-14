@@ -31,11 +31,13 @@
 CxeImageDataItemSymbian::CxeImageDataItemSymbian(QByteArray data,
                                                  QString filename,
                                                  int id,
+                                                 bool addLocation,
                                                  CxeImageDataItem::State state)
   : CxeStateMachine("CxeImageDataItemSymbian"),
     mError(KErrNone),
     mId(id),
     mData(data),
+    mAddLocationInfo(addLocation),
     mPath(filename)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -325,6 +327,12 @@ CxeImageDataItem::State CxeImageDataItemSymbian::state() const
 void CxeImageDataItemSymbian::handleStateChanged(int newStateId, CxeError::Id error)
 {
     emit stateChanged(static_cast<State> (newStateId), error);
+}
+
+
+bool CxeImageDataItemSymbian::isLocationEnabled() const
+{
+    return mAddLocationInfo;
 }
 
 void CxeImageDataItemSymbian::initializeStates()

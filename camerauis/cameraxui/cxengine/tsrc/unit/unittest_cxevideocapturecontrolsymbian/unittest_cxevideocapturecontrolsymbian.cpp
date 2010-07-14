@@ -238,9 +238,9 @@ void UnitTestCxeVideoCaptureControlSymbian::testSnapshot()
 void UnitTestCxeVideoCaptureControlSymbian::testHandleSnapshotReady()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    QPixmap snapshot;
+    QImage snapshot;
 
-    QSignalSpy spy(mCxeVideoCaptureControlSymbian, SIGNAL(snapshotReady(CxeError::Id, const QPixmap&, const QString&)));
+    QSignalSpy spy(mCxeVideoCaptureControlSymbian, SIGNAL(snapshotReady(CxeError::Id, const QImage&, const QString&)));
     mCxeVideoCaptureControlSymbian->deinit();
     doPrepareStuff();
     mCxeVideoCaptureControlSymbian->handleSnapshotReady(CxeError::OutOfMemory, snapshot);

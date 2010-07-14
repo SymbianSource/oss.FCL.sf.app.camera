@@ -22,11 +22,12 @@
 #include "cxeimagedataitem.h"
 #include "cxutils.h"
 
-CxeFakeImageDataItem::CxeFakeImageDataItem(int index, QByteArray data, QString filename, int id)
+CxeFakeImageDataItem::CxeFakeImageDataItem(int index, QByteArray data, QString filename, int id, bool addLocation)
     : mId(id),
       mIndex(index),
       mData(data),
       mFileName(filename),
+      mAddLocationInfo(addLocation),
       mState(CxeImageDataItem::SavePending)
 {
     CX_DEBUG_IN_FUNCTION();
@@ -62,6 +63,12 @@ int CxeFakeImageDataItem::id() const
 QString CxeFakeImageDataItem::path() const
 {
     return mFileName;
+}
+
+
+bool CxeFakeImageDataItem::addLocation() const
+{
+    return mAddLocationInfo;
 }
 
 // end of file

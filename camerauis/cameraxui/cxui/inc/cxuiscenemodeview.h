@@ -60,11 +60,12 @@ public:
     void construct(HbMainWindow *mainwindow,
                    CxeEngine *engine,
                    CxuiDocumentLoader *documentLoader,
-                   CxuiCaptureKeyHandler *keyHandler = NULL);
+                   CxuiCaptureKeyHandler *keyHandler,
+                   HbActivityManager *activityManager);
 
     void loadDefaultWidgets();
     void loadBackgroundImages();
-
+    void saveActivity();
 signals:
     void viewCloseEvent();
 
@@ -81,6 +82,7 @@ private slots:
 protected:
     void showEvent(QShowEvent *event);
     bool allowShowControls() const;
+    bool isFeedbackEnabled() const;
 
 private:
     QString backgroundForScene(const QString& sceneId);

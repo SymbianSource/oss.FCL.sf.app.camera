@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -69,7 +69,7 @@ void CxeSettingsImp::loadSettings(Cxe::CameraMode mode)
 /*!
     Return the current integer setting value for the given key
 */
-CxeError::Id CxeSettingsImp::get(const QString& key, int& value) const
+CxeError::Id CxeSettingsImp::get(const QString &key, int &value) const
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -124,7 +124,7 @@ CxeError::Id CxeSettingsImp::get(const QString &key, qreal &value) const
     Return the current string setting value for the given key
 */
 CxeError::Id CxeSettingsImp::get(
-        const QString& key, QString &stringValue) const
+        const QString &key, QString &stringValue) const
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -173,7 +173,7 @@ void CxeSettingsImp::get(long int uid,
     Get the current scene mode setting value for the given key
 */
 CxeError::Id CxeSettingsImp::getSceneMode(
-        const QString& key, QString &stringValue) const
+        const QString &key, QString &stringValue) const
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -204,19 +204,21 @@ CxeError::Id CxeSettingsImp::getSceneMode(
 /*!
     Set new int value for the given key
 */
-CxeError::Id CxeSettingsImp::set(const QString& key,int newValue)
+CxeError::Id CxeSettingsImp::set(const QString &key, int newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     CX_DEBUG(("CxeSettingsImp::set - key: %s value: %d",
               key.toAscii().data(), newValue));
 
-    CxeError::Id err = mSettingsModel.set(key, newValue);
-    emit settingValueChanged(key, newValue);
+    CxeError::Id error = mSettingsModel.set(key, newValue);
+    if (error == CxeError::None) {
+        emit settingValueChanged(key, newValue);
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
 
-    return err;
+    return error;
 }
 
 
@@ -224,35 +226,38 @@ CxeError::Id CxeSettingsImp::set(const QString& key,int newValue)
 /*!
     Set new int value for the given key
 */
-CxeError::Id CxeSettingsImp::set(const QString& key,qreal newValue)
+CxeError::Id CxeSettingsImp::set(const QString &key, qreal newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     CX_DEBUG(("CxeSettingsImp::set - key: %s value: %f",
               key.toAscii().data(), newValue));
 
-    CxeError::Id err = mSettingsModel.set(key, newValue);
-    emit settingValueChanged(key, newValue);
+    CxeError::Id error = mSettingsModel.set(key, newValue);
+
+    if (error == CxeError::None) {
+        emit settingValueChanged(key, newValue);
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
 
-    return err;
+    return error;
 }
 
 
 /*!
     Set new string value for the given key
 */
-CxeError::Id CxeSettingsImp::set(const QString& key,const QString& newValue)
+CxeError::Id CxeSettingsImp::set(const QString &key, const QString &newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     CX_DEBUG(("CxeSettingsImp::set - key: %s value: %s",
               key.toAscii().data(), newValue.toAscii().data()));
 
-    CxeError::Id err = setSceneMode(key, newValue);
+    CxeError::Id error = setSceneMode(key, newValue);
 
-    if (err == CxeError::NotFound) {
+    if (error == CxeError::NotFound) {
         // not scene mode setting, try setting value to settings store
         mSettingsModel.set(key, newValue);
         emit settingValueChanged(key, newValue);
@@ -260,7 +265,7 @@ CxeError::Id CxeSettingsImp::set(const QString& key,const QString& newValue)
 
     CX_DEBUG_EXIT_FUNCTION();
 
-    return err;
+    return error;
 }
 
 
@@ -269,34 +274,34 @@ CxeError::Id CxeSettingsImp::set(const QString& key,const QString& newValue)
     Set the current scene mode setting value for the given key
 */
 CxeError::Id CxeSettingsImp::setSceneMode(
-        const QString& key,const QString& newValue)
+        const QString &key,const QString &newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     CX_DEBUG(("CxeSettingsImp::set - key: %s value: %s",
               key.toAscii().data(), newValue.toAscii().data()));
 
-    CxeError::Id err = CxeError::None;
+    CxeError::Id error = CxeError::None;
     CxeScene scene;
 
     if(CxeSettingIds::IMAGE_SCENE == key) {
-        err = mSettingsModel.setImageScene(newValue);
+        error = mSettingsModel.setImageScene(newValue);
         scene = mSettingsModel.currentImageScene();
     } else if(CxeSettingIds::VIDEO_SCENE == key) {
-        err = mSettingsModel.setVideoScene(newValue);
+        error = mSettingsModel.setVideoScene(newValue);
         scene = mSettingsModel.currentVideoScene();
     } else {
-        err = CxeError::NotFound;
+        error = CxeError::NotFound;
     }
 
-    if (err == CxeError::None) {
+    if (error == CxeError::None) {
         // scene mode set, inform clients about scene mode change
         emit sceneChanged(scene);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 
-    return err;
+    return error;
 }
 
 /*!
@@ -316,7 +321,7 @@ void CxeSettingsImp::reset()
 /*
 * CxeSettingsImp::CxeSettingsImp
 */
-CxeSettingsImp::CxeSettingsImp(CxeSettingsModel& settingsModel)
+CxeSettingsImp::CxeSettingsImp(CxeSettingsModel &settingsModel)
 : mSettingsModel(settingsModel)
 {
     CX_DEBUG_IN_FUNCTION();

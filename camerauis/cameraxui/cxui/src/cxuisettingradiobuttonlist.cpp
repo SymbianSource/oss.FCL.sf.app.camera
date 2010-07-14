@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -38,7 +38,9 @@ CxuiSettingRadioButtonList::CxuiSettingRadioButtonList(QGraphicsItem *parent, Cx
     connect(this, SIGNAL(itemSelected(int)), this, SLOT(handleItemSelected(int)));
 }
 
-
+/*!
+* Init contents of the listbox and select current setting value.
+*/
 void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
 {
     // first we reset the model and clear any previous data
@@ -68,11 +70,12 @@ void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
         setSettingId(data->mSettingId);
         setListBoxType(data->mListboxType);
 
-        initOriginalSelectedItem();
-        // ensure that currently selected item is visible
-        scrollTo(currentIndex());
+        // Store the original setting value and focus matching item.
+        QString value;
+        mEngine->settings().get(mSettingId, value);
+        CX_DEBUG(("CxuiSettingRadioButtonList - original value: [%s]", value.toAscii().data()));
+        setOriginalSelectedItemByValue(QVariant(value));
     }
-
 }
 
 /*!
@@ -91,30 +94,43 @@ void CxuiSettingRadioButtonList::setOriginalSelectedItemByValue(const QVariant &
         // ensure that currently selected item is visible
         scrollTo(currentIndex());
     } else {
-        CX_DEBUG(("Value %s not found", value.toString().toAscii().data()));
+        CX_DEBUG(("[WARNING] Value %s not found, defaulting to first item", value.toString().toAscii().data()));
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+* Set list texts.
+* @param values List of the texts.
+*/
 void CxuiSettingRadioButtonList::setItems(const QStringList &values)
 {
     mListModel->setItems(values);
 }
 
+/*!
+* Set the type of this list.
+* @param type Type identifier, SingleLine or TwoLine.
+*/
 void CxuiSettingRadioButtonList::setListBoxType(int type)
 {
     mListModel->setListBoxType(type);
 }
 
-
+/*!
+* Set id of the setting this list represents.
+* @param id Id of the setting.
+*/
 void CxuiSettingRadioButtonList::setSettingId(const QString &id)
 {
     // Selected item is updated, when this list is shown.
     mSettingId = id;
 }
 
-
-
+/*!
+* Handle selecting an item.
+* @param index Index of the selected item in list.
+*/
 void CxuiSettingRadioButtonList::handleItemSelected(int index)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -124,30 +140,6 @@ void CxuiSettingRadioButtonList::handleItemSelected(int index)
     } else {
         // no action needed
     }
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-/*!
-*  Get the value currently active in settings.
-*/
-void CxuiSettingRadioButtonList::initOriginalSelectedItem()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    QString value;
-    int err = mEngine->settings().get(mSettingId, value);
-    CX_DEBUG(("CxuiSettingRadioButtonList - original value: [%s]", value.toAscii().data()));
-
-    int index = 0;
-
-    if (err == CxeError::None) {
-        index = mSettingValues.indexOf(QVariant(value));
-        CX_DEBUG(("CxuiSettingRadioButtonList - got original index of: %d", index));
-    }
-
-    mOriginalIndex = index;
-    setSelected(mOriginalIndex);
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -167,6 +159,11 @@ void CxuiSettingRadioButtonList::handleSelectionAccepted()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+* Handle closing the listbox. If the current selection was accepted,
+* we commit the new value here. If current selection has been cancelled,
+* we commit the original value.
+*/
 void CxuiSettingRadioButtonList::handleClose()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -187,7 +184,7 @@ void CxuiSettingRadioButtonList::handleClose()
 
 
 /*!
-  Commits value to the cenrep store.
+  Commits value to settings.
 */
 void CxuiSettingRadioButtonList::commit(int index)
 {

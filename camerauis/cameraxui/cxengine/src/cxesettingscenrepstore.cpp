@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -35,10 +35,15 @@
 #include "cxeerror.h"
 #include "cxecenrepkeys.h"
 
+
+#ifdef Q_OS_SYMBIAN
+#include <ProfileEngineSDKCRKeys.h>
+#endif
+
 using namespace CxeSettingIds;
 
 
-/*
+/*!
 * CxeSettingsCenRepStore::CxeSettingsCenRepStore
 */
 CxeSettingsCenRepStore::CxeSettingsCenRepStore()
@@ -74,8 +79,10 @@ CxeSettingsCenRepStore::~CxeSettingsCenRepStore()
 }
 
 
-/*
+/*!
 * Generates XQSettingsKey from given setting/runtime key
+* \param key Name of the setting from which to generate the XQSettingsKey 
+* \param[out] error Error code. CxeError::None if everything went fine.
 */
 XQSettingsKey
 CxeSettingsCenRepStore::generateXQSettingsKey(const QString& key, CxeError::Id& error)
@@ -103,7 +110,7 @@ CxeSettingsCenRepStore::generateXQSettingsKey(const QString& key, CxeError::Id& 
 
 
 
-/*
+/*!
 * Reads/loads all run-time settings values from cenrep
 * @param QList<QString> contains list of all runtime key ids which we use to load values from cenrep.
 * returns: QHash container, "contains" values associated with each key that are read from cenrep
@@ -150,7 +157,7 @@ QHash<QString, QVariantList> CxeSettingsCenRepStore::loadRuntimeSettings(QList<Q
 
 
 
-/*
+/*!
 * Reads a value from cenrep
 * @param key   - setting key
 * @param value - setting value read from cenrep
@@ -183,15 +190,16 @@ CxeError::Id CxeSettingsCenRepStore::get(const QString& key, QVariant &value)
 
 
 
-/*
-* Reads a value from cenrep
+/*!
+* Reads a value from cenrep and starts the value change monitoring.
 * @param key   - setting key
 * @param uid   - setting UID of the component that owns the setting key
-* @param type  - the type of key cr key or P&S key (constantly monitoring value)
+* @param type  - the type of key cr key or P&S key
 * @param value - setting value read from cenrep
+*
+* @sa handleValueChanged()
 */
-
-void CxeSettingsCenRepStore::get(long int uid,
+void CxeSettingsCenRepStore::startMonitoring(long int uid,
                                  unsigned long int key,
                                  Cxe::SettingKeyType type,
                                  QVariant &value)
@@ -211,18 +219,18 @@ void CxeSettingsCenRepStore::get(long int uid,
     CX_DEBUG(("reading values from XQSettingsManager.."));
     value = mSettingsManager->readItemValue(settingsKey);
 
-    if (keyType == XQSettingsKey::TargetPublishAndSubscribe) {
-        bool ok = false;
-        ok = mSettingsManager->startMonitoring(settingsKey);
-        CX_DEBUG_ASSERT(ok);
-    }
+    // start monitoring changes for the key
+    // both P&S and Repository keys are monitored
+    bool ok = false;
+    ok = mSettingsManager->startMonitoring(settingsKey);
+    CX_DEBUG_ASSERT(ok);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 
 
-/*
+/*!
 * Sets a new value to cenrep
 * @param key   - setting key
 * @param newValue - new value set to the key in cenrep
@@ -258,7 +266,7 @@ CxeError::Id CxeSettingsCenRepStore::set(const QString& key, const QVariant newV
 
 
 
-/*
+/*!
 * resets the cenrep store
 */
 void CxeSettingsCenRepStore::reset()
@@ -270,8 +278,8 @@ void CxeSettingsCenRepStore::reset()
 }
 
 
-/*
-* adds key mapping to all settings
+/*!
+* Maps CxeSettingIds to cenrep key ids that XQSettingsManager understands
 */
 void CxeSettingsCenRepStore::mapKeys()
 {
@@ -323,8 +331,28 @@ void CxeSettingsCenRepStore::mapKeys()
                   FacetrackingCr,
                   XQSettingsManager::TypeInt);
 
+    addKeyMapping(CxeSettingIds::IMAGE_SCENE,
+                  SceneModeStillCr,
+                  XQSettingsManager::TypeString);
+
+    addKeyMapping(CxeSettingIds::VIDEO_SCENE,
+                  SceneModeVideoCr,
+                  XQSettingsManager::TypeString);
+
+    addKeyMapping(CxeSettingIds::FLASH_MODE,
+                  FlashModeStillCr,
+                  XQSettingsManager::TypeInt);
+
     addKeyMapping(CxeSettingIds::CAPTURE_SOUND_ALWAYS_ON,
                   CaptureSoundAlwaysOnCr,
+                  XQSettingsManager::TypeInt);
+				  
+    addKeyMapping(CxeSettingIds::CAMERA_MODE,
+                  CameraModeCr,
+                  XQSettingsManager::TypeInt);
+
+    addKeyMapping(CxeSettingIds::GEOTAGGING_DISCLAIMER,
+                  GeoTaggingDisclaimerCr,
                   XQSettingsManager::TypeInt);
 
     // mapping run-time keys
@@ -361,8 +389,8 @@ void CxeSettingsCenRepStore::mapKeys()
 	CX_DEBUG_EXIT_FUNCTION();
 }
 
-/*
-* helper class to construct key mappings for each setting key
+/*!
+* helper method to construct key mappings for each setting key
 */
 void CxeSettingsCenRepStore::addKeyMapping(QString key,
                                            unsigned long int keyid,
@@ -393,14 +421,14 @@ void CxeSettingsCenRepStore::addKeyMapping(QString key,
 
 
 /*!
-*  Slot that handles value changed signal for Publish & Subscribe  key.
+*  Handles value changed signal from the XQSettingsManager.
+*  Emits signals corresponding the changed setting.
+*  \sa warningTonesChanged(), settingValueChanged()
 */
 void CxeSettingsCenRepStore::handleValueChanged(XQSettingsKey key, QVariant value)
 {
     CX_DEBUG_ENTER_FUNCTION();
-
     emit settingValueChanged(key.uid(), key.key(), value);
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 

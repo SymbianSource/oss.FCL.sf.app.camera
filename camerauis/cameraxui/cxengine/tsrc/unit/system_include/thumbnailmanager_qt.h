@@ -21,6 +21,7 @@
 #include <qobject>
 #include <QPixmap.h>
 #include <QStringList>
+#include <QTimer>
 
 
 class  ThumbnailManager : public QObject
@@ -63,6 +64,24 @@ public:
             int priority = 0);
 
     /**
+     * Set a thumbnail for an object file generated from pixmap delivered.
+     * thumbnailReady() signal will be emited when the operation is complete.
+     *
+     * @param source             QImage from which the thumbnail will be created
+     * @param fileName           file name
+     * @param clientData         Pointer to arbitrary client data.
+     *                           This pointer is not used by the API for
+     *                           anything other than returning it in the
+     *                           ThumbnailReady callback.
+     * @param priority           Priority for this operation
+     * @return                   Thumbnail request ID or -1 if request failed. This can be used to
+     *                           cancel the request or change priority.
+     *
+     */
+    int setThumbnail( const QImage& source, const QString& fileName,
+            void * clientData = NULL, int priority = 0 );
+
+    /**
      * Cancel a thumbnail operation.
      *
      * @param id      Request ID for the operation to be cancelled.
@@ -82,9 +101,13 @@ signals:
      */
     void thumbnailReady( QPixmap , void * , int , int );    
 
+private slots:
+    void emulateThumbnailReady();
+
 private:
     int mCurrentThumbnailId;
     QList<int> mThumbnailManagerIds;
+    QTimer mTimer;
 };
 
 #endif // THUMBNAILMANAGER_QT

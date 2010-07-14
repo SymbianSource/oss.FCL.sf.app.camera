@@ -34,14 +34,14 @@ void CxeFakeFileSaveThread::save(CxeImageDataItem *data)
 
 }
 
-void CxeFakeFileSaveThread::handleVideoSaved(CxeError::Id status, const QString& filename)
+void CxeFakeFileSaveThread::handleVideoSaved(CxeError::Id status, const QString &filename)
 {
 }
 
-void CxeFakeFileSaveThread::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, const QString& filename)
+void CxeFakeFileSaveThread::handleSnapshotReady(CxeError::Id status, const QImage &snapshot, const QString &filename)
 {
 }
 
-void CxeFakeFileSaveThread::handleSnapshotReady(CxeError::Id status, const QPixmap& snapshot, int id)
+void CxeFakeFileSaveThread::handleSnapshotReady(CxeError::Id status, const QImage &snapshot, int id)
 {
 }

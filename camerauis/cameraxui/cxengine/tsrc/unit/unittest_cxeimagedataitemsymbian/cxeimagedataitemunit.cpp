@@ -19,8 +19,8 @@
 #include "cxutils.h"
 #include "cxefakesysutil.h"
 
-CxeImageDataItemUnit::CxeImageDataItemUnit(int index, QByteArray data, QString filename)
-    : CxeImageDataItemSymbian(data, filename, index)
+CxeImageDataItemUnit::CxeImageDataItemUnit(int index, QByteArray data, QString filename, bool addLocation)
+    : CxeImageDataItemSymbian(data, filename, index, addLocation)
 {
     CX_DEBUG_IN_FUNCTION();
 }

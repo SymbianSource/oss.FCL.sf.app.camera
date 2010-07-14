@@ -19,4 +19,5 @@ SOURCES *= unittest_cxefeaturemanagerimp.cpp \
 HEADERS *= unittest_cxefeaturemanagerimp.h \
            cxefeaturemanagerimp.h \
            cxefakesettingsmodel.h \
-           cxeerror.h
+           cxeerror.h \
+           cxenamespace.h

@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include "cxeerror.h"
+#include "cxenamespace.h"
 
 class CxeCameraDevice;
 class CxeSnapshotControlPrivate;
@@ -47,13 +48,13 @@ public:
 
 public:
     State state() const;
-    QSize calculateSnapshotSize(const QSize& displaySize, const QSize& outputResolution) const;
-    void start(const QSize& size);
+    QSize calculateSnapshotSize(const QSize& displaySize, Cxe::AspectRatio aspectRatio) const;
+    void start(const QSize &size);
     void stop();
 
 signals:
     void stateChanged(CxeSnapshotControl::State newState, CxeError::Id status);
-    void snapshotReady(CxeError::Id status, const QPixmap& snapshot);
+    void snapshotReady(CxeError::Id status, const QImage &snapshot);
 
 public slots:
     void handleCameraEvent(int id, int error);

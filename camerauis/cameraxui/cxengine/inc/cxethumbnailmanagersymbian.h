@@ -21,6 +21,7 @@
 #include <QObject>
 #include <QString>
 #include <QPixmap>
+#include <QImage>
 
 // forward declaration
 class ThumbnailManager;
@@ -44,19 +45,12 @@ public slots:
     /**
      * Creates from given thumbnail.
      */
-    virtual void createThumbnail(const QString& filename, QPixmap thumbnail);
+    virtual void createThumbnail(const QString &filename, const QImage &thumbnail);
 
     /**
      * Cancels thumbnail creation.
      */
     virtual void cancelThumbnail(const QString& filename);
-
-signals:
-
-    /**
-     * Informs clients about thumbnail ready event
-     */
-    void thumbnailReady(QPixmap thumbnail, int error);
 
 private slots:
 
@@ -66,7 +60,7 @@ private slots:
     void thumbnailReady(QPixmap thumbnail, void * data, int id, int error);
 
 private:
-    ThumbnailManager* mThumbnailManager;
+    ThumbnailManager *mThumbnailManager;
     // file name, thumbnail id hash table
     QHash<QString, int> mThumbnailRequests;
 };

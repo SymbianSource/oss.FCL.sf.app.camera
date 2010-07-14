@@ -21,6 +21,7 @@
 #include <QVariant>
 #include "cxuiapplicationframeworkmonitor.h"
 
+
 class CxeSettings;
 class CxuiApplication;
 #ifdef Q_OS_SYMBIAN

@@ -191,6 +191,11 @@ Cxe::CameraMode CxeFakeEngine::mode() const
     return mFakeCameraDeviceControl->mode();
 }
 
+void CxeFakeEngine::setMode(Cxe::CameraMode mode)
+{
+    mFakeCameraDeviceControl->setMode(mode);
+}
+
 void CxeFakeEngine::initModeFake(Cxe::CameraMode cameraMode)
 {
     mFakeCameraDeviceControl->setMode( cameraMode );

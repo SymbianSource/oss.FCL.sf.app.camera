@@ -34,8 +34,7 @@
 /*!
 * Constructor
 */
-CxuiErrorManager::CxuiErrorManager(CxuiCaptureKeyHandler &keyHandler,CxuiDocumentLoader *documentLoader) :
-    mKeyHandler(keyHandler),
+CxuiErrorManager::CxuiErrorManager(CxuiDocumentLoader *documentLoader) :
     mDocumentLoader(documentLoader),
     mErrorMsgPopup(NULL),
     mErrorId(CxeError::None),
@@ -56,16 +55,18 @@ CxuiErrorManager::~CxuiErrorManager()
 
 
 /*!
-* Show error popup based on the error id.
-* @param error Error id.
+* Check the error code and show either error popup, warning popup or do nothing,
+* if "no error" code is given.
+* @param error Error id. If CxeError::None, no action is taken. Otherwise
+* either warning or error popup is shown based on the severity of error.
+*
 */
-void CxuiErrorManager::showPopup(CxeError::Id error)
+void CxuiErrorManager::check(CxeError::Id error)
 {
     CX_DEBUG_ENTER_FUNCTION();
     mErrorSeverity = CxuiErrorManager::None;
 
     if (error != CxeError::None) {
-        CxeError::Id oldError = mErrorId;
         mErrorId = error;
 
         // start evaluating the error.
@@ -75,7 +76,7 @@ void CxuiErrorManager::showPopup(CxeError::Id error)
 
         if (mErrorSeverity != CxuiErrorManager::None) {
             // Clear the old error if one for some reason exists.
-            hidePopup(oldError);
+            clear();
 
             // show the error note to the user.
             launchPopup(errorText, buttonText);
@@ -88,17 +89,14 @@ void CxuiErrorManager::showPopup(CxeError::Id error)
 }
 
 /*!
-* Close the open error popup, if it is shown for the same error as requested here.
-* @param error Error id, for which we are closing the error dialog.
+* Close the open error popup.
 */
-void CxuiErrorManager::hidePopup(CxeError::Id error)
+void CxuiErrorManager::clear()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    if (mErrorId == error) {
-        if (mErrorMsgPopup) {
-            mErrorMsgPopup->close();
-            mErrorMsgPopup = NULL;
-        }
+    if (mErrorMsgPopup) {
+        mErrorMsgPopup->close();
+        mErrorMsgPopup = NULL;
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -108,12 +106,14 @@ void CxuiErrorManager::hidePopup(CxeError::Id error)
 */
 void CxuiErrorManager::popupClosed(HbAction *action)
 {
+    Q_UNUSED(action)
+
     CX_DEBUG_ENTER_FUNCTION();
     // Dialog or action instance cannot be used anymore.
     mErrorMsgPopup = NULL;
 
     // handle any use-cases when the error can be recovered
-    emit errorRecovered();
+    emit errorPopupClosed();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -140,20 +140,12 @@ void CxuiErrorManager::getErrorDetails(QString &errorText, QString &buttonText)
     CX_DEBUG_ENTER_FUNCTION();
     switch (mErrorId) {
         case CxeError::MemoryNotAccessible:
-            mErrorSeverity = CxuiErrorManager::Severe;
+            mErrorSeverity = CxuiErrorManager::Error;
             errorText = hbTrId("txt_cam_info_error_usb_disconnected");
             buttonText = hbTrId("txt_cam_info_error_usb_disconnected_button");
             break;
-        case CxeError::Died:
-        case CxeError::InitializationFailed:
-        case CxeError::HwNotAvailable:
-        case CxeError::NotReady:
-            mErrorSeverity = CxuiErrorManager::Severe;
-            errorText = hbTrId("txt_cam_info_error");
-            buttonText = hbTrId("txt_common_button_close");
-            break;
         case CxeError::InUse:
-            mErrorSeverity = CxuiErrorManager::Severe;
+            mErrorSeverity = CxuiErrorManager::Error;
             errorText = hbTrId("txt_cam_info_camera_already_in_use");
             buttonText = hbTrId("txt_common_button_close");
             break;
@@ -161,15 +153,28 @@ void CxuiErrorManager::getErrorDetails(QString &errorText, QString &buttonText)
             mErrorSeverity = CxuiErrorManager::Warning;
             errorText = hbTrId("txt_cam_info_memory_full");
             break;
+        case CxeError::OutOfMemory:
+            mErrorSeverity = CxuiErrorManager::Error;
+            errorText = hbTrId("txt_cam_info_error_ram_full");
+            buttonText = hbTrId("txt_common_ok");
+            break;
+        case CxeError::Died:
+        case CxeError::InitializationFailed:
+        case CxeError::HwNotAvailable:
+        case CxeError::NotReady:
         default:
-            errorText = "No Error";
+            mErrorSeverity = CxuiErrorManager::Error;
+            errorText = hbTrId("txt_cam_info_error");
+            buttonText = hbTrId("txt_common_button_close");
             break;
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
-*
+* Show warning or error popup.
+* @param errorText Message to be shown in the popup.
+* @param buttonText Button text to be shown in the action button of the popup. Not used on warning popup.
 */
 void CxuiErrorManager::launchPopup(const QString &errorText, const QString &buttonText)
 {
@@ -179,10 +184,10 @@ void CxuiErrorManager::launchPopup(const QString &errorText, const QString &butt
     case CxuiErrorManager::None:
         break;
     case CxuiErrorManager::Warning:
-        showLowSeverityNote(errorText);
+        showWarningPopup(errorText);
         break;
     default:
-        showHighSeverityNote(errorText, buttonText);
+        showErrorPopup(errorText, buttonText);
         break;
     }
 
@@ -192,9 +197,9 @@ void CxuiErrorManager::launchPopup(const QString &errorText, const QString &butt
 }
 
 /*!
-* Show error note for high severity error.
+* Show error note for severe error.
 */
-void CxuiErrorManager::showHighSeverityNote(const QString &errorText, const QString &buttonText)
+void CxuiErrorManager::showErrorPopup(const QString &errorText, const QString &buttonText)
 {
     // we always prepare the popup for the new message and hence we load the
     // popup everytime from document loader
@@ -231,20 +236,18 @@ void CxuiErrorManager::showHighSeverityNote(const QString &errorText, const QStr
         exitButton->setText(buttonText);
         connect(exitButton, SIGNAL(released()), this, SLOT(closeApp()));
         exitButton->show();
-    } else {
-        // TODO handle other severity cases here.
     }
 
-    emit aboutToRecoverError();
+    emit errorPopupShown();
     mErrorMsgPopup->open(this, SLOT(popupClosed(HbAction*)));
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
-* Show error note for low severity error.
+* Show warning note for low severity error.
 */
-void CxuiErrorManager::showLowSeverityNote(const QString &errorText)
+void CxuiErrorManager::showWarningPopup(const QString &errorText)
 {
     CX_DEBUG_ENTER_FUNCTION();
     HbMessageBox::warning(errorText);

@@ -31,6 +31,7 @@
 #include <hbdeviceprofile.h> // HbDeviceProfile
 #include <hbmenu.h>
 #include <hbicon.h>
+#include <hbactivitymanager.h>
 
 #include "cxuiselftimer.h"
 #include "cxeengine.h"
@@ -82,19 +83,28 @@ CxuiStillPrecaptureView::~CxuiStillPrecaptureView()
     delete mSelfTimer;
 }
 
+/*!
+ * Construct-method handles initialisation tasks for this class. Needs to be called
+ * before the instance of this class is used.
+ * @param mainwindow
+ * @param engine
+ * @param documentLoader
+ * @param keyHandler
+ */
 void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
                                         CxuiDocumentLoader *documentLoader,
-                                        CxuiCaptureKeyHandler *keyHandler)
+                                        CxuiCaptureKeyHandler *keyHandler,
+                                        HbActivityManager *activityManager)
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0( camerax_performance, CXUISTILLPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_STILLPRECAPVIEW_CONSTRUCT 1" );
 
     // constuct base class
-    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler);
+    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler, activityManager);
 
     connect(&mEngine->autoFocusControl(), SIGNAL(stateChanged(CxeAutoFocusControl::State,CxeError::Id)),
             this, SLOT(handleAutoFocusStateChanged(CxeAutoFocusControl::State,CxeError::Id)));
-    connect(&mEngine->stillCaptureControl(), SIGNAL(snapshotReady(CxeError::Id, const QPixmap&, int)),
+    connect(&mEngine->stillCaptureControl(), SIGNAL(snapshotReady(CxeError::Id, const QImage&, int)),
             this, SLOT(handleSnapshot(CxeError::Id)));
     connect(&mEngine->stillCaptureControl(), SIGNAL(stateChanged(CxeStillCaptureControl::State, CxeError::Id)),
             this, SLOT(handleStillCaptureStateChanged(CxeStillCaptureControl::State, CxeError::Id)));
@@ -111,10 +121,19 @@ void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
     mSelfTimer = new CxuiSelfTimer(mEngine->settings());
     connect(mSelfTimer, SIGNAL(timerFinished()), this, SLOT(focusAndCapture()));
 
+    int value = Cxe::GeoTaggingDisclaimerDisabled;
+    mEngine->settings().get(CxeSettingIds::GEOTAGGING_DISCLAIMER, value);
+    if(value == Cxe::GeoTaggingDisclaimerEnabled) {
+        launchGeoTaggingDisclaimerDialog();
+    }
+
     OstTrace0( camerax_performance, DUP1_CXUISTILLPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_STILLPRECAPVIEW_CONSTRUCT 0" );
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Loads default widgets in layouts xml.
+ */
 void CxuiStillPrecaptureView::loadDefaultWidgets()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -130,6 +149,10 @@ void CxuiStillPrecaptureView::loadDefaultWidgets()
     mQualityIcon = qobject_cast<HbLabel *>(widget);
     CX_DEBUG_ASSERT(mQualityIcon);
 
+    widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_GEOTAGGING_INDICATOR_ICON);
+    mGeoTaggingIndicatorIcon = qobject_cast<HbLabel *>(widget);
+    CX_DEBUG_ASSERT(mGeoTaggingIndicatorIcon);
+
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_FACE_TRACKING_ICON);
     mFaceTrackingIcon = qobject_cast<HbLabel *>(widget);
     CX_DEBUG_ASSERT(mFaceTrackingIcon);
@@ -143,7 +166,10 @@ void CxuiStillPrecaptureView::loadDefaultWidgets()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
+/*!
+ * Loads widgets that are not part of the default section in layouts xml.
+ * Widgets are created at the time they are first loaded.
+ */
 void CxuiStillPrecaptureView::loadWidgets()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -261,7 +287,47 @@ void CxuiStillPrecaptureView::loadWidgets()
 
     hideControls();
 
+    // View is ready. Needed for startup performance automated testing.
+    emit viewReady();
+
     OstTrace0( camerax_performance, DUP1_CXUISTILLPRECAPTUREVIEW_LOADWIDGETS, "msg: e_CX_STILLPRECAPTUREVIEW_LOADWIDGETS 0" );
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Restore view state from activity.
+ */
+void CxuiStillPrecaptureView::restoreActivity(const QString &activityId, const QVariant &data)
+{
+    Q_UNUSED(activityId);
+    Q_UNUSED(data);
+
+    CX_DEBUG_ENTER_FUNCTION();
+    // no need to restore any state
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Save view state to activity.
+ */
+void CxuiStillPrecaptureView::saveActivity()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    QVariantMap data;
+    QVariantHash params;
+    //@todo: add pre-capture icon as screenshot
+    mActivityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
+    mActivityManager->addActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY, data, params);
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Clear activity from activity manager.
+ */
+void CxuiStillPrecaptureView::clearActivity()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mActivityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -308,6 +374,82 @@ void CxuiStillPrecaptureView::initializeSettingsGrid()
     }
 }
 
+/**
+* Get if postcapture view should be shown or not.
+* Postcapture view may be shown for a predefined time or
+* until user dismisses it, or it may be completely disabled.
+*/
+bool CxuiStillPrecaptureView::isPostcaptureOn() const
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    if (CxuiServiceProvider::isCameraEmbedded()) {
+        // always show post capture in embedded mode
+        CX_DEBUG_EXIT_FUNCTION();
+        return true;
+    }
+
+    // Read the value from settings. Ignoring reading error.
+    // On error (missing settings) default to "postcapture on".
+    int showPostcapture(-1);
+    if(mEngine) {
+        mEngine->settings().get(CxeSettingIds::STILL_SHOWCAPTURED, showPostcapture);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+    return showPostcapture != 0; // 0 == no postcapture
+}
+
+/*!
+* Update the scene mode icon.
+* @param sceneId The new scene id.
+*/
+void CxuiStillPrecaptureView::updateSceneIcon(const QString& sceneId)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mEngine->mode() == Cxe::ImageMode) {
+        CX_DEBUG(("CxuiStillPrecaptureView - scene: %s", sceneId.toAscii().constData()));
+
+        // No need to update icon, if widgets are not even loaded yet.
+        // We'll update the icon once the widgets are loaded.
+        if (mWidgetsLoaded) {
+
+            QString iconObjectName = STILL_PRE_CAPTURE_SCENE_MODE_ACTION;
+            QString icon = getSettingItemIcon(CxeSettingIds::IMAGE_SCENE, sceneId);
+
+            CX_DEBUG(("CxuiStillPrecaptureView - icon: %s", icon.toAscii().constData()));
+
+            if (mDocumentLoader) {
+                QObject *obj = mDocumentLoader->findObject(iconObjectName);
+                CX_DEBUG_ASSERT(obj);
+                qobject_cast<HbAction *>(obj)->setIcon(HbIcon(icon));
+            }
+        } else {
+            CX_DEBUG(("CxuiStillPrecaptureView - widgets not loaded yet, ignored!"));
+        }
+    }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+    Update the quality indicator
+*/
+void CxuiStillPrecaptureView::updateQualityIcon()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mQualityIcon && mEngine) {
+        QString icon = "";
+        int currentValue = -1;
+
+        mEngine->settings().get(CxeSettingIds::IMAGE_QUALITY, currentValue);
+        icon = getSettingItemIcon(CxeSettingIds::IMAGE_QUALITY, currentValue);
+
+        mQualityIcon->setIcon(HbIcon(icon));
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
 void CxuiStillPrecaptureView::handleSnapshot(CxeError::Id error)
 {
@@ -328,7 +470,7 @@ void CxuiStillPrecaptureView::handleSnapshot(CxeError::Id error)
             }
         }
     } else {
-        emit reportError(error);
+        emit errorEncountered(error);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -385,7 +527,9 @@ void CxuiStillPrecaptureView::capture()
                     mEngine->stillCaptureControl().reset();  //! @todo: Do not delete snapshots before images are really saved
                     mEngine->stillCaptureControl().capture();
                 } else {
-                    launchDiskFullNotification();
+                    // Inform that error was encountered.
+                    // Error manager will show necessary message to user.
+                    emit errorEncountered(CxeError::DiskFull);
                 }
             }
         } else {
@@ -453,7 +597,6 @@ void CxuiStillPrecaptureView::handleAutoFocusStateChanged(CxeAutoFocusControl::S
     default:
         break;
     }
-    //}
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -598,9 +741,11 @@ bool CxuiStillPrecaptureView::allowShowControls() const
 * Handle change in viewfinder state.
 */
 void CxuiStillPrecaptureView::handleViewfinderStateChanged(
-    CxeViewfinderControl::State newState, CxeError::Id /*error*/)
+    CxeViewfinderControl::State newState, CxeError::Id error)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    // Call base class to get standby timer and display always visible when needed.
+    CxuiPrecaptureView::handleVfStateChanged(newState, error);
 
     if (newState == CxeViewfinderControl::Running) {
 
@@ -636,30 +781,16 @@ void CxuiStillPrecaptureView::handleStillCaptureStateChanged(
     }
 }
 
+/*!
+ * Signal used to reset mCapturePending after a short timeout. If the image
+ * cannot be captured within a given time of the key press, it is better to cancel
+ * the whole operation.
+ */
 void CxuiStillPrecaptureView::resetCapturePendingFlag()
 {
     CX_DEBUG_IN_FUNCTION();
 
     mCapturePending = false;
-}
-
-/*!
-* Slot to handle application being sent to background.
-*/
-void CxuiStillPrecaptureView::handleFocusLost()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (mSelfTimer && mSelfTimer->isOngoing()) {
-        // If self-timer is running, stop and reset the delay now.
-        mSelfTimer->reset();
-    }
-
-    // Release camera as we are going to background.
-    // If taking image is just ongoing, it will be cancelled by engine.
-    releaseCamera();
-
-    CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*
@@ -686,6 +817,24 @@ void CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
             handleSettingValueChanged(CxeSettingIds::FLASH_MODE, QVariant(flashMode));
         }
     }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Enter standby mode.
+*/
+void CxuiStillPrecaptureView::enterStandby()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mSelfTimer && mSelfTimer->isOngoing()) {
+        // If self-timer is running, stop and reset the delay now.
+        mSelfTimer->reset();
+    }
+
+    // Base class handles releasing camera.
+    CxuiPrecaptureView::enterStandby();
 
     CX_DEBUG_EXIT_FUNCTION();
 }

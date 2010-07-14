@@ -58,12 +58,14 @@ void CxeFakeSettings::get(long int uid, unsigned long int key, Cxe::SettingKeyTy
 CxeError::Id CxeFakeSettings::set(const QString& key, int newValue)
 {
     mSettingKeyHash[key] = QVariant(newValue);
+    emit settingValueChanged(key, newValue);
     return CxeError::None;
 }
 
 CxeError::Id CxeFakeSettings::set(const QString &key, const QString &newValue)
 {
     mSettingKeyHash[key] = QVariant(newValue);
+    emit settingValueChanged(key, newValue);
     return CxeError::None;
 }
 
@@ -72,6 +74,7 @@ CxeError::Id CxeFakeSettings::set(const QString &key, const QString &newValue)
 CxeError::Id CxeFakeSettings::set(const QString &key, qreal newValue)
 {
     mSettingKeyHash[key] = QVariant(newValue);
+    emit settingValueChanged(key, newValue);
     return CxeError::None;
 }
 
@@ -80,3 +83,8 @@ void CxeFakeSettings::reset()
 {
 }
 
+
+void CxeFakeSettings::emulate(long int uid, unsigned long int key, QVariant value)
+{
+    emit settingValueChanged(uid, key, value);
+}

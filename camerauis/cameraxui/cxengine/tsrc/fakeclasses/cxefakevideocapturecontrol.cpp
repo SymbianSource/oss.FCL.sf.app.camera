@@ -16,6 +16,7 @@
 */
 
 #include <QPixmap>
+#include <QImage>
 #include "cxefakequalitypresets.h"
 #include "cxefakevideocapturecontrol.h"
 #include "cxutils.h"
@@ -61,7 +62,7 @@ void CxeFakeVideoCaptureControl::stop()
     CX_DEBUG_ENTER_FUNCTION();
 
     emit videoComposed(CxeError::None, filename());
-    emit snapshotReady(CxeError::None, snapshot(), filename());
+    emit snapshotReady(CxeError::None, QImage(), filename());
 
     CX_DEBUG_EXIT_FUNCTION();
 }

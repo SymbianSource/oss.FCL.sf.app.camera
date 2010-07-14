@@ -66,6 +66,7 @@ LIBS += -lthumbnailmanagerqt
 LIBS += -lxqserviceutil
 LIBS += -loommonitor
 LIBS += -lhal
+LIBS += -llocationmanager
 
 symbian {
    TARGET.EPOCALLOWDLLDATA = 1 // TODO: check this out??
@@ -159,6 +160,8 @@ HEADERS += cxecameradevicecontrol.h \
            cxediskmonitorprivate.h \
            cxesnapshotcontrol.h \
            cxesnapshotcontrolprivate.h \
+           cxegeotaggingtrail.h \
+           cxegeotaggingtrailprivate.h \
            sensor/xqsensor.h \
            sensor/xqaccsensor.h \
            sensor/xqdeviceorientation.h \
@@ -207,6 +210,8 @@ SOURCES += cxecameradevicecontrolsymbian.cpp \
            cxediskmonitorprivate.cpp \
            cxesnapshotcontrol.cpp \
            cxesnapshotcontrolprivate.cpp \
+           cxegeotaggingtrail.cpp \
+           cxegeotaggingtrailprivate.cpp \
            sensor/xqsensor.cpp \
            sensor/xqaccsensor.cpp \
            sensor/xqdeviceorientation.cpp \
