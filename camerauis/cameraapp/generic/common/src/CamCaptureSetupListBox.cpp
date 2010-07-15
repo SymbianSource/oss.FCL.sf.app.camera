@@ -148,7 +148,7 @@ TKeyResponse CCamCaptureSetupListBox::OfferKeyEventL( const TKeyEvent& aKeyEvent
     else
         {
         PRINT( _L("Camera <= CCamCaptureSetupListBox::OfferKeyEventL EKeyWasConsumed" ))
-        response = EKeyWasConsumed;
+        response = EKeyWasNotConsumed;
         }
     
     PRINT( _L("Camera <= CCamCaptureSetupListBox::OfferKeyEventL" ))

@@ -465,7 +465,7 @@ TKeyResponse CCamUserSceneSetupContainer::OfferKeyEventL(
         }
     else
         {
-        return EKeyWasConsumed;    
+        return EKeyWasNotConsumed;    
         }
     }
 

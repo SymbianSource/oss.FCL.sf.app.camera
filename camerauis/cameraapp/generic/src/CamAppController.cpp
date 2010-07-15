@@ -2555,6 +2555,13 @@ void CCamAppController::SwitchCameraL()
   SetCameraSwitchRequired( ESwitchDone );  
   CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
   iCameraController->SwitchCameraL( (ECamActiveCameraPrimary == targetCamera) ? 0 : 1 );
+  if( UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )
+      {
+      RArray<TInt> screenModeValues;
+      UiConfigManagerPtr()->SupportedScreenModesL( screenModeValues );
+      TInt landscapeScreenMode = screenModeValues[0];
+      SetCameraOrientationModeL( landscapeScreenMode );
+      }
   iCameraController->CompleteSwitchCameraL();
 
   // Camera switched.
@@ -9244,6 +9251,18 @@ CCamAppController
             {
             // sequence canceled, no need to event further
             return;
+            }
+        else if( aStatus == KErrNone )
+            {
+            //Reset standbystatus. Needed if recovered from error.
+            if( IsAppUiAvailable() ) 
+              {
+              if ( !InVideocallOrRinging() )
+                  {
+                  CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() ); 
+                  appUi->SetStandbyStatus( aStatus );               
+                  }
+              } 
             }
       break;
       }

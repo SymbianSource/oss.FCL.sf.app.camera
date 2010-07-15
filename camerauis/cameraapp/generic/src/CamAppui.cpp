@@ -1558,6 +1558,7 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
     // -----------------------------------------------------
     case ECamCmdPhotos:
       { 
+      iController.ReleaseCamera();  
       TUid msgUidLastModified(TUid::Uid(KGlxActivationCmdShowLastModified));
       TUid msgUidCameraAlbum(TUid::Uid(KGlxActivationCameraAlbum));
       TApaTaskList apaTaskList( CCoeEnv::Static()->WsSession() );
@@ -3445,7 +3446,8 @@ CCamAppUi::HandleWsEventL( const TWsEvent&    aEvent,
                ECamPreCapViewfinder == iPreCaptureMode && 
                ( !( iSelfTimer && iSelfTimer->IsActive() ) ) &&
                iController.CurrentOperation() != ECamCapturing &&
-               iController.CurrentOperation() != ECamPaused )
+               iController.CurrentOperation() != ECamPaused &&
+               !iReturningFromPretendExit )
             {
             SetToolbarVisibility(); 
             }          
