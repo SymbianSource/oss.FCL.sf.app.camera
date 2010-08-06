@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -30,17 +30,12 @@ CxeImageDataItemUnit::~CxeImageDataItemUnit()
     CX_DEBUG_IN_FUNCTION();
 }
 
-int CxeImageDataItemUnit::checkDiskSpace(RFs* aFs,
-        TInt aBytesToWrite,
-        TInt aDrive)
+bool CxeImageDataItemUnit::checkDiskSpace(RFs* aFs,
+                                          TInt aBytesToWrite,
+                                          TInt aDrive)
 {
-    CX_DEBUG_ENTER_FUNCTION();
-    int value = CxeFakeSysUtil::DiskSpaceBelowCriticalLevel(
-            aFs,
-            aBytesToWrite,
-            aDrive );
-
-    return value;
+    CX_DEBUG_IN_FUNCTION();
+    return CxeFakeSysUtil::DiskSpaceBelowCriticalLevel(aFs, aBytesToWrite, aDrive);
 }
 
 // end of file

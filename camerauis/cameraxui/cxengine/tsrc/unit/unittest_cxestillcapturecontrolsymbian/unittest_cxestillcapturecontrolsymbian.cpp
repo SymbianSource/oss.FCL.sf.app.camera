@@ -27,7 +27,6 @@
 #include "unittest_cxestillcapturecontrolsymbian.h"
 #include "cxefakeviewfindercontrol.h"
 #include "cxesnapshotcontrol.h"
-#include "cxesettingsmodel.h"
 #include "cxesensoreventhandlersymbian.h"
 #include "cxefilenamegeneratorsymbian.h"
 #include "cxefakefilenamegenerator.h"
@@ -60,7 +59,6 @@ void UnitTestCxeStillCaptureControlSymbian::cleanup()
 // Run before each individual test case
 void UnitTestCxeStillCaptureControlSymbian::initTestCase()
 {
-    mFakeSettings = new CxeFakeSettings();
     mFakeSettings->set(CxeSettingIds::IMAGE_QUALITY, 0);
     mFakeCameraDeviceControl = new CxeFakeCameraDeviceControl();
     mFakeCameraDevice = new CxeFakeCameraDevice();

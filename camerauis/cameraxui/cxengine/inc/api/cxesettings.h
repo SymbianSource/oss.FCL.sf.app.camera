@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -27,113 +27,163 @@
 #include <QString>
 #include <QVariant>
 
-#include "cxenamespace.h"
 #include "cxeerror.h"
+#include "cxenamespace.h"
+#include "cxeexception.h"
 
-
-// forward declaration
-class CxeSettingsModel;
-
-
-
-/*
+/*!
 * Class to access all kind of Camera Settings
+*
+* There are templated get() and set() methods for accessing and modifying settings.
+* Supported types are int, qreal, QString, QVariantMap and enums.
+*
+* It is possible to monitor changes in settings, either by connecting to settingValueChanged() signal
+* or registering a slot as listener to a specific setting using listenForSetting(). With the latter
+* method you will only be notified of the change in the requested setting, as opposed to the settingValueChanged()
+* which will be emitted for any setting change.
 */
 class CxeSettings : public QObject
 {
     
     Q_OBJECT
 
-    public:
-        
-        /*
-        * returns the current integer setting value for the given key
-        */
-        virtual CxeError::Id get(const QString &key, int &value) const = 0;
+public:
 
-        /*
-        * returns the current real setting value for the given key
-        */
-        virtual CxeError::Id get(const QString &key, qreal &value) const = 0;
 
-        /*
-        * returns the current string setting value for the given key
-        */
-        virtual CxeError::Id get(const QString &key, QString &stringValue) const = 0;
-        
-        /*
-        * Returns value of external setting item which is not owned by camera
-        */
-        virtual void get(long int uid,
-                         unsigned long int key,
-                         Cxe::SettingKeyType type,
-                         QVariant &value) const = 0;
-        
-        /**
-         * Get a value of a certain setting. A convenience method with a template
-         * parameter to be used with enumerations.
-         *
-         * An example:
-         * \code
-         *  Cxe::Whitebalance wb = Cxe::WhitebalanceAutomatic;
-         *  if (settings.get<Cxe::Whitebalance>(CxeSettingIds::WHITE_BALANCE, wb)) {
-         *      CX_DEBUG(("Error getting white balance - using default"));
-         *  }
-         * \endcode
-         * @param settingId  Setting key
-         * @param value      Reference to a variable where to put the setting value
-         * @return           Error code
-         */
-        template<typename T>
-        inline CxeError::Id get(const QString &key, T &value) const {
-            int intValue = value; // This will not compile if T cannot be converted to an int
-            CxeError::Id err = get(key, intValue);
-            value = static_cast<T>(intValue); // Convert to enum
-            return err;
+    /*!
+    * Returns value of external setting item which is not owned by camera
+    */
+    virtual void get(long int uid,
+                     unsigned long int key,
+                     Cxe::SettingKeyType type,
+                     QVariant &value) const = 0;
+
+    /*!
+     * Get a value of a certain setting. Template method that can be used
+     * with any enumeration (well actually, anything that can be cast to from int),
+     * int, QString and QVariantMap. Will throw CxeException in case of error.
+     *
+     * An example:
+     * \code
+     *  try {
+     *      Cxe::Whitebalance wb = settings.get<Cxe::Whitebalance>(CxeSettingIds::WHITE_BALANCE);
+     *  catch (CxeException &e) {
+     *      CX_DEBUG(("Error getting white balance"));
+     *  }
+     * \endcode
+     * @param settingId  Setting key
+     * @return           Setting value
+     */
+    template<typename T>
+    inline T get(const QString &key) const {
+        QVariant v;
+        getValue(key, v);
+        return (T)v.value<int>();
+    }
+
+    /*!
+     * Same as above but with default value in case of error. No exceptions are thrown.
+     *
+     *An example:
+     * \code
+     *
+     *  Cxe::Whitebalance wb = settings.get<Cxe::Whitebalance>(CxeSettingIds::WHITE_BALANCE, Cxe::WhitebalanceAutomatic);
+     *
+     * \endcode
+     * @param key           Setting key
+     * @param defaultValue  Default value returned in case of error
+     * @return              Value of the setting
+     */
+    template<typename T>
+    inline T get(const QString &key, const T &defaultValue) const {
+        try {
+            return get<T>(key);
+        } catch (CxeException &e) {
+            return defaultValue;
         }
-        
-        /*
-        * Set new values for the given key
-        */
-        virtual CxeError::Id set(const QString &key, int newValue) = 0;
+    }
 
-        /*
-        * Set new values for the given key
-        */
-        virtual CxeError::Id set(const QString &key, qreal newValue) = 0;
 
-        /*
-        * Set new values for the given key
-        */
-        virtual CxeError::Id set(const QString &key, const QString &newValue) = 0;
 
-        /*
-        * Resets only virtual settings( persistent settings )
-        */
-        virtual void reset() = 0;
-        
-    signals:
-        /*
-        * to notify engine and ui components for a change in a setting value
-        */
-        void settingValueChanged(const QString &key, QVariant newValue);
+    /*!
+    * Set a value of a certain setting. Template method that can be used
+    * with any enumeration (well actually, anything that can be cast to from int),
+    * int, QString and QVariantMap.
+    *
+    * An example:
+    * \code
+    *  try {
+    *      Cxe::Whitebalance wb = Cxe::WhiteBalanceAutomatic;
+    *      settings.get<Cxe::Whitebalance>(CxeSettingIds::WHITE_BALANCE, wb);
+    *  catch (CxeException &e) {
+    *      CX_DEBUG(("Error setting white balance"));
+    *  }
+    * \endcode
+    * @param settingId  Setting key
+    * @param value     Setting value
+    */
+    template<typename T>
+    inline void set(const QString &key, const T &value) {
+       QVariant v;
+       v.setValue((int)value);
+       setValue(key, v);
+    }
 
-        /*
-        * to notify engine and ui components for a change in a setting value
-        */
-        void settingValueChanged(long int uid, unsigned long int key, QVariant value);
+    /*!
+    * Resets settings to default values.
+    */
+    virtual void reset() = 0;
 
-        /*
-        * to update engine and ui components of new image scene
-        */
-        void sceneChanged(CxeScene &scene);
+    /*!
+     * Get value of variation setting.
+     */
+    virtual CxeError::Id getVariationValue(const QString &key, QVariant &value) = 0;
 
-    protected:
-        CxeSettings() {} 
-        
-    private:
-        Q_DISABLE_COPY( CxeSettings )
+    /*!
+     * Add listener for changes in one setting. When the value of the setting changes, the given
+     * slot is invoked on given object.
+     *
+     * @param settingKey Setting to listen to
+     * @param target Object that the slot will be invoked for
+     * @param slot Slot that will be invoked. The slot can have either of these two signatures:
+     *   slotName(const QVariant&)    only new value of setting is passed as parameter
+     *   slotName(const QString&, const QVariant&) both setting key and new value are passed as parameter
+     * @return boolean to indicate success
+     */
+    virtual bool listenForSetting(const QString &settingKey, QObject *target, const char *slot) = 0;
+
+protected:
+    /*!
+     * returns the setting as QVariant
+     */
+    virtual void getValue(const QString &key, QVariant &value) const = 0;
+
+    /*!
+    * Set new value for the given key
+    */
+    virtual void setValue(const QString &key, const QVariant &newValue) = 0;
+
+signals:
+
+    /*!
+    * to notify engine and ui components for a change in a setting value
+    */
+    void settingValueChanged(const QString &key, QVariant newValue);
+
+    /*!
+    * to notify engine and ui components for a change in a setting value
+    */
+    void settingValueChanged(long int uid, unsigned long int key, QVariant value);
+
+protected:
+    CxeSettings() {}
+
+private:
+    Q_DISABLE_COPY( CxeSettings )
 };
+
+// include set/get function specializations
+#include "cxesettings.inl"
 
 #endif /*CXESETTINGS_H_*/
 

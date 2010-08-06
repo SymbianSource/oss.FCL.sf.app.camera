@@ -19,8 +19,8 @@
 
 #include <QObject>
 
-class CxeFakeSettingsModel;
 class CxeFeatureManagerImp;
+class CxeSettings;
 
 class UnitTestCxeFeatureManager : public QObject
 {
@@ -38,8 +38,8 @@ private slots:
     void testconfiguredValues();
     
 private:
-    CxeFakeSettingsModel *mFakeSettingsModel;
     CxeFeatureManagerImp *mFeatureManager;
+    CxeSettings *mSettings;
 };
 
 #endif // UNITTEST_CXEFEATUREMANAGER_H

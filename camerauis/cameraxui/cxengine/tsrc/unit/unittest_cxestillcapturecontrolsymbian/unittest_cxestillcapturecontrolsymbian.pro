@@ -60,7 +60,6 @@ SOURCES *= unittest_cxestillcapturecontrolsymbian.cpp \
     sensor/xqaccsensor_p.cpp \
     sensor/xqsensor.cpp \
     sensor/xqsensor_p.cpp \
-    cxesettingsmodelimp.cpp \
     cxesettingsimp.cpp \
     cxefakeviewfindercontrol.cpp \
     cxesoundplayersymbian.cpp \
@@ -104,7 +103,6 @@ HEADERS *= unittest_cxestillcapturecontrolsymbian.h \
     sensor/xqsensor.h \
     sensor/xqsensor_p.h \
     sensor/xqaccsensor_p.h \
-    cxesettingsmodel.h \
     cxesettingsimp.h \
     cxesettings.h \
     cxecenrepkeys.h \

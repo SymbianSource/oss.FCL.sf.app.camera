@@ -40,6 +40,7 @@ private slots:
     void testMap2CameraEffect();
     void testMap2CameraAutofocus();
     void testMap2CameraOrientation();
+    void testMap2UseCaseHintVideoParameters();
 
 };
 

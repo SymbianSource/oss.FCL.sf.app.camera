@@ -17,7 +17,7 @@
 #ifndef CXEQUALITYPRESETS_H
 #define CXEQUALITYPRESETS_H
 
-#include <imagingconfigmanager.h>
+
 #include "cxequalitydetails.h"
 
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,7 +17,6 @@
 #include "cxecameradevicecontrolsymbian.h"
 #include "cxesettingsimp.h"
 #include "cxefeaturemanagerimp.h"
-#include "cxesettingsmodel.h"
 #include "cxutils.h"
 #include "cxenamespace.h"
 #include "cxeerrormappingsymbian.h"
@@ -82,7 +81,7 @@ void CxeCameraDeviceControlSymbian::reserve()
 
     if (state() == Idle) {
         setState(Initializing);
-        mCameraDevice->camera()->Reserve();
+        mCameraDevice->reserveCamera();
         OstTrace0(camerax_performance, CXECAMERADEVICECONTROLSYMBIAN_RESERVE, "msg: e_CX_RESERVE 1");
     } else if (state() == PendingRelease) {
         // if we get a reserve request and if there is a pending release

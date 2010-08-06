@@ -23,6 +23,7 @@ LIBS *= -lsysutil
 LIBS *= -lplatformenv
 LIBS *= -lefsrv
 LIBS *= -lcone
+LIBS *= -lthumbnailmanagerqt
 
 SOURCES *= unittest_cxefilesavethreadsymbian.cpp \
            thumbnailmanager_qt.cpp \

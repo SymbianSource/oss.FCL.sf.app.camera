@@ -49,4 +49,5 @@ HEADERS *= cxeimagedataitemsymbian.h \
            unittest_cxeimagedataitemsymbian.h \
            cxeimagedataitemunit.h \
            cxesysutil.h \
-           cxefakesysutil.h
+           cxefakesysutil.h \
+           cxeerror.h

@@ -23,6 +23,8 @@
 
 // forward declarations
 class CImagingConfigManager;
+class TImageQualitySet;
+class TVideoQualitySet;
 class CxeSettings;
 
 /**!
@@ -43,11 +45,11 @@ private:
     qreal avgVideoBitRateScaler();
     Cxe::AspectRatio calculateAspectRatio(int width, int height) const;
     QString toString(const TUint8* aData);
-    CxeVideoDetails createVideoPreset(TVideoQualitySet set);
-    CxeImageDetails createImagePreset(TImageQualitySet set);
+    CxeVideoDetails createVideoPreset(const TVideoQualitySet &set);
+    CxeImageDetails createImagePreset(const TImageQualitySet &set);
     QString calculateMegaPixelCount(int imageWidth, int imageHeight);
-    void debugPrints(CxeVideoDetails preset);
-    void debugPrints(CxeImageDetails newPreset);
+    void debugPrints(const CxeVideoDetails &preset);
+    void debugPrints(const CxeImageDetails &newPreset);
 
 private:
     CImagingConfigManager *mIcm;

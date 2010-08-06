@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -94,9 +94,9 @@ CxeFilenameGeneratorSymbian::CxeFilenameGeneratorSymbian(CxeSettings &settings, 
     mVideoCounter = 0;
 
     // Retrieve last used counter values from settings
-    mSettings.get(CxeSettingIds::FNAME_MONTH_FOLDER, mCurrentMonth);
-    mSettings.get(CxeSettingIds::FNAME_IMAGE_COUNTER, mImageCounter);
-    mSettings.get(CxeSettingIds::FNAME_VIDEO_COUNTER, mVideoCounter);
+    mCurrentMonth = mSettings.get<QString>(CxeSettingIds::FNAME_MONTH_FOLDER, "");
+    mImageCounter = mSettings.get<int>(CxeSettingIds::FNAME_IMAGE_COUNTER, 0);
+    mVideoCounter = mSettings.get<int>(CxeSettingIds::FNAME_VIDEO_COUNTER, 0);
 
     OstTrace0(camerax_performance, CXEFILENAMEGENERATOR_2, "msg: e_CX_FILENAMEGENERATOR_NEW 0");
     CX_DEBUG_EXIT_FUNCTION();

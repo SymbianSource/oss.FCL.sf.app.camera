@@ -36,12 +36,20 @@ void CxeFakeFileSaveThread::save(CxeImageDataItem *data)
 
 void CxeFakeFileSaveThread::handleVideoSaved(CxeError::Id status, const QString &filename)
 {
+    Q_UNUSED(status);
+    Q_UNUSED(filename);
 }
 
 void CxeFakeFileSaveThread::handleSnapshotReady(CxeError::Id status, const QImage &snapshot, const QString &filename)
 {
+    Q_UNUSED(status);
+    Q_UNUSED(snapshot);
+    Q_UNUSED(filename);
 }
 
 void CxeFakeFileSaveThread::handleSnapshotReady(CxeError::Id status, const QImage &snapshot, int id)
 {
+    Q_UNUSED(status);
+    Q_UNUSED(snapshot);
+    Q_UNUSED(id);
 }

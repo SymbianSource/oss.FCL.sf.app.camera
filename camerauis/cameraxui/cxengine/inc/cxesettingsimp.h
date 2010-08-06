@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,13 +17,17 @@
 #ifndef CXESETTINGSIMP_H
 #define CXESETTINGSIMP_H
 
+#include <QMetaMethod>
 #include "cxesettings.h"
 #include "cxeerror.h"
-
+#include "cxescenemodestore.h"
 
 // forward declaration
-class CxeSettingsModel;
+class CxeSettingsStore;
 
+
+typedef QPair<QObject*, QMetaMethod> CxeSettingListener;
+typedef QList<CxeSettingListener> CxeSettingListenerList;
 
 /*
 * Class to access all kind of Settings
@@ -34,28 +38,45 @@ class CxeSettingsImp : public CxeSettings
 
 public:
 
-    CxeSettingsImp(CxeSettingsModel &settingsModel);
+    CxeSettingsImp(CxeSettingsStore *settingStore);
     virtual ~CxeSettingsImp();
 
-    CxeError::Id get(const QString &key, int &value) const;
-    CxeError::Id get(const QString &key, QString &stringValue) const;
-    CxeError::Id get(const QString &key, qreal &value) const;
     void get(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value) const;
-    CxeError::Id set(const QString &key, int newValue);
-    CxeError::Id set(const QString &key,const QString &newValue);
-    CxeError::Id set(const QString &key, qreal newValue);
     void reset();
+    CxeError::Id getVariationValue(const QString &key, QVariant &value);
+    bool listenForSetting(const QString &settingKey, QObject *target, const char *slot);
 
 public slots:
     void loadSettings(Cxe::CameraMode mode);
 
+protected:
+    void getValue(const QString &key, QVariant &value) const;
+    void setValue(const QString &key, const QVariant &newValue);
+
 private: // helper methods
-    CxeError::Id getSceneMode(const QString &key, QString &stringValue) const;
-    CxeError::Id setSceneMode(const QString &key, const QString &stringValue);
+
+    void restoreImageSettings();
+    void restoreVideoSettings();
+
+    void setImageScene(const QString &newScene);
+    void setVideoScene(const QString &newScene);
+
+    void loadVariationSettings();
+
+    void notifyListeners(const QString &settingKey, const QVariant &newValue);
+
+private slots:
+    void handleListenerDestroyed(QObject *object);
 
 private:
-    CxeSettingsModel &mSettingsModel; // not owned
 
+    CxeSettingsStore *mSettingStore;
+    QHash<QString, QVariantList> mVariationSettings;
+
+    CxeSceneModeStore mSceneModeStore;
+    Cxe::CameraMode mCameraMode;
+
+    QMap<QString, CxeSettingListenerList> mSettingListeners;
 };
 
 #endif // CXESETTINGSIMP_H

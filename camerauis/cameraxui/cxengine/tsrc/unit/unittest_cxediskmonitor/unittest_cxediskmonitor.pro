@@ -16,6 +16,8 @@ TARGET = unittest_cxediskmonitor
 DEPENDPATH  = . ../../fakeclasses ../../../src/dummyengine ../utils
 INCLUDEPATH = . ../../fakeclasses ../../../src/dummyengine ../utils ../../../traces
 
+LIBS += -lcone
+
 DEFINES *= CXE_USE_DUMMY_CAMERA
 
 SOURCES *= unittest_cxediskmonitor.cpp \

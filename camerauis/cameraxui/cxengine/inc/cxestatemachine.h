@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -14,6 +14,7 @@
 * Description:
 *
 */
+
 #ifndef CXESTATEMACHINE_H
 #define CXESTATEMACHINE_H
 
@@ -40,7 +41,7 @@ public:
     * @sa addState setInitialState
     * @param stateMachineName  Name for this state machine (used for debug prints)
     */
-    CxeStateMachine(const char* stateMachineName);
+    CxeStateMachine(const char *stateMachineName);
     virtual ~CxeStateMachine();
 
 protected:
@@ -62,7 +63,7 @@ protected:
      * @param stateId State ID of the new state
      * @param error   Optional error code to be associated with the transition
      */
-    bool setState(int stateId, int error = 0);
+    bool setState(int stateId, CxeError::Id error = CxeError::None);
 
     /**
      * Set the initial state of the state machine. Can be called only once.
@@ -87,5 +88,3 @@ private:
 };
 
 #endif // CXESTATEMACHINE_H
-
-

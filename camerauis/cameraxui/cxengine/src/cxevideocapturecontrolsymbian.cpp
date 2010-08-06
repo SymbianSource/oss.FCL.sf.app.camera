@@ -40,6 +40,7 @@
 #include "cxequalitypresetssymbian.h"
 #include "cxeviewfindercontrolsymbian.h"
 #include "cxediskmonitor.h"
+#include "cxesettingsmappersymbian.h"
 
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -123,8 +124,9 @@ CxeVideoCaptureControlSymbian::CxeVideoCaptureControlSymbian(
     // enabling setting change callbacks to videocapturecontrol
     connect(&mSettings, SIGNAL(settingValueChanged(const QString&,QVariant)),
             this, SLOT(handleSettingValueChanged(const QString&,QVariant)));
-    connect(&mSettings, SIGNAL(sceneChanged(CxeScene&)),
-            this, SLOT(handleSceneChanged(CxeScene&)));
+
+    mSettings.listenForSetting(CxeSettingIds::VIDEO_SCENE, this, SLOT(handleSceneChanged(const QVariant&)));
+
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_M2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_CREATE_OUT, "msg: e_CX_VIDEOCAPTURECONTROL_NEW 0");
@@ -214,12 +216,12 @@ void CxeVideoCaptureControlSymbian::initVideoRecorder()
     // Init needed only in Idle state
     if (state() == Idle) {
         try {
-            // if video recorder is not created, do it now.
+            // If video recorder is not yet created, do it now.
             createVideoRecorder();
 
-            // update current video quality details from icm.
+            // Update current video quality details from ICM.
             // Throws an error if unable to get the quality.
-            getVideoQualityDetails(mCurrentVideoDetails);
+            updateVideoCaptureParameters();
 
             // Video recorder is ready to open video file for recording.
             setState(Initialized);
@@ -302,13 +304,11 @@ void CxeVideoCaptureControlSymbian::prepare()
     OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROL_PREPARE_1, "msg: e_CX_VIDCAPCONT_PREPARE 1");
     QSize frameSize(mCurrentVideoDetails.mWidth, mCurrentVideoDetails.mHeight);
 
-    int muteSetting = 0; // audio enabled
-    mSettings.get(CxeSettingIds::VIDEO_MUTE_SETTING, muteSetting);
+    bool muteSetting = mSettings.get<bool>(CxeSettingIds::VIDEO_MUTE_SETTING, false);
 
     // Check if scene defines frame rate.
     // Use generic frame rate defined in video details, if no value is set in scene.
-    int frameRate = 0;
-    mSettings.get(CxeSettingIds::FRAME_RATE, frameRate);
+    int frameRate = mSettings.get<int>(CxeSettingIds::FRAME_RATE, 0);
     if (frameRate <= 0) {
         frameRate = mCurrentVideoDetails.mVideoFrameRate;
     }
@@ -322,18 +322,12 @@ void CxeVideoCaptureControlSymbian::prepare()
         mVideoRecorder->setVideoFrameSize(frameSize);
         mVideoRecorder->setVideoFrameRate(frameRate);
         mVideoRecorder->setVideoBitRate(mCurrentVideoDetails.mVideoBitRate);
-        mVideoRecorder->setAudioEnabled(muteSetting == 0);
+        mVideoRecorder->setAudioEnabled(!muteSetting);
         // "No limit" value is handled in video recorder wrapper.
         mVideoRecorder->setVideoMaxSize(mCurrentVideoDetails.mMaximumSizeInBytes);
 
         // Settings have been applied successfully, start to prepare.
         mVideoRecorder->prepare();
-
-        // Prepare snapshot. Snapshot control throws error if problems.
-        QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
-                                mViewfinderControl.deviceDisplayResolution(),
-                                mCurrentVideoDetails.mAspectRatio);
-        mSnapshotControl.start(snapshotSize);
 
         // Prepare zoom only when there are no errors during prepare.
         emit prepareZoomForVideo();
@@ -348,29 +342,47 @@ void CxeVideoCaptureControlSymbian::prepare()
 }
 
 /*!
-* Fetches video qualites details based on video quality setting.
+* Prepare video snapshot.
+* Throws exception on error.
 */
-void
-CxeVideoCaptureControlSymbian::getVideoQualityDetails(CxeVideoDetails &videoInfo)
+void CxeVideoCaptureControlSymbian::prepareSnapshot()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROL_GETQUALITYDETAILS_1, "msg: e_CX_GET_QUALITY_DETAILS 1" );
+    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROL_PREPARESNAP_1, "msg: e_CX_PREPARE_SNAPSHOT 1" );
 
-    int quality(0);
+    // Prepare snapshot. Snapshot control throws error if problems.
+    QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
+                            mViewfinderControl.deviceDisplayResolution(),
+                            mCurrentVideoDetails.mAspectRatio);
+    mSnapshotControl.start(snapshotSize);
+
+    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROL_PREPARESNAP_2, "msg: e_CX_PREPARE_SNAPSHOT 0" );
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+  Fetch video quality details based on current video quality setting.
+*/
+void CxeVideoCaptureControlSymbian::updateVideoCaptureParameters()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROL_UPDATEVIDEOCAPTUREPARAMETERS_1, "msg: e_CX_UPDATE_VIDEO_CAPTURE_PARAMETERS 1");
+
+    int quality = 0;
 
     // Get quality index for primary camera. Only one quality for secondary camera.
     if (mCameraDeviceControl.cameraIndex() == Cxe::PrimaryCameraIndex) {
-        CxeException::throwIfError(mSettings.get(CxeSettingIds::VIDEO_QUALITY, quality));
+        quality = mSettings.get<int>(CxeSettingIds::VIDEO_QUALITY);
     }
 
     if (quality < 0 || quality >= mIcmSupportedVideoResolutions.count()) {
        throw new CxeException(CxeError::NotFound);
     }
 
-    // get video quality details
-    videoInfo = mIcmSupportedVideoResolutions.at(quality);
+    // Get video quality details
+    mCurrentVideoDetails = mIcmSupportedVideoResolutions.at(quality);
 
-    OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROL_GETQUALITYDETAILS_2, "msg: e_CX_GET_QUALITY_DETAILS 0" );
+    OstTrace0(camerax_performance, CXEVIDEOCAPTURECONTROL_UPDATEVIDEOCAPTUREPARAMETERS_2, "msg: e_CX_UPDATE_VIDEO_CAPTURE_PARAMETERS 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -504,11 +516,17 @@ void CxeVideoCaptureControlSymbian::MvruoPrepareComplete(TInt aError)
     CX_DEBUG(("CxeVideoCaptureControlSymbian::MvruoPrepareComplete, err=%d", aError));
 
     if (state() == Preparing) {
-        if (!aError) {
-            setState(CxeVideoCaptureControl::Ready);
+        try {
+            // Check that no error coming in.
+            CxeException::throwIfError(aError);
+            // Start viewfinder
             mViewfinderControl.start();
+            // Prepare snapshot (throws exception if fails).
+            prepareSnapshot();
+            // Ready for recording now.
+            setState(CxeVideoCaptureControl::Ready);
             OstTrace0( camerax_performance, CXEVIDEOCAPTURECONTROLSYMBIAN_GOTOVIDEO, "msg: e_CX_GO_TO_VIDEO_MODE 0" );
-        } else {
+        } catch (const std::exception &e) {
             handlePrepareFailed();
         }
     }
@@ -855,7 +873,7 @@ void CxeVideoCaptureControlSymbian::handleSettingValueChanged(const QString& set
  * Scene mode changed. We need to know about it because frame rate
  * might have changed.
  */
-void CxeVideoCaptureControlSymbian::handleSceneChanged(CxeScene& scene)
+void CxeVideoCaptureControlSymbian::handleSceneChanged(const QVariant& scene)
 {
     Q_UNUSED(scene)
     CX_DEBUG_ENTER_FUNCTION();
@@ -888,6 +906,38 @@ void CxeVideoCaptureControlSymbian::handleDiskSpaceChanged()
         if (time !=  mCurrentVideoDetails.mRemainingTime) {
             mCurrentVideoDetails.mRemainingTime = time;
             emit remainingTimeChanged();
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+    Use ECam Use Case Hint Custom API to inform ECam of our intended use case
+    before calling Reserve().
+*/
+void CxeVideoCaptureControlSymbian::hintUseCase()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // Make sure ECam knows we're doing video recording so it can prepare
+    // for the correct use case.
+    if (mCameraDeviceControl.mode() == Cxe::VideoMode) {
+        MCameraUseCaseHint *useCaseHintApi = mCameraDevice.useCaseHintApi();
+        if (useCaseHintApi) {
+            MCameraUseCaseHint::TVideoCodec codec =
+                    MCameraUseCaseHint::ECodecUnknown;
+            MCameraUseCaseHint::TVideoProfile profile =
+                    MCameraUseCaseHint::EProfileUnknown;
+
+            updateVideoCaptureParameters();
+            CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(
+                    mCurrentVideoDetails, codec, profile);
+
+            TSize resolution(mCurrentVideoDetails.mWidth,
+                             mCurrentVideoDetails.mHeight);
+            TRAP_IGNORE(useCaseHintApi->HintDirectVideoCaptureL(codec, profile,
+                                                                resolution));
         }
     }
 

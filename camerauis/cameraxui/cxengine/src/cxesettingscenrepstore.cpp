@@ -116,12 +116,12 @@ CxeSettingsCenRepStore::generateXQSettingsKey(const QString& key, CxeError::Id& 
 
 
 /*!
-* Reads/loads all run-time settings values from cenrep
-* @param QList<QString> contains list of all runtime key ids which we use to load values from cenrep.
+* Reads/loads all run-time variation settings values from cenrep
+* @param QList<QString> contains list of all variation key ids which we use to load values from cenrep.
 * returns: QHash container, "contains" values associated with each key that are read from cenrep
-* NOTE: loading runtime settings should be done only ONCE at start-up.
+* NOTE: loading variation settings should be done only ONCE at start-up.
 */
-QHash<QString, QVariantList> CxeSettingsCenRepStore::loadRuntimeSettings(QList<QString>& runtimeKeys)
+QHash<QString, QVariantList> CxeSettingsCenRepStore::loadVariationSettings(QList<QString>& variationKeys)
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0(camerax_performance, CXESETTINGSCENREPSTORE_LOADRUNTIME_1, "msg: e_CX_SETTINGSSTORE_LOAD_RUNTIME 1");
@@ -131,8 +131,8 @@ QHash<QString, QVariantList> CxeSettingsCenRepStore::loadRuntimeSettings(QList<Q
 	QVariantList list;
 	QVariant data;
 
-    // parsing through the list of run-time keys and reading values from cenrep.
-    foreach (QString key, runtimeKeys) {
+    // parsing through the list of run-time variation keys and reading values from cenrep.
+    foreach (QString key, variationKeys) {
 
         // read the data from cenrep
         err = get(key, data);
@@ -370,33 +370,18 @@ void CxeSettingsCenRepStore::mapKeys()
                   GeoTaggingDisclaimerCr,
                   XQSettingsManager::TypeInt);
 
-    // mapping run-time keys
-    addKeyMapping(CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS,
-                  PrimaryCameraCaptureKeysCr,
-                  XQSettingsManager::TypeString,
-                  true);
-
-    addKeyMapping(CxeRuntimeKeys::PRIMARY_CAMERA_AUTOFOCUS_KEYS,
-                  PrimaryCameraAutofocusKeysCr,
-                  XQSettingsManager::TypeString,
-                  true);
-
-    addKeyMapping(CxeRuntimeKeys::SECONDARY_CAMERA_CAPTURE_KEYS,
-                  SecondaryCameraCaptureKeysCr,
-                  XQSettingsManager::TypeString,
-                  true);
-
-    addKeyMapping(CxeRuntimeKeys::FREE_MEMORY_LEVELS,
+    // mapping run-time variation keys
+    addKeyMapping(CxeVariationKeys::FREE_MEMORY_LEVELS,
                   FreeMemoryLevelsCr,
                   XQSettingsManager::TypeString,
                   true);
 
-    addKeyMapping(CxeRuntimeKeys::STILL_MAX_ZOOM_LIMITS,
+    addKeyMapping(CxeVariationKeys::STILL_MAX_ZOOM_LIMITS,
                   StillMaxZoomLimitsCr,
                   XQSettingsManager::TypeString,
                   true);
 
-    addKeyMapping(CxeRuntimeKeys::VIDEO_MAX_ZOOM_LIMITS,
+    addKeyMapping(CxeVariationKeys::VIDEO_MAX_ZOOM_LIMITS,
                   VideoMaxZoomLimitsCr,
                   XQSettingsManager::TypeString,
                   true);

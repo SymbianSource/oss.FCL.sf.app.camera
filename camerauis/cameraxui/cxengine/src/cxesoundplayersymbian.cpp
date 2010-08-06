@@ -259,12 +259,8 @@ void CxeSoundPlayerSymbian::checkCaptureSoundSettings()
     CX_DEBUG(("Warning tones enabled [%d]", value.toInt()));
 
     // check whether capture sound is forced or not
-    int forced = 0;
-    mSettings.get(CxeSettingIds::CAPTURE_SOUND_ALWAYS_ON, forced);
-    // 0 -> capture sound not forced
-    // 1 -> capture sound forced on
-    mCaptureSoundForced = (forced == 1);
-    CX_DEBUG(("Capture sound forced [%d]", forced));
+    mCaptureSoundForced = mSettings.get<bool>(CxeSettingIds::CAPTURE_SOUND_ALWAYS_ON, false);
+    CX_DEBUG(("Capture sound forced [%d]", mCaptureSoundForced));
 
     // use sound if forced on or warningtones are enabled
     mUseSound = mCaptureSoundForced || warningTonesEnabled;

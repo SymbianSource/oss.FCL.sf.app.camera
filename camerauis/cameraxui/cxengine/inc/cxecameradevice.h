@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -28,6 +28,7 @@
 
 class MCameraOrientation;
 class MCameraFaceTracking;
+class MCameraUseCaseHint;
 
 //  Class Definitions
 class CxeCameraDevice : public QObject
@@ -44,10 +45,12 @@ class CxeCameraDevice : public QObject
         MCameraOrientation *cameraOrientation();
         CCamera::CCameraSnapshot *cameraSnapshot();
         MCameraFaceTracking *faceTracking();
+        MCameraUseCaseHint *useCaseHintApi();
 
         virtual void setCamera( CCamera *aCamera );
         virtual void deleteCamera();
         virtual void releaseCamera();
+        virtual void reserveCamera();
         virtual CxeError::Id newCamera(Cxe::CameraIndex cameraIndex, MCameraObserver2 *observer);
 
     protected:
@@ -56,7 +59,7 @@ class CxeCameraDevice : public QObject
         void prepareForCameraDelete();
         void cameraAllocated(CxeError::Id error);
         void prepareForRelease();
-
+        void aboutToReserve();
 
     private:
         CxeError::Id initResources();
@@ -69,6 +72,7 @@ class CxeCameraDevice : public QObject
         CCamera::CCameraSnapshot         *mCameraSnapshot;
         MCameraOrientation               *mCameraOrientation; // not owned
         MCameraFaceTracking              *mFaceTracking;      // not owned
+        MCameraUseCaseHint               *mUseCaseHintApi;    // not owned
 
     friend class CxeCameraDeviceControlSymbian;
 };

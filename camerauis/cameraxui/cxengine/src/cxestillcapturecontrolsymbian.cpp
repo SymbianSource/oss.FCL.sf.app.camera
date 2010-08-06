@@ -22,6 +22,7 @@
 #include <coemain.h>
 #include <ECamOrientationCustomInterface2.h>
 #include <ecamfacetrackingcustomapi.h>
+#include <ecamusecasehintcustomapi.h>
 
 #include "cxestillcapturecontrolsymbian.h"
 #include "cxeimagedataqueuesymbian.h"
@@ -43,6 +44,7 @@
 #include "cxesensoreventhandler.h"
 #include "cxequalitypresetssymbian.h"
 #include "cxediskmonitor.h"
+#include "cxeexception.h"
 
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -248,54 +250,30 @@ void CxeStillCaptureControlSymbian::prepare()
 
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_IN, "msg: e_CX_STILLCAPCONT_PREPARE 1");
 
-    int err = KErrNone;
-    CxeError::Id cxErr = getImageQualityDetails(mCurrentImageDetails);
-    int ecamStillResolutionIndex = 0;
+    CxeError::Id status(CxeError::None);
 
-    if (cxErr == CxeError::None) {
-        int imageWidth =  mCurrentImageDetails.mWidth;
-        int imageHeight = mCurrentImageDetails.mHeight;
-        CX_DEBUG(("CxeStillCaptureControlSymbian::prepare <> resolution = (%d, %d)", imageWidth, imageHeight));
-
-        TSize imageSize;
-        imageSize.SetSize(imageWidth, imageHeight);
-
-        if (mECamSupportedImageResolutions.count() > 0) {
-            ecamStillResolutionIndex = mECamSupportedImageResolutions.indexOf(imageSize);
-        }
-
-        if (ecamStillResolutionIndex < 0) {
-            CX_DEBUG(("CxeStillCaptureControlSymbian::prepare - WARNING! resolution not supported, falling back to index 0"));
-            ecamStillResolutionIndex = 0;
-        }
+    try {
+        // Update capture parameters
+        updateStillCaptureParameters();
 
         // Prepare Image capture
-        CCamera::TFormat imgFormat = supportedStillFormat(mCameraDeviceControl.cameraIndex());
+        CX_DEBUG(("Calling PrepareImageCaptureL, resolution index = %d", mSizeIndex));
         OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_MID1, "msg: e_CX_PREPARE_IMAGE_CAPTURE 1");
-        TRAP(err, mCameraDevice.camera()->PrepareImageCaptureL(imgFormat, ecamStillResolutionIndex));
+        QT_TRAP_THROWING(mCameraDevice.camera()->PrepareImageCaptureL(mCaptureFormat, mSizeIndex));
         OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_MID2, "msg: e_CX_PREPARE_IMAGE_CAPTURE 0");
 
-        CX_DEBUG(("PrepareImageCaptureL done, err=%d, resolution index = %d", err, ecamStillResolutionIndex));
-
-        if (!err) {
-            // still capture prepare went fine, try preparing snapshot
-            err = prepareStillSnapshot();
-        }
-    } else {
-        err = KErrNotFound;
-    }
-
-    if (!err) {
         // Start viewfinder before claiming to be ready,
         // as e.g. pending capture might be started by state change,
         // and viewfinder start might have problems with just started capturing.
         // If viewfinder is already running, this call does nothing.
         mViewfinderControl.start();
 
+        // Prepare snapshot
+        prepareSnapshot();
+
         // Start monitoring disk space.
         mDiskMonitor.start();
         connect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
-
 
         // Enable AF reticule drawing by adaptation
         MCameraFaceTracking *faceTracking = mCameraDevice.faceTracking();
@@ -308,19 +286,20 @@ void CxeStillCaptureControlSymbian::prepare()
         setState(Ready);
 
         // inform zoom control to prepare zoom
-        emit prepareZoomForStill(ecamStillResolutionIndex);
-    } else {
-        CX_DEBUG(("Image Prepare FAILED! symbian error = %d", err));
-        // release resources
+        emit prepareZoomForStill(mSizeIndex);
+
+    } catch (const std::exception &e) {
+        // Exception encountered, free resources.
+        CX_DEBUG(("Image Prepare FAILED! symbian error = %d", qt_symbian_exception2Error(e)));
+        status = CxeErrorHandlingSymbian::map(qt_symbian_exception2Error(e));
         deinit();
     }
 
     // Inform interested parties that image mode has been prepared for capture
-    emit imagePrepareComplete(CxeErrorHandlingSymbian::map(err));
+    emit imagePrepareComplete(status);
 
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_GOTOSTILL, "msg: e_CX_GO_TO_STILL_MODE 0");
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_OUT, "msg: e_CX_STILLCAPCONT_PREPARE 0");
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -328,61 +307,81 @@ void CxeStillCaptureControlSymbian::prepare()
 
 /*!
  Prepare still snapshot
- Returns symbian error code.
+ Throws exception on error.
  */
-int CxeStillCaptureControlSymbian::prepareStillSnapshot()
+void CxeStillCaptureControlSymbian::prepareSnapshot()
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_PREPARESNAP_1, "msg: e_CX_PREPARE_SNAPSHOT 1" );
 
-    int status(KErrNone);
-    try {
-        QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
-                                mViewfinderControl.deviceDisplayResolution(),
-                                mCurrentImageDetails.mAspectRatio);
-        mSnapshotControl.start(snapshotSize);
-    } catch (...) {
-        status = KErrGeneral;
-    }
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_PREPARESNAP_2, "msg: e_CX_PREPARE_SNAPSHOT 0" );
+    QSize snapshotSize = mSnapshotControl.calculateSnapshotSize(
+                            mViewfinderControl.deviceDisplayResolution(),
+                            mCurrentImageDetails.mAspectRatio);
+    mSnapshotControl.start(snapshotSize);
 
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_PREPARESNAP_2, "msg: e_CX_PREPARE_SNAPSHOT 0" );
     CX_DEBUG_EXIT_FUNCTION();
-    return status;
 }
 
 
 /*!
- imageInfo contains image qualities details
- Returns CxeError error code.
- */
-CxeError::Id CxeStillCaptureControlSymbian::getImageQualityDetails(CxeImageDetails &imageInfo)
+    Update image capture parameters. mCurrentImageDetails, mCaptureFormat and
+    mSizeIndex are updated based on the current settings.
+*/
+void CxeStillCaptureControlSymbian::updateStillCaptureParameters()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_GETQUALITYDETAILS_1, "msg: e_CX_GET_QUALITY_DETAILS 1" );
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_UPDATESTILLCAPTUREPARAMETERS_1, "msg: e_CX_UPDATE_STILL_CAPTURE_PARAMETERS 1" );
 
     int imageQuality = 0;
     CxeError::Id err = CxeError::None;
     if (mCameraDeviceControl.cameraIndex() == Cxe::PrimaryCameraIndex) {
-        err = mSettings.get(CxeSettingIds::IMAGE_QUALITY, imageQuality);
+        try {
+            imageQuality = mSettings.get<int>(CxeSettingIds::IMAGE_QUALITY);
 
-        bool validQuality = (imageQuality >= 0 && imageQuality < mIcmSupportedImageResolutions.count());
+            bool validQuality = (imageQuality >= 0 &&
+                                 imageQuality < mIcmSupportedImageResolutions.count());
 
-        if (err == CxeError::None && validQuality ) {
-            // get image quality details
-            imageInfo = mIcmSupportedImageResolutions.at(imageQuality);
-        } else {
-            err = CxeError::NotFound;
-            CX_DEBUG(("Invalid ImageQuality = %d", imageQuality));
+            if (validQuality ) {
+                // get image quality details
+                mCurrentImageDetails = mIcmSupportedImageResolutions.at(imageQuality);
+            } else {
+                err = CxeError::NotFound;
+                CX_DEBUG(("Invalid ImageQuality = %d", imageQuality));
+            }
+        } catch (CxeException &e) {
+            err = (CxeError::Id) e.error();
         }
     } else {
         // we are in secondary camera
         // get secondary camera image quality details
-       imageInfo = mIcmSupportedImageResolutions.at(imageQuality);
+       mCurrentImageDetails = mIcmSupportedImageResolutions.at(imageQuality);
     }
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_GETQUALITYDETAILS_2, "msg: e_CX_GET_QUALITY_DETAILS 0" );
+    mSizeIndex = 0;
+
+    if (err == CxeError::None) {
+        int imageWidth = mCurrentImageDetails.mWidth;
+        int imageHeight = mCurrentImageDetails.mHeight;
+        CX_DEBUG(("CxeStillCaptureControlSymbian::updateStillCaptureParameters <> resolution = (%d, %d)", imageWidth, imageHeight));
+
+        TSize imageSize;
+        imageSize.SetSize(imageWidth, imageHeight);
+
+        if (mECamSupportedImageResolutions.count() > 0) {
+            mSizeIndex = mECamSupportedImageResolutions.indexOf(imageSize);
+        }
+
+        if (mSizeIndex < 0) {
+            CX_DEBUG(("CxeStillCaptureControlSymbian::updateStillCaptureParameters - WARNING! resolution not supported, falling back to index 0"));
+            mSizeIndex = 0;
+        }
+
+        mCaptureFormat = supportedStillFormat(mCameraDeviceControl.cameraIndex());
+    }
+
+    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROL_UPDATESTILLCAPTUREPARAMETERS_2, "msg: e_CX_UPDATE_STILL_CAPTURE_PARAMETERS 0" );
     CX_DEBUG_EXIT_FUNCTION();
-    return err;
 }
 
 /*!
@@ -547,8 +546,8 @@ void CxeStillCaptureControlSymbian::handleImageData(MCameraBuffer* cameraBuffer,
         data = NULL;
 
         // get geotagging setting value and check if we have to add location trail to image data.
-        int value = Cxe::GeoTaggingOff;
-        mSettings.get(CxeSettingIds::GEOTAGGING, value);
+        Cxe::GeoTagging value = mSettings.get<Cxe::GeoTagging>(CxeSettingIds::GEOTAGGING, Cxe::GeoTaggingOff);
+
 
         // Save the image data
         CxeImageDataItemSymbian* dataItem = mImageDataQueue->startSave(byteArray,
@@ -866,6 +865,28 @@ void CxeStillCaptureControlSymbian::handleSensorEvent(
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+
+/*!
+    Use ECam Use Case Hint Custom API to inform ECam of our intended use case
+    before calling Reserve().
+*/
+void CxeStillCaptureControlSymbian::hintUseCase()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // Make sure ECam knows we're doing still image capture so it can prepare
+    // for the correct use case.
+    if (mCameraDeviceControl.mode() == Cxe::ImageMode) {
+        MCameraUseCaseHint *useCaseHintApi = mCameraDevice.useCaseHintApi();
+        if (useCaseHintApi) {
+            updateStillCaptureParameters();
+            TRAP_IGNORE(useCaseHintApi->HintStillCaptureL(mCaptureFormat,
+                                                          mSizeIndex));
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
 /*!
 * Returns supported image qualities based on the camera index

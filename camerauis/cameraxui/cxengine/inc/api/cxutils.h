@@ -64,7 +64,13 @@
     #define CX_DEBUG_IN_FUNCTION()
     #define CX_DEBUG_EXIT_FUNCTION()
     #define CX_DEBUG_ASSERT(x)
+
+#ifdef Q_OS_SYMBIAN
     #define CX_ASSERT_ALWAYS(x)             ASSERT(x)
+#else // !Q_OS_SYMBIAN
+    #define CX_ASSERT_ALWAYS(x)             Q_ASSERT(x)
+    #define OstTrace0(x,y,z)    
+#endif // Q_OS_SYMBIAN
 
 #endif // _DEBUG
 

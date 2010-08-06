@@ -71,12 +71,12 @@ private:
     CxuiView *createView(const QString &viewName);
     CxuiPrecaptureView* getPrecaptureView(Cxe::CameraMode mode, Cxe::CameraIndex camera);
 
-    void connectSignals(QObject *view);
-    void disconnectSignals(QObject *view = NULL);
-    void connectPreCaptureSignals();
+    void connectSignals(CxuiView *view);
+    void disconnectSignals(CxuiView *view = NULL);
+    void connectPreCaptureSignals(CxuiPrecaptureView *view);
     void connectPostCaptureSignals();
     void connectSceneModeSignals();
-    void connectCaptureKeySignals();
+    void connectCaptureKeySignals(CxuiView *view);
 
     void handleExitingNormalState();
     void clearAllActivities();

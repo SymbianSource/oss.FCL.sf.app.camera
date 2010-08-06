@@ -30,8 +30,7 @@ INCLUDEPATH += . \
                ./cxui \
                ../traces
 QT += testlib
-HB += hbcore hbwidgets hbutils hbfeedback
-CONFIG += qtestlib hb symbian_test
+CONFIG += qtestlib hb
 LIBS += -lcxengine \
         -lcommonui \
         -lapmime \
@@ -56,7 +55,6 @@ SOURCES += cxuitest.cpp \
     cxuisettingslider.cpp \
     cxuisettingradiobuttonlist.cpp \
     cxuisettingscenemoderadiobuttonlist.cpp \
-    cxuiscenelabel.cpp \
     cxuisettingbuttoncontainer.cpp \
     cxuifakestillcapturecontrol.cpp \
     cxuifakecameradevicecontrol.cpp \
@@ -76,7 +74,6 @@ HEADERS += cxuitest.h \
     cxuisettingslider.h \
     cxuisettingradiobuttonlist.h \
     cxuisettingscenemoderadiobuttonlist.h \
-    cxuiscenelabel.h \
     cxuisettingbuttoncontainer.h\
    	cxuidocumentloader.h \
     cxuienums.h \

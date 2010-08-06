@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,27 +11,25 @@
 *
 * Contributors:
 *
-* Description:
+* Description:  An interface to Location Trail.
 *
 */
 
 #ifndef R_RLOCATIONTRAIL_H
 #define R_RLOCATIONTRAIL_H
 
-#include <e32base.h>
-#include <etel3rdparty.h>
-#include <lbsposition.h>
-#include <locationdatatype.h>
-
-typedef TPckg<TLocality> TLocalityPckg;
 
 /**
- *  RLocationManager dummy.
- */
-class RLocationTrail
+ *  Fake implementation of RLocationManager class which is used for creating a Location Manager session.
+ *  Location Manager is used to start and stop the location trail, retrieve 
+ *  location information and write the location information to images.
+*/
+class  RLocationTrail
     {
 public:
-
+    /**
+     * Location trail states.
+     */
     enum TTrailState
         {
         ETrailStopped,
@@ -41,34 +39,54 @@ public:
         ETrailStopping,
         ETrailStarting
         };
+
     enum TTrailCaptureSetting
-        {
-        EOff,
-        ECaptureNetworkInfo,
-        ECaptureAll
-        };
+    	{
+    	EOff,
+    	ECaptureNetworkInfo,
+    	ECaptureAll 
+    	};    
 
 public:
-    RLocationTrail();
-    ~RLocationTrail();
+	RLocationTrail();
+	
+	~RLocationTrail();
 
-    TInt Connect();
+    /**
+     * Starts recording location information to location trail.
+     * @since S60 3.2
+     * @param aState, an enumeration of ECaptureNetworkInfo  
+     * (only cell ID stored) and ECaptureAll 
+     * (GPS coordinates and cell ID stored).
+     * @return KErrNone if successful, otherwise one of the other 
+     *         system-wide error codes.
+     */
+    int StartLocationTrail(TTrailCaptureSetting aState);
+    
+    /**
+     * Stops recording location information to location trail.
+     * @since S60 3.1
+     * @param None.
+     * @return KErrNone if successful, otherwise one of the other 
+     *         system-wide error codes.
+     */
+    int StopLocationTrail();
+    
+    
+    /**
+    * Connect to location trail server
+    * @return KErrNone if successful, otherwise one of the other 
+    *         system-wide error codes.
+    **/
+    int Connect();
+    
     void Close();
 
-    TInt StartLocationTrail(TTrailCaptureSetting aState);
-    TInt StopLocationTrail();
-    TInt GetLocationTrailState( TTrailState& aState );
-    void NotifyLocationTrailStateChange( TRequestStatus& aStatus );
-    void CancelNotificationRequest();
-    TInt RetrieveLocation( const TTime& aTimeStamp,
-                           TLocationData& aLocationData,
-                           TTrailState& aState );
-    void CurrentLocation( TRequestStatus& aStatus,
-                          TLocationData& aLocationData);
-    void CancelLocationRequest();
-    TInt GetTrailCaptureSetting( TTrailCaptureSetting& aCaptureSetting );
+private:
+    bool mTrailConnected;
+    bool mTrailStarted;
     };
-
+    
 #endif // R_RLOCATIONTRAIL_H
 
-// end of file
+//End of File

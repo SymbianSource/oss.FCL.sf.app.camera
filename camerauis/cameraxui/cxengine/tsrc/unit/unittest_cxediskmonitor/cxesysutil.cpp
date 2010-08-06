@@ -24,29 +24,24 @@ qint64 CxeSysUtil::mSpaceAvailable = 0;
      * Checks if free disk drive storage space is or will fall below critical
      * level. Static configuration values stored in Central Repository are
      * used to determine a critical level for each drive.
-     * 
+     *
      * If aBytesToWrite is more than zero, function returns false otherwise true.
      * By defining aBytesToWrite to zero it is possible to get fake fulldisk error.
-     *  
+     *
      */
-TBool CxeSysUtil::DiskSpaceBelowCriticalLevel(
+bool CxeSysUtil::DiskSpaceBelowCriticalLevel(
         RFs* /*aFs*/,
         TInt aBytesToWrite,
         TInt /*aDrive*/ )
 {
-    CX_DEBUG_IN_FUNCTION(); 
-    
-    if (aBytesToWrite > 0) {
-        return EFalse;
-    }
-    else {
-        return ETrue;
-    }
+    CX_DEBUG_IN_FUNCTION();
+
+    return (aBytesToWrite <= 0);
 }
 
 qint64 CxeSysUtil::spaceAvailable(
-                     RFs & /*fs*/, 
-                     int /*index*/, 
+                     RFs & /*fs*/,
+                     int /*index*/,
                      CxeSettings & /*settings*/)
 {
     CX_DEBUG_IN_FUNCTION();

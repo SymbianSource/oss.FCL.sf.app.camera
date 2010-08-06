@@ -41,6 +41,7 @@ void CxeTestRunner::runTests()
 #endif
 
     QStringList tests;
+
     tests << "unittest_cxevideocapturecontrolsymbian"
           << "unittest_cxestillimagesymbian"
           << "unittest_cxequalitypresetssymbian"
@@ -56,13 +57,13 @@ void CxeTestRunner::runTests()
           << "unittest_cxeimagedataitemsymbian"
           << "unittest_cxeimagedataqueuesymbian"
           << "unittest_cxeerrormappersymbian"
-          << "unittest_cxesettingsmodelimp"
           << "unittest_cxefilesavethreadsymbian"
           << "unittest_cxesettingscenrepstore"
           << "unittest_cxezoomcontrolsymbian"
           << "unittest_cxestillcapturecontrolsymbian"
           << "unittest_cxefeaturemanagerimp"
           << "unittest_cxesettingsimp"
+          << "unittest_cxescenemodestore"
           << "unittest_cxethumbnailmanagersymbian"
           << "unittest_cxeharvestercontrolsymbian"
           << "unittest_cxesettingscontrolsymbian"
@@ -70,7 +71,7 @@ void CxeTestRunner::runTests()
           << "unittest_cxeenginesymbian"
           << "unittest_cxegeotaggingtrail"
           << "unittest_cxememorymonitor"
-		  << "unittest_cxediskmonitor";
+          << "unittest_cxediskmonitor";
 
     QDir dir;
     dir.mkpath(logFileFolder);

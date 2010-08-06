@@ -14,11 +14,11 @@ color: var(qtc_popup_trans_normal);
 Selftimer
 All HbLabel text and icons inside still_precapture_selftimer_container
 */
-HbWidget#still_precapture_selftimer_container > HbLabel::icon
+HbWidget#selftimer_icon_container > HbLabel::icon
 {
 color: var(qtc_popup_trans_normal);
 }
-HbWidget#still_precapture_selftimer_container > HbLabel::text
+HbWidget#selftimer_icon_container > HbLabel::text
 {
 color: var(qtc_popup_trans_normal);
 }
@@ -46,12 +46,7 @@ color: var(qtc_popup_trans_normal);
 Bottom indicators (recording icon, time elapsed & left)
 HbLabels defined separately since they should be colored differently
 */
-/* Elapsed time is a special case, it will always be red */
 HbLabel#video_elapsed_time::text
-{
-color: red;
-}
-HbLabel#video_remaining_time::text
 {
 color: var(qtc_popup_trans_normal);
 }

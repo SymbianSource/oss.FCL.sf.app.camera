@@ -29,6 +29,7 @@
 #include "cxesettings.h"
 #include "cxenamespace.h" // CxeSettingIds
 #include "cxeerror.h"
+#include "cxeexception.h"
 
 using namespace CxUiLayout;
 
@@ -272,12 +273,11 @@ void CxuiSelfTimer::startTimer()
     CX_DEBUG_ENTER_FUNCTION();
 
     // get the current postcapture timeout
-    CxeError::Id error = mSettings.get(CxeSettingIds::STILL_SHOWCAPTURED, mOldPostCaptureTimeOut);
-
-    if (error == CxeError::None) {
+    try {
+        mOldPostCaptureTimeOut = mSettings.get<int>(CxeSettingIds::STILL_SHOWCAPTURED);
         // set continuous postcapture (view is visible until dismissed)
         mSettings.set(CxeSettingIds::STILL_SHOWCAPTURED, CONTINUOUS_POSTCAPTURE);
-    } else {
+    } catch (CxeException &e) {
         // if there was an error, don't modify the postcapture setting
         mOldPostCaptureTimeOut = UNKNOWN;
     }

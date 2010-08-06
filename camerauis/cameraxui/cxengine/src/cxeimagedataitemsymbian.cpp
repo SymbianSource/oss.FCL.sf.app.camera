@@ -15,7 +15,6 @@
 *
 */
 
-#include <bautils.h> // for deleting files
 #include "cxeimagedataitemsymbian.h"
 #include "cxeerrormappingsymbian.h"
 #include "cxesysutil.h"
@@ -27,14 +26,15 @@
 #include "cxeimagedataitemsymbianTraces.h"
 #endif
 
-
+/*!
+* Constructor.
+*/
 CxeImageDataItemSymbian::CxeImageDataItemSymbian(QByteArray data,
                                                  QString filename,
                                                  int id,
                                                  bool addLocation,
                                                  CxeImageDataItem::State state)
   : CxeStateMachine("CxeImageDataItemSymbian"),
-    mError(KErrNone),
     mId(id),
     mData(data),
     mAddLocationInfo(addLocation),
@@ -47,202 +47,109 @@ CxeImageDataItemSymbian::CxeImageDataItemSymbian(QByteArray data,
     // Init mState
     initializeStates();
     setInitialState(state);
-    // Init delayer variables
-    //mDelayedDelete = false;
-    //mDelayedRename = false;
-    //mDelayedFileName = NULL;
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+* Destructor.
+*/
 CxeImageDataItemSymbian::~CxeImageDataItemSymbian()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    // Close file
-    mFile.Close();
-
-    // Close file system
-    mFs.Close();
-
+    closeHandles();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-/*
-void CxeImageDataItemSymbian::deleteImage()
-    {
-    CX_DEBUG_ENTER_FUNCTION();
-
-    int err = KErrNone;
-
-    //! @todo: make this function return a KErrNotReady if below
-    if ( mState != CxeImageDataItem::Idle )
-        {
-        CX_DEBUG(("Error: This data item has no data..."));
-        CX_DEBUG_ASSERT(0); // panics
-        return;
-        }
-
-    // do delete or delayed delete
-    if (( mState == CxeImageDataItem::Waiting ) || ( mState == CxeImageDataItem::Saving ))
-        {
-        // we are currently saving, so we have to delete later
-        CX_DEBUG(("delayed delete"));
-        mDelayedDelete = true;
-        }
-    else
-        {
-        // delete now
-        CX_DEBUG(("deleting now..."));
-        err = KErrNotFound;
-
-
-        //! @todo: this is horrible for performance... there is no need to create multiple server sessions
-        RFs fs;
-        TInt connectError = fs.Connect();
-        BaflUtils ba;
-        if( !connectError && ba.FileExists( fs, *mPath ) )
-            {
-            err = KErrNone;
-            ba.DeleteFile( fs, *mPath );
-            }
-        fs.Close();
-        }
-
-    CX_DEBUG(("err: %d", err));
-
-    CX_DEBUG_EXIT_FUNCTION();
-    //return err; //! @todo
-    }
-
-void CxeImageDataItemSymbian::renameImage( const TDesC& newPath )
-    {
-    CX_DEBUG_ENTER_FUNCTION();
-
-    int err = KErrNone;
-
-    //! @todo: make this function return a KErrNotReady if below
-    if ( mState != CxeImageDataItem::Idle )
-        {
-        CX_DEBUG(("Error: This data item has no data..."));
-        CX_DEBUG_ASSERT(0); // panics
-        return;
-        }
-
-    // do rename or delayed rename
-    if (( mState == CxeImageDataItem::Waiting ) || ( mState == CxeImageDataItem::Saving ))
-        {
-        // we are currently saving, so we have to rename later
-        CX_DEBUG(("delayed rename"));
-        mDelayedRename = true;
-
-        TRAP( err,
-            mDelayedFileName = HBufC::NewL( newPath.Length() );
-            mDelayedFileName->Des().Append( newPath );
-            );
-        }
-    else
-        {
-        // rename now
-        CX_DEBUG(("delayed rename"));
-        err = KErrNotFound;
-        RFs fs;
-        TInt connectError = fs.Connect();
-        BaflUtils ba;
-        if( !connectError && ba.FileExists( fs, *mPath ) )
-            {
-            err = KErrNone;
-            ba.RenameFile( fs, *mPath, newPath );
-            }
-        fs.Close();
-        }
-
-    CX_DEBUG(("err: %d", err));
-
-    CX_DEBUG_EXIT_FUNCTION();
-    //return err; //! @todo
-    }
+/*!
+* Save the data now.
+* @return Status code.
 */
-
 CxeError::Id CxeImageDataItemSymbian::save()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    CxeError::Id status(CxeError::None);
+    try {
+        setState(CxeImageDataItem::Saving);
+        trySave();
+        setState(CxeImageDataItem::Saved);
+    } catch (const std::exception &e) {
+        closeHandles();
+        status = CxeErrorHandlingSymbian::map(qt_symbian_exception2Error(e));
+        setState(CxeImageDataItem::SaveFailed);
+    }
+
+    emit imageSaved(status, mPath, mId);
+
+    CX_DEBUG_EXIT_FUNCTION();
+    return status;
+}
+
+/*!
+* Helper method for trying to save the data.
+* If any error is encountered during the saving process, exception is thrown.
+*/
+void CxeImageDataItemSymbian::trySave()
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_SAVE_IN, "msg: e_CX_IMAGEDATAITEM_SAVE 1");
 
-    mError = KErrNone;
+    CX_DEBUG(("CxeImageDataItemSymbian - Starting to save [%s]", qPrintable(mPath)));
 
-    CX_DEBUG(( "Starting to save %s", mPath.toAscii().constData() ));
-
+    // Check we have the path set.
     if (mPath.isEmpty()) {
-        CX_DEBUG(("Filename not set !"));
-        mError = KErrArgument;
+        CX_DEBUG(("CxeImageDataItemSymbian - Filename not set!"));
+        qt_symbian_throwIfError(KErrArgument);
     }
 
     TPtrC16 filename;
-
-    if (!mError) {
-        filename.Set(reinterpret_cast<const TUint16*>(mPath.utf16()));
-        // Init
-        mError = mFs.Connect();
-        CX_DEBUG(("mFsSession.Connect mError=%d", mError));
-    }
+    filename.Set(reinterpret_cast<const TUint16*>(mPath.utf16()));
+    // Init
+    CX_DEBUG(("CxeImageDataItemSymbian - connect to RFs.."));
+    qt_symbian_throwIfError(mFs.Connect());
 
     // Get drive number
     TInt drive = 0;
-    if (!mError) {
-        mError = RFs::CharToDrive(filename[0], drive);
-        CX_DEBUG(("CharToDrive mError=%d", mError));
-    }
+    CX_DEBUG(("CxeImageDataItemSymbian - Get drive number.."));
+    qt_symbian_throwIfError(RFs::CharToDrive(filename[0], drive));
 
-    // Check disk space
-    if (!mError) {
-        TBool fullDisk = EFalse;
-        fullDisk = checkDiskSpace(&mFs, mData.size(), drive);
-        if (fullDisk) {
-            CX_DEBUG(("SysUtil::FullDisk"));
-            mError = KErrDiskFull;
-        }
+    // Check disk has space
+    bool fullDisk = checkDiskSpace(&mFs, mData.size(), drive);
+    if (fullDisk) {
+        CX_DEBUG(("CxeImageDataItemSymbian - Disk is full!"));
+        qt_symbian_throwIfError(KErrDiskFull);
     }
 
     // Attempt to create the file
-    if (!mError) {
-        // Note: In sake of MDS not starting harvesting here,
-        // do not use RFile::Replace. If harvesting is started now,
-        // our later call to harvest may be ignored and
-        // file may be missing from "Captured" album.
-        mError = mFile.Create(mFs, filename, EFileWrite);
-        CX_DEBUG(("file.Create mError=%d", mError));
-    }
+    // Note: In sake of MDS not starting harvesting here,
+    // do not use RFile::Replace. If harvesting is started now,
+    // our later call to harvest may be ignored and
+    // file may be missing from "Captured" album.
+    CX_DEBUG(("CxeImageDataItemSymbian - Create the file.."));
+    qt_symbian_throwIfError(mFile.Create(mFs, filename, EFileWrite));
 
-    // Write the file
-    if (!mError) {
-        // Update state
-        setState(CxeImageDataItem::Saving);
+    // Write data to the file.
+    CX_DEBUG(("CxeImageDataItemSymbian - Starting to write the file.."));
+    TPtrC8 data(reinterpret_cast<const TUint8*> (mData.constData()), mData.size());
+    qt_symbian_throwIfError(mFile.Write(data)); // synchronous
 
-        CX_DEBUG(("about to write to file"));
-        TPtrC8 data(reinterpret_cast<const TUint8*> (mData.constData()), mData.size());
-        mError = mFile.Write(data); // synchronous
-        saveCleanup();
-        CX_DEBUG(("file write completed"));
-    }
+    // Flush all the data to file now.
+    // This may take a while depending on buffer sizes and file server load.
+    OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_FLUSH_1, "msg: e_CX_SAVE_FLUSH_FILE 1");
+    qt_symbian_throwIfError(mFile.Flush());
+    OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_FLUSH_2, "msg: e_CX_SAVE_FLUSH_FILE 0");
 
-    mFile.Close(); //~400us
-    mFs.Close();   //~450us
+    // Close the file and server handles.
+    closeHandles();
+    CX_DEBUG(("CxeImageDataItemSymbian - Saving to file completed.."));
+
     OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_SAVED, "msg: e_CX_SHOT_TO_SAVE 0");
-
-    if (mError == KErrNone) {
-        setState(CxeImageDataItem::Saved);
-    } else {
-        setState(CxeImageDataItem::SaveFailed);
-    }
-    emit imageSaved(CxeErrorHandlingSymbian::map(mError), mPath, mId);
-
     OstTrace0(camerax_performance, CXEIMAGEDATAITEMSYMBIAN_SAVE_OUT, "msg: e_CX_IMAGEDATAITEM_SAVE 0");
     CX_DEBUG_EXIT_FUNCTION();
-    return CxeErrorHandlingSymbian::map(mError);
 }
 
-/**
+/*!
 * Get the id number of this data item.
 */
 int CxeImageDataItemSymbian::id() const
@@ -250,7 +157,7 @@ int CxeImageDataItemSymbian::id() const
     return mId;
 }
 
-/**
+/*!
 * Get the path of this data item.
 */
 QString CxeImageDataItemSymbian::path() const
@@ -258,84 +165,54 @@ QString CxeImageDataItemSymbian::path() const
     return mPath;
 }
 
-
-int CxeImageDataItemSymbian::checkDiskSpace(RFs* aFs,
+/*!
+* Check that there's enough space in the drive.
+* @param aFs File server session
+* @param aBytesToWrite Amount of bytes to be written.
+* @param aDrive Drive number.
+* @return True, if given amount of bytes can be written to the drive, false otherwise.
+*/
+bool CxeImageDataItemSymbian::checkDiskSpace(RFs* aFs,
         TInt aBytesToWrite,
         TInt aDrive)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    int value = CxeSysUtil::DiskSpaceBelowCriticalLevel(
+    bool value = CxeSysUtil::DiskSpaceBelowCriticalLevel(
             aFs,
             aBytesToWrite,
             aDrive );
     return value;
 }
 
-void CxeImageDataItemSymbian::saveCleanup()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CX_DEBUG_ASSERT( state() == CxeImageDataItem::Saving );
-
-    // Flush file.
-    if (!mError) {
-        CX_DEBUG(("flushing..."));
-        mError = mFile.Flush();
-        CX_DEBUG(("flushed"));
-    }
-
-
-    /*
-    // Delayed rename, if needed
-    if (( !mError ) && ( mDelayedRename ))
-        {
-        CX_DEBUG(("doing delayed rename..."));
-        mError = KErrNotFound;
-        BaflUtils ba;
-        if( ba.FileExists( mFs, *mPath ) )
-            {
-            mError = KErrNone;
-            TPtrC newPath = *mDelayedFileName;
-            ba.RenameFile( mFs, *mPath, newPath );
-            }
-        mDelayedRename = false;
-        CX_DEBUG(("rename done, mError: %d", mError));
-        }
-
-    // Delayed delete, if needed
-    if (( !mError ) && ( mDelayedDelete ))
-        {
-        CX_DEBUG(("doing delayed delete..."));
-        mError = KErrNotFound;
-        BaflUtils ba;
-        if( ba.FileExists( mFs, *mPath ) )
-            {
-            mError = KErrNone;
-            ba.DeleteFile( mFs, *mPath );
-            }
-        mDelayedDelete = false;
-        CX_DEBUG(("delete done, mError: %d", mError));
-        }*/
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
+/*!
+* State of this item.
+* @return The state.
+*/
 CxeImageDataItem::State CxeImageDataItemSymbian::state() const
 {
     return static_cast<CxeImageDataItem::State> (stateId());
 }
 
+/*!
+* Handle state change.
+*/
 void CxeImageDataItemSymbian::handleStateChanged(int newStateId, CxeError::Id error)
 {
     emit stateChanged(static_cast<State> (newStateId), error);
 }
 
-
+/*!
+* Is location tagging enabled for this item.
+* @return True if location tagging is enabled, false otherwise.
+*/
 bool CxeImageDataItemSymbian::isLocationEnabled() const
 {
     return mAddLocationInfo;
 }
 
+/*!
+* Init the state machine.
+*/
 void CxeImageDataItemSymbian::initializeStates()
 {
     // addState( id, name, allowed next states )
@@ -344,3 +221,14 @@ void CxeImageDataItemSymbian::initializeStates()
     addState(new CxeState(Saved, "Saved", 0));
     addState(new CxeState(SaveFailed, "SaveFailed", 0));
 }
+
+/*!
+* Close the file server and file handles.
+*/
+void CxeImageDataItemSymbian::closeHandles()
+{
+    mFile.Close();
+    mFs.Close();
+}
+
+// end of file

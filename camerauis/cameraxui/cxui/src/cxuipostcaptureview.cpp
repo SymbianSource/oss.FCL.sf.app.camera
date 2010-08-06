@@ -31,6 +31,7 @@
 #include <hbmessagebox.h>
 #include <hbactivitymanager.h>
 
+#include <xqaiwdecl.h>
 #include <shareui.h>
 #include <thumbnailmanager_qt.h>
 
@@ -217,8 +218,7 @@ void CxuiPostcaptureView::playVideo()
 
     QString videoFile(getCurrentFilename());
 
-    XQAiwRequest *videoRequest = mAppManager.create(
-        "com.nokia.symbian.IVideoView","playMedia(QString)", true);
+    XQAiwRequest *videoRequest = mAppManager.create(XQI_VIDEO_PLAY, XQOP_VIDEO_PLAY, true);
 
     if (videoRequest) {
         QVariantList fileList;
@@ -230,7 +230,7 @@ void CxuiPostcaptureView::playVideo()
         bool res = videoRequest->send(result);
         if (res) {
             CX_DEBUG(("CxuiPostcaptureView: request sent, received \"%s\"",
-                      result.toString().toAscii().constData()));
+                      qPrintable(result.toString())));
         } else {
             CX_DEBUG(("CxuiPostcaptureView: request sending failed, error=%d",
                       videoRequest->lastError()));
@@ -278,8 +278,7 @@ void CxuiPostcaptureView::handleDeleteDialogClosed(int action)
 
     // Check that user confirmed delete
     if (action == HbMessageBox::Yes) {
-        QString filename = getCurrentFilename();
-        QFileInfo fileInfo(filename);
+        QFileInfo fileInfo(getCurrentFilename());
         if (fileInfo.exists()) {
             //! @todo
             // We can retry deletion if file deletion does'nt succeed,
@@ -407,7 +406,12 @@ bool CxuiPostcaptureView::eventFilter(QObject *object, QEvent *event)
 */
 void CxuiPostcaptureView::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    OstTrace0(camerax_performance, CXUIPOSTCAPTUREVIEW_SNAPSHOT_DRAW, "msg: e_CX_SHOT_TO_SNAPSHOT 0");
+    // Performance trace for checking shot to snapshot time.
+    // Guard that we actually have the snapshot set before outputting the trace.
+    if (mImageLabel && !mImageLabel->icon().isNull()) {
+        OstTrace0(camerax_performance, CXUIPOSTCAPTUREVIEW_SNAPSHOT_DRAW, "msg: e_CX_SHOT_TO_SNAPSHOT 0");
+    }
+
     QGraphicsWidget::paint(painter, option, widget);
 }
 
@@ -424,7 +428,7 @@ void CxuiPostcaptureView::restoreActivity(const QString &activityId, const QVari
     // get filename. if filename is not found (toString() returns empty string)
     // we will go back to pre-capture in updateSnapshotImage()
     mFilename = data.toMap()[FILENAME_KEY].toString();
-    CX_DEBUG(("Got filename %s from activity", mFilename.toAscii().data()));
+    CX_DEBUG(("Got filename [%s] from activity", qPrintable(mFilename)));
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -439,7 +443,7 @@ void CxuiPostcaptureView::saveActivity()
     QVariantHash params;
 
     QString filename = getCurrentFilename();
-    CX_DEBUG(("Saving filename %s", filename.toAscii().data()));
+    CX_DEBUG(("Saving filename [%s]", qPrintable(filename)));
     data.insert(FILENAME_KEY, filename);
 
     QImage img(mMainWindow->rect().size(), QImage::Format_ARGB32_Premultiplied);
@@ -483,9 +487,17 @@ void CxuiPostcaptureView::showEvent(QShowEvent *event)
     if (event->type() == QEvent::Show) {
         QCoreApplication::instance()->installEventFilter(this);
 
+        // Update snapshot for current file.
+        // If the current file does not exist anymore, return to pre-capture view.
         updateSnapshotImage();
-        showControls();
-        startTimers();
+
+        // If the image / video has been deleted, control returned to pre-capture view.
+        // No point to start timers or show controls then.
+        if (mMainWindow->currentView() == this) {
+            showControls();
+            startTimers();
+        }
+
         event->accept();
     }
 
@@ -573,42 +585,80 @@ void CxuiPostcaptureView::updateSnapshotImage()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (!mFilename.isNull()) {
-        CX_DEBUG(("CxuiPostcaptureView::updateSnapshot restoring activity"));
-        // filename set, we are restoring activity
-        if (QFile::exists(mFilename)) {
-            CX_DEBUG(("Filename ok, requesting thumbnail from TNM"));
-            if (!mThumbnailManager) {
-                mThumbnailManager = new ThumbnailManager();
-                connect(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
-                                                this, SLOT(handleThumbnailReady(QPixmap, void*, int, int)));
-                mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailLarge);
-            }
-            mThumbnailManager->getThumbnail(mFilename);
-            CX_DEBUG(("Thumbnail requested"));
+    if (isFileDeleted()) {
+        // File deleted, go to pre-capture view.
+        CX_DEBUG(("File has been deleted, going back to pre-capture"));
+        goToPrecaptureView();
 
-        } else {
-            // file deleted
-            CX_DEBUG(("File %s has been deleted, going back to pre-capture", mFilename.toAscii().data()));
-            goToPrecaptureView();
+    } else if (!mFilename.isNull()) {
+        // filename set, we are restoring activity
+        if (!mThumbnailManager) {
+            mThumbnailManager = new ThumbnailManager();
+            connect(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void *, int, int)),
+                    this, SLOT(handleThumbnailReady(QPixmap)));
+            mThumbnailManager->setThumbnailSize(ThumbnailManager::ThumbnailLarge);
         }
+        mThumbnailManager->getThumbnail(mFilename);
+        CX_DEBUG(("Thumbnail requested"));
+
     } else {
+        // Normal use of post-capture view
         QPixmap snapshot;
         if (mEngine->mode() == ImageMode) {
-            if( mEngine->stillCaptureControl().imageCount() > 0 ) {
+
+            if (mEngine->stillCaptureControl().imageCount() > 0) {
                 snapshot = mEngine->stillCaptureControl()[0].snapshot();
             }
         } else {
             snapshot = mEngine->videoCaptureControl().snapshot();
         }
-        if (mImageLabel) {
-                mImageLabel->setIcon(HbIcon(QIcon(snapshot)));
-            } else {
-                // do nothing
-        }
+
+        // Update the snapshot image
+        handleThumbnailReady(snapshot);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Check if the file we show this post-capture view for is deleted.
+* This can happen e.g. if we send camera to background and delete
+* the file in other application. When used as activity, we may also
+* get the name of already deleted file as activity parameter.
+* @return True if the current file is deleted, false if not.
+*/
+bool CxuiPostcaptureView::isFileDeleted()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    bool deleted(false);
+
+    // Check how we entered this view.
+    if (mFilename.isNull()) {
+        CX_DEBUG(("Checking engine filename"));
+        // Normally entered post-capture view.
+        if (mEngine->mode() == ImageMode) {
+            // Check that the image have been saved already.
+            // If not, it cannot have been deleted in that case.
+            CxeStillImage &image(mEngine->stillCaptureControl()[0]);
+            CX_DEBUG(("Image filename [%s]", qPrintable(image.filename())));
+            CX_DEBUG(("Image file saved: %d exists: %d", image.saved(), QFile::exists(image.filename())));
+            deleted = image.saved() && !QFile::exists(image.filename());
+        } else {
+            // Check that video has been stopped fully.
+            // If it's still stopping, QFile may not work.
+            CX_DEBUG(("Video filename [%s]", qPrintable(mEngine->videoCaptureControl().filename())));
+            deleted = mEngine->videoCaptureControl().state() != CxeVideoCaptureControl::Stopping
+                   && !QFile::exists(mEngine->videoCaptureControl().filename());
+        }
+    } else {
+        // Started as activity, check the filename given when restoring activity.
+        CX_DEBUG(("Checking filename saved in activity"));
+        deleted = !QFile::exists(mFilename);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+    return deleted;
 }
 
 /* !
@@ -617,29 +667,27 @@ void CxuiPostcaptureView::updateSnapshotImage()
 QString CxuiPostcaptureView::getCurrentFilename()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    QString filename;
 
     if (!mFilename.isNull()) {
         // post-capture started by activity, engine doesn't contain correct
         // filename anymore so use the stored one
         CX_DEBUG(("Using filename saved in activity"));
-        CX_DEBUG_EXIT_FUNCTION();
-        return mFilename;
-    }
-
-    CX_DEBUG(("Getting filename from engine"));
-    QString filename;
-
-    if (mEngine->mode() == Cxe::VideoMode) {
-        filename = mEngine->videoCaptureControl().filename();
+        filename = mFilename;
     } else {
-        //!@todo Currently only gets index 0 from the still capture control.
-        CxeStillCaptureControl& stillCaptureControl = mEngine->stillCaptureControl();
-        if (stillCaptureControl.imageCount()) {
-            filename = stillCaptureControl[0].filename();
+        CX_DEBUG(("Getting filename from engine"));
+        if (mEngine->mode() == Cxe::VideoMode) {
+            filename = mEngine->videoCaptureControl().filename();
+        } else {
+            //!@todo Currently only gets index 0 from the still capture control.
+            CxeStillCaptureControl& stillCaptureControl = mEngine->stillCaptureControl();
+            if (stillCaptureControl.imageCount() > 0) {
+                filename = stillCaptureControl[0].filename();
+            }
         }
     }
-    CX_DEBUG((filename.toAscii()));
 
+    CX_DEBUG(("Got filename [%s]", qPrintable(filename)));
     CX_DEBUG_EXIT_FUNCTION();
 
     return filename;
@@ -669,8 +717,12 @@ void CxuiPostcaptureView::exitStandby()
     // Common functionality first.
     CxuiView::exitStandby();
 
-    //!@note We should not start timers until we receive the ShowEvent
-    showControls();
+    // Update snapshot and check the current file is not deleted.
+    updateSnapshotImage();
+
+    if (mMainWindow->currentView() == this) {
+        showControls();
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -695,19 +747,13 @@ void CxuiPostcaptureView::enterStandby()
  * Handle thumbnail received from ThumbnailManager.
  *
  * @param thumbnail Thumbnail as QPixmap
- * @param clientData Not used
- * @param id Thumbnail manager request id
- * @param errorCode Error code
  */
-void CxuiPostcaptureView::handleThumbnailReady(QPixmap thumbnail, void *clientData, int id, int errorCode)
+void CxuiPostcaptureView::handleThumbnailReady(QPixmap thumbnail)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    Q_UNUSED(clientData);
-    Q_UNUSED(id);
-
     if (thumbnail.isNull()) {
-        CX_DEBUG(("Received null thumbnail from TNM, going to pre-capture. Error=%d", errorCode));
+        CX_DEBUG(("[WARNING] Received null thumbnail from TNM, going to pre-capture."));
         // null thumbnail, go to precapture
         goToPrecaptureView();
     } else if (mImageLabel) {
@@ -757,9 +803,9 @@ void CxuiPostcaptureView::startPostcaptureTimer()
     }
 
     if (!CxuiServiceProvider::isCameraEmbedded()) {
-        CxeError::Id err = mEngine->settings().get(settingId, postCaptureTimeout);
+        postCaptureTimeout = mEngine->settings().get<int>(settingId, 0);
 
-        if (postCaptureTimeout > 0 && err == CxeError::None) {
+        if (postCaptureTimeout > 0) {
             mPostcaptureTimer.start(postCaptureTimeout);
         } else {
             // do nothing

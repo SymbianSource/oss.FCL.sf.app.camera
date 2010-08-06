@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -77,17 +77,17 @@ namespace
 *        is not enough free memory to create a temporary connection to
 *        file server.
 */
-TBool CxeSysUtil::DiskSpaceBelowCriticalLevel(
+bool CxeSysUtil::DiskSpaceBelowCriticalLevel(
         RFs* aFs,
         TInt aBytesToWrite,
         TInt aDrive )
 {
-    TBool fullDisk = EFalse;
+    bool fullDisk = false;
     TRAPD( utilErr,
             fullDisk = SysUtil::DiskSpaceBelowCriticalLevelL(
                     aFs, aBytesToWrite, aDrive ) );
     if(utilErr) {
-        fullDisk = EFalse;
+        fullDisk = false;
     }
     return fullDisk;
 }

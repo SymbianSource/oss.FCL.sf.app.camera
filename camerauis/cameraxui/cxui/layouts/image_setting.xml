@@ -111,7 +111,7 @@
         </setting_slider>
 
         <!-- Still scene modes -->
-        <setting_list id="still_scene_modes"
+        <setting_list id="still_scene_mode"
                       heading="txt_cam_title_scene_mode"
                       preview="0"
                       type="SingleLineListBox">

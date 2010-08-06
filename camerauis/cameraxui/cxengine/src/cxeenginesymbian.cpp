@@ -31,7 +31,6 @@
 #include "cxutils.h"
 #include "cxesettingsimp.h"
 #include "cxefeaturemanagerimp.h"
-#include "cxesettingsmodelimp.h"
 #include "cxesettingscenrepstore.h"
 #include "cxesoundplayersymbian.h"
 #include "cxesensoreventhandlersymbian.h"
@@ -40,6 +39,7 @@
 #include "cxememorymonitor.h"
 #include "cxediskmonitor.h"
 #include "cxegeotaggingtrail.h"
+#include "cxeexception.h"
 
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -61,7 +61,6 @@ CxeEngineSymbian::CxeEngineSymbian()
       mZoomControl(NULL),
       mSettings(NULL),
       mFeatureManager(NULL),
-      mSettingsModel(NULL),
       mFilenameGenerator(NULL),
       mSensorEventHandler(NULL),
       mQualityPresets(NULL),
@@ -97,7 +96,7 @@ void CxeEngineSymbian::createControls()
     CX_DEBUG_ENTER_FUNCTION();
 
     // Check we do this only once.
-    if (!mSettingsModel) {
+    if (!mSettings) {
         OstTrace0(camerax_performance, CXEENGINESYMBIAN_CREATECONTROLS_IN, "msg: e_CX_ENGINE_CREATE_CONTROLS 1");
 
         CxeCameraDeviceControlSymbian *deviceControl = new CxeCameraDeviceControlSymbian();
@@ -115,21 +114,20 @@ void CxeEngineSymbian::createControls()
         } else {
             settingsStore = new CxeSettingsCenRepStore();
         }
-        //ownership of settings store transferred to the settings model.
-        mSettingsModel = new CxeSettingsModelImp(settingsStore);
-        // assert if settings model fails to intialize
-        CX_DEBUG_ASSERT(mSettingsModel);
 
-        mSettings = new CxeSettingsImp(*mSettingsModel);
+        //ownership of settings store transferred to the settings
+        mSettings = new CxeSettingsImp(settingsStore);
 
         // Loading current camera mode value from settings store and updating
 		// devicecontrol
         Cxe::CameraMode cameraMode = Cxe::ImageMode;
-        int value;
-        CxeError::Id err = mSettings->get(CxeSettingIds::CAMERA_MODE, value);
-        if (!err) {
-            cameraMode = static_cast<Cxe::CameraMode>(value);
+
+        try {
+            cameraMode = mSettings->get<Cxe::CameraMode>(CxeSettingIds::CAMERA_MODE);
+        } catch (CxeException &e) {
+            CX_DEBUG(("Failed to read camera mode from settings, using image mode. Error code: %d", e.error()));
         }
+
         // set current camera mode to devicecontrol.
         mCameraDeviceControl->setMode(cameraMode);
 
@@ -141,7 +139,7 @@ void CxeEngineSymbian::createControls()
         connect(settingsStore, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
                 mSettings, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)));
 
-        mFeatureManager = new CxeFeatureManagerImp(*mSettingsModel);
+        mFeatureManager = new CxeFeatureManagerImp(*mSettings);
 
         // Memory monitor needed as early as possible to request free memory.
         // Note: Throws error if enough memory cannot be freed!
@@ -201,10 +199,8 @@ void CxeEngineSymbian::connectSignals()
     OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_IN, "msg: e_CX_ENGINE_CONNECT_SIGNALS 1");
 
     // enabling scene setting change callbacks to Autofocus control
-    connect(mSettings,
-            SIGNAL(sceneChanged(CxeScene&)),
-            mAutoFocusControl,
-            SLOT(handleSceneChanged(CxeScene&)));
+    mSettings->listenForSetting(CxeSettingIds::IMAGE_SCENE_DATA, mAutoFocusControl, SLOT(handleSceneChanged(const QVariant&)));
+    mSettings->listenForSetting(CxeSettingIds::VIDEO_SCENE_DATA, mAutoFocusControl, SLOT(handleSceneChanged(const QVariant&)));
 
     // connecting Autofocus state change callbacks to stillcapturecontrol
     connect(mAutoFocusControl,
@@ -272,13 +268,35 @@ void CxeEngineSymbian::connectSignals()
             mFileSaveThread,
             SLOT(handleSnapshotReady(CxeError::Id, const QImage&, const QString&)));
 
-
     // stop location trail when releasing camera.
     connect(mCameraDevice,
             SIGNAL(prepareForRelease()),
             mGeoTaggingTrail,
             SLOT(stop()),
             Qt::UniqueConnection);
+
+    // Use MCameraUseCaseHint API before calling Reserve()
+    connect(mCameraDevice,
+            SIGNAL(aboutToReserve()),
+            mStillCaptureControl,
+            SLOT(hintUseCase()),
+            Qt::UniqueConnection);
+    connect(mCameraDevice,
+            SIGNAL(aboutToReserve()),
+            mVideoCaptureControl,
+            SLOT(hintUseCase()),
+            Qt::UniqueConnection);
+
+    // Start / stop geotagging based on mode.
+    // Do this later to reduce startup time.
+    connect(mStillCaptureControl,
+            SIGNAL(imagePrepareComplete(CxeError::Id)),
+            this,
+            SLOT(initGeotagging()));
+    connect(mVideoCaptureControl,
+            SIGNAL(videoPrepareComplete(CxeError::Id)),
+            this,
+            SLOT(initGeotagging()));
 
     OstTrace0(camerax_performance, CXEENGINESYMBIAN_CONNECTSIGNALS_OUT, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
@@ -305,7 +323,6 @@ CxeEngineSymbian::~CxeEngineSymbian()
     delete mMemoryMonitor;
     delete mFeatureManager;
     delete mSettings;
-    delete mSettingsModel;
     delete mCameraDeviceControl;
     delete mQualityPresets;
     delete mFileSaveThread;
@@ -425,16 +442,10 @@ void CxeEngineSymbian::doInit()
     }
 
     if (mode() == Cxe::ImageMode) {
-        // start geotagging trail in image mode.
-        startGeotaggingTrail();
         mVideoCaptureControl->deinit();
         mStillCaptureControl->init();
     } else if (mode() == Cxe::VideoMode) {
         mStillCaptureControl->deinit();
-        if (mGeoTaggingTrail) {
-            // in video mode, Geotagging is not supported for now.
-            mGeoTaggingTrail->stop();
-        }
         mVideoCaptureControl->init();
     }
 
@@ -585,6 +596,7 @@ void CxeEngineSymbian::initMode(Cxe::CameraMode cameraMode)
 void CxeEngineSymbian::reserve()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    // Start reserving camera HW.
     mCameraDeviceControl->reserve();
     emit reserveStarted();
     CX_DEBUG_EXIT_FUNCTION();
@@ -599,8 +611,11 @@ void CxeEngineSymbian::saveMode()
     CX_DEBUG_ENTER_FUNCTION();
 
     if (mCameraDeviceControl && mSettings) {
-        int value = mCameraDeviceControl->mode();
-        mSettings->set(CxeSettingIds::CAMERA_MODE, value);
+        try {
+            mSettings->set(CxeSettingIds::CAMERA_MODE, mCameraDeviceControl->mode());
+        } catch (CxeException &e) {
+            CX_DEBUG(("Failed to save camera mode, error=%d", e.error()));
+        }
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -608,21 +623,28 @@ void CxeEngineSymbian::saveMode()
 
 
 /*!
-* Start geotagging trail.
+* Initialize geotagging.
+* Check if we are allowed to start the geotagging and if it's supported in current mode.
 */
-void CxeEngineSymbian::startGeotaggingTrail()
+void CxeEngineSymbian::initGeotagging()
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0(camerax_performance, CXEENGINE_START_GEO_IN, "msg: e_CX_ENGINE_START_GEOTAGGING 1");
 
     if (mGeoTaggingTrail && mSettings) {
-        // location trail is limited to image mode only for now.
-        int value = Cxe::GeoTaggingDisclaimerDisabled;
-        mSettings->get(CxeSettingIds::GEOTAGGING_DISCLAIMER, value);
+        if (mode() == Cxe::ImageMode) {
+            // Location trail is limited to image mode only for now.
+            Cxe::GeoTaggingDisclaimer value =
+                mSettings->get<Cxe::GeoTaggingDisclaimer>(
+                    CxeSettingIds::GEOTAGGING_DISCLAIMER, Cxe::GeoTaggingDisclaimerDisabled);
 
-        // we start location trail only when Geotagging First-time-use note is accepted by user.
-        if (value == Cxe::GeoTaggingDisclaimerDisabled) {
-            mGeoTaggingTrail->start();
+            // we start location trail only when Geotagging First-time-use note is accepted by user.
+            if (value == Cxe::GeoTaggingDisclaimerDisabled) {
+                mGeoTaggingTrail->start();
+            }
+        } else {
+            // Geotagging is not (yet) supported in video mode.
+            mGeoTaggingTrail->stop();
         }
     }
 

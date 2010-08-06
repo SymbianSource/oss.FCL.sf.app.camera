@@ -27,6 +27,8 @@ CxeFakeAutoFocusControl::CxeFakeAutoFocusControl()
 {
     CX_DEBUG_ENTER_FUNCTION();
     initializeStates();
+    qRegisterMetaType<CxeAutoFocusControl::State>("CxeAutoFocusControl::State");
+    qRegisterMetaType<CxeAutoFocusControl::Mode>("CxeAutoFocusControl::Mode");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -38,6 +40,7 @@ CxeFakeAutoFocusControl::~CxeFakeAutoFocusControl()
 CxeError::Id CxeFakeAutoFocusControl::start(bool soundEnabled)
 {
     CX_DEBUG_IN_FUNCTION();
+    Q_UNUSED(soundEnabled);
     return CxeError::None;
 }
 

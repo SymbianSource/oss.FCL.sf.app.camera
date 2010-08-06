@@ -82,7 +82,7 @@ protected slots:
 
     // Handle ECam events
     void handleCameraEvent( int eventUid, int error );
-    void handleSceneChanged(CxeScene &scene);
+    void handleSceneChanged(const QVariant &scene);
     void handleSettingValueChanged(const QString &settingId, QVariant newValue);
 
 private:

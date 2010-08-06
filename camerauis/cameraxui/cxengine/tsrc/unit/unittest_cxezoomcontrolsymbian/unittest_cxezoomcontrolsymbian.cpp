@@ -52,7 +52,6 @@ void UnitTestCxeZoomControlSymbian::init()
     mFakeCameraDeviceControl = new CxeFakeCameraDeviceControl;
     mFakeCameraDeviceControl->setState(CxeCameraDeviceControl::Ready);
     
-    mFakeSettings = new CxeFakeSettings();
     mFakeFeatureManager = new CxeFakeFeatureManager();
 
     mZoomControl = new CxeZoomControlSymbian(*mFakeCameraDevice,

@@ -43,7 +43,6 @@ SOURCES *= unittest_cxevideocapturecontrolsymbian.cpp \
     cxefakecameradevicecontrol.cpp \
     cxefakesettings.cpp \
     cxesettingsimp.cpp \
-    cxefakesettingsmodel.cpp \
     cxestatemachine.cpp \
     cxestate.cpp \
     cxestatemachinebase.cpp \
@@ -75,7 +74,6 @@ HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
     cxesettingsimp.h \
     cxesettings.h \
     cxefakesettings.h \
-    cxefakesettingsmodel.h \
     cxestatemachine.h \
     cxestate.h \
     cxeerrormappingsymbian.h \

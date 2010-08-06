@@ -16,8 +16,13 @@
 
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
+
 # FORCE_SECONDARY_CAMERA
 # Configuration flag for forcing secondary camera hw to be used also for primary camera ui.
-# To be removed
-#DEFINES += FORCE_SECONDARY_CAMERA
-#DEFINES = $$unique(DEFINES)
+
+# DEFINES += FORCE_SECONDARY_CAMERA
+# DEFINES = $$unique(DEFINES)
+
+!symbian {
+    DEFINES += CAMERAX_ENGINE_NO_LIBRARY
+}

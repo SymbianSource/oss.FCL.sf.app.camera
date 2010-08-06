@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,21 +23,24 @@
 #include <QList>
 #include <QMetaType>
 
-#include "cxesettingsmodel.h"
+#include "cxesettings.h"
 #include "cxefeaturemanagerimp.h"
 #include "cxutils.h"
 #include "cxeerror.h"
 
 
-/*
-* CxeFeatureManagerImp::isFeatureSupported
+/*!
+* Returns if a feature is supported or not
+* @param key Feature key
+* @param supported Returned boolean to indicate whether feature is supported or not
+* @return Error code
 */
 CxeError::Id CxeFeatureManagerImp::isFeatureSupported(const QString& key, bool& supported) const
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     QVariant value;
-    CxeError::Id err = mSettingsModel.getRuntimeValue(key, value);
+    CxeError::Id err = mSettings.getVariationValue(key, value);
     if (err == CxeError::None) {
         QList<QVariant> values = qVariantValue<QList<QVariant> >(value);
         supported = values[0].toInt();
@@ -52,8 +55,11 @@ CxeError::Id CxeFeatureManagerImp::isFeatureSupported(const QString& key, bool& 
 
 
 
-/*
-* CxeFeatureManagerImp::configuredValues
+/*!
+* Retrieves all the configured values for the given key
+* @param key Feature key
+* @param values Returned values
+* @return Error code
 */
 CxeError::Id CxeFeatureManagerImp::configuredValues(const QString& key,QList<int>& values)
 {
@@ -62,7 +68,7 @@ CxeError::Id CxeFeatureManagerImp::configuredValues(const QString& key,QList<int
     values.clear();
 
     QVariant variant;
-    CxeError::Id err = mSettingsModel.getRuntimeValue(key, variant);
+    CxeError::Id err = mSettings.getVariationValue(key, variant);
 
     if(CxeError::None == err) {
         QVariantList list;
@@ -94,8 +100,8 @@ CxeError::Id CxeFeatureManagerImp::configuredValues(const QString& key,QList<int
 /*
 *CxeFeatureManagerImp::CxeFeatureManagerImp
 */
-CxeFeatureManagerImp::CxeFeatureManagerImp(CxeSettingsModel& settingsModel)
-: mSettingsModel(settingsModel)
+CxeFeatureManagerImp::CxeFeatureManagerImp(CxeSettings &settings)
+: mSettings(settings)
 {
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG_EXIT_FUNCTION();

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -127,14 +127,18 @@ protected slots:
     // sensor events
     void handleSensorEvent(CxeSensorEventHandler::SensorType type,QVariant data);
 
+    // Use ECam Use Case Hint Custom API to inform ECam of our intended use case
+    // before calling Reserve()
+    void hintUseCase();
+
 private: // helper functions
 
     CxeError::Id prepareFilename(CxeStillImageSymbian *stillImage);
     void setOrientation(QVariant sensorData);
     CxeStillImageSymbian* getImageForIndex(int index);
     CCamera::TFormat supportedStillFormat(Cxe::CameraIndex cameraIndex);
-    int prepareStillSnapshot();
-    CxeError::Id getImageQualityDetails(CxeImageDetails &imageInfo);
+    void prepareSnapshot();
+    void updateStillCaptureParameters();
     void handleSnapshotEvent(CxeError::Id error);
     void initializeStates();
     void prepare();
@@ -168,6 +172,8 @@ private: // private data
     QList<TSize> mECamSupportedImageResolutions;
     //current image quality details in use
     CxeImageDetails mCurrentImageDetails;
+    CCamera::TFormat mCaptureFormat;
+    int mSizeIndex; //!< ECam still capture size index
 };
 
 #endif // CXESTILLCAPTURECONTROLSYMBIAN_H

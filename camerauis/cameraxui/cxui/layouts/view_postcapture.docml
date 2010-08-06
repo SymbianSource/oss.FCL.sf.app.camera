@@ -77,6 +77,7 @@
         <string locid="txt_cam_title_camera" name="title" value="Camera"/>
         <bool name="contentFullScreen" value="TRUE"/>
         <bool name="visible" value="TRUE"/>
+        <enums name="viewFlags" value="ViewTitleBarTransparent|ViewTitleBarFloating|ViewTitleBarHidden|ViewStatusBarTransparent|ViewStatusBarFloating|ViewStatusBarHidden"/>
     </widget>
     <connect receiver="postcapture_view" sender="cxui_action_post_delete" signal="triggered(bool)" slot="showDeleteNote()"/>
     <connect receiver="postcapture_view" sender="cxui_action_post_play" signal="triggered(bool)" slot="playVideo()"/>

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,7 +17,11 @@
 
 #include "cxutils.h"
 #include "cxegeotaggingtrail.h"
-#include "cxegeotaggingtrailprivate.h"
+#ifdef Q_OS_SYMBIAN
+#include "cxegeotaggingtrail_symbian_p.h"
+#else
+#include "cxegeotaggingtrail_desktop_p.h"
+#endif // ifdef Q_OS_SYMBIAN
 
 /*!
 * Constructor
@@ -32,7 +36,6 @@ CxeGeoTaggingTrail::CxeGeoTaggingTrail(CxeStillCaptureControl &stillControl,
             this, SIGNAL(stateChanged(CxeGeoTaggingTrail::State, CxeError::Id)),
             Qt::UniqueConnection);
 }
-
 
 /*!
 * Destructor
@@ -59,8 +62,6 @@ void CxeGeoTaggingTrail::stop()
     Q_D(CxeGeoTaggingTrail);
     d->stop();
 }
-
-
 
 /*!
 * Returns current state of Geo-tagging trail.

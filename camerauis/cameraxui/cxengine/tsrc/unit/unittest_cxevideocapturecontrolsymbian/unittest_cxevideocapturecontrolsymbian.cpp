@@ -67,7 +67,6 @@ void UnitTestCxeVideoCaptureControlSymbian::initTestCase()
     mCameraDevice = new CxeFakeCameraDevice();
     mViewfinderControl = new CxeFakeViewfinderControl();
     mSnapshotControl = new CxeSnapshotControl(*mCameraDevice);
-    mSettings = new CxeFakeSettings();
     mSettings->set(CxeSettingIds::VIDEO_SHOWCAPTURED, -1);
     mFilenameGeneratorSymbian = new CxeFakeFilenameGenerator();
     mFilenameGeneratorSymbian->init(Cxe::VideoMode);

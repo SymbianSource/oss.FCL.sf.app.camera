@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -14,15 +14,16 @@ include(../unittest.pri)
 TARGET = unittest_cxesettingsimp
 
 HEADERS *= unittest_cxesettingsimp.h \
-    cxefakesettingsmodel.h \
+    cxefakesettingsstore.h \
     cxesettings.h \
     cxesettingsimp.h \
     cxutils.h \
     cxenamespace.h \
     cxeerror.h \
-    cxesettingsmodel.h
+    cxescenemodestore.h
 
 SOURCES *= unittest_cxesettingsimp.cpp \
     cxesettingsimp.cpp \
-    cxefakesettingsmodel.cpp
+    cxefakesettingsstore.cpp \
+    cxescenemodestore.cpp
 

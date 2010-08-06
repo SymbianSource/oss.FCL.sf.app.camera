@@ -54,7 +54,6 @@ ThumbnailManager::~ThumbnailManager()
 int ThumbnailManager::getThumbnail(const QString& filename, void * clientData, int priority)
 {
     CX_DEBUG_ENTER_FUNCTION();
-
     Q_UNUSED(priority);
         
     int id = 0;
@@ -80,6 +79,7 @@ int ThumbnailManager::setThumbnail( const QImage& source, const QString& fileNam
 {
     Q_UNUSED(clientData);
     Q_UNUSED(priority);
+    Q_UNUSED(source);
 
     int status = KErrNone;
 

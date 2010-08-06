@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,8 +23,6 @@
 #include "cxestatemachine.h"
 
 
-class RFs;
-
 class CxeImageDataItemSymbian : public CxeImageDataItem,
                                 public CxeStateMachine
 {
@@ -42,27 +40,24 @@ public: // from CxeImageDataItemSymbian
     CxeError::Id save();
     int id() const;
     bool isLocationEnabled() const;
-    
+
 public: // new methods
     QString path() const;
 
 protected: // from CxeStateMachine
-    void handleStateChanged( int newStateId, CxeError::Id error );
-
-
-protected:
+    void handleStateChanged(int newStateId, CxeError::Id error);
     void initializeStates();
 
+protected:
+    virtual bool checkDiskSpace(RFs *aFs, TInt aBytesToWrite, TInt aDrive);
+
 private: // private member functions
-
-    void saveCleanup(); // delete data and report
-    int checkDiskSpace(RFs* aFs, TInt aBytesToWrite, TInt aDrive);
-
+    void trySave();
+    void closeHandles();
 
 private: // private data members
 
     int mIndex;
-    int mError;
     int mId;
 
     // used for image saving

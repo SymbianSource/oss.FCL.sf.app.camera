@@ -16,8 +16,11 @@
 */
 
 #include <QTest>
-
 #include <QList>
+
+// "fake" system include
+#include "imagingconfigmanager.h"
+
 #include "cxefakesettings.h"
 #include "unittest_cxequalitypresetssymbian.h"
 #include "cxequalitypresetssymbian.h"

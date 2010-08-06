@@ -13,6 +13,8 @@ include(../unittest.pri)
 
 TARGET = unittest_cxequalitypresetssymbian
 
+INCLUDEPATH *= ../system_include
+DEPENDPATH  *= ../system_include
 
 HEADERS *= unittest_cxequalitypresetssymbian.h \
            cxequalitypresetssymbian.h \

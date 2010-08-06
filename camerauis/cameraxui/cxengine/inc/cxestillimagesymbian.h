@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -18,30 +18,37 @@
 #define CXESTILLIMAGESYMBIAN_H
 
 //  Include Files
-#include <QString>
-#include <QPixmap>
+#include <QObject>
+#include "cxeerror.h"
 #include "cxestillimage.h"
 
+class QString;
+class QPixmap;
 class CxeImageDataItem;
 
-class CxeStillImageSymbian : public CxeStillImage
+class CxeStillImageSymbian : public QObject,
+                             public CxeStillImage
 {
+    Q_OBJECT
 public:
     CxeStillImageSymbian();
     virtual ~CxeStillImageSymbian();
 
 public: // from CxeStillImage
-    CxeImageDataItem* dataItem(); // NULL if already saved
+    CxeImageDataItem *dataItem(); // NULL if already saved
     QString filename() const;
     QPixmap snapshot() const;
     bool saved() const;
     int id() const;
 
 public:
-    void setSnapshot( QPixmap pixmap );
-    void setFilename( const QString& filename );
-    void setSaved( bool saved );
-    void setDataItem( CxeImageDataItem* dataItem );
+    void setSnapshot(QPixmap pixmap);
+    void setFilename(const QString &filename);
+    void setSaved(bool saved);
+    void setDataItem(CxeImageDataItem *dataItem);
+
+private slots:
+    void imageDataSaved(CxeError::Id status);
 
 private:
     QPixmap mSnapshot;

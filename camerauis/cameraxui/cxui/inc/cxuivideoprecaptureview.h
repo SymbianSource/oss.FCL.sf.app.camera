@@ -63,12 +63,11 @@ public slots:
     // from CxuiPrecaptureView
     virtual void handleSettingValueChanged(const QString& key, QVariant newValue);
 
-    void handleSceneChanged(CxeScene &scene);
+    void handleSceneChanged(const QVariant &scene);
     void handleQuitClicked();
 
 protected slots:
 
-    void handleSnapshot(CxeError::Id error);
     void record();
     void pause();
     void stop();
@@ -86,7 +85,7 @@ protected slots:
 
 protected:
 
-    void setVideoTime(HbLabel* label, int time);
+    void setVideoTime(HbLabel* label, int elapsedTime, int remainingTime);
     bool getElapsedTime();
     void getRemainingTime();
     bool allowShowControls() const;
@@ -99,7 +98,6 @@ protected:
     bool isPostcaptureOn() const;
     void updateSceneIcon(const QString& sceneId);
     void updateQualityIcon();
-    void setRecordingItemsVisibility(bool visible);
 
     // from QObject
     bool eventFilter(QObject *object, QEvent *event);
@@ -112,8 +110,7 @@ protected:
     int mTimeElapsed;
     int mTimeRemaining;
 
-    HbLabel *mElapsedTimeText; // not own
-    HbLabel *mRemainingTimeText; // not own
+    HbLabel *mVideoTimeText; // not own
     HbLabel *mRecordingIcon; // not own
     HbAction *mGoToStillAction; // not own
     HbToolBar *mToolbarIdle; // not own

@@ -18,7 +18,6 @@
 #include "cxefakecameradevice.h"
 #include "cxesettingsimp.h"
 #include "cxefeaturemanagerimp.h"
-#include "cxesettingsmodel.h"
 #include "cxutils.h"
 #include "cxenamespace.h"
 #include "cxeerrormappingsymbian.h"

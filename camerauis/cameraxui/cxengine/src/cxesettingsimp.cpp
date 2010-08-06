@@ -22,129 +22,54 @@
 #include <QVariant>
 #include <QList>
 #include <QMetaType>
-#include <ecam.h>
-#include <ecamadvsettingsuids.hrh>
-#include <ecamadvsettings.h>
 #include <QObject>
 
-#include "cxesettingsmodel.h"
 #include "cxesettingsimp.h"
-#include "cxesettings.h"
 #include "cxutils.h"
 #include "cxenamespace.h"
 #include "cxeerror.h"
+#include "cxesettingsstore.h"
+#include "cxeexception.h"
 
+#ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxesettingsimpTraces.h"
 #endif
+#endif // Q_OS_SYMBIAN
 
 
+// signatures for setting listener slots
+const char *SETTING_LISTENER_SIGNATURE1 = "settingChanged(const QString &, const QVariant &)";
+const char *SETTING_LISTENER_SIGNATURE2 = "settingChanged(const QVariant &)";
 
 
-/*!
-    Load image/video specific settings during mode change or startup
+/*
+* CxeSettingsImp::CxeSettingsImp
 */
-void CxeSettingsImp::loadSettings(Cxe::CameraMode mode)
+CxeSettingsImp::CxeSettingsImp(CxeSettingsStore *settingStore)
+: mSettingStore(settingStore),
+  mVariationSettings(),
+  mSceneModeStore(),
+  mCameraMode(Cxe::ImageMode)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXESETTINGSIMP_LOADSETTINGS_IN, "msg: e_CX_SETTINGS_LOADSETTINGS 1");
+    loadVariationSettings();
 
-
-    // inform the settings model for the change in mode.
-    mSettingsModel.cameraModeChanged(mode);
-
-    if (mode == Cxe::ImageMode) {
-        emit sceneChanged(mSettingsModel.currentImageScene());
-    } else {
-        emit sceneChanged(mSettingsModel.currentVideoScene());
-    }
-
-    OstTrace0(camerax_performance, CXESETTINGSIMP_LOADSETTINGS_OUT, "msg: e_CX_SETTINGS_LOADSETTINGS 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-
-/*!
-    Return the current integer setting value for the given key
+/*
+* CxeSettingsImp::close
 */
-CxeError::Id CxeSettingsImp::get(const QString &key, int &value) const
+CxeSettingsImp::~CxeSettingsImp()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    delete mSettingStore;
 
-    QVariant v;
-    CxeError::Id err = mSettingsModel.getSettingValue(key, v);
-
-    bool isInt;
-    value = v.toInt(&isInt); // 0 denotes base, check the API
-
-    if (isInt) {
-        CX_DEBUG(("CxeSettingsImp::get - key: %s value: %d",
-                  key.toAscii().data(), value ));
-    } else {
-        err = CxeError::NotSupported;
-    }
-
+    mVariationSettings.clear();
     CX_DEBUG_EXIT_FUNCTION();
-
-    return err;
 }
-
-
-
-
-/*!
-    Return the current real setting value for the given key
-*/
-CxeError::Id CxeSettingsImp::get(const QString &key, qreal &value) const
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    QVariant v;
-    CxeError::Id err = mSettingsModel.getSettingValue(key, v);
-
-    bool isReal;
-    value = v.toReal(&isReal);
-
-    if (isReal) {
-        CX_DEBUG(("CxeSettingsImp::get - key: %s value: %f",
-                  key.toAscii().data(), value ));
-    } else {
-        err = CxeError::NotSupported;
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return err;
-}
-
-
-/*!
-    Return the current string setting value for the given key
-*/
-CxeError::Id CxeSettingsImp::get(
-        const QString &key, QString &stringValue) const
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    QVariant value;
-    CxeError::Id err = getSceneMode(key, stringValue);
-
-    if (err == CxeError::NotFound) {
-        // read from settings store
-        err = mSettingsModel.getSettingValue(key, value);
-        stringValue = value.toString();
-    }
-
-    CX_DEBUG(("CxeSettingsImp::get - key: %s value: %s",
-              key.toAscii().data(), stringValue.toAscii().data()));
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return err;
-}
-
-
 
 /*
 * Reads a value from cenrep
@@ -160,149 +85,14 @@ void CxeSettingsImp::get(long int uid,
                          QVariant &value) const
 {
     CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG_ASSERT(mSettingStore);
 
-    mSettingsModel.getSettingValue(uid, key, type, value);
+    mSettingStore->startMonitoring(uid, key, type, value);
 
     CX_DEBUG_EXIT_FUNCTION();
 
 }
 
-
-
-/*!
-    Get the current scene mode setting value for the given key
-*/
-CxeError::Id CxeSettingsImp::getSceneMode(
-        const QString &key, QString &stringValue) const
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CxeError::Id err = CxeError::None;
-    CxeScene scene;
-
-    if(CxeSettingIds::IMAGE_SCENE == key) {
-         scene = mSettingsModel.currentImageScene();
-    } else if(CxeSettingIds::VIDEO_SCENE == key) {
-        scene = mSettingsModel.currentVideoScene();
-    } else {
-        err = CxeError::NotFound;
-    }
-
-    if (err == CxeError::None) {
-        stringValue = scene["sceneId"].toString();
-    }
-
-    CX_DEBUG(("CxeSettingsImp::get - key: %s value: %s",
-              key.toAscii().data(), stringValue.toAscii().data()));
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return err;
-}
-
-
-/*!
-    Set new int value for the given key
-*/
-CxeError::Id CxeSettingsImp::set(const QString &key, int newValue)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CX_DEBUG(("CxeSettingsImp::set - key: %s value: %d",
-              key.toAscii().data(), newValue));
-
-    CxeError::Id error = mSettingsModel.set(key, newValue);
-    if (error == CxeError::None) {
-        emit settingValueChanged(key, newValue);
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return error;
-}
-
-
-
-/*!
-    Set new int value for the given key
-*/
-CxeError::Id CxeSettingsImp::set(const QString &key, qreal newValue)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CX_DEBUG(("CxeSettingsImp::set - key: %s value: %f",
-              key.toAscii().data(), newValue));
-
-    CxeError::Id error = mSettingsModel.set(key, newValue);
-
-    if (error == CxeError::None) {
-        emit settingValueChanged(key, newValue);
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return error;
-}
-
-
-/*!
-    Set new string value for the given key
-*/
-CxeError::Id CxeSettingsImp::set(const QString &key, const QString &newValue)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CX_DEBUG(("CxeSettingsImp::set - key: %s value: %s",
-              key.toAscii().data(), newValue.toAscii().data()));
-
-    CxeError::Id error = setSceneMode(key, newValue);
-
-    if (error == CxeError::NotFound) {
-        // not scene mode setting, try setting value to settings store
-        mSettingsModel.set(key, newValue);
-        emit settingValueChanged(key, newValue);
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return error;
-}
-
-
-
-/*!
-    Set the current scene mode setting value for the given key
-*/
-CxeError::Id CxeSettingsImp::setSceneMode(
-        const QString &key,const QString &newValue)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    CX_DEBUG(("CxeSettingsImp::set - key: %s value: %s",
-              key.toAscii().data(), newValue.toAscii().data()));
-
-    CxeError::Id error = CxeError::None;
-    CxeScene scene;
-
-    if(CxeSettingIds::IMAGE_SCENE == key) {
-        error = mSettingsModel.setImageScene(newValue);
-        scene = mSettingsModel.currentImageScene();
-    } else if(CxeSettingIds::VIDEO_SCENE == key) {
-        error = mSettingsModel.setVideoScene(newValue);
-        scene = mSettingsModel.currentVideoScene();
-    } else {
-        error = CxeError::NotFound;
-    }
-
-    if (error == CxeError::None) {
-        // scene mode set, inform clients about scene mode change
-        emit sceneChanged(scene);
-    }
-
-    CX_DEBUG_EXIT_FUNCTION();
-
-    return error;
-}
 
 /*!
     Reset static settings (persistent settings)
@@ -311,30 +101,433 @@ void CxeSettingsImp::reset()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    mSettingsModel.reset();
+    CX_DEBUG_ASSERT(mSettingStore);
+    mSettingStore->reset();
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Get the configured run-time value associated with the key.
+* @Param key - Setting key Id ( refer to CxeSettingIds in cxenums.h )
+* @Param value - contains the value associated with the key.
+* @returns CxeError::None if successful or any CxeError specific error code.
+*/
+CxeError::Id CxeSettingsImp::getVariationValue(const QString &key, QVariant &value)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    CxeError::Id err = CxeError::None;
+
+    // read run-time configuration value
+    if ( mVariationSettings.contains(key) ) {
+        value = qVariantFromValue<QVariantList > (mVariationSettings.value(key));
+    } else {
+        err = CxeError::NotFound;
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+
+    return err;
+}
+
+
+/*!
+ * Add listener for changes in one setting. When the value of the setting changes, the given
+ * slot is invoked on given object.
+ *
+ * @param settingKey Setting to listen to
+ * @param target Object that the slot will be invoked for
+ * @param slot Slot that will be invoked. The slot can have either of these two signatures:
+ *   slotName(const QVariant&)    only new value of setting is passed as parameter
+ *   slotName(const QString&, const QVariant&) both setting key and new value are passed as parameter
+ *
+ * @return boolean to indicate success
+ *
+ */
+bool CxeSettingsImp::listenForSetting(const QString &settingKey, QObject *target, const char *slot)
+{
+
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG_ASSERT(target && slot);
+
+    // SLOT() macro adds '1' to the beginning of string so we use slot+1 to get the name of the slot
+    CX_DEBUG(("Adding listener %s::%s for key %s", target->metaObject()->className(), slot+1, settingKey.toAscii().data()));
+    QByteArray normalizedSlotName = QMetaObject::normalizedSignature(slot+1);
+
+    int slotIndex = target->metaObject()->indexOfSlot(normalizedSlotName);
+
+    bool ok = false;
+    if (slotIndex > -1) {
+        CX_DEBUG(("Slot found, checking signature"));
+        // verify that slot is correct type
+        if (QMetaObject::checkConnectArgs(QMetaObject::normalizedSignature(SETTING_LISTENER_SIGNATURE1), normalizedSlotName) ||
+            QMetaObject::checkConnectArgs(QMetaObject::normalizedSignature(SETTING_LISTENER_SIGNATURE2), normalizedSlotName)) {
+
+            CX_DEBUG(("Slot signature ok, adding listener"));
+
+            // check if list for given key already exists
+            if (!mSettingListeners.contains(settingKey)) {
+                mSettingListeners.insert(settingKey, CxeSettingListenerList());
+            }
+
+            // get QMetaMethod object
+            QMetaMethod method = target->metaObject()->method(slotIndex);
+            // add listener to the list
+            CxeSettingListenerList& list = mSettingListeners[settingKey];
+            list.append(CxeSettingListener(target, method));
+
+            // connect to destroyed() signal so we can remove listener if it's deleted
+            connect(target, SIGNAL(destroyed(QObject*)), this, SLOT(handleListenerDestroyed(QObject*)));
+
+            ok = true;
+        } else {
+            CX_DEBUG(("Slot signature doesn't match, can't add listener"));
+        }
+
+    } else {
+        CX_DEBUG(("Slot not found, can't add listener"));
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+    return ok;
+}
+
+/*!
+    Load image/video specific settings during mode change or startup
+*/
+void CxeSettingsImp::loadSettings(Cxe::CameraMode mode)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    OstTrace0(camerax_performance, CXESETTINGSIMP_LOADSETTINGS_IN, "msg: e_CX_SETTINGS_LOADSETTINGS 1");
+
+    mCameraMode = mode;
+
+    // inform the settings model for the change in mode.
+    if (mode == Cxe::ImageMode) {
+        restoreImageSettings();
+        notifyListeners(CxeSettingIds::IMAGE_SCENE_DATA, mSceneModeStore.currentScene(Cxe::ImageMode));
+        notifyListeners(CxeSettingIds::IMAGE_SCENE, mSceneModeStore.currentSceneId(Cxe::ImageMode));
+        emit settingValueChanged(CxeSettingIds::IMAGE_SCENE, mSceneModeStore.currentSceneId(Cxe::ImageMode));
+    } else {
+        restoreVideoSettings();
+        notifyListeners(CxeSettingIds::VIDEO_SCENE_DATA, mSceneModeStore.currentScene(Cxe::VideoMode));
+        notifyListeners(CxeSettingIds::VIDEO_SCENE, mSceneModeStore.currentSceneId(Cxe::VideoMode));
+        emit settingValueChanged(CxeSettingIds::VIDEO_SCENE, mSceneModeStore.currentSceneId(Cxe::VideoMode));
+    }
+
+    OstTrace0(camerax_performance, CXESETTINGSIMP_LOADSETTINGS_OUT, "msg: e_CX_SETTINGS_LOADSETTINGS 0");
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Get setting value associated with the key.
+* @Param key - Setting key Id ( refer to CxeSettingIds in cxenums.h )
+* @Param value - contains the value associated with the key.
+* @returns CxeError::None if successful or any CxeError specific error code.
+*/
+void CxeSettingsImp::getValue(const QString &key, QVariant &value) const
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG_ASSERT(mSettingStore);
+
+
+    CxeError::Id err = CxeError::None;
+
+    // check if getting scene mode
+    if(key == CxeSettingIds::IMAGE_SCENE_DATA) {
+        value = mSceneModeStore.currentScene(Cxe::ImageMode);
+    } else if(key == CxeSettingIds::VIDEO_SCENE_DATA) {
+        value = mSceneModeStore.currentScene(Cxe::VideoMode);
+    } else {
+        // Try first to find the item from cenrep store.
+        err = mSettingStore->get(key, value);
+
+        // If setting is not in cenrep store, try fetching it from scene settings.
+        if (!err) {
+            CX_DEBUG(("Got value %s from settings store", value.toString().toAscii().data()));
+        } else {
+            // setting not found in setting store, try finding if its scene specific setting.
+            CX_DEBUG(( "fetching value from scene settings" ));
+            err = mSceneModeStore.sceneSettingValue(mCameraMode, key, value);
+        }
+        if (err) {
+            throw CxeException(err);
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+
+}
+
+/*!
+* Set a value to the key.
+* @Param key - Setting key Id ( refer to CxeSettingIds in cxenums.h )
+* @Param value - contains the value associated with the key.
+* @returns CxeError::None if successful or any CxeError specific error code.
+*/
+void CxeSettingsImp::setValue(const QString &key, const QVariant &newValue)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG_ASSERT(mSettingStore);
+
+    CxeError::Id err;
+    // check if setting scene mode
+    if(key == CxeSettingIds::IMAGE_SCENE) {
+        setImageScene(newValue.toString());
+    } else if(key == CxeSettingIds::VIDEO_SCENE) {
+        setVideoScene(newValue.toString());
+    } else if(key == CxeSettingIds::IMAGE_SCENE_DATA || key == CxeSettingIds::VIDEO_SCENE_DATA) {
+        // setting whole scene by value is not supported
+        throw CxeException(CxeError::NotSupported);
+    } else {
+        // Try storing new value to cenrep
+        err = mSettingStore->set(key, newValue);
+
+        if (err) {
+            CX_DEBUG(( "Key not found in cenrepstore, writing value to scene settings" ));
+            err = mSceneModeStore.setSceneSettingValue(mCameraMode, key, newValue);
+        }
+
+        if (err) {
+            throw CxeException(err);
+        }
+
+        // send notifications
+        emit settingValueChanged(key, newValue);
+        notifyListeners(key, newValue);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+
+}
+
+/*!
+* Restores image settings, during mode change or during startup.
+*/
+void CxeSettingsImp::restoreImageSettings()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    QString currentSceneInUse = mSceneModeStore.currentSceneId(Cxe::ImageMode);
+
+    // get the image scene value from cenrep and load the scene settings
+    QString key(CxeSettingIds::IMAGE_SCENE);
+    QString cenrepSceneValue = CxeSettings::get<QString>(key);
+
+    bool ok2LoadSceneSettings = (cenrepSceneValue != currentSceneInUse);
+
+    if (ok2LoadSceneSettings) {
+        // loading scene settings
+        mSceneModeStore.setCurrentScene(Cxe::ImageMode, cenrepSceneValue);
+    }
+
+    // Updating Flash setting from cenrep
+    key = CxeSettingIds::FLASH_MODE;
+    int flashMode = CxeSettings::get<int>(key);
+
+    // update local datastructure with flash setting value from cenrep.
+    CX_DEBUG(( "flash setting value %d", flashMode));
+    mSceneModeStore.setSceneSettingValue(Cxe::ImageMode, key, flashMode);
+
+    // Updating Face Tracking setting from cenrep
+    key = CxeSettingIds::FACE_TRACKING;
+    int faceTracking = CxeSettings::get<int>(key);
+
+    // update local datastructure with flash setting value from cenrep.
+    CX_DEBUG(( "Face Tracking setting value %d", faceTracking));
+    mSceneModeStore.setSceneSettingValue(Cxe::ImageMode, key, faceTracking);
+
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 
-
-/*
-* CxeSettingsImp::CxeSettingsImp
+/*!
+* Restores video settings, during mode change or during startup.
 */
-CxeSettingsImp::CxeSettingsImp(CxeSettingsModel &settingsModel)
-: mSettingsModel(settingsModel)
+void CxeSettingsImp::restoreVideoSettings()
 {
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_ENTER_FUNCTION();
+
+    QString currentSceneInUse = mSceneModeStore.currentSceneId(Cxe::VideoMode);
+
+    // get the video scene value from cenrep and load the scene settings
+    QString cenrepSceneValue = CxeSettings::get<QString>(CxeSettingIds::VIDEO_SCENE);
+
+    bool ok2LoadSceneSettings = (cenrepSceneValue != currentSceneInUse);
+
+    if (ok2LoadSceneSettings) {
+        // loading video scene settings
+        mSceneModeStore.setCurrentScene(Cxe::VideoMode, cenrepSceneValue);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-
-/*
-* CxeSettingsImp::close
+/*!
+* Set new Image scene mode.
+* @returns CxeError::None if successful or any CxeError specific error code.
 */
-CxeSettingsImp::~CxeSettingsImp()
+void CxeSettingsImp::setImageScene(const QString &newScene)
 {
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // load scene specific settings
+    mSceneModeStore.setCurrentScene(Cxe::ImageMode, newScene);
+
+    // saving current image scene to cenrep
+    CxeError::Id err = mSettingStore->set(CxeSettingIds::IMAGE_SCENE, newScene);
+    CxeException::throwIfError(err);
+
+    // saving flash value from scene to cenrep
+    // call CxeSettingStore::set directly because we don't want to send notifications
+    // about these changes
+    QString key(CxeSettingIds::FLASH_MODE);
+    err = mSettingStore->set(key, mSceneModeStore.currentScene(Cxe::ImageMode)[key].toInt());
+
+    CxeException::throwIfError(err);
+    // saving face tracking value from scene to cenrep
+    key = CxeSettingIds::FACE_TRACKING;
+    err = mSettingStore->set(key, mSceneModeStore.currentScene(Cxe::ImageMode)[key].toInt());
+    CxeException::throwIfError(err);
+
+    // send notifications
+    emit settingValueChanged(CxeSettingIds::IMAGE_SCENE, mSceneModeStore.currentSceneId(Cxe::ImageMode));
+    notifyListeners(CxeSettingIds::IMAGE_SCENE, mSceneModeStore.currentSceneId(Cxe::ImageMode));
+    notifyListeners(CxeSettingIds::IMAGE_SCENE_DATA, mSceneModeStore.currentScene(Cxe::ImageMode));
+
+    CX_DEBUG_EXIT_FUNCTION();
+
+}
+
+/*!
+* Set new video scene mode.
+* @returns CxeError::None if successful or any CxeError specific error code.
+*/
+void CxeSettingsImp::setVideoScene(const QString &newScene)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    mSceneModeStore.setCurrentScene(Cxe::VideoMode, newScene);
+
+    // video scene set successfully, store the scene value to cenrep
+    CxeError::Id err = mSettingStore->set(CxeSettingIds::VIDEO_SCENE, newScene);
+    CxeException::throwIfError(err);
+
+    emit settingValueChanged(CxeSettingIds::VIDEO_SCENE, mSceneModeStore.currentSceneId(Cxe::VideoMode));
+    notifyListeners(CxeSettingIds::VIDEO_SCENE, mSceneModeStore.currentSceneId(Cxe::VideoMode));
+    notifyListeners(CxeSettingIds::VIDEO_SCENE_DATA, mSceneModeStore.currentScene(Cxe::VideoMode));
+
+    CX_DEBUG_EXIT_FUNCTION();
+
+}
+
+/*!
+* Loads all run-time variation settings
+*/
+void CxeSettingsImp::loadVariationSettings()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_DEBUG_ASSERT( mSettingStore );
+
+    QList<QString> variationKeys;
+    // all supported runtime variation keys are fetched from here.
+    variationKeys.append(CxeVariationKeys::FREE_MEMORY_LEVELS);
+    variationKeys.append(CxeVariationKeys::STILL_MAX_ZOOM_LIMITS);
+    variationKeys.append(CxeVariationKeys::VIDEO_MAX_ZOOM_LIMITS);
+
+    // load all run-time setting values from cenrep.
+    mVariationSettings = mSettingStore->loadVariationSettings(variationKeys);
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Notify setting listeners that setting has changed
+ * @param settingKey Setting that has changed
+ * @param newValue New value of the setting
+ */
+void CxeSettingsImp::notifyListeners(const QString &settingKey, const QVariant &newValue)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    CX_DEBUG(("CxeSettingsImp::notifyListeners settingKey=%s", settingKey.toAscii().data()));
+
+    if (mSettingListeners.contains(settingKey)) {
+        CX_DEBUG(("Listeners found"));
+        // get list of listener
+        CxeSettingListenerList& list = mSettingListeners[settingKey];
+
+        // iterate through the list and call all listeners
+        CxeSettingListenerList::const_iterator i = list.constBegin();
+        for(; i != list.constEnd(); ++i) {
+
+            QObject *object = (*i).first;
+            QMetaMethod slot = (*i).second;
+
+            CX_DEBUG_ASSERT(object);
+
+            // invoke the slot
+            CX_DEBUG(("Calling slot %s::%s", object->metaObject()->className(), slot.signature()));
+
+            bool ok = false;
+            if (slot.parameterTypes().size() == 2) {
+                // slot has two parameters, send settingKey as well
+                ok = slot.invoke(object,
+                                  Qt::AutoConnection,
+                                  Q_ARG(QString, settingKey),
+                                  Q_ARG(QVariant, newValue));
+            } else {
+                // don't send settingKey as parameter
+                ok = slot.invoke(object,
+                                 Qt::AutoConnection,
+                                 Q_ARG(QVariant, newValue));
+            }
+
+            if (!ok) {
+                CX_DEBUG(("QMetaMethod::invoke() failed, listener not notified"))
+            }
+
+        }
+
+    } else {
+        CX_DEBUG(("NO listeners found"));
+    }
+
+
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Handle deletion of registered listener.
+ */
+void CxeSettingsImp::handleListenerDestroyed(QObject *object)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    QList<QString> keyList = mSettingListeners.keys();
+
+    for (int i = 0; i < keyList.size(); i++) {
+
+        QString key = keyList[i];
+        CxeSettingListenerList& list = mSettingListeners[key];
+
+        for (int j = 0; j < list.size(); j++) {
+            CxeSettingListener &listener = list[j];
+            if (listener.first == object) {
+                list.removeAt(j--);
+            }
+        }
+
+        // removed last listener for this key
+        if (list.size() == 0) {
+            mSettingListeners.remove(key);
+        }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 // end of file

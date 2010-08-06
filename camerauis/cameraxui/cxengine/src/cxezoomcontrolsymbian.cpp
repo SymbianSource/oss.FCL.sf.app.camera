@@ -22,6 +22,7 @@
 #include "cxutils.h"
 #include "cxenamespace.h"
 #include "cxestate.h"
+#include "cxeexception.h"
 
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -55,19 +56,13 @@ CxeZoomControlSymbian::CxeZoomControlSymbian(CxeCameraDevice &cameraDevice,
     initializeStates();
 
     // getting still max zoom limits from feature manager
-    featureManager.configuredValues(CxeRuntimeKeys::STILL_MAX_ZOOM_LIMITS, mStillMaxZoomLimits);
-    featureManager.configuredValues(CxeRuntimeKeys::VIDEO_MAX_ZOOM_LIMITS, mVideoMaxZoomLimits);
+    featureManager.configuredValues(CxeVariationKeys::STILL_MAX_ZOOM_LIMITS, mStillMaxZoomLimits);
+    featureManager.configuredValues(CxeVariationKeys::VIDEO_MAX_ZOOM_LIMITS, mVideoMaxZoomLimits);
 
     connect(&mCameraDevice,
             SIGNAL(prepareForCameraDelete()),
             this,
             SLOT(reset()));
-
-    // enabling setting value change call backs
-    connect(&mSettings,
-            SIGNAL(settingValueChanged(const QString&,QVariant)),
-            this,
-            SLOT(handleSettingValueChanged(const QString&,QVariant)));
 
     init();
 
@@ -141,23 +136,6 @@ void CxeZoomControlSymbian::reset()
 
 
 
-/**
- * Settings changed, needs updated
- */
-void CxeZoomControlSymbian::handleSettingValueChanged(const QString& settingId, QVariant /*newValue*/)
-{
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (settingId == CxeSettingIds::IMAGE_QUALITY ||
-        settingId == CxeSettingIds::VIDEO_QUALITY) {
-        reset();
-    } else {
-        // do nothing
-    }
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-
 /*!
 * slot to prepare zoom control for still mode
 */
@@ -167,7 +145,7 @@ void CxeZoomControlSymbian::prepareZoomForStill(int ecamStillResolutionIndex)
     OstTrace0(camerax_performance, CXEZOOMCONTROLSYMBIAN_PREPARESTILL_IN, "msg: e_CX_PREPARE_ZOOM 1");
 
     if (mCameraDeviceControl.state() == CxeCameraDeviceControl::Ready) {
-        init();
+        reset();
         // For image mode
         CCamera::TFormat format = CCamera::EFormatExif;
         TBool isInfluencePossible = EFalse;
@@ -181,12 +159,14 @@ void CxeZoomControlSymbian::prepareZoomForStill(int ecamStillResolutionIndex)
                             format,
                             isInfluencePossible));
 
-        int imageQualityIndex;
-        CxeError::Id cxErr = mSettings.get(CxeSettingIds::IMAGE_QUALITY, imageQualityIndex);
-        if (cxErr == CxeError::None && mStillMaxZoomLimits.count() > 0) {
-            // fetching the zoom limit based on the image quality
-            mMaxZoomLevel = mStillMaxZoomLimits[imageQualityIndex];
-        } else {
+
+        try {
+            int imageQualityIndex = mSettings.get<int>(CxeSettingIds::IMAGE_QUALITY);
+            if (mStillMaxZoomLimits.count() > 0 && imageQualityIndex < mStillMaxZoomLimits.count()) {
+                // fetching the zoom limit based on the image quality
+                mMaxZoomLevel = mStillMaxZoomLimits[imageQualityIndex];
+            }
+        } catch (CxeException &e) {
             mMaxZoomLevel = NOT_DEFINED;
         }
 
@@ -207,7 +187,7 @@ void CxeZoomControlSymbian::prepareZoomForVideo()
     OstTrace0(camerax_performance, CXEZOOMCONTROLSYMBIAN_PREPAREVIDEO_IN, "msg: e_CX_PREPARE_ZOOM 1");
 
     if (mCameraDeviceControl.state() == CxeCameraDeviceControl::Ready) {
-        init();
+        reset();
         // if CxeCameraDeviceControl is ready, this pointer is valid
         CX_ASSERT_ALWAYS(mCameraDevice.advancedSettings());
         int error = KErrNone;

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -28,7 +28,7 @@
 #include "cxeerror.h"
 
 // forward declarations
-class CxeSettingsModel;
+class CxeSettings;
 
 
 
@@ -41,24 +41,14 @@ class CxeFeatureManagerImp : public CxeFeatureManager
 
 public:
     
-    CxeFeatureManagerImp(CxeSettingsModel& settingsModel);
+    CxeFeatureManagerImp(CxeSettings &settings);
     virtual ~CxeFeatureManagerImp();
 
-    /*
-    * returns if a feature is supported or not
-    * true -> supported
-    * false -> not supported
-    */
-    CxeError::Id isFeatureSupported(const QString& key, bool& value) const;
-    
-    
-    /*
-    * We retrieve all the configured values for the given key
-    */
-    CxeError::Id configuredValues(const QString& key,QList<int>& values);
+    CxeError::Id isFeatureSupported(const QString &key, bool &value) const;
+    CxeError::Id configuredValues(const QString &key, QList<int> &values);
 
-private: // not owned
-    CxeSettingsModel& mSettingsModel;
+private:
+    CxeSettings &mSettings;
 
 };
 

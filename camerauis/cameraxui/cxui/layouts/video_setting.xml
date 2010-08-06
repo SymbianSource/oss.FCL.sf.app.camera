@@ -40,7 +40,7 @@
         </setting_list>
 
         <!-- Video scene modes -->
-        <setting_list id="video_scene_modes"
+        <setting_list id="video_scene_mode"
                       heading="txt_cam_title_scene_mode_video"
                       preview="0"
                       type="SingleLineListBox">

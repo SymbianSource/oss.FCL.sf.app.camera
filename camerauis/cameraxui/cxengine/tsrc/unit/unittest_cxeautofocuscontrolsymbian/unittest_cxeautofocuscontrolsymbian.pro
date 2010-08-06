@@ -24,6 +24,7 @@ DEFINES *= CXE_USE_DUMMY_CAMERA
 
 SOURCES *= unittest_cxeautofocuscontrolsymbian.cpp \
     cxeautofocuscontrolsymbian.cpp \
+    cxeautofocuscontrolsymbianunit.cpp \
     cxestatemachine.cpp \
     cxestate.cpp \
     cxestatemachinebase.cpp \
@@ -39,6 +40,7 @@ SOURCES *= unittest_cxeautofocuscontrolsymbian.cpp \
 HEADERS *= unittest_cxeautofocuscontrolsymbian.h \
     cxeautofocuscontrol.h \
     cxeautofocuscontrolsymbian.h \
+    cxeautofocuscontrolsymbianunit.h \
     cxestatemachine.h \
     cxestate.h \
     cxestatemachinebase.h \
@@ -52,4 +54,5 @@ HEADERS *= unittest_cxeautofocuscontrolsymbian.h \
     cxefakecameradevicecontrol.h \
     cxutils.h \
     cxefakesettings.h \
-    cxesettings.h
+    cxesettings.h \
+    cxenamespace.h

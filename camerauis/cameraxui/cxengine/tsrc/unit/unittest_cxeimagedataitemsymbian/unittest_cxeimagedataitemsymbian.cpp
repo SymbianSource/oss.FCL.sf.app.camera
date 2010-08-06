@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -16,6 +16,7 @@
 */
 #include <QDate>
 #include <QTest>
+#include <QDir>
 #include <QDebug>
 #include <QSignalSpy>
 
@@ -25,11 +26,14 @@
 #include "cxeimagedataitemunit.h"
 #include "cxestillimagesymbian.h"
 #include "cxutils.h"
+#include "cxeerror.h"
 
 
 UnitTestCxeImageDataItemSymbian::UnitTestCxeImageDataItemSymbian()
-: mImageDataItem(NULL)
+: mImageDataItem(NULL),
+  mImageCounter(-1)
 {
+    qRegisterMetaType<CxeError::Id>("CxeError::Id");
 }
 
 UnitTestCxeImageDataItemSymbian::~UnitTestCxeImageDataItemSymbian()
@@ -37,27 +41,86 @@ UnitTestCxeImageDataItemSymbian::~UnitTestCxeImageDataItemSymbian()
     delete mImageDataItem;
 }
 
+/*!
+* Initializes resources.
+*/
 void UnitTestCxeImageDataItemSymbian::init()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    TInt index = 0;
-    mPath = generateImageFileName(index);
+    mFilename = generateImageFileName();
     QByteArray data = "1234";
-
-    mImageDataItem = new CxeImageDataItemUnit(index, data, mPath, false);
-
+    mImageDataItem = new CxeImageDataItemUnit(mImageCounter, data, mFilename, false);
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SavePending);
+	QCOMPARE(mImageDataItem->isLocationEnabled(), false);
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+
+/*!
+* cleans up resources for each test case
+*/
 void UnitTestCxeImageDataItemSymbian::cleanup()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    
     delete mImageDataItem;
     mImageDataItem = NULL;
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+
+
+/*!
+* Initializes resources before any test cases.
+*/
+void UnitTestCxeImageDataItemSymbian::initTestCase()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // create folder for storing temporary image files
+    QDir dir;
+    dir.mkpath(path());
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* cleans up resources after last test case
+*/
+void UnitTestCxeImageDataItemSymbian::cleanupTestCase()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // remove temporary image files and folder
+    QDir dir;
+    QString filepath = path();
+    dir.setPath(filepath);
+
+    QStringList filters;
+    filters << "*.jpg";
+    dir.setNameFilters(filters);
+    
+    QStringList filenames = dir.entryList(filters);
+    
+    // delete temporary created files
+    foreach(const QString &file, filenames) {
+        dir.remove(filepath + file);
+    }
+    
+    // delete the directory created for temporary saving image files.
+    dir.rmpath(filepath);
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+
+/*!
+* UnitTestCxeImageDataItemSymbian::testState
+*/
 void UnitTestCxeImageDataItemSymbian::testSave()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -66,75 +129,63 @@ void UnitTestCxeImageDataItemSymbian::testSave()
     QSignalSpy deviceStateSpy(mImageDataItem, SIGNAL(imageSaved(CxeError::Id, const QString&, int)));
     QVERIFY(deviceStateSpy.isValid());
 
-    int returnValue = mImageDataItem->save();
+    CxeError::Id err = mImageDataItem->save();
 
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::Saved);
-    QVERIFY(returnValue == KErrNone);
+    QCOMPARE(err, CxeError::None);
 
     QCOMPARE( deviceStateSpy.count(), 1 );
     if (deviceStateSpy.count() > 0) {
         QList<QVariant> initModeArguments = deviceStateSpy.takeFirst();
-        QVERIFY( initModeArguments.at(0).toInt() == CxeError::None );
-        QVERIFY( initModeArguments.at(1).toString().compare(mPath) == 0);
+        QCOMPARE(initModeArguments.at(0).value<CxeError::Id>(), CxeError::None);
+        QVERIFY( initModeArguments.at(1).toString().compare(mFilename) == 0);
         QVERIFY( initModeArguments.at(2).toInt() == id);
     }
-    CX_DEBUG_EXIT_FUNCTION();
-}
 
-
-void UnitTestCxeImageDataItemSymbian::testSaveFail()
-{
-    CX_DEBUG_ENTER_FUNCTION();
-    int returnValue;
-    int index = 1;
-    QString path = NULL;
+    // try to test possible fail cases.
+    QString filename = NULL;
     QByteArray data = "";
 
-    returnValue = mImageDataItem->save();
-    QVERIFY(mImageDataItem->state() == CxeImageDataItem::Saved);
-    QVERIFY(returnValue == KErrArgument);
-
-    delete mImageDataItem;
-    mImageDataItem = NULL;
-    mImageDataItem = new CxeImageDataItemUnit( index, data, path, false );
-    returnValue = mImageDataItem->save();
+    CX_DEBUG(("UnitTestCxeImageDataItemSymbian::testSave <> Invalid arguments"));
+    cleanup();
+    mImageDataItem = new CxeImageDataItemUnit(mImageCounter, data, filename, false);
+    err = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
-    QVERIFY(returnValue == KErrArgument);
+    
+    // Arugments are not valid, leaves with KErrArgument which is mapped internally to CxError::General.
+    QCOMPARE(err, CxeError::General);
 
-    delete mImageDataItem;
-    mImageDataItem = NULL;
-    QString filename = generateImageFileNameWithLetter(++index, "C");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
-    returnValue = mImageDataItem->save();
+    CX_DEBUG(("UnitTestCxeImageDataItemSymbian::testSave <> Invalid path"));
+    cleanup();
+    filename = dummyPath("C");
+    mImageDataItem = new CxeImageDataItemUnit(mImageCounter, data, filename, false);
+    err = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
-    QVERIFY(returnValue != KErrNone);
+    QVERIFY(err != CxeError::None);
 
-    qDebug() << "UnitTestCxeImageDataItemSymbian::testSaveFail3 =>";
-    delete mImageDataItem;
-    mImageDataItem = NULL;
-    filename = generateImageFileNameWithLetter(++index, "");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
-    returnValue = mImageDataItem->save();
+    CX_DEBUG(("UnitTestCxeImageDataItemSymbian::testSave <> invalid drive"));
+    cleanup();
+    filename = dummyPath("");
+    mImageDataItem = new CxeImageDataItemUnit(mImageCounter, data, filename, false);
+    err = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
-    QVERIFY(returnValue != KErrNone);
+    QVERIFY(err != CxeError::None);
 
-    qDebug() << "UnitTestCxeImageDataItemSymbian::testSaveFail4 =>";
-    delete mImageDataItem;
-    mImageDataItem = NULL;
-    filename = generateImageFileNameWithLetter(++index, "12");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
-    returnValue = mImageDataItem->save();
+    CX_DEBUG(("UnitTestCxeImageDataItemSymbian::testSave <> invalid drive - 2"));
+    cleanup();
+    filename = dummyPath("12");
+    mImageDataItem = new CxeImageDataItemUnit(mImageCounter, data, filename, false);
+    err = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
-    QVERIFY(returnValue != KErrNone);
+    QVERIFY(err != CxeError::None);
 
-    qDebug() << "UnitTestCxeImageDataItemSymbian::testSaveFail5 =>";
-    delete mImageDataItem;
-    mImageDataItem = NULL;
-    filename = generateImageFileNameWithLetter(++index, "Edata");
-    mImageDataItem = new CxeImageDataItemUnit( index, data, filename, false );
-    returnValue = mImageDataItem->save();
+    CX_DEBUG(("UnitTestCxeImageDataItemSymbian::testSave <> invalid drive - 3"));
+    cleanup();
+    filename = dummyPath("Edata");
+    mImageDataItem = new CxeImageDataItemUnit(mImageCounter, data, filename, false);
+    err = mImageDataItem->save();
     QVERIFY(mImageDataItem->state() == CxeImageDataItem::SaveFailed);
-    QVERIFY(returnValue != KErrNone);
+    QVERIFY(err != CxeError::None);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -142,33 +193,109 @@ void UnitTestCxeImageDataItemSymbian::testSaveFail()
 void UnitTestCxeImageDataItemSymbian::testPath()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    QVERIFY(mImageDataItem->path().compare(mPath) == 0);
+    QVERIFY(mImageDataItem->path().compare(mFilename) == 0);
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 
-QString UnitTestCxeImageDataItemSymbian::generateImageFileName(int counter)
+
+
+/*!
+* UnitTestCxeImageDataItemSymbian::testState
+*/
+void UnitTestCxeImageDataItemSymbian::testState()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    QString monthName = QDate::currentDate().toString("yyyyMM");
+    mImageDataItem->save();
+    QVERIFY(mImageDataItem->state() == CxeImageDataItem::Saved);
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+
+/*!
+* UnitTestCxeImageDataItemSymbian::testId
+*/
+void UnitTestCxeImageDataItemSymbian::testId()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+	// checking if initialization of image data item is successful.
+    QCOMPARE(mImageDataItem->id(), mImageCounter);
+    mImageDataItem->save();
+    QCOMPARE(mImageDataItem->id(), mImageCounter);
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* UnitTestCxeImageDataItemSymbian::testIsLocationEnabled
+*/
+void UnitTestCxeImageDataItemSymbian::testIsLocationEnabled()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+	// spl case to check if location is enabled	
+	cleanup();
+    bool enableLocation(true);
+    QByteArray data = "1234";
+    QString filename = generateImageFileName();
+    mImageDataItem = new CxeImageDataItemUnit(mImageCounter, data, filename, enableLocation);
+    QCOMPARE(mImageDataItem->isLocationEnabled(), enableLocation);
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+
+/*!
+* Generates filename.
+* @param counter is associated with image file name.
+*/
+QString UnitTestCxeImageDataItemSymbian::generateImageFileName()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    
+    mImageCounter++;
     QString filename;
-    filename.sprintf("E:\\Images\\Camera\\%s\\%sA0\\%04d_Nokia5800.jpg",
-            monthName.toAscii().data(),
-            monthName.toAscii().data(),
-            counter);
+    filename.sprintf("%04d_Nokia.jpg", mImageCounter);
+    filename = path() + filename;
+
     CX_DEBUG_EXIT_FUNCTION();
     return filename;
 }
 
-QString UnitTestCxeImageDataItemSymbian::generateImageFileNameWithLetter(int counter, QString letter)
+/*!
+* Create path for saving images to be used in testcases.
+*/
+QString UnitTestCxeImageDataItemSymbian::path()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    QString monthName = QDate::currentDate().toString("yyyyMM");
+    
+    QString path;
+
+#ifdef __WINSCW__
+    path.sprintf("c:\\data\\testimages\\");
+#else
+    path.sprintf("e:\\testimages\\");
+#endif
+
+    CX_DEBUG_EXIT_FUNCTION();
+    
+    return path;
+}
+
+
+
+/*!
+* Create a dummy invalid path for testcases.
+*/
+QString UnitTestCxeImageDataItemSymbian::dummyPath(const QString &drive)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mImageCounter++;
     QString filename;
-    filename.sprintf("%s:\\Images\\Camera\\%s\\%sA0\\%04d_Nokia5800.jpg",
-            letter.toAscii().data(),
-            monthName.toAscii().data(),
-            monthName.toAscii().data(),
-            counter);
+    filename.sprintf("%s:\\Dummy\\Camera\\%04d_Nokia.jpg",
+            drive.toAscii().data(),
+            mImageCounter);
     CX_DEBUG_EXIT_FUNCTION();
     return filename;
 }

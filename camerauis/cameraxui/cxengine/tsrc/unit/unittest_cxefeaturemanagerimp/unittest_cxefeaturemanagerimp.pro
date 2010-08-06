@@ -14,10 +14,8 @@ include(../unittest.pri)
 TARGET = unittest_cxefeaturemanagerimp
 
 SOURCES *= unittest_cxefeaturemanagerimp.cpp \
-           cxefeaturemanagerimp.cpp \
-           cxefakesettingsmodel.cpp
+           cxefeaturemanagerimp.cpp
 HEADERS *= unittest_cxefeaturemanagerimp.h \
            cxefeaturemanagerimp.h \
-           cxefakesettingsmodel.h \
            cxeerror.h \
            cxenamespace.h

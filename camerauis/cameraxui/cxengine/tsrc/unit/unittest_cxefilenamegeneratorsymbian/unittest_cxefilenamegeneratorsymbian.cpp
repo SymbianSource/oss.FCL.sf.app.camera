@@ -41,8 +41,6 @@ UnitTestCxeFilenameGeneratorSymbian::~UnitTestCxeFilenameGeneratorSymbian()
 // Run before each individual test case
 void UnitTestCxeFilenameGeneratorSymbian::init()
 {
-    mFakeSettings = new CxeFakeSettings();
-
     mFakeSettings->set(CxeSettingIds::FNAME_MONTH_FOLDER, QDate::currentDate().toString("yyyyMM"));
     mFakeSettings->set(CxeSettingIds::FNAME_IMAGE_COUNTER, 0);
     mFakeSettings->set(CxeSettingIds::FNAME_VIDEO_COUNTER, 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -16,6 +16,7 @@
  */
 #include <ECamOrientationCustomInterface2.h>
 #include <ecamfacetrackingcustomapi.h>
+#include <ecamusecasehintcustomapi.h>
 
 #include "cxecameradevice.h"
 #include "cxeerrormappingsymbian.h"
@@ -67,6 +68,18 @@ void CxeCameraDevice::releaseCamera()
     if (mCamera) {
         emit prepareForRelease();
         mCamera->Release();
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+void CxeCameraDevice::reserveCamera()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mCamera) {
+        emit aboutToReserve();
+        mCamera->Reserve();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -124,6 +137,11 @@ MCameraFaceTracking* CxeCameraDevice::faceTracking()
     return mFaceTracking;
 }
 
+MCameraUseCaseHint *CxeCameraDevice::useCaseHintApi()
+{
+    return mUseCaseHintApi;
+}
+
 CxeError::Id CxeCameraDevice::initResources()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -131,6 +149,8 @@ CxeError::Id CxeCameraDevice::initResources()
     TInt status = KErrNone;
 
     if (mCamera) {
+        OstTrace0(camerax_performance, CXECAMERADEVICE_EXTENSIONS_1, "msg: e_CX_GET_CCAMERA_EXTENSIONS 1");
+
         CX_DEBUG(("Get CCamera extensions.."));
 
         mCameraOrientation = static_cast<MCameraOrientation*>(
@@ -140,6 +160,10 @@ CxeError::Id CxeCameraDevice::initResources()
         mFaceTracking = static_cast<MCameraFaceTracking*>(
             mCamera->CustomInterface(KCameraFaceTrackingUid));
         CX_DEBUG(("MCameraFaceTracking interface 0x%08x", mFaceTracking));
+
+        mUseCaseHintApi = static_cast<MCameraUseCaseHint*>(
+            mCamera->CustomInterface(KCameraUseCaseHintUid));
+        CX_DEBUG(("MCameraUseCaseHint interface 0x%08x", mUseCaseHintApi));
 
         TRAPD(errorAdvSet, mAdvancedSettings =
               CCamera::CCameraAdvancedSettings::NewL(*mCamera));
@@ -159,6 +183,8 @@ CxeError::Id CxeCameraDevice::initResources()
         status = errorAdvSet != KErrNone
                  ? errorAdvSet : errorSnap;
         CX_DEBUG(("Total status: %d", status));
+
+        OstTrace0(camerax_performance, CXECAMERADEVICE_EXTENSIONS_2, "msg: e_CX_GET_CCAMERA_EXTENSIONS 0");
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -172,6 +198,7 @@ void CxeCameraDevice::releaseResources()
     // not owned.
     mCameraOrientation = NULL;
     mFaceTracking = NULL;
+    mUseCaseHintApi = NULL;
 
     delete mCameraSnapshot;
     mCameraSnapshot = NULL;
@@ -191,7 +218,7 @@ void CxeCameraDevice::releaseResources()
 CxeError::Id CxeCameraDevice::newCamera( Cxe::CameraIndex cameraIndex, MCameraObserver2 *observer )
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXECAMERADEVICE_NEWCAMERA_IN, "msg: e_CX_CAMERADEVICE_CREATE_CCAMERA 1");
+    OstTrace0(camerax_performance, CXECAMERADEVICE_NEWCAMERA_IN, "msg: e_CX_CREATE_CCAMERA 1");
 
     CX_DEBUG(("Cxe: using camera index %d", cameraIndex));
 
@@ -207,11 +234,12 @@ CxeError::Id CxeCameraDevice::newCamera( Cxe::CameraIndex cameraIndex, MCameraOb
     CX_DEBUG(("CxeCameraDevice::newCamera <> new CCamera"));
 #endif
 
+    OstTrace0(camerax_performance, CXECAMERADEVICE_NEWCAMERA_OUT, "msg: e_CX_CREATE_CCAMERA 0");
+
     if (!err) {
         setCamera(camera);
     }
 
-    OstTrace0(camerax_performance, CXECAMERADEVICE_NEWCAMERA_OUT, "msg: e_CX_CAMERADEVICE_CREATE_CCAMERA 0");
     CX_DEBUG_EXIT_FUNCTION();
     return CxeErrorHandlingSymbian::map(err);
 }

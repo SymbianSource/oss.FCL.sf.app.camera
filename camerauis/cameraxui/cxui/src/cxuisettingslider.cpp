@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -95,10 +95,7 @@ void CxuiSettingSlider::setSettingId(const QString &id)
     mSettingId = id;
 
     // once the settingid is set, we can get the current value for the slider from the engine
-    qreal value = 0;
-
-    int err = mSettings->get(mSettingId, value);
-    CX_DEBUG((("err: %d value: %d"),err,value));
+    qreal value = mSettings->get<qreal>(mSettingId, 0);
 
     // engine value has to be scaled when set to slider
     setValue(value * mSliderScaleValue);

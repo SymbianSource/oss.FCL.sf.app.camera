@@ -24,8 +24,9 @@
 #include "cxefakecameradevicecontrol.h"
 #include "cxefakecameradevice.h"
 #include "cxefakesettings.h"
-#include "cxeautofocuscontrolsymbian.h"
+#include "cxeautofocuscontrolsymbianunit.h"
 #include "unittest_cxeautofocuscontrolsymbian.h"
+#include "cxenamespace.h"
 
 UnitTestCxeAutoFocusControlSymbian::UnitTestCxeAutoFocusControlSymbian()
     : mAutoFocusControl(NULL),
@@ -33,17 +34,19 @@ UnitTestCxeAutoFocusControlSymbian::UnitTestCxeAutoFocusControlSymbian()
       mCameraDevice(NULL),
       mFakeSettings(NULL)
 {
+    qRegisterMetaType<CxeError::Id>("CxeError::Id");
+    qRegisterMetaType<CxeAutoFocusControl::State>("CxeAutoFocusControl::State");
+    qRegisterMetaType<CxeAutoFocusControl::Mode>("CxeAutoFocusControl::Mode");
 }
 
 UnitTestCxeAutoFocusControlSymbian::~UnitTestCxeAutoFocusControlSymbian()
 {
-    cleanup();
 }
 
 // Run before each individual test case
 void UnitTestCxeAutoFocusControlSymbian::init()
 {
-    qDebug() << "UnitTestCxeAutoFocusControlSymbian::init =>";
+    CX_DEBUG_ENTER_FUNCTION();
 
     mFakeSettings = new CxeFakeSettings();
 
@@ -51,19 +54,22 @@ void UnitTestCxeAutoFocusControlSymbian::init()
     mCameraDevice = new CxeFakeCameraDevice();
     mCameraDevice->newCamera(mCameraDeviceControl->cameraIndex(), mCameraDeviceControl);
 
-    mAutoFocusControl = new CxeAutoFocusControlSymbian(*mCameraDevice, *mFakeSettings);
-    //mAutoFocusControl->initializeResources();
+    mAutoFocusControl = new CxeAutoFocusControlSymbianUnit(*mCameraDevice, *mFakeSettings);
 
-    connect(mCameraDeviceControl, SIGNAL(cameraEvent(int,int)),
-            mAutoFocusControl, SLOT(handleCameraEvent(int,int)));
+    // make sure that initialization is correct
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Hyperfocal);
+    QCOMPARE(mAutoFocusControl->isSoundEnabled(), false);
+    QCOMPARE(mAutoFocusControl->supported(), true);
 
-    qDebug() << "UnitTestCxeAutoFocusControlSymbian::init <=";
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 // Run after each individual test case
 void UnitTestCxeAutoFocusControlSymbian::cleanup()
 {
-    qDebug() << "UnitTestCxeAutoFocusControlSymbian::cleanup =>";
+    CX_DEBUG_ENTER_FUNCTION();
+
     delete mAutoFocusControl;
     mAutoFocusControl = NULL;
 
@@ -76,52 +82,124 @@ void UnitTestCxeAutoFocusControlSymbian::cleanup()
     delete mFakeSettings;
     mFakeSettings = NULL;
 
-    qDebug() << "UnitTestCxeAutoFocusControlSymbian::cleanup <=";
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 
 void UnitTestCxeAutoFocusControlSymbian::testStart()
 {
-    QVERIFY(mAutoFocusControl->state() == CxeAutoFocusControl::Unknown);
-    mAutoFocusControl->start();
-    QVERIFY(mAutoFocusControl->state() == CxeAutoFocusControl::InProgress);
-    QVERIFY(CxeTestUtils::waitForState<CxeAutoFocusControl>(*mAutoFocusControl, CxeAutoFocusControl::Ready, 500));
+    // start takes a boolean input and returns CxeError
+    // functionality depends on current state and current autofocus mode
+
+    QSignalSpy stateSpy(mAutoFocusControl,
+                        SIGNAL(stateChanged(CxeAutoFocusControl::State,
+                                            CxeError::Id)));
+
+    CxeError::Id returnValue = CxeError::None;
+    // 1) Default input after initialisation (fixed focus) -> nothing should happen
+    returnValue = mAutoFocusControl->start();
+    // verifying the result:
+    QVERIFY(returnValue == CxeError::None);
+    QCOMPARE(mAutoFocusControl->isSoundEnabled(), true); // check for input paramete
+    // no state changes
+    QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+
+    // 2) Input parameter false is handled correctly
+    // prequisites: not fixed mode & unknown state -> normal functionality
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Auto); // non-fixed
+    // function call
+    returnValue = mAutoFocusControl->start(false);
+    // verifying the result:
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress);
+    QCOMPARE(returnValue, CxeError::None);
+    QCOMPARE(mAutoFocusControl->isSoundEnabled(), false); // check for input parameter
+
+    // 3) Autofocus is not ready (state is cancelling or in progress)
+    // prequisites:
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Macro); // non-fixed mode
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress);
+    // start should return CxeError::InUse
+    returnValue = mAutoFocusControl->start();
+    QCOMPARE(returnValue, CxeError::InUse);
+
+    // 4) Camera has been released
+    mAutoFocusControl->prepareForCameraDelete();
+    stateSpy.clear();
+    returnValue = mAutoFocusControl->start();
+    // result: no signal should be emitted
+    QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
+    QCOMPARE(returnValue, CxeError::None); // should there be and error here?
 }
 
 void UnitTestCxeAutoFocusControlSymbian::testCancel()
 {
-    mAutoFocusControl->start();
-    QVERIFY(mAutoFocusControl->state() == CxeAutoFocusControl::InProgress);
+    // create signalspy to monitor that state changed signal
+    QSignalSpy spy(mAutoFocusControl,
+                        SIGNAL(stateChanged(CxeAutoFocusControl::State,
+                                            CxeError::Id)));
+
+    // 1) after initialisation cancel does nothing
     mAutoFocusControl->cancel();
-    QVERIFY(mAutoFocusControl->state() == CxeAutoFocusControl::Canceling);
-    QVERIFY(CxeTestUtils::waitForState<CxeAutoFocusControl>(*mAutoFocusControl, CxeAutoFocusControl::Unknown, 500));
-}
+    // no state changes
+    QCOMPARE(spy.count(), 0);
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
 
-void UnitTestCxeAutoFocusControlSymbian::testMode()
-{
+    // 2) When in fixed focus mode, cancel does nothing
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Auto); // non fixed mode so that start works
+    mAutoFocusControl->start();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress); //verify start state
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Infinity); // fixed mode
+    spy.clear();
+    mAutoFocusControl->cancel();
+    QCOMPARE(spy.count(), 0);
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress);
+
+    // 3) InProgress state and "normal cancel"
+    // set mode back to non fixed mode
     mAutoFocusControl->setMode(CxeAutoFocusControl::Auto);
-    QVERIFY(mAutoFocusControl->mode() == CxeAutoFocusControl::Auto);
+    mAutoFocusControl->cancel();
+    // -> state is changed to Canceling
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Canceling);
+    // -> focustype set correctly
+    QVERIFY(mAutoFocusControl->focusType()
+            == CCamera::CCameraAdvancedSettings::EAutoFocusTypeOff);
 
-    mAutoFocusControl->setMode(CxeAutoFocusControl::Hyperfocal);
-    QVERIFY(mAutoFocusControl->mode() == CxeAutoFocusControl::Hyperfocal);
+    // 4) Canceling state (reached when calling canceling twice in a row,
+    // now already in canceling state after previous test)
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Canceling);
+    mAutoFocusControl->cancel();
+    // -> state or focustype is not changing
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Canceling);
+    QVERIFY(mAutoFocusControl->focusType()
+            == CCamera::CCameraAdvancedSettings::EAutoFocusTypeOff);
 
-    mAutoFocusControl->setMode(CxeAutoFocusControl::Macro);
-    QVERIFY(mAutoFocusControl->mode() == CxeAutoFocusControl::Macro);
+    // 5) Ready state (cancel called after start has been called and focus
+    // found)
+    // force state to ready in order to test canceling
+    mAutoFocusControl->setState(CxeAutoFocusControl::Unknown);
+    mAutoFocusControl->start(); // changes to in progress + sets focus type & range
+    mAutoFocusControl->setState(CxeAutoFocusControl::Ready);
+    mAutoFocusControl->cancel();
+    // state is changed to canceling
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Canceling);
 
-    mAutoFocusControl->setMode(CxeAutoFocusControl::Infinity);
-    QVERIFY(mAutoFocusControl->mode() == CxeAutoFocusControl::Infinity);
-
-    mAutoFocusControl->setMode(CxeAutoFocusControl::Portrait);
-    QVERIFY(mAutoFocusControl->mode() == CxeAutoFocusControl::Portrait);
 }
+
 
 void UnitTestCxeAutoFocusControlSymbian::testIsFixedFocusMode()
 {
-    QVERIFY(mAutoFocusControl->isFixedFocusMode(CxeAutoFocusControl::Auto) == false);
-    QVERIFY(mAutoFocusControl->isFixedFocusMode(CxeAutoFocusControl::Hyperfocal) == true);
-    QVERIFY(mAutoFocusControl->isFixedFocusMode(CxeAutoFocusControl::Macro) == false);
-    QVERIFY(mAutoFocusControl->isFixedFocusMode(CxeAutoFocusControl::Infinity) == true);
-    QVERIFY(mAutoFocusControl->isFixedFocusMode(CxeAutoFocusControl::Portrait) == false);
+    // default value (hyperfocal)
+    QCOMPARE(mAutoFocusControl->isFixedFocusMode(mAutoFocusControl->mode()), true);
+
+    // set non fixed focus mode
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Auto);
+    QCOMPARE(mAutoFocusControl->isFixedFocusMode(mAutoFocusControl->mode()), false);
+
+    // set fixed focus mode
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Infinity);
+    QCOMPARE(mAutoFocusControl->isFixedFocusMode(mAutoFocusControl->mode()), true);
+
 }
 
 void UnitTestCxeAutoFocusControlSymbian::testSupported()
@@ -129,6 +207,242 @@ void UnitTestCxeAutoFocusControlSymbian::testSupported()
     bool supported = mAutoFocusControl->supported();
     QVERIFY(supported);
 }
+
+
+void UnitTestCxeAutoFocusControlSymbian::testPrepareForCameraDelete()
+{
+    // prepareCameraDelete calls prepareCameraRelease plus sets advanced
+    // settings false (supported() will return false)
+    // this test is for both methods
+
+    // 1) initial values
+    mAutoFocusControl->prepareForCameraDelete();
+    QCOMPARE(mAutoFocusControl->supported(), false);
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+
+    // 2) test prepareForCameraDelete with non-initial values
+    mAutoFocusControl->handleCameraAllocated(CxeError::None);
+    // force state to be something else than Unknown and check that it will be changed
+    mAutoFocusControl->setState(CxeAutoFocusControl::Canceling);
+    // force mCancelled to be false and check that it will be changed
+    mAutoFocusControl->mCancelled = true;
+    mAutoFocusControl->prepareForCameraDelete();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+    QCOMPARE(mAutoFocusControl->mCancelled, false);
+    QCOMPARE(mAutoFocusControl->supported(), false);
+
+}
+
+void UnitTestCxeAutoFocusControlSymbian::testHandleCameraAllocated()
+{
+    // create signalspy to monitor that state changed signal
+    QSignalSpy stateSpy(mAutoFocusControl,
+                        SIGNAL(stateChanged(CxeAutoFocusControl::State,
+                                            CxeError::Id)));
+
+    // 1) initial setup without an error (camera is allocated already)
+    mAutoFocusControl->handleCameraAllocated(CxeError::None);
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+    QCOMPARE(mAutoFocusControl->supported(), true);
+
+    // 2) release camera and call with an error code
+    // -> supported should return false since initializeResources is not called in error case
+    // -> state is not changed
+    mAutoFocusControl->prepareForCameraDelete();
+    stateSpy.clear();
+    mAutoFocusControl->handleCameraAllocated(CxeError::General);
+    QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
+    QCOMPARE(mAutoFocusControl->supported(), false);
+
+    // 3) release camera and call without an error
+    // (prepareForCameraDelete has been called in previous test)
+    // -> resources are initialized i.e. supported returns true
+    // first force state to something else so state change can be verified
+    mAutoFocusControl->setState(CxeAutoFocusControl::Canceling);
+    mAutoFocusControl->handleCameraAllocated(CxeError::None);
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+    QCOMPARE(mAutoFocusControl->supported(), true);
+
+}
+
+void UnitTestCxeAutoFocusControlSymbian::testPrepareForRelease()
+{
+    // see testPrepareForCameraDelete
+}
+
+void UnitTestCxeAutoFocusControlSymbian::testHandleCameraEvent()
+{
+    // handleCameraEvent handles callbacks and gets information about
+    // focus events. handleCameraEvent calls private method handleAfEvent
+    // for the focusing events that CxeAutoFocusControlSymbian needs
+
+    // testing handleAfEvent is done by calling handleCameraEvent
+    // and monitoring state changes after each "event"
+
+    QSignalSpy stateSpy(mAutoFocusControl,
+                        SIGNAL(stateChanged(CxeAutoFocusControl::State,
+                                            CxeError::Id)));
+
+
+    // Input 1 ----------------------------------------------------
+    // Optimal focus was reached or couldn't be found
+    int eventUid = KUidECamEventCameraSettingsOptimalFocusUidValue;
+    int symbianError = 0; //KErrNone
+
+    // AutofocusControl class is not InProgress or Canceling state
+    // => event ignored, nothing is changed
+    mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
+    QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
+
+    // AutoFocusControl is InProgress state (waiting for the focus)
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Auto); // not fixed focus
+    mAutoFocusControl->start();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress); //verify start state
+    mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
+    // => state should change to Ready
+    QVERIFY(CxeTestUtils::waitForSignal(stateSpy, 1000));
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Ready);
+
+    // InProgress state but focus fails
+    mAutoFocusControl->start();
+    stateSpy.clear();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress); //verify start state
+    mAutoFocusControl->handleCameraEvent(eventUid, -18); // KErrNotReady
+    // => state should change to Failed
+    QVERIFY(CxeTestUtils::waitForSignal(stateSpy, 1000));
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Failed);
+
+    // AutoFocusControl is in Canceling state
+    mAutoFocusControl->start();
+    mAutoFocusControl->cancel();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Canceling); //verify start state
+    stateSpy.clear();
+    mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
+    // => state should change to Unknown
+    QVERIFY(CxeTestUtils::waitForSignal(stateSpy, 1000));
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+
+    // cleanup and init to make sure that the dummy engine is not messed up
+    // and we get to initial state
+    cleanup();
+    init();
+
+    // Input 2 -----------------------------------------------------
+    // Notifies a change in autofocus type
+    eventUid = KUidECamEventCameraSettingAutoFocusType2UidValue;
+    symbianError = -18; // == KErrNotReady
+
+    // InProgress: event is ignored
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Auto); // not fixed focus
+    mAutoFocusControl->start();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress); //verify start state
+    stateSpy.clear();
+    mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
+    QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
+
+    // Canceling:
+    // error parameter is ignored, state is not changed
+    mAutoFocusControl->cancel();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Canceling); //verify start state
+    stateSpy.clear();
+    mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
+    QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
+
+    // cleanup and init to make sure that the dummy engine is not messed up
+    // and we get to initial state
+    cleanup();
+    init();
+
+    // Input 3 -----------------------------------------------------
+    // Focus range have changed
+    eventUid = KUidECamEventCameraSettingFocusRangeUidValue;
+    symbianError = -2; // == KErrGeneral
+
+    // In any other state than InProgress this event is ignored
+    stateSpy.clear();
+    mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
+    QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
+
+    // InProgress: because of the error parameter state changes to failed
+    // (focus range change failed because of error)
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Auto); // not fixed focus
+    mAutoFocusControl->start();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress); //verify start state
+    mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
+    // => state should change to Failed
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Failed);
+}
+
+void UnitTestCxeAutoFocusControlSymbian::testHandleSceneChanged()
+{
+    // changes the autofocus settings to match the new scene settings
+    QVariantMap scene;
+
+    // changes focus if new scene setting defines fixed focus
+    // otherwise sets the autofocus control to Unknown state (==initial state)
+
+    // 1) change to a scene with fixed focus mode (Infinity & Hyperfocal)
+    scene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Infinity);
+    mAutoFocusControl->handleSceneChanged(scene);
+    // states are changed and mode is set correctly ->Unknown->InProgress
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress); // end state
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Infinity);
+
+    // 2) change to non-fixed mode (like Macro)
+    scene.clear();
+    scene.insert(CxeSettingIds::FOCAL_RANGE, CxeAutoFocusControl::Macro);
+    mAutoFocusControl->handleSceneChanged(scene);
+    // states are changed and mode is set correctly
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Macro);
+
+    // 3) try with error input (scene does not contain focal_range)
+    scene.clear();
+    // change the autofocuscontrol state from Unknown (last test) to
+    // something else calling start() for example
+    mAutoFocusControl->start();
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress); //verify start state
+    mAutoFocusControl->handleSceneChanged(scene);
+    // state is changed and mode is not changed
+    QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Macro);
+
+}
+
+void UnitTestCxeAutoFocusControlSymbian::testHandleSettingValueChanged()
+{
+    // Autofocus mode needs to be updated when face trackin is actived in
+    // scene mod which doesn't support facetracking
+
+    QVariant on = QVariant(1);
+    QVariant off = QVariant(0);
+
+    // 1) check that mode does not change when some other setting value
+    // than face tracking is given
+    mAutoFocusControl->handleSettingValueChanged(CxeSettingIds::LIGHT_SENSITIVITY, on);
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Hyperfocal);
+
+    // 2) check turning facetracking on, when mode is fixed
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Infinity);
+    mAutoFocusControl->handleSettingValueChanged(CxeSettingIds::FACE_TRACKING, on);
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Auto);
+    QCOMPARE(mAutoFocusControl->mFaceTrackingOverride, true);
+
+    // 3) check turning facetracking off will return the previous mode
+    mAutoFocusControl->handleSettingValueChanged(CxeSettingIds::FACE_TRACKING, off);
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Infinity);
+    QCOMPARE(mAutoFocusControl->mFaceTrackingOverride, false);
+
+    // 4) check that turning facetracking off, when it is not on, won't
+    // set the previous mode
+    mAutoFocusControl->setMode(CxeAutoFocusControl::Macro);
+    mAutoFocusControl->handleSettingValueChanged(CxeSettingIds::FACE_TRACKING, off);
+    QCOMPARE(mAutoFocusControl->mode(), CxeAutoFocusControl::Macro);
+    QCOMPARE(mAutoFocusControl->mFaceTrackingOverride, false);
+
+
+}
+
 
 
 // main() function - Need event loop for waiting signals,

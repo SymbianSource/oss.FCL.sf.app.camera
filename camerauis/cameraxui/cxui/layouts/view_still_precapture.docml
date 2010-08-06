@@ -24,7 +24,7 @@
     <object name="cxui_action_still_geotagging" type="HbAction">
         <string name="settingskey" value="geotagging"/>
         <string locid="txt_cam_opt_geotagging" name="text" value="Geotagging"/>
-    </object>    
+    </object>
     <object name="cxui_action_capture" type="HbAction">
         <icon iconName="qtg_mono_capture" name="icon"/>
     </object>
@@ -52,6 +52,7 @@
         </widget>
         <string name="title" value="Camera"/>
         <bool name="contentFullScreen" value="TRUE"/>
+        <enums name="viewFlags" value="ViewTitleBarTransparent|ViewTitleBarFloating|ViewTitleBarHidden|ViewStatusBarTransparent|ViewStatusBarFloating|ViewStatusBarHidden"/>
     </widget>
     <section name="still_capture_indicators">
         <widget name="still_container" role="HbView:widget" type="HbWidget">
@@ -98,6 +99,10 @@
                 </layout>
             </widget>
             <layout type="anchor">
+                <anchoritem dst="transparent" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="transparent" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                <anchoritem dst="transparent" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="transparent" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
                 <anchoritem dst="indicatorContainer" dstEdge="LEFT" spacing="11un" src="" srcEdge="LEFT"/>
                 <anchoritem dst="indicatorContainer" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
             </layout>
@@ -112,7 +117,7 @@
                     <real name="z" value="7"/>
                     <sizehint type="PREFERRED" width="var(hb-param-widget-toolbar-height)"/>
                     <enums name="orientation" value="Vertical"/>
-                    <bool name="visible" value="TRUE"/>
+                    <bool name="visible" value="FALSE"/>
                     <ref object="cxui_action_capture" role="HbWidget:addAction"/>
                     <ref object="cxui_action_flash" role="HbWidget:addAction"/>
                     <ref object="cxui_action_scenemodes" role="HbWidget:addAction"/>
@@ -144,18 +149,13 @@
                             <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
                             <sizehint type="FIXED" width="20un"/>
                             <string locid="txt_cam_button_start" name="text" value="Start"/>
-                            <bool name="visible" value="TRUE"/>
-                            <string name="state" value="normal"/>
                             <fontspec name="fontSpec" role="Undefined" textheight="var(hb-param-text-height-tiny)"/>
                         </widget>
                         <widget name="still_selftimer_cancel_button" type="HbPushButton">
                             <real name="z" value="4"/>
                             <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
                             <sizehint type="FIXED" width="20un"/>
-			    <sizehint height="7un" type="PREFERRED" width="20un"/>
                             <string locid="txt_cam_button_cancel" name="text" value="Cancel"/>
-                            <bool name="visible" value="TRUE"/>
-                            <string name="state" value="normal"/>
                             <fontspec name="fontSpec" role="Undefined" textheight="var(hb-param-text-height-tiny)"/>
                         </widget>
                         <real name="z" value="0"/>

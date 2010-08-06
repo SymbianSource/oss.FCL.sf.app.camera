@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -31,22 +31,24 @@ class CxeFakeSettings : public CxeSettings
 
     public: // from CxeSettings
 
-        CxeError::Id get(const QString &key, int &value) const;
-        CxeError::Id get(const QString &key, QString &stringValue) const;
-        void get(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value) const;
-        CxeError::Id set(const QString &key, int newValue);
-        CxeError::Id set(const QString &key,const QString &newValue);
-        CxeError::Id get(const QString &key, qreal &value) const;
-        CxeError::Id set(const QString &key, qreal newValue);
+        void get(long int uid,
+                 unsigned long int key,
+                 Cxe::SettingKeyType type,
+                 QVariant &value) const;
         void reset();
+        CxeError::Id getVariationValue(const QString &key, QVariant &value);
+        bool listenForSetting(const QString &settingKey, QObject *target, const char *slot);
+
+    protected:
+        void getValue(const QString &key, QVariant &value) const;
+        void setValue(const QString &key, const QVariant &newValue);
 
     public: // methods for unit testing
-        
         void emulate(long int uid, unsigned long int key, QVariant value);
 
     private: // data
         QHash<QString, QVariant> mSettingKeyHash;
-        QHash<QString, unsigned long int> mRuntimeKeyHash;
+        QHash<QString, unsigned long int> mVariationKeyHash;
 
     private:
         Q_DISABLE_COPY(CxeFakeSettings)

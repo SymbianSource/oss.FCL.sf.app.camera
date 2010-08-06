@@ -15,15 +15,19 @@
 *
 */
 
-#ifndef CXEDISKMONITORPRIVATEUNIT_H
-#define CXEDISKMONITORPRIVATEUNIT_H
+#ifndef CXENGINE_GLOBAL_H
+#define CXENGINE_GLOBAL_H
 
-// Include files
+#include <QtCore/qglobal.h>
 
-#include "cxediskmonitorprivate.h"
+#if defined(CAMERAX_ENGINE_LIBRARY)
+#  define CAMERAX_ENGINE_EXPORT Q_DECL_EXPORT
+#else
+#  if defined(CAMERAX_ENGINE_NO_LIBRARY)
+#    define CAMERAX_ENGINE_EXPORT
+#  else
+#    define CAMERAX_ENGINE_EXPORT Q_DECL_IMPORT
+#  endif
+#endif
 
-class CxeDiskMonitorPrivateUnit;
-
-
-
-#endif // CXEDISKMONITORPRIVATEUNIT_H
+#endif // CXENGINE_GLOBAL_H

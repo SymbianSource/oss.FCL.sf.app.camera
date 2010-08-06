@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,8 +15,8 @@
 *
 */
 
-#ifndef CXEGEOTAGGINGTRAILPRIVATE_H
-#define CXEGEOTAGGINGTRAILPRIVATE_H
+#ifndef CXEGEOTAGGINGTRAIL_SYMBIAN_P_H
+#define CXEGEOTAGGINGTRAIL_SYMBIAN_P_H
 
 #include <QTimer>
 #include <QObject>
@@ -28,17 +28,11 @@
 #include "cxestatemachine.h"
 #include "cxegeotaggingtrail.h"
 
-
-
-
 // Forward declarations
 class CxeSettings;
 class RLocationTrail;
 class CxeStillCaptureControl;
 class CxeVideoCaptureControl;
-
-
-
 
 class CxeGeoTaggingTrailPrivate : public QObject,
                                   public CxeStateMachine
@@ -58,17 +52,17 @@ signals:
 protected: // from CxeStateMachine
     void handleStateChanged(int newStateId, CxeError::Id error);
 
-private slots:
-    void handleSettingValueChanged(const QString&,QVariant);
-    void handleGeoTaggingPropertyEvent(long int uid, unsigned long int key, QVariant value);
-    void timeout();
-    void stop(bool closeSession = false);
-
 private:
     void start();
     void initializeStates();
     bool canStopTrail() const;
     CxeGeoTaggingTrail::State state() const;
+
+private slots:
+    void handleSettingValueChanged(const QString&, QVariant);
+    void handleGeoTaggingPropertyEvent(long int uid, unsigned long int key, QVariant value);
+    void timeout();
+    void stop();
 
 private:
     CxeStillCaptureControl &mStillCaptureControl;
@@ -76,11 +70,9 @@ private:
     CxeSettings &mSettings;
     QTimer mStopLocationTrailTimer;
     bool mPendingStopTrailSession;
-#if defined(Q_OS_SYMBIAN)
     RLocationTrail mLocationTrail;
-#endif
     
     friend class CxeGeoTaggingTrail;
 };
 
-#endif // CXEGEOTAGGINGTRAILPRIVATE_H
+#endif // CXEGEOTAGGINGTRAIL_SYMBIAN_P_H

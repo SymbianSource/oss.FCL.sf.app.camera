@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -22,9 +22,6 @@
 #include <QMetaType>
 
 #include "cxeerror.h"
-
-class CxeImageDataItem;
-class QImage;
 
 /**
  * CxeImageDataItem represents a single object that is in a queue to be saved to
@@ -67,8 +64,8 @@ public:
     virtual QString path() const = 0;
 
 signals:
-    void imageSaved(CxeError::Id error, const QString& filename, int id);
-    void stateChanged( State newState, CxeError::Id error );
+    void imageSaved(CxeError::Id error, const QString &filename, int id);
+    void stateChanged(State newState, CxeError::Id error);
 
 protected:
     CxeImageDataItem() {}

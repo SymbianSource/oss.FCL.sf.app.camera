@@ -15,7 +15,6 @@
 *
 */
 
-#include <coemain.h>
 #include <QProcess>
 #include <QApplication>
 #include <hbmainwindow.h>
@@ -53,15 +52,19 @@
 #include "cxuisettingradiobuttonlist.h"
 #include "cxuisettingslider.h"
 #include "cxuisettingsinfo.h"
+
+#ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
-#include "cxuiserviceprovider.h"
-#include "cxuizoomslider.h"
-#include "cxuifullscreenpopup.h"
 
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuiprecaptureviewTraces.h"
 #endif
-#include "cxegeotaggingtrail.h"
+
+#endif //Q_OS_SYMBIAN
+
+#include "cxuifullscreenpopup.h"
+#include "cxuiserviceprovider.h"
+#include "cxuizoomslider.h"
 
 using namespace CxUiLayout;
 using namespace CxUiSettings;
@@ -511,8 +514,8 @@ void CxuiPrecaptureView::prepareToCloseDialog(HbAction *action)
         }
         // disable geotagging disclaimer after geotagging setting is triggered from FirstTimeUse dialog
         QString settingId = action->property(PROPERTY_KEY_SETTING_ID).toString();
-        int value = Cxe::GeoTaggingDisclaimerDisabled;
-        mEngine->settings().get(CxeSettingIds::GEOTAGGING_DISCLAIMER, value);
+        CX_DEBUG(("settingsKey=%s", settingId.toAscii().constData()));
+        Cxe::GeoTaggingDisclaimer value = mEngine->settings().get<Cxe::GeoTaggingDisclaimer>(CxeSettingIds::GEOTAGGING_DISCLAIMER, Cxe::GeoTaggingDisclaimerDisabled);
         if (settingId == CxeSettingIds::GEOTAGGING && value == Cxe::GeoTaggingDisclaimerEnabled) {
             // disable geotagging first-time-use dialog
             disableGeotaggingDisclaimer();
@@ -890,10 +893,10 @@ void CxuiPrecaptureView::launchGeoTaggingDisclaimerDialog()
                                                    HbMessageBox::MessageTypeInformation);
 
     HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-    HbAction *settingsAction = new HbAction(hbTrId("txt_cam_opt_general_settings"));
+    HbAction *settingsAction = new HbAction(hbTrId("txt_cam_info_geotagging_ftu_note_settings_button"));
 
     // connecting signals for dialog's actions
-    connect(okAction, 
+    connect(okAction,
             SIGNAL(triggered()),
             this,
             SLOT(disableGeotaggingDisclaimer()));
@@ -929,7 +932,7 @@ void CxuiPrecaptureView::disableGeotaggingDisclaimer()
 
 
 /*!
-* Slot that launches geotagging setting dialog. 
+* Slot that launches geotagging setting dialog.
 */
 void CxuiPrecaptureView::launchGeoTaggingSetting()
 {

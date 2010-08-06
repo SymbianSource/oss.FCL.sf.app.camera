@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -40,7 +40,8 @@
 /*!
 * Constructor
 */
-CxeSettingsControlSymbian::CxeSettingsControlSymbian(CxeCameraDevice &cameraDevice, CxeSettings &settings)
+CxeSettingsControlSymbian::CxeSettingsControlSymbian(
+        CxeCameraDevice &cameraDevice, CxeSettings &settings)
     : mCameraDevice(cameraDevice),
       mSettings(settings)
 {
@@ -50,10 +51,9 @@ CxeSettingsControlSymbian::CxeSettingsControlSymbian(CxeCameraDevice &cameraDevi
             this,
             SLOT(handleSettingValueChanged(const QString&,QVariant)));
 
-    connect(&mSettings,
-            SIGNAL(sceneChanged(CxeScene&)),
-            this,
-            SLOT(handleSceneChanged(CxeScene&)));
+    mSettings.listenForSetting(CxeSettingIds::IMAGE_SCENE_DATA, this, SLOT(handleSceneChanged(const QVariant&)));
+    mSettings.listenForSetting(CxeSettingIds::VIDEO_SCENE_DATA, this, SLOT(handleSceneChanged(const QVariant&)));
+
 }
 
 /*!
@@ -69,7 +69,8 @@ CxeSettingsControlSymbian::~CxeSettingsControlSymbian()
 * \param settingId The id of the updated setting
 * \param newValue A new value for the updated setting
 */
-void CxeSettingsControlSymbian::handleSettingValueChanged(const QString& settingId, QVariant newValue)
+void CxeSettingsControlSymbian::handleSettingValueChanged(
+        const QString &settingId, QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
     if (settingId == CxeSettingIds::COLOR_TONE) {
@@ -106,9 +107,11 @@ void CxeSettingsControlSymbian::handleSettingValueChanged(const QString& setting
 * Scene settings are checked and new values are set to camera.
 * \param scene New scene containing scene specific settings.
 */
-void CxeSettingsControlSymbian::handleSceneChanged(CxeScene& scene)
+void CxeSettingsControlSymbian::handleSceneChanged(const QVariant &sceneData)
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    CxeScene scene = sceneData.value<CxeScene>();
     OstTrace0(camerax_performance, CXESETTINGSCONTROL_SCENE_1, "msg: e_CX_SCENE_SETTINGS_TO_CAMERA 1");
 
     CX_DEBUG(("CxeSettingsControlSymbian <> new scene [%s]",
@@ -136,13 +139,12 @@ void CxeSettingsControlSymbian::updateColorToneSetting(QVariant newValue)
     CX_ASSERT_ALWAYS(mCameraDevice.imageProcessor());
 
     CCamera::CCameraImageProcessing::TEffect effect =
-        CxeSettingsMapperSymbian::Map2CameraEffect(newValue.toInt());
+            CxeSettingsMapperSymbian::Map2CameraEffect(
+                    static_cast<Cxe::Colortone>(newValue.toInt()));
 
-    if (effect != mCameraDevice.imageProcessor()->TransformationValue(KUidECamEventImageProcessingEffect)) {
-        mCameraDevice.imageProcessor()->SetTransformationValue(KUidECamEventImageProcessingEffect, effect);
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    mCameraDevice.imageProcessor()->SetTransformationValue(
+            KUidECamEventImageProcessingEffect, effect);
+
 #else
     Q_UNUSED(newValue)
 #endif
@@ -159,13 +161,10 @@ void CxeSettingsControlSymbian::updateWhiteBalanceSetting(QVariant newValue)
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG_ASSERT(mCameraDevice.camera());
 
-    CCamera::TWhiteBalance wb = CxeSettingsMapperSymbian::Map2CameraWb(newValue.toInt());
+    CCamera::TWhiteBalance wb = CxeSettingsMapperSymbian::Map2CameraWb(
+            static_cast<Cxe::Whitebalance>(newValue.toInt()));
 
-    if (wb != mCameraDevice.camera()->WhiteBalance()) {
-        TRAP_IGNORE( mCameraDevice.camera()->SetWhiteBalanceL(wb) );
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    TRAP_IGNORE(mCameraDevice.camera()->SetWhiteBalanceL(wb));
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -181,17 +180,15 @@ void CxeSettingsControlSymbian::updateLightSensitivitySetting(QVariant newValue)
 
     int iso = newValue.toInt();
 
-    if (iso != mCameraDevice.advancedSettings()->IsoRate()) {
-        CCamera::CCameraAdvancedSettings::TISORateType type;
-        if(iso == 0) {
-            // Automatic ISO rate
-            type = CCamera::CCameraAdvancedSettings::EISOAutoUnPrioritised;
-        } else {
-            // Manual ISO rate
-            type = CCamera::CCameraAdvancedSettings::EISOManual;
-        }
-        TRAP_IGNORE(mCameraDevice.advancedSettings()->SetISORateL(type, iso));
+    CCamera::CCameraAdvancedSettings::TISORateType type;
+    if (iso == 0) {
+        // Automatic ISO rate
+        type = CCamera::CCameraAdvancedSettings::EISOAutoUnPrioritised;
+    } else {
+        // Manual ISO rate
+        type = CCamera::CCameraAdvancedSettings::EISOManual;
     }
+    TRAP_IGNORE(mCameraDevice.advancedSettings()->SetISORateL(type, iso));
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -210,16 +207,13 @@ void CxeSettingsControlSymbian::updateSharpnessSetting(QVariant newValue)
     CX_ASSERT_ALWAYS(mCameraDevice.imageProcessor());
 
     // Scale UI values of -2..2 to ECAM range -100..100.
-    int currentSharpness = mCameraDevice.imageProcessor()->TransformationValue(KUidECamEventImageProcessingAdjustSharpness);
-    int newSharpness     = newValue.toReal()*50;
+    int newSharpness = newValue.toReal() * 50;
 
-    CX_DEBUG(("Current sharpness [uid:0x%08x] value is [%d]", KUidECamEventImageProcessingAdjustSharpness, currentSharpness));
-    CX_DEBUG(("Setting sharpness [uid:0x%08x] to value [%d]", KUidECamEventImageProcessingAdjustSharpness, newSharpness));
-    if (newSharpness != currentSharpness) {
-        mCameraDevice.imageProcessor()->SetTransformationValue(KUidECamEventImageProcessingAdjustSharpness, newSharpness);
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    CX_DEBUG(("Setting sharpness [uid:0x%08x] to value [%d]",
+              KUidECamEventImageProcessingAdjustSharpness, newSharpness));
+    mCameraDevice.imageProcessor()->SetTransformationValue(
+            KUidECamEventImageProcessingAdjustSharpness, newSharpness);
+
 #else
     Q_UNUSED(newValue)
 #endif
@@ -237,16 +231,13 @@ void CxeSettingsControlSymbian::updateContrastSetting(QVariant newValue)
     CX_ASSERT_ALWAYS(mCameraDevice.imageProcessor());
 
     // Scale UI values of -2..2 to ECAM range -100..100.
-    int currentContrast = mCameraDevice.imageProcessor()->TransformationValue(KUidECamEventImageProcessingAdjustContrast);
-    int newContrast     = newValue.toReal()*50;
+    int newContrast = newValue.toReal() * 50;
 
-    CX_DEBUG(("Current contrast [uid:0x%08x] value is [%d]", KUidECamEventImageProcessingAdjustContrast, currentContrast));
-    CX_DEBUG(("Setting contrast [uid:0x%08x] to value [%d]", KUidECamEventImageProcessingAdjustContrast, newContrast));
-    if (newContrast != currentContrast) {
-        mCameraDevice.imageProcessor()->SetTransformationValue(KUidECamEventImageProcessingAdjustContrast, newContrast);
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    CX_DEBUG(("Setting contrast [uid:0x%08x] to value [%d]",
+              KUidECamEventImageProcessingAdjustContrast, newContrast));
+
+    mCameraDevice.imageProcessor()->SetTransformationValue(
+            KUidECamEventImageProcessingAdjustContrast, newContrast);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -261,16 +252,13 @@ void CxeSettingsControlSymbian::updateBrightnessSetting(QVariant newValue)
     CX_ASSERT_ALWAYS(mCameraDevice.imageProcessor());
 
     // Scale UI values of -10..10 to ECAM range -100..100.
-    int currentBrightness = mCameraDevice.imageProcessor()->TransformationValue(KUidECamEventImageProcessingAdjustBrightness);
-    int newBrightness     = newValue.toInt()*10;
+    int newBrightness = newValue.toInt() * 10;
 
-    CX_DEBUG(("Current brightness [uid:0x%08x] value is [%d]", KUidECamEventImageProcessingAdjustBrightness, currentBrightness));
-    CX_DEBUG(("Setting brightness [uid:0x%08x] to value [%d]", KUidECamEventImageProcessingAdjustBrightness, newBrightness));
-    if (newBrightness != currentBrightness) {
-        mCameraDevice.imageProcessor()->SetTransformationValue(KUidECamEventImageProcessingAdjustBrightness, newBrightness);
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    CX_DEBUG(("Setting brightness [uid:0x%08x] to value [%d]",
+              KUidECamEventImageProcessingAdjustBrightness, newBrightness));
+
+    mCameraDevice.imageProcessor()->SetTransformationValue(
+            KUidECamEventImageProcessingAdjustBrightness, newBrightness);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -284,13 +272,11 @@ void CxeSettingsControlSymbian::updateExposureModeSetting(QVariant newValue)
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG_ASSERT(mCameraDevice.advancedSettings());
 
-    CCamera::TExposure exposure = CxeSettingsMapperSymbian::Map2CameraExposureMode(newValue.toInt());
+    CCamera::TExposure exposure =
+            CxeSettingsMapperSymbian::Map2CameraExposureMode(
+                    static_cast<Cxe::ExposureMode>(newValue.toInt()));
 
-    if(exposure != mCameraDevice.advancedSettings()->ExposureMode()) {
-        mCameraDevice.advancedSettings()->SetExposureMode(exposure);
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    mCameraDevice.advancedSettings()->SetExposureMode(exposure);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -307,13 +293,9 @@ void CxeSettingsControlSymbian::updateExposureCompensationSetting(QVariant newVa
     // Exposure compensation is a float value, e.g. "-1.5".
     // ECAM interface takes integer values, so KECamFineResolutionFactor from
     // ecamconstants.h needs to be used as scaler.
-    int ev = newValue.toReal()*KECamFineResolutionFactor;
+    int ev = newValue.toReal() * KECamFineResolutionFactor;
 
-    if (ev != mCameraDevice.advancedSettings()->ExposureCompensationStep()) {
-        mCameraDevice.advancedSettings()->SetExposureCompensationStep(ev);
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    mCameraDevice.advancedSettings()->SetExposureCompensationStep(ev);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -327,13 +309,10 @@ void CxeSettingsControlSymbian::updateFlashSetting(QVariant newValue)
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(mCameraDevice.camera());
 
-    CCamera::TFlash flash = CxeSettingsMapperSymbian::Map2CameraFlash(newValue.toInt());
+    CCamera::TFlash flash = CxeSettingsMapperSymbian::Map2CameraFlash(
+            static_cast<Cxe::FlashMode>(newValue.toInt()));
 
-    if (flash != mCameraDevice.camera()->Flash()) {
-        TRAP_IGNORE(mCameraDevice.camera()->SetFlashL(flash));
-    } else {
-        CX_DEBUG(("CxeSettingsControlSymbian: value up-to-date"));
-    }
+    TRAP_IGNORE(mCameraDevice.camera()->SetFlashL(flash));
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -346,7 +325,7 @@ void CxeSettingsControlSymbian::updateFaceTrackingSetting(QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
     MCameraFaceTracking *faceTracking = mCameraDevice.faceTracking();
-    if(faceTracking) {
+    if (faceTracking) {
         TRAP_IGNORE(faceTracking->SetFaceTrackingL(newValue.toInt()));
     }
     CX_DEBUG_EXIT_FUNCTION();

@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -15,9 +15,17 @@
 #
 
 include(../camerax.pri)
+!symbian {
+    CONFIG += staticlib
+    CONFIG += HB
+    HB += hbcore hbwidgets
+} else {
+    CONFIG  += dll
+    DEFINES += CAMERAX_ENGINE_LIBRARY
+}
 
 TEMPLATE = lib
-TARGET =
+TARGET = 
 DEPENDPATH += inc inc/api src/dummyengine
 INCLUDEPATH += inc \
                inc/sensor \
@@ -27,7 +35,6 @@ INCLUDEPATH += inc \
                ../extensions/inc
 
 VPATH += src
-CONFIG += dll
 MOC_DIR = tmp
 
 symbian {
@@ -36,40 +43,39 @@ symbian {
     # Fix for QMake translating INCLUDEPATH to SYSTEMINCLUDE
     # and TraceCompiler needing USERINCLUDE.
     MMP_RULES           += "USERINCLUDE traces"
-}
+    MMP_RULES           += SMPSAFE
 
-# Libs
-LIBS += -lecam
-LIBS += -lecamadvsettings
-LIBS += -lecamsnapshot
-LIBS += -lfbscli
-LIBS += -lbitgdi
-LIBS += -lgdi
-LIBS += -lws32
-LIBS += -lcone
-LIBS += -lecamdirectviewfinder
-LIBS += -lmediaclientvideo
-LIBS += -lefsrv
-LIBS += -lsysutil
-LIBS += -lbafl
-LIBS += -lmediaclientaudio
-LIBS += -lecom
-LIBS += -lecampluginsupport
-LIBS += -lmmfcontrollerframework
-LIBS += -lplatformenv
-LIBS += -lxqsettingsmanager
-LIBS += -lsensrvclient
-LIBS += -lsensrvutil
-LIBS += -limagingconfigmanager
-LIBS += -lharvesterclient
-LIBS += -lthumbnailmanagerqt
-LIBS += -lxqserviceutil
-LIBS += -loommonitor
-LIBS += -lhal
-LIBS += -llocationmanager
+    # Libs
+    LIBS += -lecam
+    LIBS += -lecamadvsettings
+    LIBS += -lecamsnapshot
+    LIBS += -lfbscli
+    LIBS += -lbitgdi
+    LIBS += -lgdi
+    LIBS += -lws32
+    LIBS += -lcone
+    LIBS += -lecamdirectviewfinder
+    LIBS += -lmediaclientvideo
+    LIBS += -lefsrv
+    LIBS += -lsysutil
+    LIBS += -lbafl
+    LIBS += -lmediaclientaudio
+    LIBS += -lecom
+    LIBS += -lecampluginsupport
+    LIBS += -lmmfcontrollerframework
+    LIBS += -lplatformenv
+    LIBS += -lxqsettingsmanager
+    LIBS += -lsensrvclient
+    LIBS += -lsensrvutil
+    LIBS += -limagingconfigmanager
+    LIBS += -lharvesterclient
+    LIBS += -lthumbnailmanagerqt
+    LIBS += -lxqserviceutil
+    LIBS += -loommonitor
+    LIBS += -lhal
+    LIBS += -llocationmanager
 
-symbian {
-   TARGET.EPOCALLOWDLLDATA = 1 // TODO: check this out??
+    TARGET.EPOCALLOWDLLDATA = 1 // TODO: check this out??
 }
 
 # dependencies
@@ -101,67 +107,72 @@ symbian {
 
 
 # Input
-HEADERS += cxecameradevicecontrol.h \
-           cxecameradevicecontrolsymbian.h \
+HEADERS += cxengine_global.h \
+           cxememorymonitor.h \
+           cxememorymonitorprivate.h \
+           cxecameradevicecontrol.h \
            cxeengine.h \
-           cxeenginesymbian.h \
-           cxeviewfindercontrol.h \
-           cxeviewfindercontrolsymbian.h \
-           cxestillcapturecontrol.h \
-           cxestillcapturecontrolsymbian.h \
-           cxevideocapturecontrol.h \
-           cxevideocapturecontrolsymbian.h \
-           cxesettingscontrolsymbian.h \
-           cxeautofocuscontrol.h \
-           cxeautofocuscontrolsymbian.h \
-           cxezoomcontrol.h \
-           cxezoomcontrolsymbian.h \
-           cxeimagedataqueue.h \
-           cxeimagedataqueuesymbian.h \
-           cxeimagedataitem.h \
-           cxeimagedataitemsymbian.h \
-           cxefilenamegeneratorsymbian.h \
-           cxecameradevice.h \
            cxutils.h \
            cxeerror.h \
-           cxeerrormappingsymbian.h \
-           cxesoundplayersymbian.h \
            cxenamespace.h \
            cxesettings.h \
            cxesettingsimp.h \
            cxefeaturemanager.h \
            cxefeaturemanagerimp.h \
-           cxesettingsmodel.h \
-           cxesettingsmodelimp.h \
            cxestatemachine.h \
            cxestate.h \
            cxestatemachinebase.h \
            cxestillimage.h \
-           cxestillimagesymbian.h \
+           cxestillcapturecontrol.h \
+           cxefilesavethread.h \
+           cxesensoreventhandler.h \
+           cxesettingsstore.h \
+           cxequalitydetails.h \
+           cxequalitypresets.h \
+           cxeautofocuscontrol.h \
+           cxevideocapturecontrol.h \
+           cxeimagedataitem.h \
+           cxeimagedataqueue.h \
+           cxezoomcontrol.h \
+           cxeviewfindercontrol.h \
+           cxegeotaggingtrail.h \
+           cxeexception.h \
+           cxescenemodestore.h
+
+symbian {
+
+HEADERS+=  cxequalitypresetssymbian.h \
+           cxecameradevicecontrolsymbian.h \
+           cxecameradevice.h \
+           cxeviewfindercontrolsymbian.h \
+           cxevideocapturecontrolsymbian.h \
+           cxesettingscontrolsymbian.h \
+           cxestillcapturecontrolsymbian.h \
+           cxeenginesymbian.h \
+           cxeautofocuscontrolsymbian.h \
+           cxezoomcontrolsymbian.h \
+           cxeimagedataqueuesymbian.h \
+           cxeimagedataitemsymbian.h \
+           cxefilenamegeneratorsymbian.h \
+           cxeerrormappingsymbian.h \
+           cxesoundplayersymbian.h \
            cxevideorecorderutility.h \
            cxevideorecorderutilitysymbian.h \
-           cxedummycamera.h \
+           cxestillimagesymbian.h \
            cxesettingsmappersymbian.h \
-           cxefilesavethread.h \
            cxefilesavethreadsymbian.h \
-           cxesensoreventhandler.h \
            cxesensoreventhandlersymbian.h \
            cxesettingscenrepstore.h \
            cxesysutil.h \
            cxevideocontainer.h \
-           cxequalitydetails.h \
-           cxequalitypresets.h \
-           cxequalitypresetssymbian.h \
+           cxedummycamera.h \
            cxeharvestercontrolsymbian.h \
            cxethumbnailmanagersymbian.h \
-           cxememorymonitor.h \
-           cxememorymonitorprivate.h \
            cxediskmonitor.h \
            cxediskmonitorprivate.h \
            cxesnapshotcontrol.h \
            cxesnapshotcontrolprivate.h \
-           cxegeotaggingtrail.h \
-           cxegeotaggingtrailprivate.h \
+           cxegeotaggingtrail_symbian_p.h \
            sensor/xqsensor.h \
            sensor/xqaccsensor.h \
            sensor/xqdeviceorientation.h \
@@ -169,9 +180,45 @@ HEADERS += cxecameradevicecontrol.h \
            sensor/xqsensor_p.h \
            sensor/xqaccsensor_p.h \
            traces/OstTraceDefinitions.h
+           
+} else {
+HEADERS += cxeautofocuscontroldesktop.h \
+           cxecameradevicecontroldesktop.h \
+           cxeviewfindercontroldesktop.h \
+           cxezoomcontroldesktop.h \
+           cxefilenamegeneratordesktop.h \
+           cxefilesavethreaddesktop.h \
+           cxeimagedataitemdesktop.h \
+           cxeimagedataqueuedesktop.h \
+           cxevideocapturecontroldesktop.h \
+           cxestillimagedesktop.h \
+           cxestillcapturecontroldesktop.h \
+           cxequalitypresets.h \
+           cxequalitypresetsdesktop.h \
+           cxesensoreventhandlerdesktop.h \
+           cxesettingsstoredesktop.h \
+           cxecameradevicedesktop.h \
+           cxeviewfinderwidgetdesktop.h \
+           cxegeotaggingtrail_desktop_p.h \
+           cxeenginedesktop.h
+}
 
-SOURCES += cxecameradevicecontrolsymbian.cpp \
-           cxeengine.cpp \
+SOURCES += cxeengine.cpp \
+           cxefeaturemanagerimp.cpp \
+           cxememorymonitor.cpp \
+           cxememorymonitorprivate.cpp \
+           cxestatemachine.cpp \
+           cxestate.cpp \
+           cxestatemachinebase.cpp \
+           cxefilesavethread.cpp \
+           cxegeotaggingtrail.cpp \
+           cxesettingsimp.cpp \
+           cxescenemodestore.cpp
+
+symbian {
+SOURCES += cxedummycamera.cpp \
+           cxesysutil.cpp \
+           cxevideocontainer.cpp \
            cxeenginesymbian.cpp \
            cxeviewfindercontrolsymbian.cpp \
            cxestillcapturecontrolsymbian.cpp \
@@ -184,41 +231,46 @@ SOURCES += cxecameradevicecontrolsymbian.cpp \
            cxefilenamegeneratorsymbian.cpp \
            cxecameradevice.cpp \
            cxesoundplayersymbian.cpp \
-           cxesettingsmodelimp.cpp \
-           cxesettingsimp.cpp \
-           cxefeaturemanagerimp.cpp \
-           cxestatemachine.cpp \
-           cxestate.cpp \
-           cxestatemachinebase.cpp \
+           cxecameradevicecontrolsymbian.cpp \
            cxeerrormappingsymbian.cpp \
            cxestillimagesymbian.cpp \
            cxevideorecorderutilitysymbian.cpp \
            cxesettingsmappersymbian.cpp \
-           cxedummycamera.cpp \
-           cxefilesavethread.cpp \
            cxefilesavethreadsymbian.cpp \
            cxesensoreventhandlersymbian.cpp \
            cxesettingscenrepstore.cpp \
-           cxesysutil.cpp \
-           cxevideocontainer.cpp \
            cxequalitypresetssymbian.cpp \
            cxeharvestercontrolsymbian.cpp \
            cxethumbnailmanagersymbian.cpp \
-           cxememorymonitor.cpp \
-           cxememorymonitorprivate.cpp \
            cxediskmonitor.cpp \
            cxediskmonitorprivate.cpp \
            cxesnapshotcontrol.cpp \
            cxesnapshotcontrolprivate.cpp \
-           cxegeotaggingtrail.cpp \
-           cxegeotaggingtrailprivate.cpp \
+           cxegeotaggingtrail_symbian_p.cpp \
            sensor/xqsensor.cpp \
            sensor/xqaccsensor.cpp \
            sensor/xqdeviceorientation.cpp \
            sensor/xqdeviceorientation_p.cpp \
            sensor/xqsensor_p.cpp \
            sensor/xqaccsensor_p.cpp
-
-
-
-
+           
+} else {
+SOURCES += cxeautofocuscontroldesktop.cpp \
+           cxecameradevicecontroldesktop.cpp \
+           cxeviewfindercontroldesktop.cpp \
+           cxezoomcontroldesktop.cpp \
+           cxefilenamegeneratordesktop.cpp \
+           cxefilesavethreaddesktop.cpp \
+           cxeimagedataqueuedesktop.cpp \
+           cxeimagedataitemdesktop.cpp \
+           cxevideocapturecontroldesktop.cpp \
+           cxestillimagedesktop.cpp \
+           cxestillcapturecontroldesktop.cpp \
+           cxequalitypresetsdesktop.cpp \
+           cxesensoreventhandlerdesktop.cpp \
+           cxesettingsstoredesktop.cpp \
+           cxecameradevicedesktop.cpp \
+           cxeviewfinderwidgetdesktop.cpp \
+           cxegeotaggingtrail_desktop_p.cpp \
+           cxeenginedesktop.cpp
+}

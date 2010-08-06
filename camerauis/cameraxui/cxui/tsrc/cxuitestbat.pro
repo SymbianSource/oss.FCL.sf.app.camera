@@ -34,8 +34,8 @@ INCLUDEPATH += . \
                ../traces
 
 QT += testlib
-CONFIG += qtestlib hb symbian_test
-HB += hbcore hbwidgets hbfeedback hbutils
+CONFIG += qtestlib hb
+HB += hbcore hbwidgets hbtools hbfeedback
 
 LIBS += -lcxengine \
         -lcommonui \
@@ -62,7 +62,6 @@ SOURCES += cxuitestbat.cpp \
     cxuisettingslider.cpp \
     cxuisettingradiobuttonlist.cpp \
     cxuisettingscenemoderadiobuttonlist.cpp \
-    cxuiscenelabel.cpp \
     cxuiselftimer.cpp \
 	cxuierrormanager.cpp \
     cxuistandby.cpp
@@ -78,12 +77,11 @@ HEADERS += cxuitestbat.h \
     cxuienums.h \
     cxuidocumentloader.h \
     cxuidisplaypropertyhandler.h \
-	cxuisettingslider.h \
+    cxuisettingslider.h \
     cxuisettingradiobuttonlist.h \
     cxuisettingscenemoderadiobuttonlist.h \
-    cxuiscenelabel.h \
     cxuiselftimer.h \
-	cxuierrormanager.h \
+    cxuierrormanager.h \
     cxuistandby.h \
     ../traces/OstTraceDefinitions.h
 

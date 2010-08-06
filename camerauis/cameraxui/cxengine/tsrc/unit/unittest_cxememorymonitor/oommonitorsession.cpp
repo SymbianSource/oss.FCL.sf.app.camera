@@ -22,7 +22,7 @@ TInt ROomMonitorSession::Connect()
     return KErrNone;
 }
 
-TInt ROomMonitorSession::RequestFreeMemory(TInt aBytesRequested)
+TInt ROomMonitorSession::RequestFreeMemory(TInt /*aBytesRequested*/)
 {
     return KErrNone;
 }
@@ -37,7 +37,7 @@ TInt ROomMonitorSession::RequestOptionalRam(TInt /*aBytesRequested*/, TInt /*aMi
     return KErrNone;
 }
 
-void ROomMonitorSession::RequestOptionalRam(TInt /*aBytesRequested*/, TInt /*aMinimumBytesNeeded*/, TInt aPluginId, TRequestStatus& /*aStatus*/)
+void ROomMonitorSession::RequestOptionalRam(TInt /*aBytesRequested*/, TInt /*aMinimumBytesNeeded*/, TInt /*aPluginId*/, TRequestStatus& /*aStatus*/)
 {
     // do nothing
 }

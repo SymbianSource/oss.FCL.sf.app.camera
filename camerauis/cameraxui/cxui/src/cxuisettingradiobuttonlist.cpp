@@ -71,8 +71,7 @@ void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
         setListBoxType(data->mListboxType);
 
         // Store the original setting value and focus matching item.
-        QString value;
-        mEngine->settings().get(mSettingId, value);
+        QString value = mEngine->settings().get<QString>(mSettingId, "");
         CX_DEBUG(("CxuiSettingRadioButtonList - original value: [%s]", qPrintable(value)));
         setOriginalSelectedItemByValue(QVariant(value));
     }
@@ -205,11 +204,13 @@ void CxuiSettingRadioButtonList::commit(int index)
 
             // Don't set the value again, if it is the current value.
             // For e.g. video quality it would result in re-preparation etc.
-            int current(0);
-            CxeError::Id status(mEngine->settings().get(mSettingId, current));
-
-            if (status != CxeError::None || current != value.toInt()) {
-                mEngine->settings().set(mSettingId, value.toInt());
+            try {
+                int current = mEngine->settings().get<int>(mSettingId);
+                if (current != value.toInt()) {
+                    mEngine->settings().set(mSettingId, value.toInt());
+                }
+            } catch (CxeException &e) {
+                // ignore error
             }
             // inform interested clients about value changed event
             emit valueSelected(value.toInt());
@@ -217,12 +218,14 @@ void CxuiSettingRadioButtonList::commit(int index)
         } else if (value.type() == QVariant::String) {
             CX_DEBUG(("CxuiSettingRadioButtonList - index:%d value:[%s]", index, qPrintable(value.toString())));
 
-            QString current;
-            CxeError::Id status(mEngine->settings().get(mSettingId, current));
-            CX_DEBUG(("CxuiSettingRadioButtonList - settings model value:[%s]", qPrintable(current)));
-
-            if (status != CxeError::None || current != value.toString()) {
-                mEngine->settings().set(mSettingId, value.toString());
+            try {
+                QString current = mEngine->settings().get<QString>(mSettingId);
+                CX_DEBUG(("CxuiSettingRadioButtonList - settings model value:[%s]", qPrintable(current)));
+                if (current != value.toString()) {
+                    mEngine->settings().set(mSettingId, value.toString());
+                }
+            } catch (CxeException &e) {
+                // ignore error
             }
         }
     }

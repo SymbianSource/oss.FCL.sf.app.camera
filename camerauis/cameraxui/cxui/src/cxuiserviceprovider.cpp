@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -26,21 +26,13 @@
 #include "cxuiserviceprovider.h"
 #include "cxesettings.h"
 
+#include <xqaiwdecl.h>
+
 CxuiServiceProvider* CxuiServiceProvider::mInstance = NULL;
-
-// TODO: get these constants from header <xqaiwdecl.h>
-// will be released wk16
-const QString CXUI_SERVICE_NAME = "cxui.com.nokia.symbian.ICameraCapture";
-
-const QString CAMERA_INDEX = "CameraIndex";
-const QString QUALITY = "Quality";
-const QString ALLOW_MODE_SWITCH = "AllowModeSwitch";
-const QString ALLOW_CAMERA_SWITCH = "AllowCameraSwitch";
-const QString ALLOW_QUALITY_CHANGE = "AllowQualityChange";
 
 CxuiServiceProvider::CxuiServiceProvider(CxeEngine *engine)
 :
-    XQServiceProvider(CXUI_SERVICE_NAME),
+    XQServiceProvider("cxui." + XQI_CAMERA_CAPTURE),
     mRequestIndex(-1),
     mEngine(engine),
     mRequestedMode(Cxe::ImageMode),
@@ -151,6 +143,7 @@ void CxuiServiceProvider::sendFilenameToClientAndExit(QString filename)
     if (mRequestIndex == -1) {
         CX_DEBUG(("CxuiServiceProvider: no request in progress"));
         QCoreApplication::instance()->quit();
+        CX_DEBUG_EXIT_FUNCTION();
         return;
     }
 
@@ -159,6 +152,7 @@ void CxuiServiceProvider::sendFilenameToClientAndExit(QString filename)
     CX_DEBUG(("CxuiServiceProvider: completing request"));
     if (!completeRequest(mRequestIndex, QVariant(filename))) {
         // if request completion fails call quit immediately because signal is not coming
+        CX_DEBUG(("completeRequest() failed, quitting now"));
         QCoreApplication::instance()->quit();
     }
     mRequestIndex = -1;
@@ -236,22 +230,23 @@ bool CxuiServiceProvider::readParameters(const QVariantMap& parameters)
     CX_DEBUG_ENTER_FUNCTION();
     CX_DEBUG(("Reading parameters"));
     bool ok;
-    mCameraIndex = parameters[CAMERA_INDEX].toInt(&ok);
+    mCameraIndex = parameters[XQCAMERA_INDEX].toInt(&ok);
     if (!ok) {
-        CX_DEBUG(("Error reading parameter %s", CAMERA_INDEX.toAscii().constData()));
+        CX_DEBUG(("Error reading parameter %s", XQCAMERA_INDEX.latin1()));
         CX_DEBUG_EXIT_FUNCTION();
         return false;
     }
-    mQuality = parameters[QUALITY].toInt(&ok);
+    mQuality = parameters[XQCAMERA_QUALITY].toInt(&ok);
     if (!ok) {
-        CX_DEBUG(("Error reading parameter %s", CAMERA_INDEX.toAscii().constData()));
+        CX_DEBUG(("Error reading parameter %s", XQCAMERA_QUALITY.latin1()));
         CX_DEBUG_EXIT_FUNCTION();
         return false;
     }
 
-    mAllowModeSwitching = parameters[ALLOW_MODE_SWITCH].toBool();
-    mAllowQualityChange = parameters[ALLOW_QUALITY_CHANGE].toBool();
-    mAllowCameraSwitching = parameters[ALLOW_CAMERA_SWITCH].toBool();
+    // ignore possible errors on these parameters. default values will be false
+    mAllowModeSwitching = parameters[XQCAMERA_MODE_SWITCH].toBool();
+    mAllowQualityChange = parameters[XQCAMERA_QUALITY_CHANGE].toBool();
+    mAllowCameraSwitching = parameters[XQCAMERA_INDEX_SWITCH].toBool();
 
     CX_DEBUG_EXIT_FUNCTION();
     return true;

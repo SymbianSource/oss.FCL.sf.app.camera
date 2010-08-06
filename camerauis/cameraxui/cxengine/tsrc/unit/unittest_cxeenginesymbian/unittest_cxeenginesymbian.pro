@@ -44,6 +44,10 @@ LIBS *= -limagingconfigmanager
 LIBS *= -lxqserviceutil
 LIBS *= -loommonitor
 LIBS += -llocationmanager
+LIBS += -lcone
+LIBS *= -lws32
+LIBS += -lgdi
+LIBS += -lhal
 
 
 SOURCES *= unittest_cxeenginesymbian.cpp \
@@ -67,7 +71,6 @@ SOURCES *= unittest_cxeenginesymbian.cpp \
            cxestatemachine.cpp \
            cxestatemachinebase.cpp \
            cxestate.cpp \
-           cxesettingsmodelimp.cpp \
            cxesettingscenrepstore.cpp \
            cxefilenamegeneratorsymbian.cpp \
            cxefakefilenamegenerator.cpp \
@@ -104,15 +107,16 @@ SOURCES *= unittest_cxeenginesymbian.cpp \
            cxememorymonitorprivate.cpp \
            cxesnapshotcontrol.cpp \
            cxesnapshotcontrolprivate.cpp \
-           cxefakesettingsmodel.cpp \
            cxegeotaggingtrail.cpp \
-           cxegeotaggingtrailprivate.cpp           
+           cxegeotaggingtrail_symbian_p.cpp \
+           cxescenemodestore.cpp          
 
 
 
 HEADERS *= unittest_cxeenginesymbian.h \
            cxeenginesymbianunit.h \
            cxeenginesymbian.h \
+           cxengine_global.h \
            cxeengine.h \
            cxeautofocuscontrol.h \
            cxeautofocuscontrolsymbian.h \
@@ -140,7 +144,6 @@ HEADERS *= unittest_cxeenginesymbian.h \
            cxesettings.h \
            cxesettingsimp.h \
            cxefakesettings.h \
-           cxesettingsmodel.h \
            cxesettingscenrepstore.h \
            cxesettingsmappersymbian.h \
            cxesettingscontrolsymbian.h \
@@ -181,6 +184,6 @@ HEADERS *= unittest_cxeenginesymbian.h \
            cxememorymonitorprivate.h \
            cxesnapshotcontrol.h \
            cxesnapshotcontrolprivate.h \
-           cxefakesettingsmodel.h \
            cxegeotaggingtrail.h \
-           cxegeotaggingtrailprivate.h
+           cxegeotaggingtrail_symbian_p.h \
+           cxescenemodestore.h

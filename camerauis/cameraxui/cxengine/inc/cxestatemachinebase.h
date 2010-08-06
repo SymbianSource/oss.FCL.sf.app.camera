@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -14,6 +14,7 @@
 * Description:
 *
 */
+
 #ifndef CXESTATEMACHINEBASE_H
 #define CXESTATEMACHINEBASE_H
 
@@ -52,7 +53,7 @@ public:
     * @sa addState setInitialState
     * @param stateMachineName  Name for this state machine (used for debug prints)
     */
-    CxeStateMachineBase(const char* stateMachineName);
+    CxeStateMachineBase(const char *stateMachineName);
     virtual ~CxeStateMachineBase();
 
 protected:
@@ -76,7 +77,7 @@ protected:
      * @return False if state change fails. True if changing is allowed, or the current state is same
      * as the new state.
      */
-    virtual bool setState(int stateId, int error = 0);
+    virtual bool setState(int stateId, CxeError::Id error = CxeError::None);
 
     /**
      * Set the initial state of the state machine. Can be called only once.
@@ -116,7 +117,7 @@ protected:
 private:
 
     //! Hash table of all states. stateId as key
-    QHash<int, CxeState*> mStates;
+    QHash<int, CxeState *> mStates;
 
     //! All states ORed together
     int mStateBitsUsed;
@@ -130,5 +131,3 @@ private:
 };
 
 #endif // CXESTATEMACHINEBASE_H
-
-

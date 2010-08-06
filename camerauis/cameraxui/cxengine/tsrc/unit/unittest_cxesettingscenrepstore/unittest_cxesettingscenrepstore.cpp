@@ -67,7 +67,6 @@ void UnitTestCxeSettingsCenrepStore::cleanup()
 */
 void UnitTestCxeSettingsCenrepStore::testSettingValues()
 {
-    QString runtimekey = CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS;
     QString settingkey = CxeSettingIds::FNAME_MONTH_FOLDER;
     QString scenekey = CxeSettingIds::COLOR_TONE;
     QVariant result;
@@ -75,10 +74,6 @@ void UnitTestCxeSettingsCenrepStore::testSettingValues()
     CxeError::Id error;
     
     // case 0: check default value of a runtime key, real setting key and scene key
-    error = mSettingsCenrepStore->get(runtimekey, result);
-    QVERIFY(error == CxeError::None);
-    QCOMPARE(result.toInt(), 1);
-    
     error = mSettingsCenrepStore->get(settingkey, result);
     QVERIFY(error == CxeError::None);
     QCOMPARE(result.toInt(), 1);
@@ -89,9 +84,6 @@ void UnitTestCxeSettingsCenrepStore::testSettingValues()
 
     
     // case 1: try setting a value to a run-time key and real setting key
-    error = mSettingsCenrepStore->set(runtimekey, value);
-    QVERIFY(error == CxeError::NotFound);
-    
     error = mSettingsCenrepStore->set(settingkey, value);
     QVERIFY(error == CxeError::None);
     
@@ -124,11 +116,10 @@ void UnitTestCxeSettingsCenrepStore::testSettingValues()
 void UnitTestCxeSettingsCenrepStore::testloadSettings()
 {
     QList<QString> keys;
-    keys.append(CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS);
-    keys.append(CxeRuntimeKeys::PRIMARY_CAMERA_AUTOFOCUS_KEYS);
-    keys.append(CxeRuntimeKeys::SECONDARY_CAMERA_CAPTURE_KEYS);
-    keys.append(CxeRuntimeKeys::FREE_MEMORY_LEVELS);
-    QHash<QString, QVariantList> runtimesettings =  mSettingsCenrepStore->loadRuntimeSettings(keys);
+    keys.append(CxeVariationKeys::STILL_MAX_ZOOM_LIMITS);
+    keys.append(CxeVariationKeys::VIDEO_MAX_ZOOM_LIMITS);
+    keys.append(CxeVariationKeys::FREE_MEMORY_LEVELS);
+    QHash<QString, QVariantList> runtimesettings =  mSettingsCenrepStore->loadVariationSettings(keys);
     
     foreach(QString runtimekey, keys) {
         QVariant result;

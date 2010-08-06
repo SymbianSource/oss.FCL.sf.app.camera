@@ -48,17 +48,32 @@ void UnitTestCxeThumbnailManagerSymbian::testCreateThumbnail()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    QSignalSpy thumbnailReadySpy(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, int)));
     QString filename;
+
+    QVERIFY(thumbnailReadySpy.isValid()); 
 
     // case 1: testing with wrong dummy file, we should get an error code with thumbnailready
     // since filename is invalid
     mThumbnailManager->createThumbnail(filename, QImage());
+
+    // we should not get any call back when we have invalid file name.
+    QCOMPARE(thumbnailReadySpy.count(), 0);
 
 
     // case 1: testing with proper file name, we shouldnt get an error code with thumbnailready
     // since filename is valid
     filename = QString("c:\\test.jpg");    
     mThumbnailManager->createThumbnail(filename, QImage());
+
+    QTest::qWait(1500);
+ 
+    QCOMPARE( thumbnailReadySpy.count(), 1 );
+    if (thumbnailReadySpy.count() > 0) {
+        QList<QVariant> initModeArguments = thumbnailReadySpy.takeFirst();
+        // we are only interested in error code in this case 1
+        QCOMPARE(initModeArguments.at(1).toInt(), KErrNone);
+    }
 
     CX_DEBUG_EXIT_FUNCTION();
 }

@@ -27,7 +27,7 @@
 #include "cxefakesensoreventhandler.h"
 #include "cxefakefilenamegenerator.h"
 #include "cxutils.h"
-#include "cxefakesettingsmodel.h"
+
 
 //  Member Functions
 
@@ -52,8 +52,6 @@ void CxeEngineSymbianUnit::createControls()
     if (!mVideoCaptureControl) {
         mCameraDeviceControl = new CxeFakeCameraDeviceControl();
 
-        mSettings = new CxeFakeSettings();
-
         mFeatureManager = new CxeFakeFeatureManager();
 
         mSensorEventHandler = new CxeFakeSensorEventHandler();
@@ -69,8 +67,6 @@ void CxeEngineSymbianUnit::createControls()
         mZoomControl = new CxeFakeZoomControl();
 
         mVideoCaptureControl = new CxeFakeVideoCaptureControl();
-
-        mSettingsModel = new CxeFakeSettingsModel();
 
         mFeatureManager = new CxeFakeFeatureManager();
 

@@ -21,7 +21,7 @@
 
 #include "cxenamespace.h"
 
-class CxeAutoFocusControlSymbian;
+class CxeAutoFocusControlSymbianUnit;
 class CxeFakeCameraDeviceControl;
 class CxeFakeCameraDevice;
 class CxeFakeSettings;
@@ -40,21 +40,28 @@ private slots:
 
     void testStart();
     void testCancel();
-    void testMode();
-    void testIsFixedFocusMode();
 
+    void testIsFixedFocusMode();
     void testSupported();
+
+    // tests for protected slots?
+    void testPrepareForCameraDelete();
+    void testHandleCameraAllocated();
+    void testPrepareForRelease();
+    void testHandleCameraEvent();
+    void testHandleSceneChanged();
+    void testHandleSettingValueChanged();
 
 private:
     // Helper methods for test cases
 
 private:
-
     // Need to test with derived class to hide missing ECAM.
-    CxeAutoFocusControlSymbian *mAutoFocusControl;
+    CxeAutoFocusControlSymbianUnit *mAutoFocusControl;
     CxeFakeCameraDeviceControl *mCameraDeviceControl;
     CxeFakeCameraDevice *mCameraDevice;
     CxeFakeSettings *mFakeSettings;
+
 };
 
 #endif // UNITTEST_CXEAUTOFOCUSCONTROLSYMBIAN_H

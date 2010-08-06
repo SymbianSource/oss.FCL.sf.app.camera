@@ -29,14 +29,14 @@ class CxeSysUtil
 
 public:
 
-    static TBool DiskSpaceBelowCriticalLevel(
+    static bool DiskSpaceBelowCriticalLevel(
         RFs* aFs,
         TInt aBytesToWrite,
         TInt aDrive);
 
     static qint64 spaceAvailable(RFs &fs, int index, CxeSettings &settings);
     static void setSpaceAvailable(qint64 aSpaceAvailable);
-    
+
     static int getCameraDrive(RFs &fs);
 
 public:

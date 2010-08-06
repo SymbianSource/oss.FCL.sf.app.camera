@@ -268,19 +268,8 @@ void CxuiView::hideControls()
         mHideControlsTimeout.stop();
     }
 
-    // Hide title bar and status bar.
-    //!@todo: View flags property is missing from HbView, so can't set these in DocML.
-    HbView::HbViewFlags flags(HbView::ViewTitleBarTransparent
-                            | HbView::ViewTitleBarFloating
-                            | HbView::ViewTitleBarHidden
-                            | HbView::ViewStatusBarTransparent
-                            | HbView::ViewStatusBarFloating
-                            | HbView::ViewStatusBarHidden);
-    setViewFlags(flags);
-    //!@todo: Once the flags are defined in DocML, we can just use these convenience functions
-    //        to hide the title bar and status bar here.
-    //setTitleBarVisible(false);
-    //setStatusBarVisible(false);
+    setTitleBarVisible(false);
+    setStatusBarVisible(false);
 
     hideZoom();
 

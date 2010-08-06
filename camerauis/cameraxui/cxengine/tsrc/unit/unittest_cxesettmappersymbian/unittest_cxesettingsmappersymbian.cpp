@@ -22,7 +22,9 @@
 
 #include "cxenamespace.h"
 #include "cxesettingsmappersymbian.h"
+#include "cxequalitydetails.h"
 #include "unittest_cxesettingsmappersymbian.h"
+
 
 // Enums
 
@@ -64,7 +66,7 @@ void UnitTestCxeSettingsMapperSymbian::testMap2CameraAutofocus()
 void UnitTestCxeSettingsMapperSymbian::testMap2CameraEffect()
 {
     CCamera::CCameraImageProcessing::TEffect result;
-    int initialData = 99999;
+    Cxe::Colortone initialData = static_cast<Cxe::Colortone>(99999);
 
     // case 0: check with unknown value
     result = CxeSettingsMapperSymbian::Map2CameraEffect(initialData);
@@ -76,7 +78,8 @@ void UnitTestCxeSettingsMapperSymbian::testMap2CameraEffect()
     QVERIFY(result == CCamera::CCameraImageProcessing::EEffectSepia);
 
     // case 2: try with direct value which is invalid
-    result = CxeSettingsMapperSymbian::Map2CameraEffect(-1);
+    result = CxeSettingsMapperSymbian::Map2CameraEffect(
+            static_cast<Cxe::Colortone>(-1));
     QVERIFY(result == CCamera::CCameraImageProcessing::EEffectNone);
 
 }
@@ -84,7 +87,7 @@ void UnitTestCxeSettingsMapperSymbian::testMap2CameraEffect()
 void UnitTestCxeSettingsMapperSymbian::testMap2CameraExposureMode()
 {
     CCamera::TExposure result;
-    int initialData = -1;
+    Cxe::ExposureMode initialData = static_cast<Cxe::ExposureMode>(-1);
 
     // case 0: check with unknown value
     result = CxeSettingsMapperSymbian::Map2CameraExposureMode(initialData);
@@ -96,14 +99,15 @@ void UnitTestCxeSettingsMapperSymbian::testMap2CameraExposureMode()
     QVERIFY(result == CCamera::EExposureNight);
 
     // case 2: try with direct value which is invalid
-    result = CxeSettingsMapperSymbian::Map2CameraExposureMode(99999);
+    result = CxeSettingsMapperSymbian::Map2CameraExposureMode(
+        static_cast<Cxe::ExposureMode>(99999));
     QVERIFY(result == CCamera::EExposureAuto);
 }
 
 void UnitTestCxeSettingsMapperSymbian::testMap2CameraFlash()
 {
     CCamera::TFlash result;
-    int initialData = -1;
+    Cxe::FlashMode initialData = static_cast<Cxe::FlashMode>(-1);
 
     // case 0: check with unknown value
     result = CxeSettingsMapperSymbian::Map2CameraFlash(initialData);
@@ -115,7 +119,8 @@ void UnitTestCxeSettingsMapperSymbian::testMap2CameraFlash()
     QVERIFY(result == CCamera::EFlashForced);
 
     // case 2: try with direct value which is invalid
-    result = CxeSettingsMapperSymbian::Map2CameraFlash(99999);
+    result = CxeSettingsMapperSymbian::Map2CameraFlash(
+            static_cast<Cxe::FlashMode>(99999));
     QVERIFY(result == CCamera::EFlashAuto);
 }
 
@@ -138,7 +143,7 @@ void UnitTestCxeSettingsMapperSymbian::testMap2CameraOrientation()
 void UnitTestCxeSettingsMapperSymbian::testMap2CameraWb()
 {
     CCamera::TWhiteBalance result;
-    int initialData = -1;
+    Cxe::Whitebalance initialData = static_cast<Cxe::Whitebalance>(-1);
 
     // case 0: check with unknown value
     result = CxeSettingsMapperSymbian::Map2CameraWb(initialData);
@@ -150,10 +155,62 @@ void UnitTestCxeSettingsMapperSymbian::testMap2CameraWb()
     QVERIFY(result == CCamera::EWBDaylight);
 
     // case 2: try with direct value which is invalid
-    result = CxeSettingsMapperSymbian::Map2CameraWb(99999);
+    result = CxeSettingsMapperSymbian::Map2CameraWb(
+            static_cast<Cxe::Whitebalance>(99999));
     QVERIFY(result == CCamera::EWBAuto);
 }
 
+void UnitTestCxeSettingsMapperSymbian::testMap2UseCaseHintVideoParameters()
+{
+    CxeVideoDetails details;
+    MCameraUseCaseHint::TVideoCodec codec = MCameraUseCaseHint::ECodecUnknown;
+    MCameraUseCaseHint::TVideoProfile profile = MCameraUseCaseHint::EProfileUnknown;
+
+    details.mVideoCodecMimeType = "video/H263-2000";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecH263);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileH263P0L10);
+
+    details.mVideoCodecMimeType = "video/mp4v-es; profile-level-id=2";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecMpeg4);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileMPEG4SpL2);
+
+    details.mVideoCodecMimeType = "video/mp4v-es; profile-level-id=3";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecMpeg4);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileMPEG4SpL3);
+
+    details.mVideoCodecMimeType = "video/mp4v-es; profile-level-id=4";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecMpeg4);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileMPEG4SpL4a);
+
+    details.mVideoCodecMimeType = "video/mp4v-es; profile-level-id=foobar";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecMpeg4);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileUnknown);
+
+    details.mVideoCodecMimeType = "video/H264; profile-level-id=42801E";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecH264);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileH264BpL3);
+
+    details.mVideoCodecMimeType = "video/H264; profile-level-id=42801F";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecH264);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileH264BpL3_1);
+
+    details.mVideoCodecMimeType = "video/H264; profile-level-id=foobar";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecH264);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileUnknown);
+
+    details.mVideoCodecMimeType = "invalid";
+    CxeSettingsMapperSymbian::Map2UseCaseHintVideoParameters(details, codec, profile);
+    QCOMPARE(codec, MCameraUseCaseHint::ECodecUnknown);
+    QCOMPARE(profile, MCameraUseCaseHint::EProfileUnknown);
+}
+
 // main() function non-GUI testing
-QTEST_APPLESS_MAIN(UnitTestCxeSettingsMapperSymbian)
-;
+QTEST_APPLESS_MAIN(UnitTestCxeSettingsMapperSymbian);

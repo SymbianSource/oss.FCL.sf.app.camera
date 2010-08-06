@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -14,35 +14,39 @@
 * Description:
 *
 */
-/*
- * cxesettings.h
- *
- *  Created on: Dec 30, 2008
- *
- */
-#ifndef CXESETTINGSMAPPERSYMBIAN_H_
-#define CXESETTINGSMAPPERSYMBIAN_H_
+#ifndef CXESETTINGSMAPPERSYMBIAN_H
+#define CXESETTINGSMAPPERSYMBIAN_H
 
 #include <ecam.h>
 #include <ecamadvsettings.h>
 #include <ECamOrientationCustomInterface2.h>
+#include <ecamusecasehintcustomapi.h>
 #include "cxeautofocuscontrol.h"
 #include "cxenamespace.h"
-/*
-* Class to access all kind of Settings
+#include "cxequalitydetails.h"
+
+/*!
+    Map CameraX specific enums to ECam equivalents
 */
 class CxeSettingsMapperSymbian
 {
-
-  public: // mappings functions that maps UI enum value to CCamera specific enum
-    static CCamera::TWhiteBalance Map2CameraWb(int aWbId );
-    static CCamera::TFlash Map2CameraFlash(int aFlashId );
-    static CCamera::TExposure Map2CameraExposureMode(int aExpModeId );
-    static CCamera::CCameraImageProcessing::TEffect Map2CameraEffect(int aColourFilterId );
-    static CCamera::CCameraAdvancedSettings::TFocusRange Map2CameraAutofocus(CxeAutoFocusControl::Mode afMode);
-	static MCameraOrientation::TOrientation Map2CameraOrientation(Cxe::DeviceOrientation orientation);
+public:
+    static CCamera::TWhiteBalance Map2CameraWb(Cxe::Whitebalance whiteBalance);
+    static CCamera::TFlash Map2CameraFlash(Cxe::FlashMode flashMode);
+    static CCamera::TExposure Map2CameraExposureMode(
+            Cxe::ExposureMode exposureMode);
+    static CCamera::CCameraImageProcessing::TEffect Map2CameraEffect(
+            Cxe::Colortone colorTone);
+    static CCamera::CCameraAdvancedSettings::TFocusRange Map2CameraAutofocus(
+            CxeAutoFocusControl::Mode afMode);
+    static MCameraOrientation::TOrientation Map2CameraOrientation(
+            Cxe::DeviceOrientation orientation);
+    static void Map2UseCaseHintVideoParameters(
+            const CxeVideoDetails &videoDetails,
+            MCameraUseCaseHint::TVideoCodec &codec,
+            MCameraUseCaseHint::TVideoProfile &profile);
 };
 
-#endif /*CXESETTINGSMAPPERSYMBIAN_H_*/
+#endif /*CXESETTINGSMAPPERSYMBIAN_H*/
 
 // end  of file

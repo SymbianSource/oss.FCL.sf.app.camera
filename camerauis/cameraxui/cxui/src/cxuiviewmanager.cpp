@@ -21,6 +21,7 @@
 #include <hbstyleloader.h>
 #include <hbactivitymanager.h>
 #include <hbaction.h>
+#include <xqserviceutil.h>
 
 #include "cxuiapplication.h"
 #include "cxuiapplicationstate.h"
@@ -163,7 +164,7 @@ void CxuiViewManager::handleApplicationStateChanged(CxuiApplicationState::State 
     Q_UNUSED(oldState);
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxuiView *view = qobject_cast<CxuiView *>(mMainWindow.currentView());
+    CxuiView *view = currentView();
     CX_DEBUG(("CxuiViewManager - current view %d", view));
 
     switch (newState) {
@@ -209,7 +210,7 @@ void CxuiViewManager::handleExitingNormalState()
 {
     CX_DEBUG_ENTER_FUNCTION();
     // Store view that is active now.
-    CxuiView *view = qobject_cast<CxuiView *>(mMainWindow.currentView());
+    CxuiView *view = currentView();
     CX_DEBUG(("CxuiViewManager - current view %d", view));
 
     // Emit signal so current view can enter standby.
@@ -250,7 +251,6 @@ void CxuiViewManager::stopStandbyTimer()
 CxuiView* CxuiViewManager::currentView() const
 {
     CxuiView *view = qobject_cast<CxuiView*> (mMainWindow.currentView());
-    CX_ASSERT_ALWAYS(view);
     return view;
 }
 
@@ -261,7 +261,12 @@ void CxuiViewManager::initStartupView()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (mApplication.activateReason() == Hb::ActivationReasonService) {
+    if (mApplication.activateReason() == Hb::ActivationReasonService ||
+        // @todo: There's a bug in orbit and we never get Hb::ActivationReasonService as
+        // activation reason. Use XQServiceUtil to determine if starting service as
+        // a workaround for now
+        XQServiceUtil::isService()) {
+
         // For embedded mode: don't create view yet, create when engine inits to correct mode.
         // Connect signals to set up the view after image/video prepare
         connect(&mEngine.stillCaptureControl(), SIGNAL(imagePrepareComplete(CxeError::Id)),
@@ -290,16 +295,12 @@ void CxuiViewManager::initStartupView()
         }
 
         CxuiView *view = createView(viewName);
-        mMainWindow.setCurrentView(view, false);
-
         if (preCapture) {
-            connectPreCaptureSignals();
+            connectPreCaptureSignals(static_cast<CxuiPrecaptureView *>(view));
         } else {
             connectPostCaptureSignals();
         }
-
-        // Check the current application state, signalled to handleApplicationStateChanged.
-        mApplicationState->startMonitoring();
+        mMainWindow.setCurrentView(view, false);
 
         // restore view from activity
         bool ok = mApplication.activityManager()->waitActivity();
@@ -317,15 +318,14 @@ void CxuiViewManager::initStartupView()
         } else {
             view = createView(STILL_PRE_CAPTURE_VIEW);
         }
-
+        connectPreCaptureSignals(static_cast<CxuiPrecaptureView *>(view));
         mMainWindow.setCurrentView(view, false);
-        connectPreCaptureSignals();
-
-        // Check the current application state, signalled to handleApplicationStateChanged.
-        mApplicationState->startMonitoring();
 
         clearAllActivities();
     }
+
+    // Check the current application state, signalled to handleApplicationStateChanged.
+    mApplicationState->startMonitoring();
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -393,9 +393,9 @@ void CxuiViewManager::showScenesView()
     CX_ASSERT_ALWAYS(view);
     view->loadBackgroundImages();
 
-    mMainWindow.setCurrentView(view, false);
     stopStandbyTimer();
     connectSceneModeSignals();
+    mMainWindow.setCurrentView(view, false);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -435,14 +435,17 @@ void CxuiViewManager::changeToPostcaptureView()
 
     CxuiView *postCaptureView = createView(POSTCAPTURE_VIEW);
 
-    mMainWindow.setCurrentView(postCaptureView, false);
-
     // Connecting all necessary signals for postcapture view.
     // Not connected yet if not in normal state. We connect the signals
     // once we enter normal state again.
     if (mApplicationState->currentState() == CxuiApplicationState::Normal) {
         connectPostCaptureSignals();
     }
+
+    // Connect signals before we set the post-capture view as current view.
+    // We need to have signals connected if post-capture view for example
+    // needs to move back to pre-capture view already in showEvent.
+    mMainWindow.setCurrentView(postCaptureView, false);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -470,8 +473,12 @@ void CxuiViewManager::changeToPrecaptureView()
         // Disconnect signals from old view.
         disconnectSignals();
 
-        HbView *view = getPrecaptureView(mEngine.mode(),
-            mEngine.cameraDeviceControl().cameraIndex());
+        CxuiPrecaptureView *view =
+            getPrecaptureView(mEngine.mode(), mEngine.cameraDeviceControl().cameraIndex());
+
+        // Connect necessary pre-capture view signals.
+        connectPreCaptureSignals(view);
+
         mMainWindow.setCurrentView(view, false);
 
         // Release resources needed by scene view.
@@ -483,9 +490,6 @@ void CxuiViewManager::changeToPrecaptureView()
             sceneView->deleteLater();
             sceneView = NULL;
         }
-
-        // connecting necessary pre-capture view signals
-        connectPreCaptureSignals();
 
         // Make sure engine prepares for new image/video if necessary
         mEngine.initMode(mEngine.mode());
@@ -515,10 +519,9 @@ void CxuiViewManager::switchCamera()
     }
 
     CxuiPrecaptureView* view = getPrecaptureView(mEngine.mode(), nextCamera);
+    connectPreCaptureSignals(view);
     mMainWindow.setCurrentView(view, false);
     view->updateOrientation(nextViewOrientation);
-
-    connectPreCaptureSignals();
 
     mEngine.cameraDeviceControl().switchCamera(nextCamera);
 
@@ -577,7 +580,7 @@ bool CxuiViewManager::eventFilter(QObject *object, QEvent *event)
 /*!
 * Connect signals specific to given view.
 */
-void CxuiViewManager::connectSignals(QObject *view)
+void CxuiViewManager::connectSignals(CxuiView *view)
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0(camerax_performance, CXUIVIEWMANAGER_CONNECTSIGNALS_1, "msg: e_CX_VIEWMANAGER_CONNECT_SIGNALS 1");
@@ -588,7 +591,7 @@ void CxuiViewManager::connectSignals(QObject *view)
         } else if (view == mViews[SCENE_MODE_VIEW]) {
             connectSceneModeSignals();
         } else {
-            connectPreCaptureSignals();
+            connectPreCaptureSignals(static_cast<CxuiPrecaptureView *>(view));
         }
     }
 
@@ -601,7 +604,7 @@ void CxuiViewManager::connectSignals(QObject *view)
 * We don't want to send or receive signals with inactive views, so this is done every time changing a view.
 * @param view View object from which signals are disconnected. If NULL is given, current view is used.
 */
-void CxuiViewManager::disconnectSignals(QObject *view)
+void CxuiViewManager::disconnectSignals(CxuiView *view)
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0(camerax_performance, CXUIVIEWMANAGER_DISCONNECT_1, "msg: e_CX_VIEWMANAGER_DISCONNECT_SIGNALS 1");
@@ -611,7 +614,7 @@ void CxuiViewManager::disconnectSignals(QObject *view)
 
     if (!view) {
         // If view is not given, take current view.
-        view = mMainWindow.currentView();
+        view = currentView();
     }
 
     CX_DEBUG(("CxuiViewManager - disconnecting from view %d", view));
@@ -629,42 +632,39 @@ void CxuiViewManager::disconnectSignals(QObject *view)
 /*!
 * Connect signals to pre-capture view.
 */
-void CxuiViewManager::connectPreCaptureSignals()
+void CxuiViewManager::connectPreCaptureSignals(CxuiPrecaptureView *view)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    // Disconnect from the current, "old" view
     disconnectSignals();
 
-    HbView *currentView = mMainWindow.currentView();
+    // connecting pre-capture view signals to standby timer.
+    connect(view, SIGNAL(startStandbyTimer()),       this, SLOT(startStandbyTimer()), Qt::UniqueConnection);
+    connect(view, SIGNAL(stopStandbyTimer()),        this, SLOT(stopStandbyTimer()),  Qt::UniqueConnection);
+    connect(view, SIGNAL(changeToPrecaptureView()),  this, SLOT(startStandbyTimer()), Qt::UniqueConnection);
+    connect(view, SIGNAL(changeToPostcaptureView()), this, SLOT(stopStandbyTimer()),  Qt::UniqueConnection);
 
-    if (currentView != mViews[POSTCAPTURE_VIEW]) {
-        // connects all capture key signals.
-        connectCaptureKeySignals();
+    // connecting pre-capture view signals to viewmanager slots
+    connect(view, SIGNAL(changeToPostcaptureView()), this, SLOT(changeToPostcaptureView()), Qt::UniqueConnection);
+    connect(view, SIGNAL(changeToPrecaptureView()),  this, SLOT(changeToPrecaptureView()),  Qt::UniqueConnection);
 
-        // connecting pre-capture view signals to standby timer.
-        connect(currentView, SIGNAL(startStandbyTimer()),       this, SLOT(startStandbyTimer()), Qt::UniqueConnection);
-        connect(currentView, SIGNAL(stopStandbyTimer()),        this, SLOT(stopStandbyTimer()),  Qt::UniqueConnection);
-        connect(currentView, SIGNAL(changeToPrecaptureView()),  this, SLOT(startStandbyTimer()), Qt::UniqueConnection);
-        connect(currentView, SIGNAL(changeToPostcaptureView()), this, SLOT(stopStandbyTimer()),  Qt::UniqueConnection);
+    //connecting scene modes signal
+    connect(view, SIGNAL(showScenesView()), this, SLOT(showScenesView()), Qt::UniqueConnection);
 
-        // connecting pre-capture view signals to viewmanager slots
-        connect(currentView, SIGNAL(changeToPostcaptureView()), this, SLOT(changeToPostcaptureView()), Qt::UniqueConnection);
-        connect(currentView, SIGNAL(changeToPrecaptureView()),  this, SLOT(changeToPrecaptureView()),  Qt::UniqueConnection);
+    connect(view, SIGNAL(switchCamera()), this, SLOT(switchCamera()), Qt::UniqueConnection);
 
-        //connecting scene modes signal
-        connect(currentView, SIGNAL(showScenesView()), this, SLOT(showScenesView()), Qt::UniqueConnection);
+    // connecting error signals from precapture view to application state.
+    connect(view, SIGNAL(errorEncountered(CxeError::Id)),
+            mApplicationState, SLOT(handleApplicationError(CxeError::Id)),
+            Qt::UniqueConnection);
 
-        connect(currentView, SIGNAL(switchCamera()), this, SLOT(switchCamera()), Qt::UniqueConnection);
+    // Standby signals
+    connect(this, SIGNAL(normalStateEntered()), view, SLOT(exitStandby()), Qt::UniqueConnection);
+    connect(this, SIGNAL(normalStateExited()), view, SLOT(enterStandby()), Qt::UniqueConnection);
 
-        // connecting error signals from precapture view to application state.
-        connect(currentView, SIGNAL(errorEncountered(CxeError::Id)),
-                mApplicationState, SLOT(handleApplicationError(CxeError::Id)),
-                Qt::UniqueConnection);
-
-        // Standby signals
-        connect(this, SIGNAL(normalStateEntered()), currentView, SLOT(exitStandby()), Qt::UniqueConnection);
-        connect(this, SIGNAL(normalStateExited()), currentView, SLOT(enterStandby()), Qt::UniqueConnection);
-    }
+    // connects all capture key signals.
+    connectCaptureKeySignals(view);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -676,20 +676,20 @@ void CxuiViewManager::connectPostCaptureSignals()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    // Disconnect from the current, "old" view
     disconnectSignals();
-    QObject *currentView = mMainWindow.currentView();
-    if (currentView == mViews[POSTCAPTURE_VIEW]) {
 
-        connect(currentView, SIGNAL(changeToPrecaptureView()), this, SLOT(changeToPrecaptureView()), Qt::UniqueConnection);
+    CxuiView *view = mViews[POSTCAPTURE_VIEW];
+    if (view) {
+        connect(view, SIGNAL(changeToPrecaptureView()), this, SLOT(changeToPrecaptureView()), Qt::UniqueConnection);
 
         // Standby signals
-        connect(this, SIGNAL(normalStateEntered()), currentView, SLOT(exitStandby()), Qt::UniqueConnection);
-        connect(this, SIGNAL(normalStateExited()), currentView, SLOT(enterStandby()), Qt::UniqueConnection);
+        connect(this, SIGNAL(normalStateEntered()), view, SLOT(exitStandby()), Qt::UniqueConnection);
+        connect(this, SIGNAL(normalStateExited()), view, SLOT(enterStandby()), Qt::UniqueConnection);
 
         // connect necessary capturekey signals
-        connectCaptureKeySignals();
+        connectCaptureKeySignals(view);
     }
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -699,20 +699,20 @@ void CxuiViewManager::connectPostCaptureSignals()
 void CxuiViewManager::connectSceneModeSignals()
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    // Disconnect from the current, "old" view
     disconnectSignals();
 
-    HbView *currentView = mMainWindow.currentView();
-
-    if (currentView == mViews[SCENE_MODE_VIEW]) {
-
-        connectCaptureKeySignals();
-
+    CxuiView *view = mViews[SCENE_MODE_VIEW];
+    if (view) {
         // Standby signals for releasing camera
-        connect(this, SIGNAL(normalStateEntered()), currentView, SLOT(exitStandby()));
-        connect(this, SIGNAL(normalStateExited()), currentView, SLOT(enterStandby()));
+        connect(this, SIGNAL(normalStateEntered()), view, SLOT(exitStandby()));
+        connect(this, SIGNAL(normalStateExited()), view, SLOT(enterStandby()));
 
         // Moving back to pre-capture view
-        connect(currentView, SIGNAL(viewCloseEvent()), this, SLOT(changeToPrecaptureView()));
+        connect(view, SIGNAL(viewCloseEvent()), this, SLOT(changeToPrecaptureView()));
+
+        connectCaptureKeySignals(view);
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -720,22 +720,20 @@ void CxuiViewManager::connectSceneModeSignals()
 /*!
 * Connect key handler capture key signals.
 */
-void CxuiViewManager::connectCaptureKeySignals()
+void CxuiViewManager::connectCaptureKeySignals(CxuiView *view)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     // Disconnect all existing capture key signals
     mKeyHandler->disconnect();
 
-    QObject *currentView = mMainWindow.currentView();
-
-    if (currentView) {
+    if (view) {
         // If the view class does not implement the named slot, the connect will fail
         // and output some warnings as debug prints. This is by design.
-        connect(mKeyHandler, SIGNAL(autofocusKeyPressed()),  currentView, SLOT(handleAutofocusKeyPressed()));
-        connect(mKeyHandler, SIGNAL(autofocusKeyReleased()), currentView, SLOT(handleAutofocusKeyReleased()));
-        connect(mKeyHandler, SIGNAL(captureKeyPressed()),    currentView, SLOT(handleCaptureKeyPressed()));
-        connect(mKeyHandler, SIGNAL(captureKeyReleased()),   currentView, SLOT(handleCaptureKeyReleased()));
+        connect(mKeyHandler, SIGNAL(autofocusKeyPressed()),  view, SLOT(handleAutofocusKeyPressed()));
+        connect(mKeyHandler, SIGNAL(autofocusKeyReleased()), view, SLOT(handleAutofocusKeyReleased()));
+        connect(mKeyHandler, SIGNAL(captureKeyPressed()),    view, SLOT(handleCaptureKeyPressed()));
+        connect(mKeyHandler, SIGNAL(captureKeyReleased()),   view, SLOT(handleCaptureKeyReleased()));
     }
 
     CX_DEBUG_EXIT_FUNCTION();

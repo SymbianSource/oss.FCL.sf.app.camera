@@ -18,9 +18,9 @@
 #include <QTest>
 
 #include "unittest_cxefeaturemanagerimp.h"
-#include "cxefakesettingsmodel.h"
 #include "cxefeaturemanagerimp.h"
 #include "cxenamespace.h"
+#include "cxesettings.h"
 
 
 static const char* INVALID_KEY = "invalid key";
@@ -28,7 +28,7 @@ static const char* EMPTY_KEY = "";
 
 
 UnitTestCxeFeatureManager::UnitTestCxeFeatureManager()
-: mFakeSettingsModel(NULL), mFeatureManager(NULL)
+: mFeatureManager(NULL)
 {
 }
 
@@ -41,16 +41,12 @@ UnitTestCxeFeatureManager::~UnitTestCxeFeatureManager()
 void UnitTestCxeFeatureManager::init()
 {
     // fake model contains initialized test data.
-    mFakeSettingsModel = new CxeFakeSettingsModel();
-    mFeatureManager = new CxeFeatureManagerImp(*mFakeSettingsModel);
+    mFeatureManager = new CxeFeatureManagerImp(*mSettings);
 }
 
 // Run after each individual test case
 void UnitTestCxeFeatureManager::cleanup()
 {
-    delete mFakeSettingsModel;
-    mFakeSettingsModel = 0;
-
     delete mFeatureManager;
     mFeatureManager = 0;
 }
@@ -73,7 +69,7 @@ void UnitTestCxeFeatureManager::testIsFeatureSupported()
     QCOMPARE(err, CxeError::NotFound);
 
     // test with right key
-    key = CxeRuntimeKeys::PRIMARY_CAMERA_CAPTURE_KEYS;
+    key = CxeVariationKeys::STILL_MAX_ZOOM_LIMITS;
     err = mFeatureManager->isFeatureSupported(key, isSupported);
     QVERIFY(isSupported);
     QCOMPARE(err, CxeError::None);
@@ -99,7 +95,7 @@ void UnitTestCxeFeatureManager::testconfiguredValues()
     QCOMPARE(values.count(), 0);
     
     // case 3: test with right key
-    key = CxeRuntimeKeys::VIDEO_MAX_ZOOM_LIMITS;
+    key = CxeVariationKeys::VIDEO_MAX_ZOOM_LIMITS;
     err = mFeatureManager->configuredValues(key, values);
     QCOMPARE(err, CxeError::None);
     QVERIFY(values.count() > 0);

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -106,21 +106,23 @@ protected slots:
     void handleCameraAllocated(CxeError::Id error);
     void prepareForRelease();
     // settings call back
-    void handleSettingValueChanged(const QString& settingId,QVariant newValue);
+    void handleSettingValueChanged(const QString &settingId, QVariant newValue);
     // scene mode change
-    void handleSceneChanged(CxeScene& scene);
+    void handleSceneChanged(const QVariant &scene);
     // Disk space change
     void handleDiskSpaceChanged();
+    void hintUseCase();
 
 private: // helper methods
     void releaseResources();
     void initializeStates();
-    void getVideoQualityDetails(CxeVideoDetails &videoInfo);
+    void updateVideoCaptureParameters();
     void initVideoRecorder();
     void open();
     void prepare();
+    void prepareSnapshot();
     virtual void createVideoRecorder();
-    int calculateRemainingTime(const CxeVideoDetails& videoDetails);
+    int calculateRemainingTime(const CxeVideoDetails &videoDetails);
     void updateRemainingRecordingTimeCounter();
     void generateFilename();
     void handlePrepareFailed();

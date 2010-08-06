@@ -35,6 +35,8 @@ CxeFakeVideoRecorderUtility::CxeFakeVideoRecorderUtility(MVideoRecorderUtilityOb
                               : mObserver( &aObserver )
 {
     CX_DEBUG_IN_FUNCTION();
+    Q_UNUSED(aPriority);
+    Q_UNUSED(aPref);
 }
 
 void CxeFakeVideoRecorderUtility::open(int cameraHandle,
@@ -45,6 +47,7 @@ void CxeFakeVideoRecorderUtility::open(int cameraHandle,
                                        const QString &/*audioType*/)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    Q_UNUSED(cameraHandle);
     mObserver->MvruoOpenComplete(KErrNone);
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -57,21 +60,25 @@ void CxeFakeVideoRecorderUtility::setVideoFrameSize(const QSize &/*size*/)
 void CxeFakeVideoRecorderUtility::setVideoFrameRate(int rate)
 {
     CX_DEBUG_IN_FUNCTION();
+    Q_UNUSED(rate);
 }
 
 void CxeFakeVideoRecorderUtility::setVideoBitRate(int rate)
 {
     CX_DEBUG_IN_FUNCTION();
+    Q_UNUSED(rate);
 }
 
 void CxeFakeVideoRecorderUtility::setAudioEnabled(bool enabled)
 {
     CX_DEBUG_IN_FUNCTION();
+    Q_UNUSED(enabled);
 }
 
 void CxeFakeVideoRecorderUtility::setVideoMaxSize(int sizeInBytes)
 {
     CX_DEBUG_IN_FUNCTION();
+    Q_UNUSED(sizeInBytes);
 }
 
 void CxeFakeVideoRecorderUtility::close()
@@ -94,6 +101,7 @@ void CxeFakeVideoRecorderUtility::record()
 void CxeFakeVideoRecorderUtility::stop(bool asynchronous)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    Q_UNUSED(asynchronous);
     mObserver->MvruoRecordComplete(KErrNone);
     CX_DEBUG_EXIT_FUNCTION();
 }

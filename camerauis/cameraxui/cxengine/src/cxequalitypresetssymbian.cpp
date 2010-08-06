@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009, Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <e32std.h> // For Symbian types used in mmsenginedomaincrkeys.h
 #include <MmsEngineDomainCRKeys.h>
+#include <imagingconfigmanager.h>
 
 #include "cxutils.h"
 #include "cxenamespace.h"
@@ -222,7 +223,7 @@ QList<CxeVideoDetails> CxeQualityPresetsSymbian::videoQualityPresets(Cxe::Camera
 @ param set contains the ICM configuration data
 @ returns CxeImageQuality struct
 */
-CxeImageDetails CxeQualityPresetsSymbian::createImagePreset(TImageQualitySet set)
+CxeImageDetails CxeQualityPresetsSymbian::createImagePreset(const TImageQualitySet &set)
 {
     CxeImageDetails newPreset;
     // set setting values from quality set
@@ -244,7 +245,7 @@ CxeImageDetails CxeQualityPresetsSymbian::createImagePreset(TImageQualitySet set
 /*!
 * Creates a new video preset based on TVideoQualitySet values from ICM.
 */
-CxeVideoDetails CxeQualityPresetsSymbian::createVideoPreset(TVideoQualitySet set)
+CxeVideoDetails CxeQualityPresetsSymbian::createVideoPreset(const TVideoQualitySet &set)
 {
     CX_DEBUG_ENTER_FUNCTION();
     CxeVideoDetails newPreset;
@@ -384,11 +385,10 @@ int CxeQualityPresetsSymbian::recordingTimeAvailable(const CxeVideoDetails& deta
         scaler = VIDEO_AVG_BITRATE_SCALER;
     }
 
-    int muteSetting = 0; // audio enabled
-    mSettings.get(CxeSettingIds::VIDEO_MUTE_SETTING, muteSetting);
+    bool muteSetting = mSettings.get<bool>(CxeSettingIds::VIDEO_MUTE_SETTING, false); // false = audio enabled
 
     int avgVideoBitRate = (details.mVideoBitRate * scaler);
-    int avgAudioBitRate = (muteSetting == 1) ? 0 : details.mAudioBitRate;
+    int avgAudioBitRate = muteSetting ? 0 : details.mAudioBitRate;
 
     quint32 averageBitRate = (quint32)((avgVideoBitRate + avgAudioBitRate) * VIDEO_METADATA_COEFF);
     quint32 averageByteRate = averageBitRate / 8;
@@ -437,7 +437,7 @@ QString CxeQualityPresetsSymbian::toString(const TUint8* aData)
 * Helper method to enable debug prints.
 @ param  Video quality preset values are printed out for debugging
 */
-void CxeQualityPresetsSymbian::debugPrints(CxeVideoDetails preset)
+void CxeQualityPresetsSymbian::debugPrints(const CxeVideoDetails &preset)
 {
     CX_DEBUG(("Video quality details"));
     CX_DEBUG(("Video resolution (%d,%d)", preset.mWidth, preset.mHeight));
@@ -462,7 +462,7 @@ void CxeQualityPresetsSymbian::debugPrints(CxeVideoDetails preset)
 * Helper method to enable debug prints.
 @ param  Image quality preset values are printed out for debugging
 */
-void CxeQualityPresetsSymbian::debugPrints(CxeImageDetails newPreset)
+void CxeQualityPresetsSymbian::debugPrints(const CxeImageDetails &newPreset)
 {
     CX_DEBUG(("Image quality details"));
     CX_DEBUG(("Image resolution (%d,%d)", newPreset.mWidth, newPreset.mHeight));

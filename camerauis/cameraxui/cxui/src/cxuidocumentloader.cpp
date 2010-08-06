@@ -33,10 +33,12 @@
 #include "cxeengine.h"
 #include "cxuienums.h"
 
+#ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuidocumentloaderTraces.h"
-#endif
+#endif // OST_TRACE_COMPILER_IN_USE
+#endif // Q_OS_SYMBIAN
 
 
 CxuiDocumentLoader::CxuiDocumentLoader(CxeEngine *engine) : HbDocumentLoader(), mEngine(engine)

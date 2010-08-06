@@ -86,6 +86,7 @@ protected slots:
     void handleDeleteDialogClosed(int action);
 
 private:
+    bool isFileDeleted();
     QString getCurrentFilename();
 
     void startTimers();
@@ -93,7 +94,7 @@ private:
     void startReleaseTimers();
 
 private slots:
-    void handleThumbnailReady(QPixmap thumbnail, void *clientData, int id, int errorCode);
+    void handleThumbnailReady(QPixmap thumbnail);
 
 private: // data
     HbToolBar *mStillToolbar;

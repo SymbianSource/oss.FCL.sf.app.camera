@@ -21,6 +21,7 @@
 #include <QLocale>
 #include <HbTranslator>
 #include <hbmainwindow.h>
+#include <xqserviceutil.h>
 
 #ifdef Q_OS_SYMBIAN
 #include <coemain.h>
@@ -41,8 +42,6 @@
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "mainTraces.h"
 #endif // OST_TRACE_COMPILER_IN_USE
-#else
-#include "cxuimacrosdesktop.h"
 #endif // Q_OS_SYMBIAN
 
 using namespace Cxe;
@@ -74,13 +73,19 @@ int main(int argc, char *argv[])
     CxeEngine *engine = CxeEngine::createEngine();
     OstTrace0( camerax_performance, DUP8__MAIN, "msg: e_CX_CREATE_ENGINE 0" );
 
-    if (app.activateReason() == Hb::ActivationReasonService) {
+    if (app.activateReason() == Hb::ActivationReasonService ||
+        // @todo: There's a bug in orbit and we never get Hb::ActivationReasonService as
+        // activation reason. Use XQServiceUtil to determine if starting service as
+        // a workaround for now
+        XQServiceUtil::isService()) {
+        CX_DEBUG(("CxUI: Camera started as service"));
         // Embedded mode.  Engine is inited to correct mode
         // by service provider when request arrives
         CX_DEBUG(("CxUI: creating serviceprovider"));
         CxuiServiceProvider::create(engine);
         CX_DEBUG(("CxUI: done"));
     } else if (app.activateReason() == Hb::ActivationReasonActivity) {
+        CX_DEBUG(("CxUI: Camera started as activity"));
         Cxe::CameraMode mode = Cxe::ImageMode;
         QString activityId = app.activateId();
         if (activityId == CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY ||
@@ -98,6 +103,7 @@ int main(int argc, char *argv[])
             engine->setMode(mode);
         }
 	} else {
+        CX_DEBUG(("CxUI: Camera started as normal app"));
 	    // normal start
 	    engine->initMode(engine->mode());
 	}
@@ -105,7 +111,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_SYMBIAN
     //!@todo: Yield run time to system to get enough resources released to start camera.
     CX_DEBUG(("CxUI: yield control for resource freeing.."));
-    User::After(300*1000); // 300ms
+    User::After(2*1000*1000); // 2s
     CX_DEBUG(("CxUI: waiting done.."));
 #endif // Q_OS_SYMBIAN
 

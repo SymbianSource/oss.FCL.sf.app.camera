@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -14,12 +14,12 @@
  * Description:
  *
  */
+
 #include "cxestatemachinebase.h"
 #include "cxutils.h"
-#include "cxeerrormappingsymbian.h"
 #include "cxestate.h"
 
-CxeStateMachineBase::CxeStateMachineBase( const char* stateMachineName ) :
+CxeStateMachineBase::CxeStateMachineBase(const char *stateMachineName) :
     mStateBitsUsed(0), mStateId(0), mName(stateMachineName)
 {
 }
@@ -30,7 +30,7 @@ CxeStateMachineBase::~CxeStateMachineBase()
     mStates.clear();
 }
 
-bool CxeStateMachineBase::addState( CxeState* state )
+bool CxeStateMachineBase::addState(CxeState *state)
 {
     bool success( state // non-null state object
                && state->stateId() // state id is not zero
@@ -46,7 +46,7 @@ bool CxeStateMachineBase::addState( CxeState* state )
     return success;
 }
 
-bool CxeStateMachineBase::setState( int stateId, int error )
+bool CxeStateMachineBase::setState(int stateId, CxeError::Id error)
 {
     bool success = true;
 
@@ -76,13 +76,13 @@ bool CxeStateMachineBase::setState( int stateId, int error )
 
     if (success) {
         mStateId = stateId;
-        handleStateChanged(mStateId, CxeErrorHandlingSymbian::map(error));
+        handleStateChanged(mStateId, error);
     }
 
     return success;
 }
 
-bool CxeStateMachineBase::setInitialState( int stateId )
+bool CxeStateMachineBase::setInitialState(int stateId)
 {
     bool success = mStates.contains(stateId);
 
@@ -113,7 +113,7 @@ int CxeStateMachineBase::stateId() const
     return mStateId;
 }
 
-bool CxeStateMachineBase::verifyStateChange( int newStateId )
+bool CxeStateMachineBase::verifyStateChange(int newStateId)
 {
     bool allowStateChange = false;
 
@@ -126,7 +126,3 @@ bool CxeStateMachineBase::verifyStateChange( int newStateId )
 
     return allowStateChange;
 }
-
-
-
-

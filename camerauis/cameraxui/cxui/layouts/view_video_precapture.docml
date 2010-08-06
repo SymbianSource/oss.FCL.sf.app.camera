@@ -56,6 +56,7 @@
         </widget>
         <string locid="txt_cam_title_camera" name="title" value="Camera"/>
         <bool name="contentFullScreen" value="TRUE"/>
+        <enums name="viewFlags" value="ViewTitleBarTransparent|ViewTitleBarFloating|ViewTitleBarHidden|ViewStatusBarTransparent|ViewStatusBarFloating|ViewStatusBarHidden"/>
     </widget>
     <section name="video_capture_indicators">
         <widget name="video_container" role="HbView:widget" type="HbWidget">
@@ -83,7 +84,6 @@
                     <icon iconName="qtg_mono_call_mute" name="icon"/>
                     <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
                     <sizehint height="var(hb-param-graphic-size-primary-small)" type="FIXED" width="var(hb-param-graphic-size-primary-small)"/>
-                    <bool name="visible" value="FALSE"/>
                 </widget>
                 <real name="z" value="5"/>
                 <bool name="visible" value="TRUE"/>
@@ -96,6 +96,10 @@
                 </layout>
             </widget>
             <layout type="anchor">
+                <anchoritem dst="video_viewfinder_widget" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="video_viewfinder_widget" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="video_viewfinder_widget" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                <anchoritem dst="video_viewfinder_widget" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
                 <anchoritem dst="video_indicator_container_top" dstEdge="LEFT" spacing="11un" src="" srcEdge="LEFT"/>
                 <anchoritem dst="video_indicator_container_top" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
             </layout>
@@ -139,31 +143,20 @@
                 <widget name="video_indicator_container_bottom" type="HbWidget">
                     <widget name="video_recording_icon" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                        <icon iconName="qtg_small_record" name="icon"/>
+                        <icon iconName="qtg_mono_pause" name="icon"/>
                         <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
                         <sizehint height="var(hb-param-graphic-size-function)" type="FIXED" width="var(hb-param-graphic-size-function)"/>
-                    </widget>
-                    <widget name="video_remaining_time" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                        <sizehint height="var(hb-param-graphic-size-function)" type="PREFERRED"/>
-                        <string name="textColor" value="#ffffff"/>
-                        <string name="plainText" value="00:00"/>
-                        <fontspec name="fontSpec" role="Undefined" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="video_elapsed_time" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                         <sizehint height="var(hb-param-graphic-size-function)" type="PREFERRED"/>
-                        <string name="textColor" value="#ffffff"/>
-                        <string name="plainText" value="00:00"/>
                         <fontspec name="fontSpec" role="Undefined" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <real name="z" value="5"/>
-                    <bool name="visible" value="FALSE"/>
                     <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
                         <contentsmargins bottom="var(hb-param-margin-gene-middle-vertical)" left="var(hb-param-margin-gene-middle-horizontal)" right="var(hb-param-margin-gene-middle-horizontal)" top="var(hb-param-margin-gene-middle-vertical)"/>
                         <linearitem itemname="video_recording_icon"/>
                         <linearitem itemname="video_elapsed_time"/>
-                        <linearitem itemname="video_remaining_time"/>
                     </layout>
                 </widget>
                 <layout type="anchor">
@@ -229,63 +222,21 @@
         </widget>
     </section>
     <section name="video_idle">
-        <widget name="video_elapsed_time" type="HbLabel">
-            <bool name="visible" value="FALSE"/>
-        </widget>
         <widget name="video_recording_icon" type="HbLabel">
-            <bool name="visible" value="FALSE"/>
-        </widget>
-        <widget name="video_indicator_container_bottom" type="HbWidget">
-            <bool name="visible" value="TRUE"/>
-            <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
-                <contentsmargins bottom="var(hb-param-margin-gene-middle-vertical)" left="var(hb-param-margin-gene-middle-horizontal)" right="var(hb-param-margin-gene-middle-horizontal)" top="var(hb-param-margin-gene-middle-vertical)"/>
-                <linearitem itemname="video_remaining_time"/>
-            </layout>
+            <icon iconName="qtg_mono_pause" name="icon"/>
         </widget>
     </section>
     <section name="video_recording">
-        <widget name="video_elapsed_time" type="HbLabel">
-            <bool name="visible" value="TRUE"/>
-        </widget>
-        <widget name="video_remaining_time" type="HbLabel">
-            <bool name="visible" value="TRUE"/>
-        </widget>
         <widget name="video_recording_icon" type="HbLabel">
-            <bool name="visible" value="TRUE"/>
             <icon iconName="qtg_small_record" name="icon"/>
-        </widget>
-        <widget name="video_indicator_container_bottom" type="HbWidget">
-            <bool name="visible" value="TRUE"/>
-            <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
-                <contentsmargins bottom="var(hb-param-margin-gene-middle-vertical)" left="var(hb-param-margin-gene-middle-horizontal)" right="var(hb-param-margin-gene-middle-horizontal)" top="var(hb-param-margin-gene-middle-vertical)"/>
-                <linearitem itemname="video_recording_icon"/>
-                <linearitem itemname="video_elapsed_time"/>
-                <linearitem itemname="video_remaining_time"/>
-            </layout>
         </widget>
     </section>
     <section name="video_paused">
-        <widget name="video_elapsed_time" type="HbLabel">
-            <bool name="visible" value="TRUE"/>
-        </widget>
-        <widget name="video_remaining_time" type="HbLabel">
-            <string name="textColor" value="#ffffff"/>
-        </widget>
         <widget name="video_recording_icon" type="HbLabel">
             <icon iconName="qtg_mono_pause" name="icon"/>
-            <bool name="visible" value="TRUE"/>
-        </widget>
-        <widget name="video_indicator_container_bottom" type="HbWidget">
-            <bool name="visible" value="TRUE"/>
-            <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
-                <contentsmargins bottom="var(hb-param-margin-gene-middle-vertical)" left="var(hb-param-margin-gene-middle-horizontal)" right="var(hb-param-margin-gene-middle-horizontal)" top="var(hb-param-margin-gene-middle-vertical)"/>
-                <linearitem itemname="video_recording_icon"/>
-                <linearitem itemname="video_elapsed_time"/>
-                <linearitem itemname="video_remaining_time"/>
-            </layout>
         </widget>
     </section>
-    <metadata activeUIState="Paused" display="NHD-3.2-inch_landscape" unit="un">
+    <metadata activeUIState="Common ui state" display="NHD-3.2-inch_landscape" unit="un">
         <uistate name="Common ui state" sections="#common"/>
         <uistate name="All widgets" sections="#common video_capture_with_widgets"/>
         <uistate name="video_standalone_mode" sections="#common video_capture_with_widgets video_standalone_mode"/>

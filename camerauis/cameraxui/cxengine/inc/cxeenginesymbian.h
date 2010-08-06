@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -33,7 +33,6 @@ class CxeFeatureManager;
 class CxeAutoFocusControl;
 class CxeSettings;
 class CxeFeatureManager;
-class CxeSettingsModel;
 class CxeSensorEventHandler;
 class CxeFilenameGenerator;
 class CxeQualityPresets;
@@ -77,6 +76,7 @@ protected:
 
 private slots:
     void doInit();
+    void initGeotagging();
 
 private:
     void connectSignals();
@@ -85,7 +85,6 @@ private:
     bool startViewfinderNeeded();
     void reserve();
     void saveMode();
-    void startGeotaggingTrail();
 
 protected:
     CxeCameraDeviceControl *mCameraDeviceControl;
@@ -99,7 +98,6 @@ protected:
     CxeZoomControl *mZoomControl;
     CxeSettings *mSettings;
     CxeFeatureManager *mFeatureManager;
-    CxeSettingsModel *mSettingsModel;
     CxeFilenameGenerator *mFilenameGenerator;
     CxeSensorEventHandler* mSensorEventHandler;
     CxeQualityPresets *mQualityPresets;

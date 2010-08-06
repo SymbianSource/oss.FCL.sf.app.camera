@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -14,20 +14,19 @@
 * Description:
 *
 */
+
 #ifndef CXUICAPTUREKEYHANDLER_H
 #define CXUICAPTUREKEYHANDLER_H
 
 #include <QObject>
 
-class RWsSession;
-class RWindowGroup;
 class QEvent;
 class CxeEngine;
-
+class CxuiCaptureKeyHandlerPrivate;
 
 class CxuiCaptureKeyHandler : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 public:
     CxuiCaptureKeyHandler(CxeEngine &aEngine);
     virtual ~CxuiCaptureKeyHandler();
@@ -49,23 +48,8 @@ signals:
     void captureKeyReleased();
 
 private:
-    void listenKey(int key);
-
-private:
-    bool mAutofocusKeyPressed;
-    bool mCaptureKeyPressed;
-
-    QList<int> mCapturedKeyHandles;
-    QList<int> mCapturedKeyUpDownHandles;
-
-    QList<int> mPrimaryCameraAutofocusKeys;
-    QList<int> mPrimaryCameraCaptureKeys;
-    QList<int> mSecondaryCameraCaptureKeys;
-
-    CxeEngine &mEngine;
-
-    RWsSession &mWsSession; // not own
-    RWindowGroup &mWindowGroup; // not own
+    CxuiCaptureKeyHandlerPrivate *d_ptr;
+    Q_DECLARE_PRIVATE(CxuiCaptureKeyHandler)
 };
 
 #endif // CXUICAPTUREKEYHANDLER_H

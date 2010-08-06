@@ -48,10 +48,16 @@
 #include "cxesettings.h"
 #include "cxefeaturemanager.h" // mEngine->featureManager()
 #include "cxuidocumentloader.h"
+
+#ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
+
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuistillprecaptureviewTraces.h"
 #endif
+
+#endif //Q_OS_SYMBIAN
+
 #include "cxuistillprecaptureview.h"
 #include "cxuiserviceprovider.h"
 #include "cxuisettingdialog.h"
@@ -112,22 +118,13 @@ void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
             this, SLOT(handleStillCaptureStateChanged(CxeStillCaptureControl::State, CxeError::Id)));
     connect(&mEngine->viewfinderControl(), SIGNAL(stateChanged(CxeViewfinderControl::State, CxeError::Id)),
             this, SLOT(handleViewfinderStateChanged(CxeViewfinderControl::State, CxeError::Id)));
-    connect(&(mEngine->settings()), SIGNAL(sceneChanged(CxeScene&)),
-            this, SLOT(handleSceneChanged(CxeScene&)));
     connect(&mEngine->stillCaptureControl(), SIGNAL(availableImagesChanged()),
             this, SLOT(updateImagesLeftLabel()));
 
+    mEngine->settings().listenForSetting(CxeSettingIds::IMAGE_SCENE_DATA, this, SLOT(handleSceneChanged(const QVariant&)));
+
     loadDefaultWidgets();
     hideControls();
-
-    mSelfTimer = new CxuiSelfTimer(mEngine->settings());
-    connect(mSelfTimer, SIGNAL(timerFinished()), this, SLOT(focusAndCapture()));
-
-    int value = Cxe::GeoTaggingDisclaimerDisabled;
-    mEngine->settings().get(CxeSettingIds::GEOTAGGING_DISCLAIMER, value);
-    if (value == Cxe::GeoTaggingDisclaimerEnabled) {
-        launchGeoTaggingDisclaimerDialog();
-    }
 
     OstTrace0( camerax_performance, DUP1_CXUISTILLPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_STILLPRECAPVIEW_CONSTRUCT 0" );
     CX_DEBUG_EXIT_FUNCTION();
@@ -159,7 +156,7 @@ void CxuiStillPrecaptureView::reloadIndicatorWidgets()
 {
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(mDocumentLoader);
-    
+
     bool ok = false;
     mDocumentLoader->load(STILL_1ST_XML, STILL_PRE_CAPTURE_INDICATORS_SECTION, &ok);
     CX_ASSERT_ALWAYS(ok);
@@ -168,7 +165,7 @@ void CxuiStillPrecaptureView::reloadIndicatorWidgets()
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_QUALITY_ICON);
     mQualityIcon = qobject_cast<HbLabel *>(widget);
     CX_ASSERT_ALWAYS(mQualityIcon);
-    
+
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_FLASHBLINK_INDICATOR_ICON);
     HbLabel *flashBlinkingIcon = qobject_cast<HbLabel *>(widget);
     CX_ASSERT_ALWAYS(flashBlinkingIcon);
@@ -184,7 +181,7 @@ void CxuiStillPrecaptureView::reloadIndicatorWidgets()
     widget = mDocumentLoader->findWidget(STILL_PRE_CAPTURE_INDICATOR_CONTAINER);
     mIndicators = qobject_cast<HbWidget *>(widget);
     CX_ASSERT_ALWAYS(mIndicators);
-    
+
     QGraphicsLayout *layout = mIndicators->layout();
     QGraphicsLayoutItem *graphicsLayoutItem = NULL;
     QGraphicsItem *graphicsItem = NULL;
@@ -202,15 +199,15 @@ void CxuiStillPrecaptureView::reloadIndicatorWidgets()
             currentSettingValue = -1;
             if (graphicsItem == mGeoTaggingIndicatorIcon) {
                 key = CxeSettingIds::GEOTAGGING;
-                mEngine->settings().get(key, currentSettingValue);
+                currentSettingValue = mEngine->settings().get(key, currentSettingValue);
                 if (currentSettingValue == Cxe::GeoTaggingOff) {
                     isSettingOff = true;
                 }
             } else if (graphicsItem == mFaceTrackingIcon) {
                 key = CxeSettingIds::FACE_TRACKING;
-                mEngine->settings().get(key, currentSettingValue);
-                // facetracking implementation does not use 
-                // enum for on/off values but instead 
+                currentSettingValue = mEngine->settings().get(key, currentSettingValue);
+                // facetracking implementation does not use
+                // enum for on/off values but instead
                 // 0 for off and 1 for on.
                 if (currentSettingValue == 0) {
                     isSettingOff = true;
@@ -224,10 +221,10 @@ void CxuiStillPrecaptureView::reloadIndicatorWidgets()
             }
         }
     }
-    
+
     // create background for indicator container
     createWidgetBackgroundGraphic(mIndicators, TRANSPARENT_BACKGROUND_GRAPHIC);
-    
+
     mIndicators->setVisible(true);
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -242,7 +239,7 @@ void CxuiStillPrecaptureView::loadWidgets()
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(mDocumentLoader);
 
-    if( mWidgetsLoaded ) {
+    if (mWidgetsLoaded) {
         CX_DEBUG(("Widgets already loaded"));
         CX_DEBUG_EXIT_FUNCTION();
         return;
@@ -272,12 +269,6 @@ void CxuiStillPrecaptureView::loadWidgets()
     CX_ASSERT_ALWAYS(mSlider);
     mSlider->addZoomButtons();
     createWidgetBackgroundGraphic(mSlider, TRANSPARENT_BACKGROUND_GRAPHIC);
-
-    if (mSelfTimer) {
-        // let selftimer class get needed selftimer related widgets
-        // from the documentloader
-        mSelfTimer->loadSelftimerWidgets(mDocumentLoader);
-    }
 
     // create background for selftimer containers
     HbWidget *container = NULL;
@@ -310,6 +301,13 @@ void CxuiStillPrecaptureView::loadWidgets()
     createWidgetBackgroundGraphic(mImagesLeftContainer, TRANSPARENT_BACKGROUND_GRAPHIC);
     updateImagesLeftLabel();
 
+    // Create self timer.
+    // Let selftimer class get needed selftimer related widgets from the documentloader
+    mSelfTimer = new CxuiSelfTimer(mEngine->settings());
+    CX_ASSERT_ALWAYS(mSelfTimer);
+    connect(mSelfTimer, SIGNAL(timerFinished()), this, SLOT(focusAndCapture()));
+    mSelfTimer->loadSelftimerWidgets(mDocumentLoader);
+
     if (CxuiServiceProvider::isCameraEmbedded()) {
         CX_DEBUG(("EMBEDDED: camera in embedded mode"));
 
@@ -341,18 +339,19 @@ void CxuiStillPrecaptureView::loadWidgets()
     mWidgetsLoaded = true;
 
     // Update toolbar flash mode icon
-    int flash;
-    if (mEngine->settings().get(CxeSettingIds::FLASH_MODE, flash) == CxeError::None) {
-        handleSettingValueChanged(CxeSettingIds::FLASH_MODE, flash);
-    }
+    int flash = mEngine->settings().get<int>(CxeSettingIds::FLASH_MODE);
+    handleSettingValueChanged(CxeSettingIds::FLASH_MODE, flash);
 
     // Update toolbar scene mode icon
-    QString sceneId;
-    if (mEngine->settings().get(CxeSettingIds::SCENE_ID, sceneId) == CxeError::None) {
-        updateSceneIcon(sceneId);
-    }
+    updateSceneIcon(mEngine->settings().get<QString>(CxeSettingIds::IMAGE_SCENE));
 
     hideControls();
+
+    // Check if we need to show the geotagging disclaimer for first time use.
+    Cxe::GeoTaggingDisclaimer value = mEngine->settings().get<Cxe::GeoTaggingDisclaimer>(CxeSettingIds::GEOTAGGING_DISCLAIMER, Cxe::GeoTaggingDisclaimerDisabled);
+    if (value == Cxe::GeoTaggingDisclaimerEnabled) {
+        launchGeoTaggingDisclaimerDialog();
+    }
 
     // View is ready. Needed for startup performance automated testing.
     emit viewReady();
@@ -459,7 +458,7 @@ bool CxuiStillPrecaptureView::isPostcaptureOn() const
     // On error (missing settings) default to "postcapture on".
     int showPostcapture(-1);
     if(mEngine) {
-        mEngine->settings().get(CxeSettingIds::STILL_SHOWCAPTURED, showPostcapture);
+        showPostcapture = mEngine->settings().get<int>(CxeSettingIds::STILL_SHOWCAPTURED, -1);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -507,9 +506,7 @@ void CxuiStillPrecaptureView::updateQualityIcon()
 
     if (mQualityIcon && mEngine) {
         QString icon = "";
-        int currentValue = -1;
-
-        mEngine->settings().get(CxeSettingIds::IMAGE_QUALITY, currentValue);
+        int currentValue = mEngine->settings().get<int>(CxeSettingIds::IMAGE_QUALITY, -1);
         icon = getSettingItemIcon(CxeSettingIds::IMAGE_QUALITY, currentValue);
 
         mQualityIcon->setIcon(HbIcon(icon));
@@ -558,16 +555,17 @@ void CxuiStillPrecaptureView::focusAndCapture()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (!mEngine->autoFocusControl().supported()) {
+    if (!mEngine->autoFocusControl().supported() ||
+         mEngine->autoFocusControl().isFixedFocusMode(mEngine->autoFocusControl().mode())) {
         // autofocus is not supported, so start capturing straight away
         capture();
     } else {
+        setCapturePending();
         // start focusing
         // Auto-focus can only work if viewfinder is running
         if (mEngine->viewfinderControl().state() == CxeViewfinderControl::Running) {
             mEngine->autoFocusControl().start(false);
         }
-        setCapturePending();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -864,11 +862,12 @@ void CxuiStillPrecaptureView::resetCapturePendingFlag()
     Slot for handling scene mode change
     \param scene QVariantMap containing settings related to the new scene mode
  */
-void CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
+void CxuiStillPrecaptureView::handleSceneChanged(const QVariant &newSceneData)
 {
     CX_DEBUG_ENTER_FUNCTION();
     if (mEngine->mode() == Cxe::ImageMode) {
 
+        CxeScene scene = newSceneData.toMap();
         // update toolbar scene mode icon
         updateSceneIcon(scene[CxeSettingIds::SCENE_ID].toString());
 
@@ -879,10 +878,10 @@ void CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
         } else {
             // No flash mode specified within the scene.
             // Check from setting model what is it currently.
-            int flashMode(Cxe::FlashAuto);
-            mEngine->settings().get(CxeSettingIds::FLASH_MODE, flashMode);
+            Cxe::FlashMode flashMode = mEngine->settings().get<Cxe::FlashMode>(CxeSettingIds::FLASH_MODE, Cxe::FlashAuto);
             handleSettingValueChanged(CxeSettingIds::FLASH_MODE, QVariant(flashMode));
         }
+
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -984,10 +983,8 @@ void CxuiStillPrecaptureView::launchSetting()
         launchSettingsDialog(action);
         // special case to get value changed event to the selftimer class
         if (settingsKey == CxeSettingIds::SELF_TIMER) {
-            // if selftimer is active remember the previously selected value
-            if (mSelfTimer->isEnabled()) {
-                mSettingsDialogList->setOriginalSelectedItemByValue(mSelfTimer->getTimeout());
-            }
+            // selftimer is not found in settings so set the value now
+            mSettingsDialogList->setOriginalSelectedItemByValue(mSelfTimer->getTimeout());
             connect(mSettingsDialogList, SIGNAL(valueSelected(int)),
                     mSelfTimer, SLOT(changeTimeOut(int)));
         }
@@ -1028,11 +1025,10 @@ void CxuiStillPrecaptureView::updateFaceTrackingIcon()
     if (mFaceTrackingIcon && mEngine) {
         QString key = "";
         QString icon = "";
-        int currentValue = -1;
 
         key = CxeSettingIds::FACE_TRACKING;
 
-        mEngine->settings().get(key, currentValue);
+        int currentValue = mEngine->settings().get<int>(key, -1);
         icon = getSettingItemIcon(key, currentValue);
 
         mFaceTrackingIcon->setIcon(HbIcon(icon));

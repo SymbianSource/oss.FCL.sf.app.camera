@@ -401,10 +401,11 @@ CCamera::CCameraAdvancedSettings::TAutoFocusType CxeAutoFocusControlSymbian::foc
 /*
 * Image Scene mode changed, get the new autofocus value
 */
-void CxeAutoFocusControlSymbian::handleSceneChanged(CxeScene& scene)
+void CxeAutoFocusControlSymbian::handleSceneChanged(const QVariant& sceneData)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    CxeScene scene = sceneData.value<CxeScene>();
     // whenever scene mode is changed we set the state to unknown
     setState(CxeAutoFocusControl::Unknown);
 
@@ -442,14 +443,14 @@ void CxeAutoFocusControlSymbian::handleAfEvent(int eventUid, int error)
             if (KErrNone == error) {
                 setState(CxeAutoFocusControl::Ready);
             } else {
-                setState(CxeAutoFocusControl::Failed, error);
+                setState(CxeAutoFocusControl::Failed, CxeErrorHandlingSymbian::map(error));
             }
          } else if (eventUid == KUidECamEventCameraSettingFocusRangeUidValue) {
              // check for error, we don't need this event for anything else
              if (error != KErrNone) {
                  CX_DEBUG(("CxeAutofocusControlSymbian::handleAfEvent <> "
                          "KUidECamEventCameraSettingFocusRangeUidValue: autofocus failed %d", error));
-                 setState(CxeAutoFocusControl::Failed, error);
+                 setState(CxeAutoFocusControl::Failed, CxeErrorHandlingSymbian::map(error));
              }
          }
          break;

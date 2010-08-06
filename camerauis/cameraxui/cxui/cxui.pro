@@ -29,6 +29,7 @@ symbian {
     # Fix for QMake translating INCLUDEPATH to SYSTEMINCLUDE
     # and TraceCompiler needing USERINCLUDE.
     MMP_RULES           += "USERINCLUDE traces"
+    MMP_RULES           += SMPSAFE
 }
 
 # export sound file
@@ -42,26 +43,45 @@ VPATH += src \
     inc
 INCLUDEPATH += inc \
                traces
+!symbian {
+    DEPENDPATH  += stubs_desktop/inc
+    INCLUDEPATH += ../cxengine/inc/api \
+                   stubs_desktop/inc
+    DEFINES += CAMERAX_ENGINE_NO_LIBRARY
+}
 
-LIBS += -lecam  \
-    -lecamsnapshot \
-    -lws32 \
-    -lbitgdi \
-    -lfbscli \
-    -lcxengine \
-    -lapmime \
-    -lcommonui \
-    -lxqutils \
-    -lxqservice \
-    -lxqserviceutil \
-    -lshareui \
-    -lcone \
-    -lefsrv \
-    -lws32 \
-    -lgdi \
-    -lapgrfx \
-    -lusbman \
-    -lthumbnailmanagerqt
+symbian {
+    LIBS += -lecam  \
+            -lecamsnapshot \
+            -lws32 \
+            -lbitgdi \
+            -lfbscli \
+            -lcxengine \
+            -lapmime \
+            -lcommonui \
+            -lxqutils \
+            -lxqservice \
+            -lxqserviceutil \
+            -lshareui \
+            -lcone \
+            -lefsrv \
+            -lws32 \
+            -lgdi \
+            -lapgrfx \
+            -lusbman \
+            -lthumbnailmanagerqt
+} else {
+    win32 {
+        debug {
+            LIBS += ../cxengine/debug/libcxengine.a
+
+        } else {
+            LIBS += ../cxengine/release/libcxengine.a
+        }        
+    } else {
+        LIBS += ../cxengine/libcxengine.a
+    }
+}
 
 CONFIG += hb
 CONFIG += service
@@ -72,7 +92,18 @@ SERVICE.OPTIONS = embeddable
 HB += hbcore hbwidgets hbfeedback hbutils
 
 # Input
-HEADERS += cxuiapplication.h \
+
+DOCML += layouts/errornote_popup.docml \
+    layouts/full_screen_popup.docml \
+    layouts/setting.docml \
+    layouts/setting_scenemode.docml \
+    layouts/setting_slider.docml \
+    layouts/view_postcapture.docml \
+    layouts/view_still_precapture.docml \
+    layouts/view_video_precapture.docml        
+
+HEADERS += cxengine_global.h \
+    cxuiapplication.h \
     cxuiapplicationframeworkmonitor.h \
     cxuiapplicationframeworkmonitorprivate.h \
     cxuiapplicationstate.h \
@@ -90,7 +121,6 @@ HEADERS += cxuiapplication.h \
     cxuisettingslider.h \
     cxuiselftimer.h \
     cxuisettingradiobuttonlist.h \
-    cxuiscenelabel.h \
     cxuierrormanager.h \
     cxuisettingradiobuttonlistmodel.h \
     cxuisettingsinfo.h \
@@ -99,8 +129,21 @@ HEADERS += cxuiapplication.h \
     cxuiscenemodeview.h \
     cxuizoomslider.h \
     cxuifullscreenpopup.h \
-    cxuieventlog.h \
-    traces/OstTraceDefinitions.h
+    cxuieventlog.h 
+
+symbian {
+    HEADERS += traces/OstTraceDefinitions.h \
+               cxuicapturekeyhandler_symbian_p.h
+}
+else {
+    HEADERS += cxuimacrosdesktop.h \
+               cxuicapturekeyhandler_desktop_p.h \
+               shareui.h \
+               thumbnailmanager_qt.h \
+               xqappmgr.h \
+               xqserviceprovider.h \
+               XQUtils
+}
 
 SOURCES += main.cpp \
     cxuiapplication.cpp \
@@ -120,7 +163,6 @@ SOURCES += main.cpp \
     cxuisettingslider.cpp \
     cxuiselftimer.cpp \
     cxuisettingradiobuttonlist.cpp \
-    cxuiscenelabel.cpp \
     cxuierrormanager.cpp \
     cxuisettingradiobuttonlistmodel.cpp \
     cxuisettingsinfo.cpp \
@@ -130,6 +172,12 @@ SOURCES += main.cpp \
     cxuizoomslider.cpp \
     cxuifullscreenpopup.cpp \
     cxuieventlog.cpp
+
+symbian {
+    SOURCES += cxuicapturekeyhandler_symbian_p.cpp
+} else {
+    SOURCES += cxuicapturekeyhandler_desktop_p.cpp
+}
 
 RESOURCES += cxui.qrc
 

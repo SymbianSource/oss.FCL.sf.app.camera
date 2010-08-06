@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,12 +15,15 @@
 *
 */
 
+#include "cxememorymonitorprivate.h"
+
+#ifdef Q_OS_SYMBIAN
 #include <hal.h>
+#endif // Q_OS_SYMBIAN
 
 #include "cxutils.h"
 #include "cxenamespace.h"
 #include "cxefeaturemanager.h"
-#include "cxememorymonitorprivate.h"
 
 namespace
 {
@@ -36,7 +39,7 @@ CxeMemoryMonitorPrivate::CxeMemoryMonitorPrivate(CxeFeatureManager &features)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    mFeatures.configuredValues(CxeRuntimeKeys::FREE_MEMORY_LEVELS, mLevels);
+    mFeatures.configuredValues(CxeVariationKeys::FREE_MEMORY_LEVELS, mLevels);
 
     CX_DEBUG(("CxeMemoryMonitorPrivate - trigger level: %d bytes", mLevels.value(Cxe::FreeMemoryTrigger)));
     CX_DEBUG(("CxeMemoryMonitorPrivate - target level:  %d bytes", mLevels.value(Cxe::FreeMemoryTarget)));

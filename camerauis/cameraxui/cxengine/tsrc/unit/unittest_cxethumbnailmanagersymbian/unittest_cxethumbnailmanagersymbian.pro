@@ -18,6 +18,8 @@ TARGET = unittest_cxethumbnailmanagersymbian
 INCLUDEPATH *= ../system_include
 DEPENDPATH  *= ../system_include
 
+LIBS *= -lthumbnailmanagerqt
+
 HEADERS *= unittest_cxethumbnailmanagersymbian.h \
            cxethumbnailmanagersymbian.h \
            thumbnailmanager_qt.h \

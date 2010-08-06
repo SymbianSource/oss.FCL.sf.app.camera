@@ -75,9 +75,7 @@ public slots:
     // from CxuiPrecaptureView
     virtual void handleSettingValueChanged(const QString& key, QVariant newValue);
 
-    // whenever a scene setting is changed on the engine side, an icon might need updating on the toolbar
-    // connects to the sceneChanged signal of CxeSettings
-    void handleSceneChanged(CxeScene &scene);
+    void handleSceneChanged(const QVariant &newSceneData);
 
     // From CxuiPrecaptureView
     virtual void enterStandby();

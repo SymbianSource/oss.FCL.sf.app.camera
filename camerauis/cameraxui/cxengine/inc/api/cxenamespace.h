@@ -120,7 +120,7 @@ namespace Cxe
     };
 
     /*!
-    * Index to CxeRuntimeKeys::FREE_MEMORY_LEVELS comma separated values
+    * Index to CxeVariationKeys::FREE_MEMORY_LEVELS comma separated values
     */
     enum FreeMemoryIndex
     {
@@ -193,9 +193,13 @@ namespace CxeSettingIds
     static const char*  FNAME_IMAGE_COUNTER                    = "image_counter";
     static const char*  FNAME_VIDEO_COUNTER                    = "video_counter";
 
-    // scene mode keys
-    static const char* IMAGE_SCENE                             = "still_scene_modes";
-    static const char* VIDEO_SCENE                             = "video_scene_modes";
+    // scene modes. these ids are used to access scene data in settings (CxeScene)
+    static const char* IMAGE_SCENE_DATA                        = "still_scene_mode_data";
+    static const char* VIDEO_SCENE_DATA                        = "video_scene_mode_data";
+
+    // these setting ids are used to access scene id
+    static const char* IMAGE_SCENE                             = "still_scene_mode";
+    static const char* VIDEO_SCENE                             = "video_scene_mode";
 
     // setting keys for post capture timeout
     static const char*  STILL_SHOWCAPTURED                     = "still_showcaptured";
@@ -206,12 +210,9 @@ namespace CxeSettingIds
 }
 
 
-namespace CxeRuntimeKeys
+namespace CxeVariationKeys
 {
-    // Runtime keys
-    static const char* PRIMARY_CAMERA_CAPTURE_KEYS   = "primary_camera_capture_keys";
-    static const char* PRIMARY_CAMERA_AUTOFOCUS_KEYS = "primary_camera_autofocus_keys";
-    static const char* SECONDARY_CAMERA_CAPTURE_KEYS = "secondary_camera_capture_keys";
+    // Runtime variation keys
     static const char* FREE_MEMORY_LEVELS            = "free_memory_levels";
     static const char* STILL_MAX_ZOOM_LIMITS         = "still_max_zoom_limits";
     static const char* VIDEO_MAX_ZOOM_LIMITS         = "video_max_zoom_limits";

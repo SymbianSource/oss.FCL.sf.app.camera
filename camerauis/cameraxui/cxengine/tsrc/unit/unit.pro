@@ -31,7 +31,6 @@ SUBDIRS = cxeunitrunner \
           unittest_cxestillimagesymbian \
           unittest_cxeimagedataitemsymbian \
           unittest_cxeerrormappersymbian \
-          unittest_cxesettingsmodelimp \
           unittest_cxefilesavethreadsymbian \
           unittest_cxesettingscenrepstore \
           unittest_cxestillcapturecontrolsymbian \
@@ -39,6 +38,7 @@ SUBDIRS = cxeunitrunner \
           unittest_cxefeaturemanagerimp \
           unittest_cxeenginesymbian \
           unittest_cxesettingsimp \
+	  unittest_cxescenemodestore \
           unittest_cxequalitypresetssymbian \
           unittest_cxethumbnailmanagersymbian \
           unittest_cxeharvestercontrolsymbian \

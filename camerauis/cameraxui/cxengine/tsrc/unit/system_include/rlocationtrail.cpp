@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,9 +15,11 @@
 *
 */
 
+#include <e32err.h>
 #include "rlocationtrail.h"
 
 RLocationTrail::RLocationTrail()
+    : mTrailConnected(false), mTrailStarted(false)
 {
 }
 
@@ -25,57 +27,40 @@ RLocationTrail::~RLocationTrail()
 {
 }
 
-TInt RLocationTrail::Connect()
+int RLocationTrail::StartLocationTrail(TTrailCaptureSetting /*aState*/)
 {
+    int err = KErrNone;
+    
+    if (mTrailConnected) {
+        mTrailStarted = true;
+    } else {
+        err = KErrGeneral;
+    }
+    
+    return err;
+}
+
+int RLocationTrail::StopLocationTrail()
+{
+    int err = KErrNone;
+    if (!mTrailConnected || !mTrailStarted) {
+        err = KErrGeneral;
+    } else {
+        mTrailStarted = false;
+    }
+    return err;
+}
+
+
+
+int RLocationTrail::Connect()
+{
+    mTrailConnected = true;
     return KErrNone;
 }
+
 
 void RLocationTrail::Close()
 {
+    mTrailConnected = false;
 }
-
-TInt RLocationTrail::StartLocationTrail(TTrailCaptureSetting aState)
-{
-    return KErrNone;
-}
-
-TInt RLocationTrail::StopLocationTrail()
-{
-    return KErrNone;
-}
-
-TInt RLocationTrail::GetLocationTrailState( TTrailState& aState )
-{
-    return KErrNone;
-}
-
-void RLocationTrail::NotifyLocationTrailStateChange( TRequestStatus& aStatus )
-{
-}
-
-void RLocationTrail::CancelNotificationRequest()
-{
-}
-
-TInt RLocationTrail::RetrieveLocation( const TTime& aTimeStamp,
-                                       TLocationData& aLocationData,
-                                       TTrailState& aState )
-{
-    return KErrNone;
-}
-
-void RLocationTrail::CurrentLocation( TRequestStatus& aStatus,
-                                      TLocationData& aLocationData)
-{
-}
-
-void RLocationTrail::CancelLocationRequest()
-{
-}
-
-TInt RLocationTrail::GetTrailCaptureSetting( TTrailCaptureSetting& aCaptureSetting )
-{
-    return KErrNone;
-}
-
-// end of file

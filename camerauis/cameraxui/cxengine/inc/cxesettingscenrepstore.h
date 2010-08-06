@@ -25,72 +25,15 @@
 #include "cxeerror.h"
 #include "cxenamespace.h"
 #include "xqsettingsmanager.h"
+#include "cxesettingsstore.h"
 
 // forward declarations
 class XQSettingsManager;
 class XQSettingsKey;
 
-
 /*!
-* \class CxeSettingsStore 
-* \brief Settings store intrerface.
-*/
-class CxeSettingsStore
-{
-public:
+* CxeSettingsCenRepStore class implements CxeSettingsStore.
 
-    /*!
-    * This needs to be here to be able to delete an object
-    * of inherited class through mixin pointer.
-    * If this is not defined, deleting through the mixin pointer
-    * results in User-42 panic!
-    */
-    virtual ~CxeSettingsStore() {};
-
-    /*!
-    * resets the cenrep store
-    */
-    virtual void reset() = 0;
-    
-    /*!
-    * Reads a value from cenrep
-    * @param "key"   - setting key
-    * @param "value" - setting value read from cenrep
-    */
-	virtual CxeError::Id get(const QString& key, QVariant &value) = 0;
-
-    /*!
-    * Reads a value from cenrep and starts monitoring changes
-    * @param "uid"   - UID of the component that own setting key
-    * @param "key"   - setting key id
-    * @param "type"  - type of setting key
-    * @param "value" - setting value read from cenrep
-    */
-	virtual void startMonitoring(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value) = 0;
-	
-	/*!
-    * Sets a new value to cenrep
-    * @param "key"   - setting key
-    * @param "newValue" - new value set to the key in cenrep
-    */
-	virtual CxeError::Id set(const QString& key,const QVariant newValue) = 0;
-	    
-	/*!
-    * Reads/loads all run-time settings values from cenrep
-    * @param QList<QString> contains list of all runtime key ids which we use to load values from cenrep.
-    * returns: QHash container, "contains" values associated with each key that are read from cenrep
-    * NOTE: loading runtime settings should be done only ONCE at start-up. Its an overhead to read runtime keys
-    *       unnecessarily multiple times as the values of the runtime keys are not changed.
-    *       Runtime keys are only used to configure camerax application.
-    */
-	virtual QHash<QString, QVariantList> loadRuntimeSettings(QList<QString>& settingKeys) = 0;
-};
-
-
-
-/*!
-* \class CxeSettingsCenRepStore 
-* \brief Class implements CxeSettingsStore.
 * This class uses CenRep key mechanism for storing and retrieving settings information.
 */
 class CxeSettingsCenRepStore : public QObject,
@@ -107,10 +50,10 @@ public:
 public: // from base class
 
     void reset();
-	CxeError::Id get(const QString& key, QVariant &value);
+	CxeError::Id get(const QString &key, QVariant &value);
     void startMonitoring(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value);
-	CxeError::Id set(const QString& key,const QVariant newValue);
-	QHash<QString, QVariantList> loadRuntimeSettings(QList<QString>& settingKeys);
+	CxeError::Id set(const QString &key, const QVariant newValue);
+	QHash<QString, QVariantList> loadVariationSettings(QList<QString> &settingKeys);
 
 
 signals:

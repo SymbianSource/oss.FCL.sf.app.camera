@@ -109,8 +109,7 @@ namespace CxUiLayout
     static const char *VIDEO_PRE_CAPTURE_VIEWFINDER = "video_viewfinder_widget";
     static const char *VIDEO_PRE_CAPTURE_ZOOM_SLIDER = "video_zoom";
     static const char *VIDEO_PRE_CAPTURE_RECORDING_ICON = "video_recording_icon";
-    static const char *VIDEO_PRE_CAPTURE_ELAPSED_TIME_LABEL = "video_elapsed_time";
-    static const char *VIDEO_PRE_CAPTURE_REMAINING_TIME_LABEL = "video_remaining_time";
+    static const char *VIDEO_PRE_CAPTURE_VIDEO_TIME_LABEL = "video_elapsed_time";
     static const char *VIDEO_PRE_CAPTURE_DEFAULT_MENU = "video_view_menu";
     static const char *VIDEO_PRE_CAPTURE_VIDEO_QUALITY_ACTION = "cxui_video_action_quality";
     static const char *VIDEO_PRE_CAPTURE_GOTO_STILL_ACTION = "cxui_video_action_gotostill";

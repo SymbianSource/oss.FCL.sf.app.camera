@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,24 +15,15 @@
 *
 */
 
-#include <QObject> // For Q_OS_SYMBIAN define
-#if defined(Q_OS_SYMBIAN)
-#include <locationtrailpskeys.h>
-#endif
-
 #include "cxutils.h"
 #include "cxestate.h"
 #include "cxesettings.h"
 #include "cxenamespace.h"
 #include "cxestillcapturecontrol.h"
 #include "cxevideocapturecontrol.h"
-#include "cxegeotaggingtrailprivate.h"
+#include "cxegeotaggingtrail_symbian_p.h"
 
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "cxegeotaggingtrailprivateTraces.h"
-#endif
-
+#include <locationtrailpskeys.h>
 
 namespace
 {
@@ -40,11 +31,10 @@ namespace
     const int STOP_TRAIL_INTERVAL = 10*1000;
 }
 
-
 /*!
 * Constructor
 */
-CxeGeoTaggingTrailPrivate::CxeGeoTaggingTrailPrivate(CxeStillCaptureControl &stillControl,
+CxeGeoTaggingTrailPrivate::CxeGeoTaggingTrailPrivate(CxeStillCaptureControl &stillControl, 
                                                      CxeVideoCaptureControl &videoControl,
                                                      CxeSettings &settings)
     : CxeStateMachine("CxeGeoTaggingTrailPrivate"),
@@ -59,24 +49,21 @@ CxeGeoTaggingTrailPrivate::CxeGeoTaggingTrailPrivate(CxeStillCaptureControl &sti
     qRegisterMetaType<CxeGeoTaggingTrail::State>();
     initializeStates();
 
-#if defined(Q_OS_SYMBIAN)
-
     QVariant locationTrailState;
     // Get initial location trail state.
-    mSettings.get(KPSUidLocationTrail.iUid, KLocationTrailState,
+    mSettings.get(KPSUidLocationTrail.iUid, KLocationTrailState, 
                   Cxe::PublishAndSubscribe, locationTrailState);
 
     connect(&mSettings, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
             this, SLOT(handleGeoTaggingPropertyEvent(long int, unsigned long int, QVariant)));
 
-#endif
 
     connect(&mSettings, SIGNAL(settingValueChanged(const QString&,QVariant)),
             this, SLOT(handleSettingValueChanged(const QString&,QVariant)));
-
+    
     connect(&mStopLocationTrailTimer, SIGNAL(timeout()),
-            this, SLOT(timeout()), Qt::UniqueConnection);
-
+            this, SLOT(timeout()), Qt::UniqueConnection);    
+   
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -87,8 +74,8 @@ CxeGeoTaggingTrailPrivate::~CxeGeoTaggingTrailPrivate()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    // stop trail and close location utility session
-    stop(true);
+    // close the location utility session
+    mLocationTrail.Close();
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -100,14 +87,11 @@ CxeGeoTaggingTrailPrivate::~CxeGeoTaggingTrailPrivate()
 void CxeGeoTaggingTrailPrivate::start()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXEGEOTAGGINGTRAIL_START_1, "msg: e_CX_START_GEOTAGGING 1");
-
-#if defined(Q_OS_SYMBIAN)
 
     int err = KErrNone;
     int settingValue = Cxe::GeoTaggingOff;
-    mSettings.get(CxeSettingIds::GEOTAGGING, settingValue);
-
+    settingValue = mSettings.get(CxeSettingIds::GEOTAGGING, settingValue);
+    
     if (settingValue == Cxe::GeoTaggingOn) {
         // geotagging setting is ON, trying to start location trail
         if (state() == CxeGeoTaggingTrail::NotConnected) {
@@ -117,7 +101,7 @@ void CxeGeoTaggingTrailPrivate::start()
                 setState(CxeGeoTaggingTrail::Connected);
             }
         }
-
+    
         if (state() == CxeGeoTaggingTrail::Connected && !err) {
             err = mLocationTrail.StartLocationTrail(RLocationTrail::ECaptureAll);
             if (!err) {
@@ -129,32 +113,22 @@ void CxeGeoTaggingTrailPrivate::start()
 
         if (err) {
             CX_DEBUG(("CxeGeoTaggingTrailPrivate::start <> FAILED: error = %d ", err));
-            stop(true);
-        }
+            mLocationTrail.Close();
+        }        
     } else {
         // geotagging setting off, do nothing.
         CX_DEBUG(("CxeGeoTaggingTrail <> start -- Geotagging setting OFF, do nothing.."));
     }
 
-#endif
-    OstTrace0(camerax_performance, CXEGEOTAGGINGTRAIL_START_2, "msg: e_CX_START_GEOTAGGING 0");
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-
-
 /*!
 * Stop location trail.
-* @ param closeSession, indicates if we are willing to close the location utility session.
 */
-void CxeGeoTaggingTrailPrivate::stop(bool closeSession)
+void CxeGeoTaggingTrailPrivate::stop()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXEGEOTAGGINGTRAIL_STOP_1, "msg: e_CX_STOP_GEOTAGGING 1");
-
-#if defined(Q_OS_SYMBIAN)
 
     bool ok2StopTrail = canStopTrail();
 
@@ -169,25 +143,13 @@ void CxeGeoTaggingTrailPrivate::stop(bool closeSession)
             setState(CxeGeoTaggingTrail::Connected);
         }
 
-        if (closeSession && state() == CxeGeoTaggingTrail::Connected) {
-            CX_DEBUG(("CxeGeoTaggingTrailPrivate <> disconnect location trail utility"));
-            mLocationTrail.Close();
-            setState(CxeGeoTaggingTrail::NotConnected);
-        }
     } else {
         // not ready to stop the location trail, TrailStarted the timer.
-        if (!mPendingStopTrailSession) {
-            mPendingStopTrailSession = closeSession;
-        }
         mStopLocationTrailTimer.start(STOP_TRAIL_INTERVAL);
     }
-
-#endif
-
-    OstTrace0(camerax_performance, CXEGEOTAGGINGTRAIL_STOP_2, "msg: e_CX_STOP_GEOTAGGING 0");
+    
+    CX_DEBUG_EXIT_FUNCTION();
 }
-
-
 
 /*!
 * Checking possible stillcapturecontrol/videocapturecontrol states for stopping
@@ -197,7 +159,7 @@ bool CxeGeoTaggingTrailPrivate::canStopTrail() const
 {
     // checking still capture control states
     bool ok = mStillCaptureControl.state() != CxeStillCaptureControl::Capturing;
-
+    
     // Still side OK, checking video capture control states
     if (ok) {
         ok = (mVideoCaptureControl.state() != CxeVideoCaptureControl::Recording &&
@@ -208,8 +170,6 @@ bool CxeGeoTaggingTrailPrivate::canStopTrail() const
     return ok;
 }
 
-
-
 /*!
 * Slot that is called when timer timeout signal is triggered. We track this to do pending
 * stopping of location trail.
@@ -217,15 +177,12 @@ bool CxeGeoTaggingTrailPrivate::canStopTrail() const
 void CxeGeoTaggingTrailPrivate::timeout()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
+    
     // stop the pending location trail utility
-    stop(mPendingStopTrailSession);
-
+    stop();
+    
     CX_DEBUG_EXIT_FUNCTION();
 }
-
-
-
 
 /*!
 * Handle new setting value.
@@ -234,7 +191,7 @@ void CxeGeoTaggingTrailPrivate::timeout()
 void CxeGeoTaggingTrailPrivate::handleSettingValueChanged(const QString& settingId, QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
-
+    
     if (settingId == CxeSettingIds::GEOTAGGING) {
         if (newValue.toInt() == Cxe::GeoTaggingOn) {
             // setting is turned ON, start location trail
@@ -249,10 +206,9 @@ void CxeGeoTaggingTrailPrivate::handleSettingValueChanged(const QString& setting
             start();
         }
     }
-
+    
     CX_DEBUG_EXIT_FUNCTION();
 }
-
 
 /*!
 * Handle new setting value.
@@ -263,13 +219,11 @@ void CxeGeoTaggingTrailPrivate::handleGeoTaggingPropertyEvent(long int uid,
                                                               QVariant value)
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-#if defined(Q_OS_SYMBIAN)
-
-    if (uid == KPSUidLocationTrail.iUid && key == KLocationTrailState) {
+    bool stateOk = (state() == CxeGeoTaggingTrail::DataAvailable || state() == CxeGeoTaggingTrail::TrailStarted);
+    if (uid == KPSUidLocationTrail.iUid && key == KLocationTrailState && stateOk) {
         CX_DEBUG(("Location trail: new state = %d ", value.toInt()));
 
-        RLocationTrail::TTrailState newState =
+        RLocationTrail::TTrailState newState = 
                 static_cast<RLocationTrail::TTrailState>(value.toInt());
 
         if (newState == RLocationTrail::ETrailStarted) {
@@ -280,12 +234,8 @@ void CxeGeoTaggingTrailPrivate::handleGeoTaggingPropertyEvent(long int uid,
         }
     }
 
-#endif
-
     CX_DEBUG_EXIT_FUNCTION();
 }
-
-
 
 /*!
 Returns current state of Location trail
@@ -295,17 +245,14 @@ CxeGeoTaggingTrail::State CxeGeoTaggingTrailPrivate::state() const
     return static_cast<CxeGeoTaggingTrail::State> (stateId());
 }
 
-
-
 /*!
 * slot called when state is changed.
 */
 void CxeGeoTaggingTrailPrivate::handleStateChanged(int newStateId, CxeError::Id error)
 {
     emit stateChanged(static_cast<CxeGeoTaggingTrail::State> (newStateId), error);
-
+    
 }
-
 
 /*!
 * Initialize states for geotaggingtrail
@@ -314,17 +261,17 @@ void CxeGeoTaggingTrailPrivate::initializeStates()
 {
     // addState( id, name, allowed next states )
     addState(new CxeState(CxeGeoTaggingTrail::NotConnected, "NotConnected", CxeGeoTaggingTrail::Connected));
-
-    addState(new CxeState(CxeGeoTaggingTrail::Connected, "Connected", CxeGeoTaggingTrail::TrailStarted |
+    
+    addState(new CxeState(CxeGeoTaggingTrail::Connected, "Connected", CxeGeoTaggingTrail::TrailStarted | 
                                                                       CxeGeoTaggingTrail::NotConnected));
-
+    
     addState(new CxeState(CxeGeoTaggingTrail::TrailStarted, "TrailStarted", CxeGeoTaggingTrail::DataAvailable |
                                                                             CxeGeoTaggingTrail::Connected |
                                                                             CxeGeoTaggingTrail::NotConnected));
-
-    addState(new CxeState(CxeGeoTaggingTrail::DataAvailable, "DataAvailable", CxeGeoTaggingTrail::Connected |
+    
+    addState(new CxeState(CxeGeoTaggingTrail::DataAvailable, "DataAvailable", CxeGeoTaggingTrail::Connected | 
                                                                               CxeGeoTaggingTrail::NotConnected));
-
+    
 
     setInitialState(CxeGeoTaggingTrail::NotConnected);
 }

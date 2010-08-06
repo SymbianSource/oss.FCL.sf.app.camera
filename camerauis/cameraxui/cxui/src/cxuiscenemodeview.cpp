@@ -171,8 +171,7 @@ void CxuiSceneModeView::loadBackgroundImages()
     }
 
     if (mScenesBackground) {
-        QString sceneId;
-        mEngine->settings().get(data.mSettingId, sceneId);
+        QString sceneId = mEngine->settings().get<QString>(data.mSettingId);
         HbIcon background(backgroundForScene(sceneId));
         background.setMirroringMode(HbIcon::LayoutDirection);
         mScenesBackground->setIcon(background);

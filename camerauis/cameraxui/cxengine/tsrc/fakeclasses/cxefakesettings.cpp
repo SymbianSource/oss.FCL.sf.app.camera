@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,6 +17,7 @@
 
 #include "cxefakesettings.h"
 
+
 CxeFakeSettings::CxeFakeSettings()
 {
 }
@@ -25,28 +26,11 @@ CxeFakeSettings::~CxeFakeSettings()
 {
 }
 
-CxeError::Id CxeFakeSettings::get(const QString& key, int& value) const
-{
-    value = mSettingKeyHash[key].toInt();
-    return CxeError::None;
-}
 
-CxeError::Id CxeFakeSettings::get(const QString& key, QString &stringValue) const
-{
-    stringValue = mSettingKeyHash[key].toString();
-    return CxeError::None;
-}
-
-
-
-CxeError::Id CxeFakeSettings::get(const QString &key, qreal &value) const
-{
-    value = mSettingKeyHash[key].toReal();
-    return CxeError::None;
-}
-
-
-void CxeFakeSettings::get(long int uid, unsigned long int key, Cxe::SettingKeyType type, QVariant &value) const
+void CxeFakeSettings::get(long int uid,
+         unsigned long int key,
+         Cxe::SettingKeyType type,
+         QVariant &value) const
 {
     Q_UNUSED(uid);
     Q_UNUSED(key);
@@ -54,29 +38,32 @@ void CxeFakeSettings::get(long int uid, unsigned long int key, Cxe::SettingKeyTy
     Q_UNUSED(value);
 }
 
-
-CxeError::Id CxeFakeSettings::set(const QString& key, int newValue)
+bool CxeFakeSettings::listenForSetting(const QString &settingKey, QObject *target, const char *slot)
 {
-    mSettingKeyHash[key] = QVariant(newValue);
-    emit settingValueChanged(key, newValue);
+    Q_UNUSED(settingKey);
+    Q_UNUSED(target);
+    Q_UNUSED(slot);
+    return true;
+}
+
+CxeError::Id CxeFakeSettings::getVariationValue(const QString &key, QVariant &value)
+{
+    int variation = mVariationKeyHash[key];
+    value = QVariant(variation);
     return CxeError::None;
 }
 
-CxeError::Id CxeFakeSettings::set(const QString &key, const QString &newValue)
+void CxeFakeSettings::getValue(const QString &key, QVariant &value) const
 {
-    mSettingKeyHash[key] = QVariant(newValue);
-    emit settingValueChanged(key, newValue);
-    return CxeError::None;
+    value = mSettingKeyHash[key];
 }
 
-
-
-CxeError::Id CxeFakeSettings::set(const QString &key, qreal newValue)
+void CxeFakeSettings::setValue(const QString &key, const QVariant &newValue)
 {
-    mSettingKeyHash[key] = QVariant(newValue);
+    mSettingKeyHash[key] = newValue;
     emit settingValueChanged(key, newValue);
-    return CxeError::None;
 }
+
 
 
 void CxeFakeSettings::reset()

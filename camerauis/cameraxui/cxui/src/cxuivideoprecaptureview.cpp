@@ -15,7 +15,7 @@
 *
 */
 
-#include <e32keys.h>
+
 
 #include <QApplication>
 #include <QGraphicsLayout>
@@ -48,11 +48,15 @@
 #include "cxuidocumentloader.h"
 #include "cxuiserviceprovider.h"
 
+#ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
+
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "cxuivideoprecaptureviewTraces.h"
 #endif
 
+#include <e32keys.h>
+#endif  //Q_OS_SYMBIAN
 
 using namespace Cxe;
 using namespace CxUiLayout;
@@ -66,6 +70,7 @@ namespace
 
     //!@todo Localization?
     static const char* VIDEO_TIME_FORMAT = "%02d:%02d";
+    const int POSTCAPTURE_ON = -1;
 }
 
 
@@ -74,8 +79,7 @@ CxuiVideoPrecaptureView::CxuiVideoPrecaptureView(QGraphicsItem *parent) :
     mElapsedTimer(this),
     mTimeElapsed(0),
     mTimeRemaining(0),
-    mElapsedTimeText(NULL),
-    mRemainingTimeText(NULL),
+    mVideoTimeText(NULL),
     mRecordingIcon(NULL),
     mGoToStillAction(NULL),
     mToolbarIdle(NULL),
@@ -117,14 +121,12 @@ void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
     mVideoCaptureControl = &(engine->videoCaptureControl());
 
     connect(&mElapsedTimer, SIGNAL(timeout()), this, SLOT(updateTimeLabels()));
-    connect(mVideoCaptureControl, SIGNAL(snapshotReady(CxeError::Id, const QImage&, const QString&)),
-            this, SLOT(handleSnapshot(CxeError::Id)));
     connect(mVideoCaptureControl, SIGNAL(stateChanged(CxeVideoCaptureControl::State, CxeError::Id)),
             this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
-    connect(&(mEngine->settings()), SIGNAL(sceneChanged(CxeScene&)),
-            this, SLOT(handleSceneChanged(CxeScene&)));
     connect(mVideoCaptureControl, SIGNAL(remainingTimeChanged()),
             this, SLOT(updateTimeLabels()));
+
+    mEngine->settings().listenForSetting(CxeSettingIds::VIDEO_SCENE, this, SLOT(handleSceneChanged(const QVariant&)));
 
     mPauseTimer.setSingleShot(true);
     connect(&mPauseTimer, SIGNAL(timeout()), this, SLOT(stop()));
@@ -162,7 +164,7 @@ void CxuiVideoPrecaptureView::loadDefaultWidgets()
 }
 
 /*!
- * Loads default indicators from docml and modifies the visibility 
+ * Loads default indicators from docml and modifies the visibility
  * according to current settings.
  */
 void CxuiVideoPrecaptureView::reloadIndicatorWidgets()
@@ -208,9 +210,9 @@ void CxuiVideoPrecaptureView::reloadIndicatorWidgets()
             currentSettingValue = -1;
             if (graphicsItem == videoaudiomuteIndicatorIcon) {
                 key = CxeSettingIds::VIDEO_MUTE_SETTING;
-                mEngine->settings().get(key, currentSettingValue);
-                // video mute implementation does not use 
-                // enum for on/off values but instead 
+                currentSettingValue = mEngine->settings().get(key, currentSettingValue);
+                // video mute implementation does not use
+                // enum for on/off values but instead
                 // 0 for off and 1 for on.
                 if (currentSettingValue == 0) {
                     isSettingOff = true;
@@ -323,13 +325,9 @@ void CxuiVideoPrecaptureView::loadWidgets()
     CX_ASSERT_ALWAYS(indicatorContainer);
     createWidgetBackgroundGraphic(indicatorContainer, TRANSPARENT_BACKGROUND_GRAPHIC);
 
-    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_ELAPSED_TIME_LABEL);
-    mElapsedTimeText = qobject_cast<HbLabel *> (widget);
-    CX_ASSERT_ALWAYS(mElapsedTimeText);
-
-    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_REMAINING_TIME_LABEL);
-    mRemainingTimeText = qobject_cast<HbLabel *> (widget);
-    CX_ASSERT_ALWAYS(mRemainingTimeText);
+    widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_VIDEO_TIME_LABEL);
+    mVideoTimeText = qobject_cast<HbLabel *> (widget);
+    CX_ASSERT_ALWAYS(mVideoTimeText);
 
     widget = mDocumentLoader->findWidget(VIDEO_PRE_CAPTURE_RECORDING_ICON);
     mRecordingIcon = qobject_cast<HbLabel *> (widget);
@@ -348,9 +346,10 @@ void CxuiVideoPrecaptureView::loadWidgets()
 
 
     // Update toolbar scene mode icon.
-    QString sceneId;
-    if (mEngine->settings().get(CxeSettingIds::SCENE_ID, sceneId) == CxeError::None) {
-        updateSceneIcon(sceneId);
+    try {
+        updateSceneIcon(mEngine->settings().get<QString>(CxeSettingIds::VIDEO_SCENE));
+    } catch (CxeException &e) {
+        // ignore error
     }
 
     // Initialize the video time counters.
@@ -425,6 +424,7 @@ void CxuiVideoPrecaptureView::initializeSettingsGrid()
     }
 }
 
+
 /**
 * Get if postcapture view should be shown or not.
 * Postcapture view may be shown for a predefined time or
@@ -441,9 +441,9 @@ bool CxuiVideoPrecaptureView::isPostcaptureOn() const
 
     // Read the value from settings. Ignoring reading error.
     // On error (missing settings) default to "postcapture on".
-    int showPostcapture(-1);
+    int showPostcapture(POSTCAPTURE_ON);
     if(mEngine) {
-        mEngine->settings().get(CxeSettingIds::VIDEO_SHOWCAPTURED, showPostcapture);
+        showPostcapture = mEngine->settings().get<int>(CxeSettingIds::VIDEO_SHOWCAPTURED, POSTCAPTURE_ON);
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -490,20 +490,12 @@ void CxuiVideoPrecaptureView::updateQualityIcon()
 
     if (mQualityIcon && mEngine) {
         QString icon = "";
-        int currentValue = -1;
 
-        mEngine->settings().get(CxeSettingIds::VIDEO_QUALITY, currentValue);
+        int currentValue = mEngine->settings().get<int>(CxeSettingIds::VIDEO_QUALITY, -1);
         icon = getSettingItemIcon(CxeSettingIds::VIDEO_QUALITY, currentValue);
 
         mQualityIcon->setIcon(HbIcon(icon));
     }
-
-    CX_DEBUG_EXIT_FUNCTION();
-}
-
-void CxuiVideoPrecaptureView::handleSnapshot(CxeError::Id /*error*/)
-{
-    CX_DEBUG_ENTER_FUNCTION();
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -516,7 +508,9 @@ void CxuiVideoPrecaptureView::record()
     mVideoCaptureControl->remainingTime(time);
 
     if (time) {
-        mMenu = takeMenu();
+        if (!mMenu){ // Only take out menu, if we have not already done it
+            mMenu = takeMenu();
+        }
         mVideoCaptureControl->record();
     } else {
         emit errorEncountered(CxeError::DiskFull);
@@ -652,7 +646,7 @@ void CxuiVideoPrecaptureView::updateTimeLabels()
 {
     CX_DEBUG_IN_FUNCTION();
 
-    if (!mRemainingTimeText || !mElapsedTimeText) {
+    if (!mVideoTimeText) {
         // Section not loaded yet. Skip update until created.
         CX_DEBUG(("CxuiVideoPrecaptureView: video time labels not loaded yet!"));
         CX_DEBUG_EXIT_FUNCTION();
@@ -685,8 +679,7 @@ void CxuiVideoPrecaptureView::updateTimeLabels()
             break;
     }
 
-    setVideoTime(mRemainingTimeText, mTimeRemaining);
-    setVideoTime(mElapsedTimeText, mTimeElapsed);
+    setVideoTime(mVideoTimeText, mTimeElapsed, mTimeRemaining);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -709,16 +702,21 @@ void CxuiVideoPrecaptureView::hideControls()
 /*!
 * Helper method for formatting video time to requested label.
 * @param label Text label to show the time.
-* @param time Time in seconds to be formatted to the label text.
+* @param elapsedTime Elapsed time in seconds to be formatted to the label text.
+* @param remainingTime Remaining time in seconds to be formatted to the label text.
 */
-void CxuiVideoPrecaptureView::setVideoTime(HbLabel* label, int time)
+void CxuiVideoPrecaptureView::setVideoTime(HbLabel* label,
+                                           int elapsedTime,
+                                           int remainingTime)
 {
     // Convert time (seconds) into mm:ss
     // HbExtendedLocale wraps minutes at 60 so we can't use that.
     // We need to show times over 1 hour, e.g. "90:00".
-    QString timeString;
-    timeString.sprintf(VIDEO_TIME_FORMAT, time/60, time%60);
-    label->setPlainText(timeString);
+    QString elapsed, remaining;
+    elapsed.sprintf(VIDEO_TIME_FORMAT, elapsedTime/60, elapsedTime%60);
+    remaining.sprintf(VIDEO_TIME_FORMAT, remainingTime/60, remainingTime%60);
+
+    label->setPlainText(hbTrId("txt_cam_info_redorcding_time").arg(elapsed).arg(remaining));
 }
 
 bool CxuiVideoPrecaptureView::getElapsedTime()
@@ -784,6 +782,7 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         if (mDocumentLoader){
             mDocumentLoader->load(VIDEO_1ST_XML, VIDEO_PRE_CAPTURE_RECORDING);
         }
+
         mElapsedTimer.start(CXUI_ELAPSED_TIME_TIMEOUT);
         disableFeedback();
 
@@ -837,8 +836,7 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         // don't change anything
         break;
     default:
-        // in any other state, just hide the controls
-        setRecordingItemsVisibility(false);
+        // don't change anything
         break;
     }
 
@@ -956,34 +954,16 @@ void CxuiVideoPrecaptureView::handleSettingValueChanged(const QString& key, QVar
 * Handle scene mode change.
 * @param scene The new active scene mode.
 */
-void CxuiVideoPrecaptureView::handleSceneChanged(CxeScene &scene)
+void CxuiVideoPrecaptureView::handleSceneChanged(const QVariant &scene)
 {
     CX_DEBUG_ENTER_FUNCTION();
     // Ignore if not in video mode.
     if (mEngine->mode() == Cxe::VideoMode) {
         // Update toolbar scene mode icon.
-        updateSceneIcon(scene[CxeSettingIds::SCENE_ID].toString());
+        updateSceneIcon(scene.toString());
     }
 
     CX_DEBUG_EXIT_FUNCTION();
-}
-
-
-
-/*!
-    Sets the visibility of recording icon and elapsed time text.
-    \param visible True if widgets are to be shown, false if not.
-*/
-void CxuiVideoPrecaptureView::setRecordingItemsVisibility(bool visible) {
-
-    if (mRecordingIcon) {
-        mRecordingIcon->setVisible(visible);
-        mRecordingIcon->setOpacity(1.0f);
-    }
-
-    if (mElapsedTimeText) {
-        mElapsedTimeText->setVisible(visible);
-    }
 }
 
 /*!

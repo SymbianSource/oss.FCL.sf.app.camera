@@ -108,7 +108,7 @@ void TestCxUiBat::initVideoMode()
     QCOMPARE( deviceStateSpy.count(), 3 );
 
     QList<QVariant> initModeArguments = deviceStateSpy.takeAt(0);
-    QVERIFY( initModeArguments.at(0).value<CxeVideoCaptureControl::State>() == CxeVideoCaptureControl::Open );
+    QVERIFY( initModeArguments.at(0).value<CxeVideoCaptureControl::State>() == CxeVideoCaptureControl::Initialized );
     QVERIFY( initModeArguments.at(1).toInt() == 0 );
     initModeArguments = deviceStateSpy.takeAt(0);
     QVERIFY( initModeArguments.at(1).toInt() == 0 );
@@ -252,7 +252,7 @@ void TestCxUiBat::testCaptureKeyInVideoMode()
     QCOMPARE(deviceStateSpy.count(), 3);
     if (deviceStateSpy.count() > 0) {
         QList<QVariant> initModeArguments = deviceStateSpy.takeAt(0);
-        QVERIFY( initModeArguments.at(0).value<CxeVideoCaptureControl::State>() == CxeVideoCaptureControl::Open );
+        QVERIFY( initModeArguments.at(0).value<CxeVideoCaptureControl::State>() == CxeVideoCaptureControl::Initialized  );
         QVERIFY( initModeArguments.at(1).toInt() == 0 );
         initModeArguments = deviceStateSpy.takeAt(0);
         QVERIFY( initModeArguments.at(1).toInt() == 0 );
