@@ -290,7 +290,7 @@ void CCamUserSceneSetupViewBase::HandleForegroundEventL( TBool aForeground )
     // To background
     else if( !aForeground )
         {
-        iNotifierPopupShowing = appUi->AppInBackground( ETrue );
+        iNotifierPopupShowing = appUi->AppInBackground( ETrue ) && !appUi->AppInBackground( EFalse );        
         PRINT( _L("Camera <> CCamUserSceneSetupViewBase::HandleForegroundEventL dec engine count") );
         // Register that we nolonger need the engine
         if( !iNotifierPopupShowing )

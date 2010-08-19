@@ -277,7 +277,7 @@ void CCamVideoPostCaptureView::DoActivateL(
             R_CAM_SHARE_ON_OVI_INTEREST );
 
     // SHARE_AIW
-    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID),
+    iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID),
                                      R_CAM_AIW_VIEW_INTEREST );
 
     CCamPostCaptureViewBase::DoActivateL(
@@ -314,7 +314,7 @@ void CCamVideoPostCaptureView::DoActivateL(
             {   
             }
         }
-    if ( iController.IntegerSettingValue(ECamSettingItemVideoEditorSupport) )
+    if ( iController.IntegerSettingValue(ECamSettingItemVideoEditorSupport) != ECamNoEditorSupport )
         {
         iAiwServiceHandler->AttachMenuL( ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ), 
                 R_CAM_SET_AS_RING_TONE_INTEREST_EDITOR );
@@ -476,53 +476,32 @@ void CCamVideoPostCaptureView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane*
     if ( aResourceId == ROID( R_CAM_VIDEO_POST_CAPTURE_MENU_ID ) ||
          aResourceId == ROID( R_CAM_VIDEO_POST_CAPTURE_OK_MENU_ID ) )
         {
-        TBool showSend = ETrue;
-        TBool showSendToCaller = EFalse;
-
-/*#ifndef __WINS__
-        if ( iSFIUtils->IsCLIValidL() )
-            {
-            showSend = EFalse;
-            showSendToCaller = ETrue;
-
-            if ( iController.IntegerSettingValue( ECamSettingItemVideoQuality ) 
-                == ECamVideoQualityHigh )
-                {
-                showSendToCaller = EFalse;
-                }
-            }
-#endif*/
-
-        if ( !iController.IsTouchScreenSupported() ||
-             !iOneClickUploadUtility->OneClickUploadSupported() )
-            {
-            // In non-touch UI Send/Send to caller are always in AP.
-            // No need for Options menu items.
-
-            // If 1-click upload is not supported in touch UI, then there is
-            // a send button in the fixed toolbar. There is no need to
-            // have it in Options menu.
-            showSend = EFalse;
-            showSendToCaller = EFalse;
-            }
 
         if( aMenuPane->MenuItemExists( ECamCmdSendToCallerMultimedia, itemPos ) )
             {
             aMenuPane->SetItemDimmed(
-                ECamCmdSendToCallerMultimedia, !showSendToCaller );
+                ECamCmdSendToCallerMultimedia, ETrue );
             }
-
-        if(iController.IntegerSettingValue(ECamSettingItemVideoEditorSupport))
+		TInt editorSupport = iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport);
+		
+		if( editorSupport == ECamNoEditorSupport || 
+			editorSupport == ECamEditorSupportInOptions )
             {
-            showSend = ETrue;
-            }
-        
-        if( aMenuPane->MenuItemExists( ECamCmdSend, itemPos ) )
-            {
-            aMenuPane->SetItemDimmed(
-                ECamCmdSend, !showSend );
-            }
-
+			if ( aMenuPane->MenuItemExists( ECamCmdSend, itemPos ) )
+				{
+				aMenuPane->SetItemDimmed(
+					ECamCmdSend, ETrue );
+				}
+			}
+		if( editorSupport == ECamNoEditorSupport || 
+			editorSupport == ECamEditorSupportInToolbar )
+			{
+			if ( aMenuPane->MenuItemExists( ECamCmdEditPhoto, itemPos ) )
+				{
+				aMenuPane->SetItemDimmed(
+					ECamCmdEditPhoto, ETrue );
+				}			
+			}
         /*
          * MSK : ContextOptions --> We just hide Help and Exit from the Options Menu when
          *       the MSK is pressed in the postcapture still view
@@ -594,7 +573,8 @@ void CCamVideoPostCaptureView::DynInitToolbarL( TInt aResourceId,
 			}
         else
 			{
-            if(iController.IntegerSettingValue(ECamSettingItemVideoEditorSupport))
+			TInt editorSupport = iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport);
+            if( editorSupport == ECamEditorSupportInToolbar )
                 {
                 aToolbar->RemoveItem( ECamCmdSend );
                 CAknButton* editButton = dynamic_cast<CAknButton*>(aToolbar->ControlOrNull( ECamCmdEdit ));

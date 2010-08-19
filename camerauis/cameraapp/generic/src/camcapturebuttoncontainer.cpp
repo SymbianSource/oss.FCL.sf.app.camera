@@ -32,7 +32,7 @@ const TInt32 KCaptureIconDelta( 7 );
 const TUint32 KToolbarExtensionBgColor = 0x00000000;
 const TInt KToolBarExtensionBgAlpha = 0x7F;
 const TInt KCaptureButtonOrdinalPriority( 1 );
-
+const TSize KIconMargin( 7, 7 );
 
 // -----------------------------------------------------------------------------
 // CCamCaptureButtonContainer::CCamCaptureButtonContainer
@@ -65,22 +65,41 @@ void CCamCaptureButtonContainer::ConstructL( const TRect& aRect )
     CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
 
     // Load capture icon
-    TInt bitmapId = EMbmCameraappQgn_indi_cam4_capture;
-    TInt maskId   = EMbmCameraappQgn_indi_cam4_capture_mask;
+    TInt bitmapId = EMbmCameraappQgn_indi_cam4_capture_image;
+    TInt maskId   = EMbmCameraappQgn_indi_cam4_capture_image_mask;
+    TInt bitmapPressedId = EMbmCameraappQgn_indi_cam4_capture_image_pressed;
+    TInt maskPressedId = EMbmCameraappQgn_indi_cam4_capture_image_pressed_mask;
+
     if ( iCameraMode == ECamControllerVideo )
         {
-        bitmapId = EMbmCameraappQgn_indi_cam4_video;
-        maskId   = EMbmCameraappQgn_indi_cam4_video_mask;
+        bitmapId = EMbmCameraappQgn_indi_cam4_capture_video;
+        maskId   = EMbmCameraappQgn_indi_cam4_capture_video_mask;
+        bitmapPressedId = EMbmCameraappQgn_indi_cam4_capture_video_pressed;
+        maskPressedId = EMbmCameraappQgn_indi_cam4_capture_video_pressed_mask;
         }
+    
+    iCaptureRect = aRect;
+    iCaptureRect.Move(-iCaptureRect.iTl.iX, -iCaptureRect.iTl.iY );
+    iCaptureRect.Shrink( KIconMargin );
+    
     AknIconUtils::CreateIconL(
              iCaptureIcon,
-             iCaptureMask,
+             iCaptureIconMask,
              KCamBitmapFile(),
              bitmapId,
              maskId );
-    AknIconUtils::SetSize( iCaptureIcon, KIconSize, EAspectRatioPreserved );
+    AknIconUtils::SetSize( iCaptureIcon, iCaptureRect.Size() );
+    AknIconUtils::SetSize( iCaptureIconMask, iCaptureRect.Size() );
     
-    iCaptureRect = aRect;
+    AknIconUtils::CreateIconL(
+                 iCaptureIconPressed,
+                 iCaptureIconPressedMask,
+                 KCamBitmapFile(),
+                 bitmapPressedId,
+                 maskPressedId );
+    AknIconUtils::SetSize( iCaptureIconPressed, iCaptureRect.Size() );
+    AknIconUtils::SetSize( iCaptureIconPressedMask, iCaptureRect.Size() );
+    
     iFeedback = MTouchFeedback::Instance();
     PRINT( _L("Camera <= CCamCaptureButtonContainer::ConstructL") );
     }
@@ -92,7 +111,9 @@ void CCamCaptureButtonContainer::ConstructL( const TRect& aRect )
 CCamCaptureButtonContainer::~CCamCaptureButtonContainer()
     {
     delete iCaptureIcon;
-    delete iCaptureMask;
+    delete iCaptureIconMask;
+    delete iCaptureIconPressed;
+    delete iCaptureIconPressedMask;
     }
 
 // -----------------------------------------------------------------------------
@@ -266,31 +287,18 @@ void CCamCaptureButtonContainer::Draw( const TRect& aRect ) const
 void CCamCaptureButtonContainer::DrawCaptureButton( CBitmapContext& aGc ) const
     {
     PRINT( _L("Camera => CCamCaptureButtonContainer::DrawCaptureButton") );
-
     TRect boundingRect( iCaptureRect );
-    boundingRect.Move( -iCaptureRect.iTl.iX, -iCaptureRect.iTl.iY );
-    boundingRect.Shrink( KAdditionalArea );
-    
-    TPoint iconTl( boundingRect.iTl.iX + KCaptureIconDelta, 
-                   boundingRect.iTl.iY + KCaptureIconDelta );
+    boundingRect.Move( -boundingRect.iTl.iX, -boundingRect.iTl.iY );
 
-    aGc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
-    aGc.SetBrushStyle( CGraphicsContext::ESolidBrush );
-    aGc.SetPenStyle( CGraphicsContext::ENullPen );
     if ( iCaptureButtonPressed )
         {
-        aGc.SetBrushColor( KRgbBlack );
+        aGc.BitBltMasked( iCaptureRect.iTl, iCaptureIconPressed, boundingRect, iCaptureIconPressedMask, EFalse );
         }
     else
         {
-        aGc.SetBrushColor( TRgb( KToolbarExtensionBgColor, KToolBarExtensionBgAlpha ) );
-        }
-    aGc.DrawEllipse( boundingRect );
+        aGc.BitBltMasked( iCaptureRect.iTl, iCaptureIcon, boundingRect, iCaptureIconMask, EFalse );
 
-    TRect iconRect( KIconSize );
-    aGc.SetPenStyle( CGraphicsContext::ESolidPen );
-    aGc.SetBrushStyle( CGraphicsContext::ENullBrush );
-    aGc.BitBltMasked( iconTl, iCaptureIcon, iconRect, iCaptureMask, EFalse );
+        }
 
     PRINT( _L("Camera <= CCamCaptureButtonContainer::DrawCaptureButton") );
     }

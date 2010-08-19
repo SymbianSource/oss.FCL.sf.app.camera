@@ -636,7 +636,7 @@ void CCamCaptureSetupSlider::TouchLayoutL()
         {
         // Set the shaft layout and icon size for Contrast slider
         iShaftLayout.LayoutRect( sliderRect, 
-                              AknLayoutScalable_Apps::cset_slider_pane( 7 )  );
+                              AknLayoutScalable_Apps::cset_slider_pane( 5 )  );
         // set Contrast slider legend layouts      
         TouchContrastLayoutL( sliderRect ); 
         }   

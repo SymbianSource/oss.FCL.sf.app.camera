@@ -393,7 +393,7 @@ TKeyResponse CCamCaptureSetupContainer::OfferKeyEventL(
          ( IsCaptureKeyL( aKeyEvent, aType ) || IsShutterKeyL( aKeyEvent, aType ) ) ) )  
         {
         TKeyResponse response = iCaptureSetupControl->OfferKeyEventL( aKeyEvent, aType );
-        if ( aType == EEventKey && response == EKeyWasNotConsumed &&
+        if ( aType == EEventKey && response == EKeyWasNotConsumed && aKeyEvent.iCode != EKeyOK &&
             ( ECamSettingItemDynamicPhotoFlash == iControlHandler.SettingType() ||
             ECamSettingItemDynamicSelfTimer == iControlHandler.SettingType() ) )
             {

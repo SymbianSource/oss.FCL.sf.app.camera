@@ -2918,14 +2918,12 @@ CCamCameraController
 
               OstTrace0( CAMERAAPP_PERFORMANCE, CCAMCAMERACONTROLLER_PROCESSVFSTARTREQUESTL, "e_CAM_APP_VF_INIT 0" ); //CCORAPP_APP_VF_INIT_END
 
-              TInt orgPos = SetVfWindowOrdinal(); // Set visible
               iCamera->StartViewFinderDirectL(
                   env->WsSession(),
                   *env->ScreenDevice(),
                   *iViewfinderWindow,
                   params().iRect );
-              (void) SetVfWindowOrdinal( orgPos ); // back to original
-
+              
               if ( appUi && ECamActiveCameraSecondary == appUi->ActiveCamera() )
                   {
                   iCamera->SetViewFinderMirrorL(ETrue);
@@ -6502,13 +6500,12 @@ void CCamCameraController::SetViewfinderWindowHandle( RWindowBase* aWindow )
             
             CEikonEnv* env = CEikonEnv::Static();
     
-              TInt orgPos = SetVfWindowOrdinal(); // Set visible
-              iCamera->StartViewFinderDirectL(
+            iCamera->StartViewFinderDirectL(
                   env->WsSession(),
                   *env->ScreenDevice(),
                   *iViewfinderWindow,
                   params().iRect );
-              (void) SetVfWindowOrdinal( orgPos ); // back to original
+              
             }
         else
             {

@@ -201,7 +201,7 @@ TKeyResponse CCamStandbyContainer::OfferKeyEventL(
                !static_cast<CCamAppUi*>( iEikonEnv->AppUi() )->IsSecondCameraEnabled() )
         || ( IsCaptureKeyL(aKeyEvent, aType)) )
         {
-        // in case we receive an enter key or MSK key event in standby mode
+        // in case we receive MSK key event in standby mode
         // we should not call HandleCommandL function with ECamCmdExitStandby
         // because by default application will get a left softkey command id
         // when MSK is pressed. In standby mode left softkey command id is
@@ -209,8 +209,7 @@ TKeyResponse CCamStandbyContainer::OfferKeyEventL(
         if ( !( ( aType == EEventKey || 
                   aType == EEventKeyDown || 
                   aType == EEventKeyUp ) && 
-                ( aKeyEvent.iScanCode == EStdKeyDevice3 ||
-                  aKeyEvent.iScanCode == EStdKeyEnter ) ) )
+                  aKeyEvent.iScanCode == EStdKeyDevice3  ) )
              {
              iView.HandleCommandL( ECamCmdExitStandby );
              }

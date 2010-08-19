@@ -597,7 +597,15 @@ void CCamInfoListBoxContainer::HandleListBoxEventL( CEikListBox* aListBox, TList
         case EEventItemSingleClicked:
             {
             TInt settingValue = CurrentSettingItemValue();
-            iController.PreviewSettingChangeL( ECamSettingItemDynamicPhotoLightSensitivity, settingValue );
+
+            if ( iView.Id().iUid == ECamViewIdPhotoUserSceneSetup )
+                {                   
+                iController.PreviewSettingChangeL( ECamSettingItemUserSceneLightSensitivity, settingValue );
+                }
+     	    else
+       	        {
+		        iController.PreviewSettingChangeL( ECamSettingItemDynamicPhotoLightSensitivity, settingValue );
+          	    }
             }
             break;
         default:

@@ -51,6 +51,18 @@
 const TInt KCamDefaultBatteryCellHeight = 3;
 const TInt KCamDefaultBatteryCellMargin = 1;
 
+const TInt KBatteryStrengthIcons[] = 
+        {
+                EMbmCameraappQgn_indi_cam4_battery_strength_0,
+                EMbmCameraappQgn_indi_cam4_battery_strength_1,
+                EMbmCameraappQgn_indi_cam4_battery_strength_2,
+                EMbmCameraappQgn_indi_cam4_battery_strength_3,
+                EMbmCameraappQgn_indi_cam4_battery_strength_4,
+                EMbmCameraappQgn_indi_cam4_battery_strength_5,
+                EMbmCameraappQgn_indi_cam4_battery_strength_6,
+                EMbmCameraappQgn_indi_cam4_battery_strength_7
+        };
+
 // ---------------------------------------------------------------------------
 // CCamBatteryPaneDrawer::CCamBatteryPaneDrawer
 // ---------------------------------------------------------------------------
@@ -134,19 +146,11 @@ void CCamBatteryPaneDrawer::LoadIconsL()
     // Delete existing icon bitmaps
     DeleteIcons();
 
-    // Load and resize battery icon and mask
-    delete iBatteryIcon;
-    iBatteryIcon = NULL;
-    iBatteryIcon = CCamBitmapItem::NewL(
-        EMbmCameraappQgn_prop_cam_battery_icon,
-        EMbmCameraappQgn_prop_cam_battery_icon_mask );
-    
-    // Load and resize battery strength icon and mask    
-    delete iBatteryStrengthIcon;
-    iBatteryStrengthIcon = NULL;
-    iBatteryStrengthIcon = CCamBitmapItem::NewL(
-        EMbmCameraappQgn_indi_cam_battery_strength,
-        EMbmCameraappQgn_indi_cam_battery_strength_mask );                            
+    for( TInt index = KMinBatteryStrength; index <= KMaxBatteryStrength; index++ )
+        {
+        iBatteryIcons.AppendL( CCamBitmapItem::NewL( KBatteryStrengthIcons[index], 
+                KBatteryStrengthIcons[index] + 1) );
+        }
 
     PRINT( _L("Camera <= CCamBatteryPaneDrawer::LoadIconsL") );	       
     }
@@ -167,30 +171,7 @@ TRect CCamBatteryPaneDrawer::Rect() const
 //
 void CCamBatteryPaneDrawer::Draw( CBitmapContext& aGc ) const
     {
-    // Make sure that no brush is being used
-    aGc.SetBrushStyle( CGraphicsContext::ENullBrush );    
-
-    if( iBatteryStrengthIcon )
-        {
-        TSize iconSize = iBatteryStrengthIcon->BitmapSize();
-
-        TRect strengthIconCropRect(
-            0,
-            iconSize.iHeight - BatteryStrengthIconHeight( iBatteryStrength ),
-            iconSize.iWidth,
-            iconSize.iHeight );
-
-        // Draw the icon, with correct battery strength
-        iBatteryStrengthIcon->DrawPartial( 
-            aGc,
-            iBatteryStrengthIcon->LayoutRect(),
-            strengthIconCropRect );
-        }
-
-    if( iBatteryIcon )
-        {
-        iBatteryIcon->Draw( aGc );
-        }    
+    iBatteryIcons[ iBatteryStrength ]->Draw( aGc );
     }       
 
 // ---------------------------------------------------------------------------
@@ -230,30 +211,12 @@ void CCamBatteryPaneDrawer::LoadLayoutsL()
 
 
 // ---------------------------------------------------------------------------
-// CCamBatteryPaneDrawer::BatteryStrengthIconHeight
-// ---------------------------------------------------------------------------    
-//
-TInt CCamBatteryPaneDrawer::BatteryStrengthIconHeight( TInt aLevel ) const
-    {
-    TInt cellHeight = KCamDefaultBatteryCellHeight;
-    if ( iBatteryStrengthIcon )
-        {
-        cellHeight = iBatteryStrengthIcon->BitmapSize().iHeight /
-            KMaxBatteryStrength;
-        }
-    return ( aLevel * cellHeight ) + KCamDefaultBatteryCellMargin;
-    }
-
-// ---------------------------------------------------------------------------
 // CCamBatteryPaneDrawer::DeleteIcons
 // ---------------------------------------------------------------------------
 //
 void CCamBatteryPaneDrawer::DeleteIcons()
     {
-    delete iBatteryIcon;
-    iBatteryIcon = NULL;
-    delete iBatteryStrengthIcon;
-    iBatteryStrengthIcon = NULL;
+    iBatteryIcons.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------------------------
@@ -293,19 +256,11 @@ void CCamBatteryPaneDrawer::NonTouchLayoutL()
     batteryPane.LayoutRect( indicatorsPane.Rect(),
         AknLayoutScalable_Apps::cam6_battery_pane( cba ) );
     iRect = batteryPane.Rect();
-
-    // Battery icon
-    if ( iBatteryIcon )
+	
+    TInt batteryIconsCount = iBatteryIcons.Count();
+    for( TInt index = 0; index < batteryIconsCount; index++ )
         {
-        iBatteryIcon->SetLayoutL( iRect,
-            AknLayoutScalable_Apps::cam6_battery_pane_g1( cba ));
-        }
-
-    // Battery strength icon    
-    if ( iBatteryStrengthIcon )
-        {
-        iBatteryStrengthIcon->SetLayoutL( iRect,
-            AknLayoutScalable_Apps::cam6_battery_pane_g2( cba ));
+        iBatteryIcons[index]->SetLayoutL( iRect );
         }
     }
 
@@ -326,19 +281,12 @@ void CCamBatteryPaneDrawer::TouchLayoutL()
         AknLayoutScalable_Apps::cam4_battery_pane( var ).LayoutLine() );
     iRect = batteryPane.Rect();
 
-    // Battery icon
-    if ( iBatteryIcon )
+    TInt batteryIconsCount = iBatteryIcons.Count();
+    for( TInt index = 0; index < batteryIconsCount; index++ )
         {
-        iBatteryIcon->SetLayoutL( iRect,
-            AknLayoutScalable_Apps::cam4_battery_pane_g2( var ).LayoutLine() );
+        iBatteryIcons[index]->SetLayoutL( iRect );
         }
-
-    // Battery strength icon    
-    if ( iBatteryStrengthIcon )
-        {
-        iBatteryStrengthIcon->SetLayoutL( iRect,
-            AknLayoutScalable_Apps::cam4_battery_pane_g1( var ).LayoutLine() );
-        }
+    
     }
 
 // End of file

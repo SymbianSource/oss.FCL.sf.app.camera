@@ -68,6 +68,8 @@ class CCamCollectionManagerAO;
 class CCamStillPreCaptureView;
 class CCamVideoPreCaptureView;
 class CCamMemoryMonitor;
+//FTU message display class
+class CCamFtuDisplay;
 class CCamStartupLogoController;
 
 
@@ -198,16 +200,36 @@ class CCamAppUi : public CCamAppUiBase,
     */
     void FileCheckingCompleteL( TInt aStatus, TInt aError );   
 
-  // -------------------------------------------------------
-  // New functions
-  public: 
-      /**
-      * Returns whether or the toolbar has been activated/visible
-      * Will return ETrue when when the toolbar is active/visible
-      * @since 3.2
-      * @return ETrue if toolbar is active/visible, else returns EFalse
-      */
-      virtual TBool IsToolBarVisible() const;
+    // -------------------------------------------------------
+    // New functions
+public: 
+    /*
+     * HyperlinkCallback
+     * static methode  to be called from TCallback
+     */
+
+    static TInt HyperlinkCallback( TAny* aAny );
+    
+    /**
+     * CamFtuDisplayL
+     * Check if camera is launching for first time ,
+     * accordingly FTU Message will be displayed.
+     */
+    void CamFtuDisplayL();
+  
+     /**
+	  * OpenSettingView
+	  * Non static public method , to launch the settings view
+	  */
+    void OpenSettingView();
+
+    /**
+     * Returns whether or the toolbar has been activated/visible
+     * Will return ETrue when when the toolbar is active/visible
+     * @since 3.2
+     * @return ETrue if toolbar is active/visible, else returns EFalse
+     */
+    virtual TBool IsToolBarVisible() const;
 
         /**
         * Check if given view state indicates that "internal",
@@ -1874,6 +1896,12 @@ class CCamAppUi : public CCamAppUiBase,
         CCamStartupLogoController* iStartupLogoController;
 
         TBool iVideoClipPlayInProgress;
+
+        /**
+         * iCamFtuDisplay
+         * An instance of the CCamFtuDisplay class
+         */
+        CCamFtuDisplay* iCamFtuDisplay;
         };
 
 // ===========================================================================

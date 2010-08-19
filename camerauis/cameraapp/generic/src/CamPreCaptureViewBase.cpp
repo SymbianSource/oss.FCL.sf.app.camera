@@ -1877,7 +1877,8 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
         }
     else if ( EAknTouchGestureFwDoubleTap == aEvent.Type() 
               && ( ECamNoOperation == iController.CurrentOperation() 
-                   || ( ECamCapturing   == iController.CurrentOperation() 
+                   || ( ( ECamCapturing   == iController.CurrentOperation() 
+                            || ECamPaused   == iController.CurrentOperation() )
                         && iController.CurrentMode() == ECamControllerVideo ) ) )
         {
         PRINT( _L("Camera <> double tap event") );

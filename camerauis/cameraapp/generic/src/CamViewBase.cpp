@@ -515,6 +515,13 @@ void CCamViewBase::SwitchToStandbyModeL( TCamAppViewIds aViewId, TInt aError )
 
     SetStandbyModeActive(ETrue);
 
+    UpdateCbaL();
+    if ( Cba() )
+        {
+        Cba()->DrawNow();
+        }
+        
+    
     // Release the camera hardware
     iController.ReleaseCamera();
     

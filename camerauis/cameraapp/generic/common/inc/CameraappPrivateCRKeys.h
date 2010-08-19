@@ -87,6 +87,8 @@ const TUint32 KCamCrDefaultAlbumTitle       = 0x57;
 // Customise Toolbar keys
 const TUint32 KCamCrImageToolbarItems        = 0x58;
 const TUint32 KCamCrImageToolbarDefaultItems = 0x59;
+//Ftu message key
+const TUint32 KCamCrFtuMessageFlag           = 0x60;
 
 //Support for Photo and Video editor
 const TUint32 KCamCrPhotoEditorSupport = 0x5A;

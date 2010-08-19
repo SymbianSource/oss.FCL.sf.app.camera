@@ -23,7 +23,7 @@
 #include <aknview.h>
 #include <eikclb.h>
 #include <ConeResLoader.h>
-#include <gsplugininterface.h>
+#include <GSPluginInterface.h> 
 #include <gsbaseview.h>
 #include "CamStaticSettingsModel.h"
 

@@ -165,3 +165,15 @@
 -c8,8 qgn_menu_cams.svg
 -c8,1 qgn_indi_vid4_tb_still.svg
 -c8,1 qgn_indi_vid4_tb_video.svg
+-c8,8 qgn_indi_cam4_battery_strength_0.svg
+-c8,8 qgn_indi_cam4_battery_strength_1.svg
+-c8,8 qgn_indi_cam4_battery_strength_2.svg
+-c8,8 qgn_indi_cam4_battery_strength_3.svg
+-c8,8 qgn_indi_cam4_battery_strength_4.svg
+-c8,8 qgn_indi_cam4_battery_strength_5.svg
+-c8,8 qgn_indi_cam4_battery_strength_6.svg
+-c8,8 qgn_indi_cam4_battery_strength_7.svg
+-c8,8 qgn_indi_cam4_capture_image.svg
+-c8,8 qgn_indi_cam4_capture_image_pressed.svg
+-c8,8 qgn_indi_cam4_capture_video.svg
+-c8,8 qgn_indi_cam4_capture_video_pressed.svg

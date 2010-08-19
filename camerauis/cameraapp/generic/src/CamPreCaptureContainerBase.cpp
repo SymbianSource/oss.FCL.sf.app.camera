@@ -981,7 +981,7 @@ void CCamPreCaptureContainerBase::HandleForegroundEventL( TBool aForeground )
         // Cancel timer if we're losing focus
         iZoomTimer->Cancel();  
         
-        if ( !iShuttingDown )
+        if ( iController.IsAppUiAvailable() && !iShuttingDown )
             {
             iSidePane->MakeVisible( ETrue );
             iZoomPane->MakeVisible( EFalse, EFalse );
@@ -2929,7 +2929,8 @@ void CCamPreCaptureContainerBase::PrepareForCapture()
         iDrawIndicator = ETrue;
         }
     
-    if ( iCaptureButtonContainer )
+    CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() );
+    if ( iCaptureButtonContainer && !( appUi && appUi->SelfTimerEnabled() ) )
         {
         iCaptureButtonContainer->SetCaptureButtonShown( EFalse );
         }

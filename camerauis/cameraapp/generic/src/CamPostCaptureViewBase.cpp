@@ -217,6 +217,8 @@ void CCamPostCaptureViewBase::HandleCommandL( TInt aCommand )
             break;
         case KAiwCmdEdit:
         case ECamCmdEdit:
+        case ECamCmdEditPhoto:
+        case ECamCmdEditVideo:    
             {
             CAiwGenericParamList& inputParams = iAiwServiceHandler->InParamListL();
             TPtrC currentFullFileName(iController.CurrentFullFileName());
@@ -582,7 +584,8 @@ void CCamPostCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId, TUid a
                 {
                 fixedToolbar->SetToolbarObserver( this );
                 UpdateToolbarIconsL();
-                if( Id().iUid != ECamViewIdVideoPostCapture && !appui->IsSelfTimedCapture() )
+                if( Id().iUid != ECamViewIdVideoPostCapture && !appui->IsSelfTimedCapture() && 
+                    !iController.SavedCurrentImage() )
                     {
                     fixedToolbar->SetDimmed(ETrue);
                     }

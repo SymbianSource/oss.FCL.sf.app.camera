@@ -114,13 +114,6 @@ class CCamBatteryPaneDrawer: public CBase
         void LoadLayoutsL();
         
         /**
-        * Calculate height of 
-        * @param aLevel Battery level
-        * @return height
-        */
-        TInt BatteryStrengthIconHeight( TInt aLevel ) const;
-        
-        /**
         * Load icons needed for drawing the battery pane
         */
         void LoadIconsL();
@@ -145,10 +138,9 @@ class CCamBatteryPaneDrawer: public CBase
         // Battery strength    
         TInt        iBatteryStrength;
 
-        // Battery strength and battery icon
-        CCamBitmapItem* iBatteryIcon; // own
-        CCamBitmapItem* iBatteryStrengthIcon; // own
-
+        
+        RPointerArray<CCamBitmapItem> iBatteryIcons;
+        
         // Rectangle of the battery pane
         TRect       iRect;
 

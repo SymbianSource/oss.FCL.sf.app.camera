@@ -342,7 +342,7 @@ void CCamStillPostCaptureView::DoActivateL(
     iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID),
             R_CAM_AIW_VIEW_INTEREST );
 
-    if ( iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport) )
+    if ( iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport) != ECamNoEditorSupport )
         {    
         iAiwServiceHandler->AttachMenuL( ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID), 
                 R_CAM_SET_AS_CALL_IMAGE_INTEREST_EDITOR );
@@ -558,46 +558,34 @@ void CCamStillPostCaptureView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane*
     if ( aResourceId == ROID( R_CAM_STILL_POST_CAPTURE_MENU_ID ) ||
          aResourceId == ROID( R_CAM_STILL_POST_CAPTURE_OK_MENU_ID ) )
         {
-        TBool showSend = ETrue;
-        TBool showSendToCaller = EFalse;
-
-/*#ifndef __WINS__
-        if ( iSFIUtils->IsCLIValidL() )
-            {
-            showSend = EFalse;
-            showSendToCaller = ETrue;
-            }
-#endif*/
-
-        TCamOrientation orientation =
-            static_cast<CCamAppUiBase*>( AppUi() )->CamOrientation();
-
-        if ( orientation == ECamOrientationCamcorder || 
-            orientation == ECamOrientationCamcorderLeft ||
-			orientation == ECamOrientationPortrait )
-            {
-            showSend = EFalse;
-            showSendToCaller = EFalse;
-            }
-
         TInt itemPos = 0;
         if ( aMenuPane->MenuItemExists( ECamCmdSendToCallerMultimedia, itemPos ) )
             {
             aMenuPane->SetItemDimmed(
-                ECamCmdSendToCallerMultimedia, !showSendToCaller );
+                ECamCmdSendToCallerMultimedia, ETrue );
             }
         
-        if(iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport))
-            {
-            showSend = ETrue;
-            }
+		TInt editorSupport = iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport);
         
-        if ( aMenuPane->MenuItemExists( ECamCmdSend, itemPos ) )
+		if( editorSupport == ECamNoEditorSupport || 
+			editorSupport == ECamEditorSupportInOptions )
             {
-            aMenuPane->SetItemDimmed(
-                ECamCmdSend, !showSend );
-            }
-
+			if ( aMenuPane->MenuItemExists( ECamCmdSend, itemPos ) )
+				{
+				aMenuPane->SetItemDimmed(
+					ECamCmdSend, ETrue );
+				}
+			}
+		if( editorSupport == ECamNoEditorSupport || 
+			editorSupport == ECamEditorSupportInToolbar )
+			{
+			if ( aMenuPane->MenuItemExists( ECamCmdEditPhoto, itemPos ) )
+				{
+				aMenuPane->SetItemDimmed(
+					ECamCmdEditPhoto, ETrue );
+				}			
+			}
+			
         /*
          * MSK : ContextOptions --> We just hide Help and Exit from the Options Menu when
          *       the MSK is pressed in the postcapture still view
@@ -668,7 +656,8 @@ void CCamStillPostCaptureView::DynInitToolbarL( TInt aResourceId,
 			}
 		else
 			{
-            if(iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport))
+			TInt editorSupport = iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport);
+            if( editorSupport == ECamEditorSupportInToolbar )
                 {
                 aToolbar->RemoveItem( ECamCmdSend );
                 CAknButton* editButton = dynamic_cast<CAknButton*>(aToolbar->ControlOrNull( ECamCmdEdit ));

@@ -2563,6 +2563,22 @@ void CCamAppController::SwitchCameraL()
       SetCameraOrientationModeL( landscapeScreenMode );
       }
   iCameraController->CompleteSwitchCameraL();
+  // Force to get a sensor data after switch camera from primary to secondary 
+  // when always holding in camera with portrait mode. 
+  if( iConfigManager 
+      && iConfigManager->IsOrientationSensorSupported() )
+    {
+    if( iAccSensorListening )
+      {
+      iAccSensorListening = EFalse;
+      }
+    if( iAccSensorChannel )
+      {
+      delete iAccSensorChannel;
+      iAccSensorChannel = NULL;
+      }        
+    TRAP_IGNORE( UpdateSensorApiL( ETrue ) );            
+    }
 
   // Camera switched.
   // a) Set current camera index to the new one.
@@ -3995,6 +4011,7 @@ TBool CCamAppController::IsInShutdownMode() const
 //
 TBool CCamAppController::IsAppUiAvailable() const
     {
+    PRINT1(_L("Camera <> CCamAppController::IsAppUiAvailable=%d"),iAppUiAvailable);
     return iAppUiAvailable;
     }       
     
@@ -8753,6 +8770,26 @@ void CCamAppController::StartLocationTrailL()
   {
   PRINT( _L("Camera => CCamAppController::StartLocationTrailL") );
   CCamAppUi* appUI = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+
+  if( !iRepository )
+    {
+    iRepository = CRepository::NewL( KCRUidCameraappSettings ); 
+    }
+
+    TInt ftuValue=-1;
+    TInt retErr=0;
+    retErr = iRepository->Get( KCamCrFtuMessageFlag, ftuValue );
+	if( ftuValue == 0 )
+		{
+		return;
+		}
+
+	if( iRepository )
+		{
+		delete  iRepository;
+		iRepository = NULL;
+		}
+
 
   // If a stop request is pending but the trail is being restarted, stop 
   // and delete the timer

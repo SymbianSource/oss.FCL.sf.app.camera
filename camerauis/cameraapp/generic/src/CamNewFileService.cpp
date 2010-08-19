@@ -69,13 +69,13 @@ CCamNewFileService::~CCamNewFileService()
   if ( !iCompleted && iObserver )
     {	    
     TRAP_IGNORE( iObserver->HandleCompletedNewServiceL( EFalse ) );
-    CCamAppUi* appUi = static_cast< CCamAppUi* >( CEikonEnv::Static()->EikAppUi() );
-    if ( appUi )
-        {
-        // Tell appui 'this' is not valid MCamEmbeddedObserver pointer anymore
-        appUi->SetEmbeddedObserver( NULL );
-        }
     }
+  CCamAppUi* appUi = static_cast< CCamAppUi* >( CEikonEnv::Static()->EikAppUi() );
+  if ( appUi )
+      {
+      // Tell appui 'this' is not valid MCamEmbeddedObserver pointer anymore
+      appUi->SetEmbeddedObserver( NULL );
+      }
   PRINT( _L("Camera <= ~CCamNewFileService") );
   }
     

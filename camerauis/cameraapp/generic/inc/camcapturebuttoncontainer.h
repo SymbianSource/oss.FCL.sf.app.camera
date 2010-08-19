@@ -135,7 +135,9 @@ private:
 
     // Icons and rect for capturing image
     CFbsBitmap *iCaptureIcon;
-    CFbsBitmap *iCaptureMask;
+    CFbsBitmap *iCaptureIconMask;
+    CFbsBitmap *iCaptureIconPressed;
+    CFbsBitmap *iCaptureIconPressedMask;
     TRect iCaptureRect;
     TBool iCaptureButtonShown;
     TBool iCaptureButtonPressed;
