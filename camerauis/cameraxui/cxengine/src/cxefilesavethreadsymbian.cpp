@@ -338,8 +338,10 @@ void CxeFileSaveThreadSymbian::saveNow()
                     mSnapshots.insert(path, snapshot);
                 }
             }
-
-            harvestFile(path, qobject_cast<CxeImageDataItemSymbian*>(item)->isLocationEnabled());
+            CxeImageDataItemSymbian* item_s = qobject_cast<CxeImageDataItemSymbian*>(item);
+            if (item_s) {
+                harvestFile(path, item_s->isLocationEnabled());
+            }
         }
 
         // Delete item, since we own it

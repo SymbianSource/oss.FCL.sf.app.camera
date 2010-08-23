@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,15 +20,14 @@
 #include "unittest_cxefeaturemanagerimp.h"
 #include "cxefeaturemanagerimp.h"
 #include "cxenamespace.h"
-#include "cxesettings.h"
-
+#include "cxefakesettings.h"
 
 static const char* INVALID_KEY = "invalid key";
 static const char* EMPTY_KEY = "";
 
 
 UnitTestCxeFeatureManager::UnitTestCxeFeatureManager()
-: mFeatureManager(NULL)
+: mFeatureManager(NULL), mFakeSettings(NULL)
 {
 }
 
@@ -40,8 +39,9 @@ UnitTestCxeFeatureManager::~UnitTestCxeFeatureManager()
 // Run before each individual test case
 void UnitTestCxeFeatureManager::init()
 {
+    mFakeSettings = new CxeFakeSettings();
     // fake model contains initialized test data.
-    mFeatureManager = new CxeFeatureManagerImp(*mSettings);
+    mFeatureManager = new CxeFeatureManagerImp(*mFakeSettings);
 }
 
 // Run after each individual test case
@@ -49,6 +49,8 @@ void UnitTestCxeFeatureManager::cleanup()
 {
     delete mFeatureManager;
     mFeatureManager = 0;
+    delete mFakeSettings;
+    mFakeSettings = NULL;
 }
 
 // Testing that isFeatureSupported function returns correct values

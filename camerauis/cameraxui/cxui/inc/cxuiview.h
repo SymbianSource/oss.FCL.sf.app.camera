@@ -79,6 +79,8 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 
 public slots:
+    void zoomDisappearEffectFinished(const HbEffect::EffectStatus &status);
+    void zoomAppearEffectFinished(const HbEffect::EffectStatus &status);
     virtual void enterStandby();
     virtual void exitStandby();
 

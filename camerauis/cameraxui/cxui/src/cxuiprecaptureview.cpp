@@ -32,6 +32,8 @@
 #include <hbstyle.h>
 #include <hbframeitem.h>
 #include <hbwidget.h>
+#include <hbeffect.h>
+#include <hbinstance.h>
 
 #include "cxeengine.h"
 #include "cxeviewfindercontrol.h"
@@ -166,6 +168,10 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
     OstTrace0(camerax_performance, CXUIPRECAPTUREVIEW_CONSTRUCT_2, "msg: e_CX_PRECAPVIEW_CONSTRUCT 0");
 
     QCoreApplication::instance()->installEventFilter(this);
+
+    HbEffect::add("toolbarextension", "camera_toolbarextension_appear", "toolbarextension_appear");
+    HbEffect::add("toolbarextension", "camera_toolbarextension_disappear", "toolbarextension_disappear");
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -573,6 +579,12 @@ CxuiSettingDialog* CxuiPrecaptureView::createSettingsDialog()
                                     documentLoader->findWidget(SETTINGS_DIALOG_CONTENT_WIDGET));
     CX_ASSERT_ALWAYS(mSettingsDialogList);
 
+	// The radio button size policy defaults to "Expanding" which makes it
+	// always full screen. Let's override the policy here to make the layout
+	// reasonable.
+    mSettingsDialogList->setSizePolicy(QSizePolicy(QSizePolicy::Ignored,
+	                                               QSizePolicy::Maximum));
+
     QObject *object = documentLoader->findObject(SETTINGS_DIALOG_OK_ACTION);
     mSettingsDialogOkAction = qobject_cast<HbAction *>(object);
     CX_DEBUG_ASSERT(mSettingsDialogOkAction);
@@ -785,6 +797,7 @@ void CxuiPrecaptureView::showSettingsGrid()
     if(mSettingsGrid) {
         mSettingsGrid->setModal(true);
         mSettingsGrid->show();
+        HbEffect::start(mSettingsGrid, "toolbarextension", "toolbarextension_appear");
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -797,7 +810,8 @@ void CxuiPrecaptureView::hideSettingsGrid()
 {
     CX_DEBUG_ENTER_FUNCTION();
     if (mSettingsGrid) {
-        mSettingsGrid->hide();
+        // Hiding of the settingsgrid will be done after effect has finished
+        HbEffect::start(mSettingsGrid, "toolbarextension", "toolbarextension_disappear", this, "toolbarExtensionDisappearEffectFinished");
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -807,21 +821,29 @@ void CxuiPrecaptureView::hideSettingsGrid()
 */
 QPointF CxuiPrecaptureView::getDialogPosition()
 {
-    HbStyle *style = new HbStyle();
-    qreal bottomMargin;
-    qreal rightMargin;
-    bool ok = style->parameter("hb-param-margin-gene-bottom", bottomMargin);
-    CX_ASSERT_ALWAYS(ok);
-    ok = style->parameter("hb-param-margin-gene-right", rightMargin);
-    CX_ASSERT_ALWAYS(ok);
+    HbStyle *style = HbInstance::instance()->style();
 
-    // calculate dialog's bottom right position
-    QSize deviceRes = mEngine->viewfinderControl().deviceDisplayResolution();
-    QPointF point(deviceRes.width() - rightMargin, deviceRes.height() - bottomMargin);
+    if (style) {
+        qreal bottomMargin = 0.0f;
+        qreal rightMargin = 0.0f;
+        bool ok = style->parameter("hb-param-margin-gene-bottom",
+                                   bottomMargin);
+        CX_DEBUG_ASSERT(ok);
+        ok = style->parameter("hb-param-margin-gene-right",
+                              rightMargin);
+        CX_DEBUG_ASSERT(ok);
 
-    delete style;
+        // calculate dialog's bottom right position
+        QSize deviceRes =
+            mEngine->viewfinderControl().deviceDisplayResolution();
+        QPointF point(deviceRes.width() - rightMargin,
+                      deviceRes.height() - bottomMargin);
 
-    return point;
+        style = NULL; // owned by HbInstance
+        return point;
+    } else {
+        return QPointF(); // (0, 0)
+    }
 }
 
 
@@ -880,6 +902,17 @@ void CxuiPrecaptureView::updateLocationIndicator(CxeGeoTaggingTrail::State newSt
 
     CX_DEBUG_EXIT_FUNCTION();
 }
+
+
+void CxuiPrecaptureView::toolbarExtensionDisappearEffectFinished(const HbEffect::EffectStatus &status) {
+    if (mSettingsGrid) {
+        mSettingsGrid->hide();
+    }
+}
+
+void CxuiPrecaptureView::toolbarExtensionAppearEffectFinished(const HbEffect::EffectStatus &status) {
+}
+
 
 
 /*!

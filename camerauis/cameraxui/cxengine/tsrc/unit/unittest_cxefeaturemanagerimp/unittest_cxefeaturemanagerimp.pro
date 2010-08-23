@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -14,8 +14,15 @@ include(../unittest.pri)
 TARGET = unittest_cxefeaturemanagerimp
 
 SOURCES *= unittest_cxefeaturemanagerimp.cpp \
-           cxefeaturemanagerimp.cpp
+           cxefeaturemanagerimp.cpp \
+           cxesettingsmappersymbian.cpp \
+           cxesettingsimp.cpp \
+           cxefakesettings.cpp
 HEADERS *= unittest_cxefeaturemanagerimp.h \
            cxefeaturemanagerimp.h \
            cxeerror.h \
-           cxenamespace.h
+           cxenamespace.h \
+           cxesettingsmappersymbian.h \
+           cxesettings.h \
+           cxesettingsimp.h \
+           cxefakesettings.h

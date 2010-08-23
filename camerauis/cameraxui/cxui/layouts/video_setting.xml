@@ -9,6 +9,7 @@
         <setting_list id="video_showcaptured" heading="txt_cam_title_show_captured_video"
                                  preview="0" type="SingleLineListBox" setting_icon="">
             <lnItem string="txt_cam_list_ln_sec_video" lnValue="2"  value="2000" icon="" />
+            <lnItem string="txt_cam_list_ln_sec_video" lnValue="4"  value="4000" icon="" />
             <lnItem string="txt_cam_list_ln_sec_video" lnValue="10" value="10000" icon="" />
             <item string="txt_cam_list_continuous_video" value="-1" icon="" />
             <item string="txt_cam_list_not_video" value="0" icon="" />

@@ -221,7 +221,12 @@ void CxuiSettingRadioButtonList::commit(int index)
             try {
                 QString current = mEngine->settings().get<QString>(mSettingId);
                 CX_DEBUG(("CxuiSettingRadioButtonList - settings model value:[%s]", qPrintable(current)));
-                if (current != value.toString()) {
+                // If the changed setting is a scene mode, we need to reset it
+                // because a scene mode related setting might have changed
+                // even though the scene mode itself hadn't
+                if (current != value.toString() ||
+                    mSettingId == CxeSettingIds::IMAGE_SCENE ||
+                    mSettingId == CxeSettingIds::VIDEO_SCENE) {
                     mEngine->settings().set(mSettingId, value.toString());
                 }
             } catch (CxeException &e) {

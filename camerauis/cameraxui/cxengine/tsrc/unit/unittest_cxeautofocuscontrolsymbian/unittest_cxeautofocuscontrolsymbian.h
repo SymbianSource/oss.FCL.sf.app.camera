@@ -48,7 +48,12 @@ private slots:
     void testPrepareForCameraDelete();
     void testHandleCameraAllocated();
     void testPrepareForRelease();
-    void testHandleCameraEvent();
+
+    void testHandleCameraEventOptimalFocus();
+    void testHandleCameraEventAutofocusChanged();
+    void testHandleCameraEventFocusRangeChanged();
+
+
     void testHandleSceneChanged();
     void testHandleSettingValueChanged();
 

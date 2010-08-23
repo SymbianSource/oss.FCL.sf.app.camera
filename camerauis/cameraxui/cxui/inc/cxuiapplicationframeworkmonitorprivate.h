@@ -19,6 +19,7 @@
 
 #include <QObject>
 #include <QVariant>
+#include <QTimer>
 #include "cxuiapplicationframeworkmonitor.h"
 
 
@@ -50,7 +51,7 @@ private:
 private slots:
     void handleEvent(const QSymbianEvent *event);
     void handlePropertyEvent(long int uid, unsigned long int key, QVariant value);
-
+    void usbModeCheckTimerCallback();
 private:
     void init();
     void handleWindowServerEvent(const QSymbianEvent *event);
@@ -73,7 +74,7 @@ private:
     int mKeyLockState;
     int mBatteryStatus;
     int mUsbPersonality;
-
+    QTimer mUsbModeCheckTimer;
     CxuiEventLog *mEventLog;
 #endif // Q_OS_SYMBIAN
 

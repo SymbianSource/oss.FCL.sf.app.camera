@@ -87,6 +87,3 @@ HEADERS += cxuitestbat.h \
 
 RESOURCES += ../cxui.qrc
 
-symbian {
-    RSS_RULES = "group_name=\"Qt Camera\";"
-}

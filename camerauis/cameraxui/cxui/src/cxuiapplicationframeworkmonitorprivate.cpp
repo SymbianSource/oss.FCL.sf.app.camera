@@ -32,6 +32,7 @@
 #include <QMetaEnum>
 #include <QString>
 #include <QVariant>
+#include <QTimer>
 #include <qsymbianevent.h>
 
 #endif // Q_OS_SYMBIAN
@@ -42,6 +43,9 @@
 #include "cxesettings.h"
 #include "cxuiapplicationframeworkmonitorprivate.h"
 
+namespace{
+    const int CXUI_USB_MODE_CHECK_TIMER_DELAY = 1000; // 1 second
+}
 
 #ifdef Q_OS_SYMBIAN
 namespace
@@ -110,6 +114,7 @@ CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(C
        mKeyLockState(EKeyguardNotActive),
        mBatteryStatus(EBatteryStatusUnknown),
        mUsbPersonality(0),
+       mUsbModeCheckTimer(this),
        mEventLog(NULL),
 #endif // Q_OS_SYMBIAN
        mState(CxuiApplicationFrameworkMonitor::ForegroundOwned)
@@ -120,6 +125,10 @@ CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(C
     mWindowGroupName = windowGroupName(mWsSession, mWindowGroupId);
     mEventLog = new CxuiEventLog("CxuiApplicationFrameworkMonitorPrivate");
     init();
+    mUsbModeCheckTimer.setSingleShot(true);
+    mUsbModeCheckTimer.setInterval(CXUI_USB_MODE_CHECK_TIMER_DELAY);
+    connect(&mUsbModeCheckTimer, SIGNAL(timeout()),
+            this, SLOT(usbModeCheckTimerCallback()));
 #endif // Q_OS_SYMBIAN
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -234,9 +243,39 @@ void CxuiApplicationFrameworkMonitorPrivate::handlePropertyEvent(long int uid, u
 
             // Check if mass memory mode activity changed.
             if (wasUsbMassMemoryModeActive != isUsbMassMemoryModeActive()) {
-                emit q->usbMassMemoryModeToggled(isUsbMassMemoryModeActive());
+
+                // If the massmemory mode switched from on to off,
+                // the signal is emitted immediately.
+                // If the switch is from off to on, we need to use a timer
+                // as a workaround because  plugging in the USB charger
+                // sends a mass memory mode change event.
+                if (wasUsbMassMemoryModeActive) {
+                    emit q->usbMassMemoryModeToggled(isUsbMassMemoryModeActive());
+                } else {
+                    // (Re)starting the timer
+                    mUsbModeCheckTimer.stop();
+                    mUsbModeCheckTimer.start();
+                }
+
             }
         }
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+*  Callback function for the timer used to seperate USB charging
+*  from USB mass memory mode
+*/
+void CxuiApplicationFrameworkMonitorPrivate::usbModeCheckTimerCallback()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // if the device is still in mass memory mode after the timer has finished,
+    // the device really is in massmemory mode and not plugged into the charger
+    if (isUsbMassMemoryModeActive()){
+        emit q->usbMassMemoryModeToggled(isUsbMassMemoryModeActive());
     }
 
     CX_DEBUG_EXIT_FUNCTION();

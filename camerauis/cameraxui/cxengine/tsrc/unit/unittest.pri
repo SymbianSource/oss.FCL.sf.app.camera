@@ -32,7 +32,6 @@ INCLUDEPATH += . ../../../inc ../../../inc/api ../../fakeclasses ../../../traces
 
 symbian {
     TARGET.CAPABILITY = ALL -TCB -DRM
-    RSS_RULES = "group_name=\"Qt Camera\";"
     
     DEFINES += CAMERAX_ENGINE_LIBRARY
 }

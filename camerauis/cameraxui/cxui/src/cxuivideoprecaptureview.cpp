@@ -382,9 +382,15 @@ void CxuiVideoPrecaptureView::saveActivity()
     CX_DEBUG_ENTER_FUNCTION();
     QVariantMap data;
     QVariantHash params;
-    //@todo: add pre-capture icon as screenshot
-    mActivityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
-    mActivityManager->addActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY, data, params);
+
+    HbIcon activityScreenshot("qtg_graf_taskswitcher_camcorder");
+    QPixmap screenshot = activityScreenshot.pixmap();
+    params.insert("screenshot", screenshot);
+
+    mActivityManager->removeActivity(
+            CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
+    mActivityManager->addActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY,
+                                  data, params);
     CX_DEBUG_EXIT_FUNCTION();
 }
 

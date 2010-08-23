@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -18,6 +18,7 @@
 #define CXECAMERADEVICECONTROLSYMBIAN_H
 
 //  Include Files
+#include <QTimer>
 
 #include "cxecameradevicecontrol.h"
 #include "cxecameradevice.h"
@@ -77,6 +78,9 @@ signals:
     void deviceReady(); // device is ready to prepared in either still or video mode
     void vfFrameReady(MCameraBuffer* buffer, int error);
 
+private slots:
+    void doReserve();
+
 protected: // Protected data so that unit test cases can replace
            // mCameraDevice with a fake implementation.
     CxeCameraDevice *mCameraDevice; // own
@@ -84,6 +88,7 @@ protected: // Protected data so that unit test cases can replace
 protected: // data
     Cxe::CameraIndex mCameraIndex;
     Cxe::CameraMode  mCameraMode;
+    QTimer mReserveTimer;
 };
 
 #endif  // CXECAMERADEVICECONTROLSYMBIAN_H

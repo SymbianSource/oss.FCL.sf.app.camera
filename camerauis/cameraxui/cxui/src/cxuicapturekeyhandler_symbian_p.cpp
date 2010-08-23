@@ -57,52 +57,55 @@ CxuiCaptureKeyHandlerPrivate::CxuiCaptureKeyHandlerPrivate(CxeEngine &aEngine, C
     mPrimaryCameraCaptureKeys.append(CXUI_CAPTURE_KEY_CODE1);
     mPrimaryCameraCaptureKeys.append(CXUI_CAPTURE_KEY_CODE2);
 
-    listenKeys(true);
+    startListeningKeys();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 CxuiCaptureKeyHandlerPrivate::~CxuiCaptureKeyHandlerPrivate()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    listenKeys(false);
+    stopListeningKeys();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
-* Start or stop listening key events.
-* @param listen Should we start (true) or stop (false) listening key events.
+* Starts listening key events.
 */
-void CxuiCaptureKeyHandlerPrivate::listenKeys(bool listen)
+void CxuiCaptureKeyHandlerPrivate::startListeningKeys()
 {
     CX_DEBUG_ENTER_FUNCTION();
+    // Protect from multiple calls
+    if (mCapturedKeyUpDownHandles.empty() && mCapturedKeyHandles.empty()) {
 
-    if (listen) {
-        // Protect from multiple calls
-        if (mCapturedKeyUpDownHandles.empty() && mCapturedKeyHandles.empty()) {
-
-            int key(0);
-            foreach (key, mPrimaryCameraAutofocusKeys) {
-                CX_DEBUG(("CxuiCaptureKeyHandlerPrivate - hooking autofocus key with scan / key code: %d", key));
-                listenKey(key);
-            }
-            foreach (key, mPrimaryCameraCaptureKeys) {
-                CX_DEBUG(("CxuiCaptureKeyHandlerPrivate - hooking capture key with scan / key code: %d", key));
-                listenKey(key);
-            }
+        int key(0);
+        foreach (key, mPrimaryCameraAutofocusKeys) {
+            CX_DEBUG(("CxuiCaptureKeyHandlerPrivate - hooking autofocus key with scan / key code: %d", key));
+            listenKey(key);
         }
-    } else {
-
-        int handle(0);
-        foreach (handle, mCapturedKeyUpDownHandles) {
-            mWindowGroup.CancelCaptureKeyUpAndDowns(handle);
+        foreach (key, mPrimaryCameraCaptureKeys) {
+            CX_DEBUG(("CxuiCaptureKeyHandlerPrivate - hooking capture key with scan / key code: %d", key));
+            listenKey(key);
         }
-        mCapturedKeyUpDownHandles.clear();
-
-        foreach (handle, mCapturedKeyHandles) {
-            mWindowGroup.CancelCaptureKey(handle);
-        }
-        mCapturedKeyHandles.clear();
     }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Stops listening key events.
+*/
+void CxuiCaptureKeyHandlerPrivate::stopListeningKeys()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    int handle(0);
+    foreach (handle, mCapturedKeyUpDownHandles) {
+        mWindowGroup.CancelCaptureKeyUpAndDowns(handle);
+    }
+    mCapturedKeyUpDownHandles.clear();
+
+    foreach (handle, mCapturedKeyHandles) {
+        mWindowGroup.CancelCaptureKey(handle);
+    }
+    mCapturedKeyHandles.clear();
     CX_DEBUG_EXIT_FUNCTION();
 }
 

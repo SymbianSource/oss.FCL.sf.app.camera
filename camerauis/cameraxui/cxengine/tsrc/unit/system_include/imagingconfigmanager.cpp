@@ -176,16 +176,16 @@ void CImagingConfigManager::initVideoQualitySet(TVideoQualitySet& aSet)
         aSet.iPreferredSupplier[ i ] = NULL;
         }
     aSet.iVideoQualitySetLevel = 100;
-    aSet.iVideoWidth = 0;
-    aSet.iVideoHeight = 0;
+    aSet.iVideoWidth = 640;
+    aSet.iVideoHeight = 360;
     aSet.iVideoFrameRate = 0.0;
-    aSet.iVideoBitRate = 0;
+    aSet.iVideoBitRate = 100;
     aSet.iVideoEncoderUID.iUid = 0;
     aSet.iRandomAccessRate = 0;
     aSet.iVideoPixelAspectRatioNum = 0;
     aSet.iVideoPixelAspectRatioDenom = 0;
     aSet.iAudioFourCCType = 0;
-    aSet.iAudioBitRate = 0;
+    aSet.iAudioBitRate = 100;
     aSet.iAudioSamplingRate = 0;
     aSet.iAudioChannels = 0;
     aSet.iAudioEncoderUID.iUid = 0;

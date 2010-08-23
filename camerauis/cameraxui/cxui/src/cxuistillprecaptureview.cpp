@@ -381,9 +381,15 @@ void CxuiStillPrecaptureView::saveActivity()
     CX_DEBUG_ENTER_FUNCTION();
     QVariantMap data;
     QVariantHash params;
-    //@todo: add pre-capture icon as screenshot
-    mActivityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
-    mActivityManager->addActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY, data, params);
+
+    HbIcon activityScreenshot("qtg_graf_taskswitcher_camera");
+    QPixmap screenshot = activityScreenshot.pixmap();
+    params.insert("screenshot", screenshot);
+
+    mActivityManager->removeActivity(
+            CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
+    mActivityManager->addActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY,
+                                  data, params);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -880,6 +886,11 @@ void CxuiStillPrecaptureView::handleSceneChanged(const QVariant &newSceneData)
             // Check from setting model what is it currently.
             Cxe::FlashMode flashMode = mEngine->settings().get<Cxe::FlashMode>(CxeSettingIds::FLASH_MODE, Cxe::FlashAuto);
             handleSettingValueChanged(CxeSettingIds::FLASH_MODE, QVariant(flashMode));
+        }
+
+        // If facetracking is changed, we need to update the indicator icon
+        if (scene.contains(CxeSettingIds::FACE_TRACKING)) {
+            handleSettingValueChanged(CxeSettingIds::FACE_TRACKING, scene[CxeSettingIds::FACE_TRACKING]);
         }
 
     }

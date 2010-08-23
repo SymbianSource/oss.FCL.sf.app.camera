@@ -156,7 +156,7 @@ void CxuiErrorManager::getErrorDetails(QString &errorText, QString &buttonText)
         case CxeError::OutOfMemory:
             mErrorSeverity = CxuiErrorManager::Error;
             errorText = hbTrId("txt_cam_info_error_ram_full");
-            buttonText = hbTrId("txt_common_ok");
+            buttonText = hbTrId("txt_common_button_ok");
             break;
         case CxeError::Died:
         case CxeError::InitializationFailed:

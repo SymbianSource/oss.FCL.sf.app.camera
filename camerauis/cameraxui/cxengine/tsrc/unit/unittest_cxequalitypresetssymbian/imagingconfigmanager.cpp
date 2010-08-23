@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -99,6 +99,7 @@ TInt CImagingConfigManager::GetVideoQualitySet( TVideoQualitySet& aSet,
 // Get all settings for Camcorder
 TInt CImagingConfigManager::GetCamcorderMMFPluginSettings(TCamcorderMMFPluginSettings& aSet) const
     {
+    aSet.iCMRAvgVideoBitRateScaler = 0.9;
     return KErrNone;
     }
 

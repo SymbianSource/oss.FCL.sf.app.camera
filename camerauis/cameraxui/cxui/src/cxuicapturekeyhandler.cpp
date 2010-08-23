@@ -37,7 +37,7 @@ CxuiCaptureKeyHandler::CxuiCaptureKeyHandler(CxeEngine &aEngine) :
 {
     d_ptr = new CxuiCaptureKeyHandlerPrivate(aEngine, this);
     
-    d_ptr->listenKeys(true);
+    d_ptr->startListeningKeys();
 }
 
 CxuiCaptureKeyHandler::~CxuiCaptureKeyHandler()
@@ -45,17 +45,23 @@ CxuiCaptureKeyHandler::~CxuiCaptureKeyHandler()
     CX_DEBUG_ENTER_FUNCTION();
 
     Q_D(CxuiCaptureKeyHandler);
-    d->listenKeys(false);
+    d->stopListeningKeys();
 
     delete d;
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-void CxuiCaptureKeyHandler::listenKeys(bool listen)
+void CxuiCaptureKeyHandler::startListeningKeys()
 {
     Q_D(CxuiCaptureKeyHandler);
-    d->listenKeys(listen);
+    d->startListeningKeys();
+}
+
+void CxuiCaptureKeyHandler::stopListeningKeys()
+{
+    Q_D(CxuiCaptureKeyHandler);
+    d->stopListeningKeys();
 }
 
 bool CxuiCaptureKeyHandler::isAutofocusKeyPressed()

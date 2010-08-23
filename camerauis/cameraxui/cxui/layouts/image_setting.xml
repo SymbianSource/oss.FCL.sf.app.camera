@@ -30,6 +30,7 @@
                       type="SingleLineListBox"
                       setting_icon="">
             <lnItem string="txt_cam_list_ln_sec" lnValue="2"  value="2000" icon="" />
+            <lnItem string="txt_cam_list_ln_sec" lnValue="4" value="4000" icon="" />
             <lnItem string="txt_cam_list_ln_sec" lnValue="10" value="10000" icon="" />
             <item   string="txt_cam_list_continuous" value="-1" icon="" />
             <item   string="txt_cam_list_never"        value="0"  icon="" />

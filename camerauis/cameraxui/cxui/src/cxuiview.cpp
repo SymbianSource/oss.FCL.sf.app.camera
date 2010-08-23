@@ -21,6 +21,7 @@
 #include <hbtoolbar.h>
 #include <hbnotificationdialog.h>
 #include <hbframeitem.h>
+#include <hbeffect.h>
 #include "cxuiview.h"
 #include "cxutils.h"
 #include "cxeengine.h"
@@ -86,6 +87,9 @@ void CxuiView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
     connect(&mHideControlsTimeout, SIGNAL(timeout()), this, SLOT(hideControls()));
     mHideControlsTimeout.setSingleShot(true);
     mHideControlsTimeout.setInterval(CXUI_HIDE_CONTROLS_TIMEOUT);
+    
+    HbEffect::add("zoombar", "camera_zoom_appear", "zoom_appear");
+    HbEffect::add("zoombar", "camera_zoom_disappear", "zoom_disappear");
     
     mControlsFeedback.setOwningWindow(mMainWindow);
     CX_DEBUG_EXIT_FUNCTION();
@@ -361,7 +365,8 @@ void CxuiView::showIndicators()
 void CxuiView::hideZoom()
 {
     if (mSlider) {
-        mSlider->hide();
+        // Hiding of the slider will be done after effect has finished
+        HbEffect::start(mSlider, "zoombar", "zoom_disappear", this, "zoomDisappearEffectFinished");
     }
     mZoomVisible = false;
 }
@@ -391,6 +396,7 @@ void CxuiView::showZoom()
         if (mSlider->maximum() > 0) {
             mSlider->show();
         }
+        HbEffect::start(mSlider, "zoombar", "zoom_appear");
     }
 
     mZoomVisible = true;
@@ -453,6 +459,15 @@ void CxuiView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         toggleControls();
         event->accept();
     }
+}
+
+void CxuiView::zoomDisappearEffectFinished(const HbEffect::EffectStatus &status) {
+    if (mSlider) {
+        mSlider->hide();
+    }
+}
+
+void CxuiView::zoomAppearEffectFinished(const HbEffect::EffectStatus &status) {
 }
 
 // End of file

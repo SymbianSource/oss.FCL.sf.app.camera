@@ -45,6 +45,10 @@ CxeCameraDeviceControlSymbian::CxeCameraDeviceControlSymbian()
 
     mCameraDevice = new CxeCameraDevice();
 
+    //!@todo Temporary delay before reserving camera to avoid timing issues
+    connect(&mReserveTimer, SIGNAL(timeout()), this, SLOT(doReserve()));
+    mReserveTimer.setSingleShot(true);
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -76,13 +80,14 @@ void CxeCameraDeviceControlSymbian::init()
 void CxeCameraDeviceControlSymbian::reserve()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    CX_DEBUG_ASSERT(mCameraDevice && mCameraDevice->camera());
+    CX_ASSERT_ALWAYS(mCameraDevice);
 
     if (state() == Idle) {
         setState(Initializing);
-        mCameraDevice->reserveCamera();
+        //!@todo Temporary delay before reserving camera to avoid timing issues
+        mReserveTimer.start(2000);
         OstTrace0(camerax_performance, CXECAMERADEVICECONTROLSYMBIAN_RESERVE, "msg: e_CX_RESERVE 1");
+        CX_DEBUG(("HACK: Waiting for 2000ms before really doing reserve()"));
     } else if (state() == PendingRelease) {
         // if we get a reserve request and if there is a pending release
         // it is just fine to continue the init operation.
@@ -93,6 +98,15 @@ void CxeCameraDeviceControlSymbian::reserve()
 
     CX_DEBUG_EXIT_FUNCTION();
 }
+
+void CxeCameraDeviceControlSymbian::doReserve()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    CX_ASSERT_ALWAYS(mCameraDevice);
+    mCameraDevice->reserveCamera();
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
 
 void CxeCameraDeviceControlSymbian::powerOn()
 {
@@ -225,6 +239,16 @@ CxeError::Id CxeCameraDeviceControlSymbian::switchCamera(Cxe::CameraIndex camera
 void CxeCameraDeviceControlSymbian::release()
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    //!@todo Temporary delay before reserving camera to avoid timing issues
+    if (mReserveTimer.isActive()) {
+        // release() was called when the timer was active
+        mReserveTimer.stop();
+        mCameraDevice->releaseCamera();
+        setState(Idle);
+        CX_DEBUG_EXIT_FUNCTION();
+        return;
+    }
 
     if (state() == Idle) {
         // nothing to do

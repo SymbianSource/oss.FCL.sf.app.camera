@@ -54,7 +54,8 @@ SOURCES *= unittest_cxevideocapturecontrolsymbian.cpp \
     cxediskmonitorprivate.cpp \
     cxesnapshotcontrol.cpp \
     cxesnapshotcontrolprivate.cpp \
-    cxesysutil.cpp
+    cxesysutil.cpp \
+    cxescenemodestore.cpp
 
 HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
     cxevideocapturecontrolsymbian.h \
@@ -86,4 +87,5 @@ HEADERS *= unittest_cxevideocapturecontrolsymbian.h \
     cxediskmonitorprivate.h \
     cxesnapshotcontrol.h \
     cxesnapshotcontrolprivate.h \
-    cxesysutil.h
+    cxesysutil.h  \
+    cxescenemodestore.h

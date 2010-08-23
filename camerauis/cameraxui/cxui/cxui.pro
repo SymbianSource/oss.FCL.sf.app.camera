@@ -25,7 +25,6 @@ symbian {
     TARGET.VID          = VID_DEFAULT
     TARGET.EPOCHEAPSIZE = 0x020000 0x1000000
     SKINICON            = qtg_large_camera
-    RSS_RULES           = "group_name=\"Qt Camera\";"
     # Fix for QMake translating INCLUDEPATH to SYSTEMINCLUDE
     # and TraceCompiler needing USERINCLUDE.
     MMP_RULES           += "USERINCLUDE traces"

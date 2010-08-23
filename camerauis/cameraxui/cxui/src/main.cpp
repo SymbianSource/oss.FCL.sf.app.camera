@@ -57,10 +57,9 @@ int main(int argc, char *argv[])
 
     Q_INIT_RESOURCE(cxui);
 
-    // Use software rendering / raster graphics system to save GPU memory.
-    CX_DEBUG(("CxUI: Take raster graphics system into use.."));
+    // Use software rendering / raster graphics system to save graphics memory
+    CX_DEBUG(("CxUI: Take raster graphics system into use"));
     QApplication::setGraphicsSystem("raster");
-    CX_DEBUG(("CxUI: ..raster graphics system in use"));
 
     OstTrace0( camerax_performance, DUP1__MAIN, "msg: e_CX_HBAPP_CREATION 1" );
     CxuiApplication app(argc, argv);
@@ -102,18 +101,11 @@ int main(int argc, char *argv[])
             // so init can be done later
             engine->setMode(mode);
         }
-	} else {
+    } else {
         CX_DEBUG(("CxUI: Camera started as normal app"));
-	    // normal start
-	    engine->initMode(engine->mode());
-	}
-
-#ifdef Q_OS_SYMBIAN
-    //!@todo: Yield run time to system to get enough resources released to start camera.
-    CX_DEBUG(("CxUI: yield control for resource freeing.."));
-    User::After(2*1000*1000); // 2s
-    CX_DEBUG(("CxUI: waiting done.."));
-#endif // Q_OS_SYMBIAN
+        // normal start
+        engine->initMode(engine->mode());
+    }
 
     // Load language specific application localization file, e.g. "camera_en.qm"
     // Translations need to be loaded before any widgets are created.

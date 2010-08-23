@@ -98,7 +98,6 @@ symbian {
 symbian {
     CXENGINE_DIR = $$section(PWD,":",1)
     BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
-    BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/CI_camerax.confml                 APP_LAYER_CONFML(CI_camerax.confml)
     BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/camerax.confml                    APP_LAYER_CONFML(camerax.confml)
     BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/camerax_20027017.crml             APP_LAYER_CRML(camerax_20027017.crml)
     BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/cameraxvariation.confml           APP_LAYER_CONFML(cameraxvariation.confml)

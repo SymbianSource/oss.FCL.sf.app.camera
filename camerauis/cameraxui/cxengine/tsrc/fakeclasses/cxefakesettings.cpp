@@ -15,11 +15,14 @@
 *
 */
 
+#include <QVariant>
+#include <QList>
 #include "cxefakesettings.h"
 
 
 CxeFakeSettings::CxeFakeSettings()
 {
+    mVariationSettings = loadVariationSettings();
 }
 
 CxeFakeSettings::~CxeFakeSettings()
@@ -48,9 +51,19 @@ bool CxeFakeSettings::listenForSetting(const QString &settingKey, QObject *targe
 
 CxeError::Id CxeFakeSettings::getVariationValue(const QString &key, QVariant &value)
 {
-    int variation = mVariationKeyHash[key];
-    value = QVariant(variation);
-    return CxeError::None;
+    CxeError::Id err = CxeError::None;
+
+    // read run-time configuration value
+    if ( mVariationSettings.contains(key) ) {
+        value = qVariantFromValue<QVariantList > (mVariationSettings.value(key));
+    } else {
+        err = CxeError::NotFound;
+    }
+    
+    return err;
+    //int variation = mVariationKeyHash[key];
+    //value = QVariant(variation);
+    //return CxeError::None;
 }
 
 void CxeFakeSettings::getValue(const QString &key, QVariant &value) const
@@ -74,4 +87,40 @@ void CxeFakeSettings::reset()
 void CxeFakeSettings::emulate(long int uid, unsigned long int key, QVariant value)
 {
     emit settingValueChanged(uid, key, value);
+}
+
+
+/*
+* Load some test settings
+*/
+QHash<QString, QVariantList> CxeFakeSettings::loadVariationSettings()
+{
+    QHash<QString, QVariantList> settings;
+	CxeError::Id err = CxeError::None;
+	QVariantList list;
+	QVariant data;
+
+    // clear the list
+    list.clear();
+    list << QString("32");
+    list << QString("32");
+    list << QString("32");
+    list << QString("32");
+    list << QString("32");
+    //args << QVariant(QVariant::UInt);
+    settings.insert(CxeVariationKeys::STILL_MAX_ZOOM_LIMITS, list);
+    // clear the list
+    list.clear();
+    list << QString("40");
+    list << QString("40");
+    list << QString("40");
+    list << QString("-1");
+    list << QString("-1");
+    settings.insert(CxeVariationKeys::VIDEO_MAX_ZOOM_LIMITS, list);
+    // clear the list
+    list.clear();
+    list << QString("8000000");
+    list << QString("10000000");
+    settings.insert(CxeVariationKeys::FREE_MEMORY_LEVELS, list);
+    return settings;
 }

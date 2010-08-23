@@ -124,6 +124,7 @@ void CxuiSceneModeView::loadDefaultWidgets()
     HbIcon background(CXUI_SCENES_AUTOMATIC_IMAGE);
     background.setMirroringMode(HbIcon::LayoutDirection);
     mScenesBackground->setIcon(background);
+    mScenesBackground2->setIcon(background);
 
     widget = mDocumentLoader->findWidget(SCENE_MODE_VIEW_RADIOBUTTONS);
     mScenesList = qobject_cast<CxuiSettingRadioButtonList *> (widget);

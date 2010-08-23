@@ -68,6 +68,7 @@ CxeSettingsImp::~CxeSettingsImp()
     delete mSettingStore;
 
     mVariationSettings.clear();
+    mSettingListeners.clear();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -135,6 +136,7 @@ CxeError::Id CxeSettingsImp::getVariationValue(const QString &key, QVariant &val
 /*!
  * Add listener for changes in one setting. When the value of the setting changes, the given
  * slot is invoked on given object.
+ * The validity of the settingKey is not checked.
  *
  * @param settingKey Setting to listen to
  * @param target Object that the slot will be invoked for

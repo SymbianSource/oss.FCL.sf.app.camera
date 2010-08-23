@@ -106,7 +106,7 @@ void UnitTestCxeAutoFocusControlSymbian::testStart()
     QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
 
     // 2) Input parameter false is handled correctly
-    // prequisites: not fixed mode & unknown state -> normal functionality
+    // prerequisites : not fixed mode & unknown state -> normal functionality
     mAutoFocusControl->setMode(CxeAutoFocusControl::Auto); // non-fixed
     // function call
     returnValue = mAutoFocusControl->start(false);
@@ -116,7 +116,7 @@ void UnitTestCxeAutoFocusControlSymbian::testStart()
     QCOMPARE(mAutoFocusControl->isSoundEnabled(), false); // check for input parameter
 
     // 3) Autofocus is not ready (state is cancelling or in progress)
-    // prequisites:
+    // prerequisites :
     mAutoFocusControl->setMode(CxeAutoFocusControl::Macro); // non-fixed mode
     QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::InProgress);
     // start should return CxeError::InUse
@@ -124,12 +124,15 @@ void UnitTestCxeAutoFocusControlSymbian::testStart()
     QCOMPARE(returnValue, CxeError::InUse);
 
     // 4) Camera has been released
-    mAutoFocusControl->prepareForCameraDelete();
+    // Cannot be tested like this since assertion crashes the function
+    // AFTER prepareForCameraDelete CALL.
+    /*mAutoFocusControl->prepareForCameraDelete();
     stateSpy.clear();
     returnValue = mAutoFocusControl->start();
     // result: no signal should be emitted
     QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
     QCOMPARE(returnValue, CxeError::None); // should there be and error here?
+    */
 }
 
 void UnitTestCxeAutoFocusControlSymbian::testCancel()
@@ -270,7 +273,7 @@ void UnitTestCxeAutoFocusControlSymbian::testPrepareForRelease()
     // see testPrepareForCameraDelete
 }
 
-void UnitTestCxeAutoFocusControlSymbian::testHandleCameraEvent()
+void UnitTestCxeAutoFocusControlSymbian::testHandleCameraEventOptimalFocus()
 {
     // handleCameraEvent handles callbacks and gets information about
     // focus events. handleCameraEvent calls private method handleAfEvent
@@ -321,16 +324,17 @@ void UnitTestCxeAutoFocusControlSymbian::testHandleCameraEvent()
     // => state should change to Unknown
     QVERIFY(CxeTestUtils::waitForSignal(stateSpy, 1000));
     QCOMPARE(mAutoFocusControl->state(), CxeAutoFocusControl::Unknown);
+}
 
-    // cleanup and init to make sure that the dummy engine is not messed up
-    // and we get to initial state
-    cleanup();
-    init();
-
+void UnitTestCxeAutoFocusControlSymbian::testHandleCameraEventAutofocusChanged()
+{
+    QSignalSpy stateSpy(mAutoFocusControl,
+                        SIGNAL(stateChanged(CxeAutoFocusControl::State,
+                                            CxeError::Id)));
     // Input 2 -----------------------------------------------------
     // Notifies a change in autofocus type
-    eventUid = KUidECamEventCameraSettingAutoFocusType2UidValue;
-    symbianError = -18; // == KErrNotReady
+    int eventUid = KUidECamEventCameraSettingAutoFocusType2UidValue;
+    int symbianError = -18; // == KErrNotReady
 
     // InProgress: event is ignored
     mAutoFocusControl->setMode(CxeAutoFocusControl::Auto); // not fixed focus
@@ -348,15 +352,18 @@ void UnitTestCxeAutoFocusControlSymbian::testHandleCameraEvent()
     mAutoFocusControl->handleCameraEvent(eventUid, symbianError);
     QVERIFY(!CxeTestUtils::waitForSignal(stateSpy, 1000));
 
-    // cleanup and init to make sure that the dummy engine is not messed up
-    // and we get to initial state
-    cleanup();
-    init();
+}
+
+void UnitTestCxeAutoFocusControlSymbian::testHandleCameraEventFocusRangeChanged()
+{
+    QSignalSpy stateSpy(mAutoFocusControl,
+                        SIGNAL(stateChanged(CxeAutoFocusControl::State,
+                                            CxeError::Id)));
 
     // Input 3 -----------------------------------------------------
     // Focus range have changed
-    eventUid = KUidECamEventCameraSettingFocusRangeUidValue;
-    symbianError = -2; // == KErrGeneral
+    int eventUid = KUidECamEventCameraSettingFocusRangeUidValue;
+    int symbianError = -2; // == KErrGeneral
 
     // In any other state than InProgress this event is ignored
     stateSpy.clear();

@@ -78,6 +78,10 @@ CxeAutoFocusControlSymbian::CxeAutoFocusControlSymbian(CxeCameraDevice &cameraDe
     OstTrace0(camerax_performance, CXEAUTOFOCUSCONTROLSYMBIAN_CREATE_MID2, "msg: e_CX_ENGINE_CONNECT_SIGNALS 0");
 
     initializeResources();
+    
+    setMode(CxeAutoFocusControl::Hyperfocal);
+    // autofocus sounds should be disabled by default
+    mSoundEnabled = false;
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -320,6 +324,7 @@ void CxeAutoFocusControlSymbian::initializeResources()
 
     // No check if non-null. Not supported if zero pointer (see supported() ).
     mAdvancedSettings = mCameraDevice.advancedSettings();
+    CX_ASSERT_ALWAYS(mAdvancedSettings);
 
     CX_DEBUG_EXIT_FUNCTION();
 }

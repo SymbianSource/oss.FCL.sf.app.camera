@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -39,6 +39,7 @@
 UnitTestCxeVideoCaptureControlSymbian::UnitTestCxeVideoCaptureControlSymbian()
     : mCxeVideoCaptureControlSymbian(0)
 {
+    mSettings = new CxeFakeSettings();
     qRegisterMetaType<CxeError::Id>("CxeError::Id");
     qRegisterMetaType<CxeVideoCaptureControl::State>("CxeVideoCaptureControl::State");
 }
@@ -164,7 +165,8 @@ void UnitTestCxeVideoCaptureControlSymbian::testStop()
     mCxeVideoCaptureControlSymbian->stop();
     QVERIFY((mCxeVideoCaptureControlSymbian->state() == CxeVideoCaptureControl::Stopping)
         || (mCxeVideoCaptureControlSymbian->state() == CxeVideoCaptureControl::Initialized)
-        || (mCxeVideoCaptureControlSymbian->state() == CxeVideoCaptureControl::Idle));
+        || (mCxeVideoCaptureControlSymbian->state() == CxeVideoCaptureControl::Idle)
+        || (mCxeVideoCaptureControlSymbian->state() == CxeVideoCaptureControl::Ready));
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -203,6 +205,7 @@ void UnitTestCxeVideoCaptureControlSymbian::testReset()
     // just call to see if it doesn't crash
     mCxeVideoCaptureControlSymbian->reset();
     QVERIFY(mCxeVideoCaptureControlSymbian->snapshot().isNull());
+    QVERIFY(mCxeVideoCaptureControlSymbian->filename().isEmpty());
 
     CX_DEBUG_EXIT_FUNCTION();
 }

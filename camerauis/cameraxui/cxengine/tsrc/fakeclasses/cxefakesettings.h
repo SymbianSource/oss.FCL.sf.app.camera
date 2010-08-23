@@ -45,10 +45,14 @@ class CxeFakeSettings : public CxeSettings
 
     public: // methods for unit testing
         void emulate(long int uid, unsigned long int key, QVariant value);
+        
+    private:
+        QHash<QString, QVariantList> loadVariationSettings();
 
     private: // data
         QHash<QString, QVariant> mSettingKeyHash;
         QHash<QString, unsigned long int> mVariationKeyHash;
+        QHash<QString, QVariantList> mVariationSettings;
 
     private:
         Q_DISABLE_COPY(CxeFakeSettings)

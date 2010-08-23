@@ -51,8 +51,8 @@ private slots:
     void testStop();
     void testRemainingTime();
     void testElapsedTime();
-    void testReset();
     void testFilename();
+    void testReset();
     void testSnapshot();
     void testHandleSnapshotReady();
     void testInit();

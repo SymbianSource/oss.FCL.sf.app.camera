@@ -470,7 +470,9 @@ void CxeVideoCaptureControlSymbian::stop()
             // Try asynchronous stopping first.
             mVideoRecorder->stop(true);
             // No error from asynchronous stop -> wait for stop event
-            setState(Stopping);
+            if (state() != Ready) {
+                setState(Stopping);
+            }
         } catch (const std::exception &e) {
             CX_DEBUG(("CxeVideoCaptureControlSymbian - async stop failed, try sync.."));
             try {
@@ -706,9 +708,9 @@ void CxeVideoCaptureControlSymbian::initializeStates()
     addState(new CxeState(Initialized, "Initialized", Preparing | Idle));
     addState(new CxeState(Preparing, "Preparing", Ready | Idle));
     addState(new CxeState(Ready, "Ready", Recording | PlayingStartSound | Preparing | Idle));
-    addState(new CxeState(Recording, "Recording", Recording | Paused | Stopping | Idle));
+    addState(new CxeState(Recording, "Recording", Recording | Paused | Stopping | Idle | Ready));
     addState(new CxeState(Paused, "Paused", Recording | Stopping | PlayingStartSound | Idle));
-    addState(new CxeState(Stopping, "Stopping", Initialized | Idle));
+    addState(new CxeState(Stopping, "Stopping", Initialized | Idle | Ready));
     addState(new CxeState(PlayingStartSound, "PlayingStartSound", Recording | Idle));
 
     setInitialState(Idle);

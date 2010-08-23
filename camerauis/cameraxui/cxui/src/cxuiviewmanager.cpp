@@ -169,9 +169,16 @@ void CxuiViewManager::handleApplicationStateChanged(CxuiApplicationState::State 
 
     switch (newState) {
     case CxuiApplicationState::Normal:
-        // Disable raising to foreground with capture key.
-        disconnect(mKeyHandler, SIGNAL(captureKeyPressed()), this, SLOT(toForeground()));
-
+        // If camera is in embedded mode, we need to start
+        // listening to key events again
+        if (CxuiServiceProvider::isCameraEmbedded()){
+            mKeyHandler->startListeningKeys();
+        } else {
+            // If in standalone mode, we disable raising to
+            // foreground with capture key.
+            disconnect(mKeyHandler, SIGNAL(captureKeyPressed()),
+                       this, SLOT(toForeground()));
+        }
         connectSignals(view);
 
         CX_DEBUG(("CxuiViewManager - emitting normalStateEntered"));
@@ -193,8 +200,16 @@ void CxuiViewManager::handleApplicationStateChanged(CxuiApplicationState::State 
 
         if (newState == CxuiApplicationState::Background) {
             // Moved to background.
-            // Bring application back to foreground by capture key press
-            connect(mKeyHandler, SIGNAL(captureKeyPressed()), this, SLOT(toForeground()));
+            // If we're in embedded mode, we should stop listening to camera key
+            // events
+            if (CxuiServiceProvider::isCameraEmbedded()){
+                mKeyHandler->stopListeningKeys();
+            } else {
+                // If not in embedded mode, then we bring application back to
+                // foreground by capture key press
+                connect(mKeyHandler, SIGNAL(captureKeyPressed()),
+                        this, SLOT(toForeground()));
+            }
         }
         break;
     }

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,6 +20,7 @@
 
 #include "unittest_cxefilenamegeneratorsymbian.h"
 #include "cxefilenamegeneratorsymbian.h"
+#include "cxesettings.h"
 #include "cxefakesettings.h"
 
 namespace
@@ -41,11 +42,12 @@ UnitTestCxeFilenameGeneratorSymbian::~UnitTestCxeFilenameGeneratorSymbian()
 // Run before each individual test case
 void UnitTestCxeFilenameGeneratorSymbian::init()
 {
+    mFakeSettings = new CxeFakeSettings();
+    
     mFakeSettings->set(CxeSettingIds::FNAME_MONTH_FOLDER, QDate::currentDate().toString("yyyyMM"));
     mFakeSettings->set(CxeSettingIds::FNAME_IMAGE_COUNTER, 0);
     mFakeSettings->set(CxeSettingIds::FNAME_VIDEO_COUNTER, 0);
     mFakeSettings->set(CxeSettingIds::FNAME_FOLDER_SUFFIX, FILENAME_SUFFIX);
-
 
     mFileNameGenerator = new CxeFilenameGeneratorSymbian(*mFakeSettings, mMode);
     mFileNameGenerator->init(mMode);
@@ -95,17 +97,31 @@ void UnitTestCxeFilenameGeneratorSymbian::testGenerateFilename()
 
 QString UnitTestCxeFilenameGeneratorSymbian::generateImageFileName(int counter)
 {
+    // get the file name suffix
+    //QString fileNameSuffix;
+    //qobject_cast<CxeSettings*>(mFakeSettings)->get(CxeSettingIds::FNAME_FOLDER_SUFFIX, fileNameSuffix);
+    //QString fileNameSuffix("");
+    //QString cleanedFileNameSuffix = fnFormat.arg(fileNameSuffix);
+
     QString monthName = QDate::currentDate().toString("yyyyMM");
     QString filename;
-    filename.sprintf("\\Images\\Camera\\%s\\%sA0\\%04d%s.jpg", monthName.toAscii().data(), monthName.toAscii().data(), counter, FILENAME_SUFFIX);
+    //filename.sprintf("\\Images\\Camera\\%s\\%sA0\\%04d%s.jpg", monthName.toAscii().data(), monthName.toAscii().data(), counter, fileNameSuffix);
+    filename.sprintf("\\Images\\Camera\\%s\\%sA0\\%04d.jpg", monthName.toAscii().data(), monthName.toAscii().data(), counter);
     return filename;
 }
 
 QString UnitTestCxeFilenameGeneratorSymbian::generateSequenceImageFileName(int counter, int burstIndex)
 {
+    // For now, burst image names are created like normal unique names
+    QString filename = generateImageFileName(counter);
+    // get the file name suffix
+    /*QString fileNameSuffix;
+    qobject_cast<CxeSettings*>(mFakeSettings)->get(CxeSettingIds::FNAME_FOLDER_SUFFIX, fileNameSuffix);
+
     QString monthName = QDate::currentDate().toString("yyyyMM");
     QString filename;
-    filename.sprintf("\\Images\\Camera\\%s\\%sA0\\%04d%s(%02d).jpg", monthName.toAscii().data(), monthName.toAscii().data(), counter, FILENAME_SUFFIX, burstIndex);
+    filename.sprintf("\\Images\\Camera\\%s\\%sA0\\%04d%s(%02d).jpg", monthName.toAscii().data(), monthName.toAscii().data(), counter, fileNameSuffix, burstIndex);
+    */
     return filename;
 }
 

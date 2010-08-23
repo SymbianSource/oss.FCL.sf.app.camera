@@ -42,7 +42,12 @@ CxuiCaptureKeyHandlerPrivate::~CxuiCaptureKeyHandlerPrivate()
     CX_DEBUG_IN_FUNCTION();
 }
 
-void CxuiCaptureKeyHandlerPrivate::listenKeys(bool listen)
+void CxuiCaptureKeyHandlerPrivate::startListeningKeys()
+{
+    CX_DEBUG_IN_FUNCTION();
+}
+
+void CxuiCaptureKeyHandlerPrivate::stopListeningKeys()
 {
     CX_DEBUG_IN_FUNCTION();
 }

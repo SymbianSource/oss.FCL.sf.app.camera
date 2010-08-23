@@ -11,14 +11,16 @@
 *
 * Contributors:
 *
-* Description: Stub implementation of the HAL class for testing purposes
-*
+* Description:
+*   Stub used by main, CxeEngineSymbian and CxuiViewManager
 */
 
-#include "hal.h"
+#ifndef XQSERVICEUTIL_H
+#define XQSERVICEUTIL_H
 
-TInt HAL::Get(TAttribute /*aAttribute*/, TInt& aValue)
+namespace XQServiceUtil
 {
-    aValue = 1000000;
-    return KErrNone;
+   inline bool isService(){return false;};
 }
+
+#endif // XQSERVICEUTIL_H

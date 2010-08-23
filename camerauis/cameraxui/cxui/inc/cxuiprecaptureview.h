@@ -108,6 +108,9 @@ public slots:
     // connects to the settingValueChanged signal of CxeSettings
     virtual void handleSettingValueChanged(const QString& key, QVariant newValue);
 
+    void toolbarExtensionDisappearEffectFinished(const HbEffect::EffectStatus &status);
+    void toolbarExtensionAppearEffectFinished(const HbEffect::EffectStatus &status);
+
     // From CxuiView
     virtual void enterStandby();
     virtual void exitStandby();

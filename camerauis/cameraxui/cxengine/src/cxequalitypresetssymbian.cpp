@@ -296,6 +296,12 @@ CxeVideoDetails CxeQualityPresetsSymbian::createVideoPreset(const TVideoQualityS
 qreal CxeQualityPresetsSymbian::avgVideoBitRateScaler()
 {
     CX_DEBUG_IN_FUNCTION();
+    // Get the average video bitrate scaler
+    if (mIcm) {
+        TCamcorderMMFPluginSettings mmfPluginSettings;
+        mIcm->GetCamcorderMMFPluginSettings(mmfPluginSettings);
+        mCMRAvgVideoBitRateScaler = mmfPluginSettings.iCMRAvgVideoBitRateScaler;
+    }
     return mCMRAvgVideoBitRateScaler;
 }
 

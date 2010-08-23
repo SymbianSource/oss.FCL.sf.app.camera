@@ -19,6 +19,7 @@
 #include <QtXml>
 #include <QFile>
 #include <hbparameterlengthlimiter.h>
+#include <HbExtendedLocale>
 
 
 #include "cxutils.h"
@@ -356,6 +357,8 @@ returns slider parameters
 */
 CxUiSettings::SliderParams *CxuiSettingXmlReader::parseSettingSlider(const QDomElement& element)
 {
+    const double SLIDER_ZERO = 0.0;
+
     CX_DEBUG_ENTER_FUNCTION();
 
     // Read the heading and id.
@@ -409,9 +412,13 @@ CxUiSettings::SliderParams *CxuiSettingXmlReader::parseSettingSlider(const QDomE
                 value = value - step;
             }
 
+            HbExtendedLocale locale = HbExtendedLocale::system();
+            QString zeroString = locale.toString(SLIDER_ZERO, 'f', 1);
+            p->mSettingStrings.append(zeroString);
+
             // generating all non-negative valued strings for slider setting
             step = p->mMajorStep;
-            value = 0;
+            value = step;
             while(value <= l1Value.toInt()) {
                 // format the setting string
                 QString str = hbTrId(maxString.toAscii().constData()).arg(value,0,'f',1);
