@@ -1,9 +1,0 @@
--c8,1 qgn_graf_cam4_tb_top.svg
--c8,1 qgn_graf_cam4_tb_arrow_down.svg
--c8,1 qgn_graf_cam4_tb_arrow_up.svg
--c8,1 qgn_graf_cam4_tb_body.svg
--c8,1 qgn_graf_cam4_tb_bottom.svg
--c8,1 qgn_graf_cam4_tb_focus.svg
--c8,1 qgn_graf_cam4_tb_tooltip_body.svg
--c8,1 qgn_graf_cam4_tb_tooltip_end.svg
--c8,1 qgn_graf_cam4_tb_gap.svg
