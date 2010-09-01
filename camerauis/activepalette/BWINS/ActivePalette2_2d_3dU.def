@@ -1,0 +1,28 @@
+EXPORTS
+	??0CActivePalettePluginBase@@IAE@ABVTPluginCreationParams@NActivePalettePluginFactory@@@Z @ 1 NONAME ; CActivePalettePluginBase::CActivePalettePluginBase(class NActivePalettePluginFactory::TPluginCreationParams const &)
+	??0TAP2GenericPluginIcon@@QAE@HH@Z @ 2 NONAME ; TAP2GenericPluginIcon::TAP2GenericPluginIcon(int, int)
+	??0TAP2GenericPluginParams@@QAE@HABVTDesC16@@HH0HH@Z @ 3 NONAME ; TAP2GenericPluginParams::TAP2GenericPluginParams(int, class TDesC16 const &, int, int, class TDesC16 const &, int, int)
+	??0TActivePalette2ItemVisible@@QAE@HH@Z @ 4 NONAME ; TActivePalette2ItemVisible::TActivePalette2ItemVisible(int, int)
+	??0TActivePalette2NavigationKeys@@QAE@HHH@Z @ 5 NONAME ; TActivePalette2NavigationKeys::TActivePalette2NavigationKeys(int, int, int)
+	??0TActivePalette2NavigationKeys@@QAE@XZ @ 6 NONAME ; TActivePalette2NavigationKeys::TActivePalette2NavigationKeys(void)
+	??0TPluginCreationParams@NActivePalettePluginFactory@@QAE@AAVMActivePalettePluginObserver@@ABVTSize@@@Z @ 7 NONAME ; NActivePalettePluginFactory::TPluginCreationParams::TPluginCreationParams(class MActivePalettePluginObserver &, class TSize const &)
+	??1CActivePalettePluginBase@@UAE@XZ @ 8 NONAME ; CActivePalettePluginBase::~CActivePalettePluginBase(void)
+	?ConstructL@CActivePalettePluginBase@@UAEXABVTPluginCreationParams@NActivePalettePluginFactory@@ABVTDesC8@@H@Z @ 9 NONAME ; void CActivePalettePluginBase::ConstructL(class NActivePalettePluginFactory::TPluginCreationParams const &, class TDesC8 const &, int)
+	?CreateActivePaletteUIL@ActivePalette2Factory@@SAPAVMActivePalette2UI@@W4TActivePalette2DrawMode@@@Z @ 10 NONAME ; class MActivePalette2UI * ActivePalette2Factory::CreateActivePaletteUIL(enum TActivePalette2DrawMode)
+	?CreateHUIActivePaletteUIL@ActivePalette2Factory@@SAPAVMActivePalette2UI@@AAVCHuiEnv@@@Z @ 11 NONAME ; class MActivePalette2UI * ActivePalette2Factory::CreateHUIActivePaletteUIL(class CHuiEnv &)
+	?CurItem@TActivePalette2EventData@@QBEHXZ @ 12 NONAME ; int TActivePalette2EventData::CurItem(void) const
+	?Dimensions@TPluginCreationParams@NActivePalettePluginFactory@@QBE?AVTSize@@XZ @ 13 NONAME ; class TSize NActivePalettePluginFactory::TPluginCreationParams::Dimensions(void) const
+	?HandleMessageL@CActivePalettePluginBase@@UAEXHABVTDesC8@@H@Z @ 14 NONAME ; void CActivePalettePluginBase::HandleMessageL(int, class TDesC8 const &, int)
+	?ItemId@TActivePalette2ItemVisible@@QBEHXZ @ 15 NONAME ; int TActivePalette2ItemVisible::ItemId(void) const
+	?PluginObserver@TPluginCreationParams@NActivePalettePluginFactory@@QBEAAVMActivePalettePluginObserver@@XZ @ 16 NONAME ; class MActivePalettePluginObserver & NActivePalettePluginFactory::TPluginCreationParams::PluginObserver(void) const
+	?PrepareAniFramesL@CActivePalettePluginBase@@UAEXHAAVTPluginAnimationInfo@1@ABV21@ABVCFbsBitmap@@PBV3@@Z @ 17 NONAME ; void CActivePalettePluginBase::PrepareAniFramesL(int, class CActivePalettePluginBase::TPluginAnimationInfo &, class CActivePalettePluginBase::TPluginAnimationInfo const &, class CFbsBitmap const &, class CFbsBitmap const *)
+	?PrevItem@TActivePalette2EventData@@QBEHXZ @ 18 NONAME ; int TActivePalette2EventData::PrevItem(void) const
+	?ProduceAniFrame@CActivePalettePluginBase@@UAEXHHABVTPluginAnimationInfo@1@ABVCFbsBitmap@@PBV3@PAPAV3@3AAH4@Z @ 19 NONAME ; void CActivePalettePluginBase::ProduceAniFrame(int, int, class CActivePalettePluginBase::TPluginAnimationInfo const &, class CFbsBitmap const &, class CFbsBitmap const *, class CFbsBitmap * *, class CFbsBitmap * *, int &, int &)
+	?ReleaseAniFrames@CActivePalettePluginBase@@UAEXH@Z @ 20 NONAME ; void CActivePalettePluginBase::ReleaseAniFrames(int)
+	?Result@TActivePalette2EventData@@QBEHXZ @ 21 NONAME ; int TActivePalette2EventData::Result(void) const
+	?ServingItem@TActivePalette2EventData@@QBEHXZ @ 22 NONAME ; int TActivePalette2EventData::ServingItem(void) const
+	?ServingPlugin@TActivePalette2EventData@@QBE?AVTUid@@XZ @ 23 NONAME ; class TUid TActivePalette2EventData::ServingPlugin(void) const
+	?Shutdown@CActivePalettePluginBase@@UAEXXZ @ 24 NONAME ; void CActivePalettePluginBase::Shutdown(void)
+	?Visible@TActivePalette2ItemVisible@@QBEHXZ @ 25 NONAME ; int TActivePalette2ItemVisible::Visible(void) const
+	?CreateGuiActivePaletteUIL@ActivePalette2Factory@@SAPAVMActivePalette2UI@@PAVMGui@@@Z @ 26 NONAME ; class MActivePalette2UI * ActivePalette2Factory::CreateGuiActivePaletteUIL(class MGui *)
+

@@ -1,0 +1,63 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+; 
+; Description: Active Palette 2 API tests
+;
+
+; Languages
+&EN
+
+; Provide value for uid
+#{"ActivePalette2ApiTest"},(0x101FB3E3),1,1,0,TYPE=SA
+
+; Series60 product id for S60 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Logo
+; None
+
+; Package signature - Optional
+; None
+
+; Start of Package body
+
+; Condition blocks
+; None
+
+; Options list
+; None
+
+; Install files
+; Files To Copy <src> <destination>
+"\epoc32\release\armv5\urel\ActivePalette2ApiTest.dll"     -   "C:\Sys\Bin\ActivePalette2ApiTest.dll"
+"\epoc32\data\z\resource\apps\ActivePalette2ApiTest.mif"   -   "C:\Resource\Apps\ActivePalette2ApiTest.mif"
+"..\conf\ui_ActivePalette2ApiTest.cfg"                     -   "C:\TestFramework\ui_ActivePalette2ApiTest.cfg"
+"..\init\ActivePalette2ApiTest.ini"                        -   "C:\TestFramework\ActivePalette2ApiTest.ini"
+
+
+; Embedded SIS 
+; None
+
+; End of Package body
+
+; PKG dependencies
+; None
+
+; PKG capabilities
+; None

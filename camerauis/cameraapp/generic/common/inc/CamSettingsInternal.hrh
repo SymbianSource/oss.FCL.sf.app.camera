@@ -1,0 +1,702 @@
+/*
+* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Contains constants which define the configuration of the camera.
+*                These constants are internal to this application only.
+*
+*/
+
+
+#ifndef CAMSETTINGSINTERNAL_HRH
+#define CAMSETTINGSINTERNAL_HRH
+
+// DATA TYPES
+
+// Ids for different settings list items.
+enum TCamSettingItemIds
+  {
+  // Start mode photo or video
+  ECamSettingItemDefaultMode,                // shared key is "DefaultCaptureMode"
+
+  // -----------------------------------------------------
+  // Static photo settings
+  ECamSettingItemStaticPhotoRangeMin,     // Range marker for static photo settings
+  ECamSettingItemPhotoQuality,            // shared key is "PhotoQuality"
+  ECamSettingItemPhotoShowFocusPoint,     // shared key is "PhotoFocusPoint"
+  ECamSettingItemPhotoStoreInAlbum,       // shared key is "PhotoStoreAlbum"
+  ECamSettingItemShowCapturedPhoto,       // shared key is "PhotoShowCaptured"
+  ECamSettingItemPhotoCaptureTone,        // shared key is "PhotoCaptureTone"
+  ECamSettingItemPhotoMediaStorage,       // shared key is "PhotoMemInUse"
+  ECamSettingItemPhotoNameBase,           // shared key is "ImgBase" from KSDUidCamcorder
+  ECamSettingItemPhotoNameBaseType,       // shared key is "ImgNamType"
+  ECamSettingItemPhotoNumber,             // shared key is "ImgCount"
+  ECamSettingItemPhotoDigitalZoom,        // shared key is "PhotoExtDigZoom"
+  ECamSettingItemFaceTracking,            // shared key is "PhotoFaceTracking"
+  ECamSettingItemImageRotation,
+  ECamSettingItemFlickerCancel,
+
+
+  ECamSettingItemPhotoSize,               // shared key is "PhotoSize"
+  ECamSettingItemPhotoCompression,        // not in shared data. Need to hold compression
+                                          // as this can change from standard for sports scene
+                                          // and sequence mode.
+  ECamSettingItemImageToolbarItems,
+  ECamSettingItemImageToolbarDefaultItems,
+  ECamSettingItemStaticPhotoRangeMax,     // Range marker for static photo settings
+  // -----------------------------------------------------
+
+  // -----------------------------------------------------
+  // Static Video settings
+  ECamSettingItemStaticVideoRangeMin,     // Range marker for static video settings
+  ECamSettingItemVideoAudioRec,           // shared key is "VideoAudRec"
+  ECamSettingItemContinuousAutofocus,     // shared key is "KCamCrContinuosAutofocus"  
+  ECamSettingItemVideoStoreInAlbum,       // shared key is "VideoStoreAlbum"
+  ECamSettingItemVideoShowCapturedVideo,  // shared key is "VideoShowCaptured"
+  ECamSettingItemVideoMediaStorage,       // shared key is "VideoMemInUse"
+  ECamSettingItemVideoNameBase,           // shared key is "VidBase" from KSDUidCamcorder
+  ECamSettingItemVideoNameBaseType,       // shared key is "VidNamType"
+  ECamSettingItemVideoNumber,             // shared key is "VidCount"
+  ECamSettingItemVideoQuality,            // shared key is "VideoQuality"
+  ECamSettingItemVideoDigitalZoom,       // shared key is "VidExtDigZoom"
+  ECamSettingItemVideoStab,
+  ECamSettingItemVideoOpZoomOff,          //
+  ECamSettingItemVideoResolution,         // shared key is "VideoRes"
+  ECamSettingItemVideoClipLength,         // shared key is "VideoClipLen"
+  ECamSettingItemVideoFileType,           // shared key is "VideoFileType"
+  ECamSettingItemStaticVideoRangeMax,     // Range marker for static video settings
+  // -----------------------------------------------------
+
+  // -----------------------------------------------------
+  // Static common settings
+  ECamSettingItemStaticCommonRangeMin,    // Range marker for static common settings
+  ECamSettingItemUserMode,
+  ECamSettingItemDefaultAlbumId,
+  ECamSettingItemDefaultAlbumName,
+  ECamSettingItemRecLocation,
+  //Photo and video editor support
+  ECamSettingItemPhotoEditorSupport,    // Support for photo editor
+  ECamSettingItemVideoEditorSupport,    // Support for video editor
+  ECamSettingItemRemovePhoneMemoryUsage, // Remove phone memory usage
+  ECamSettingItemStopRecordingInHdmiMode, // Stop video recording when HDMI cable is inserted
+  ECamSettingItemStaticCommonRangeMax,    // Range marker for static common settings
+  // -----------------------------------------------------
+
+  // -----------------------------------------------------
+  // User Scene Settings items (shared .ini data)
+  ECamSettingItemUserSceneRangeMin,         // Range marker for user scene settings
+  ECamSettingItemUserSceneBasedOnScene,     // shared key is "UserSceneBasedOnScene"
+  ECamSettingItemUserSceneWhitebalance,     // shared key is "UserSceneWhiteBalance"
+  ECamSettingItemUserSceneColourFilter,     // shared key is "UserSceneColourFilter"
+  ECamSettingItemUserSceneExposure,         // shared key is "UserSceneExposure"
+  ECamSettingItemUserSceneFlash,            // shared key is "UserSceneFlash"
+  ECamSettingItemUserSceneBrightness,       // shared key is "UserSceneBrightness"
+  ECamSettingItemUserSceneContrast,         // shared key is "UserSceneContrast"
+  ECamSettingItemUserSceneImageSharpness,
+  ECamSettingItemUserSceneColourSaturation,
+  ECamSettingItemUserSceneLightSensitivity, // shared key is "UserSceneLightSensitivity"
+  ECamSettingItemUserSceneDefault,          // shared key is "UserSceneDefault"
+  ECamSettingItemUserSceneRangeMax,         // Range marker for user scene settings
+
+  ECamSettingItemUserSceneReset,            // This needs to be out of the range as it is not stored
+                                            // but is more of a command identifier.
+  // -----------------------------------------------------
+
+  // -----------------------------------------------------
+  // Capture setup photo Settings items
+  ECamSettingItemDynamicPhotoRangeMin,         // Range marker for dynamic photo settings
+  ECamSettingItemDynamicPhotoScene,
+  ECamSettingItemDynamicPhotoWhiteBalance,
+  ECamSettingItemDynamicPhotoExposure,
+  ECamSettingItemDynamicPhotoColourFilter,
+  ECamSettingItemDynamicPhotoFlash,
+  ECamSettingItemDynamicPhotoBrightness,
+  ECamSettingItemDynamicPhotoContrast,
+  ECamSettingItemDynamicPhotoImageSharpness,
+  ECamSettingItemDynamicPhotoColourSaturation,
+  ECamSettingItemDynamicSelfTimer,
+  ECamSettingItemDynamicPhotoLightSensitivity,
+  ECamSettingItemViewfinderGrid,
+  ECamSettingItemHistogram,
+  ECamSettingItemDynamicPhotoFocusMode,
+  ECamSettingItemDynamicPhotoRangeMax,         // Range marker for dynamic photo settings
+  // -----------------------------------------------------
+
+  // -----------------------------------------------------
+  // Capture setup video Settings items
+  ECamSettingItemDynamicVideoRangeMin,         // Range marker for dynamic video settings
+  ECamSettingItemDynamicVideoScene,
+  ECamSettingItemDynamicVideoWhiteBalance,
+  ECamSettingItemDynamicVideoExposure,
+  ECamSettingItemDynamicVideoColourFilter,
+  ECamSettingItemDynamicVideoFlash,
+  ECamSettingItemDynamicVideoBrightness,
+  ECamSettingItemDynamicVideoContrast,
+  ECamSettingItemDynamicVideoColourSaturation,
+  ECamSettingItemDynamicVideoLightSensitivity,
+  ECamSettingItemDynamicVideoRangeMax,         // Range marker for dynamic video settings
+  // -----------------------------------------------------
+
+  // -----------------------------------------------------
+  // Scene Settings items
+  ECamSettingItemSceneRangeMin,         // Range marker for scene settings
+  ECamSettingItemSceneAEMode,
+  ECamSettingItemSceneAWBMode,
+  ECamSettingItemSceneAFMode,
+  ECamSettingItemSceneFlashMode,
+  ECamSettingItemSceneMaxRes,
+  ECamSettingItemSceneSharpness,
+  ECamSettingItemSceneContrast,
+  ECamSettingItemSceneISO,
+  ECamSettingItemSceneEV,
+  ECamSettingItemSceneFramerate,
+  ECamSettingItemSceneRangeMax,         // Range marker for scene settings
+  // -----------------------------------------------------
+
+  // -----------------------------------------------------
+  // Command like setting items that are not stored in any setting list.
+  // Used to identify setting item in setting list,
+  // but value of the setting will never be stored in settings model.
+
+  ECamSettingItemSequenceMode,    // Not stored setting (could be made one)
+  ECamSettingItemVideoModeSelect, // Used in photo mode, but not storable setting
+  ECamSettingItemImageModeSelect, // Used in video mode, but not storable setting
+
+  ECamSettingItemFullToolbar,     // Used to add all items to Toolbar
+  ECamSettingItemCustomiseToolbar,// Used to identify "Customise toolbar" AP item
+  ECamSettingItemGotoPhotos,     // Used to identify "Go to photos" AP item
+  ECamSettingItemRestoreCameraSettings,
+  ECamSettingItemSwitchCamera,    // Used to switch between 1st and 2nd camera
+
+  // -----------------------------------------------------
+
+  ECamSettingItemLast // Marker - keep this as the last item
+  };
+
+// Video quality settings.
+// Values associated with the key "VideoQuality" for the shared.ini file
+enum TCamVideoQualitySettings
+    {
+    ECamVideoQualityHigh,
+    ECamVideoQualityNormalHigh,
+    ECamVideoQualityNormal,
+    ECamVideoQualityNormalLow,
+    ECamVideoQualitySharing
+    };
+
+/**
+* Video quality description enumeration
+*/
+enum TCamVideoQualityDescription
+    {
+    ECamVideoQualityDescHDHighest,
+    ECamVideoQualityDescWidescreenHighest,
+    ECamVideoQualityDescTVHigh,
+    ECamVideoQualityDescHigh,
+    ECamVideoQualityDescWidescreenHigh,
+    ECamVideoQualityDescWidescreenNorm,
+    ECamVideoQualityDescTVNorm,
+    ECamVideoQualityDescNorm,
+    ECamVideoQualityDescWebHigh,
+    ECamVideoQualityDescWebNorm,
+    ECamVideoQualityDescMMS,
+    ECamVideoQualityDescSharing,
+    ECamVideoQualityDescLast
+    };
+
+// Photo quality settings
+// Values associated with the key "PhotoQuality" for the shared.ini file
+enum TCamImageQualitySetting
+    {
+    ECamImageQualityPrint12m,
+    ECamImageQualityPrintW9m,
+    ECamImageQualityPrint8m,
+    ECamImageQualityPrintW6m,
+    ECamImageQualityPrint5m,
+    ECamImageQualityPrint3m,    // 3 MegaPixel print quality
+    ECamImageQualityPrint2m,    // 2 MegaPixel print quality
+    ECamImageQualityPrint1_3m,  // 1.3 MegaPixel print quality
+    ECamImageQualityEmail1m,
+    ECamImageQualityEmail08m,
+    ECamImageQualityEmail05m,
+    ECamImageQualityMMS,
+    ECamImageQualitySecondary,
+    ECamImageQualityLast
+    };
+
+/**
+* Photo quality description enumeration
+*/
+enum TCamPhotoQualityDescription
+    {
+    ECamPhotoQualityDesc12mLarge,
+    ECamPhotoQualityDescW9mLarge,
+    ECamPhotoQualityDesc8mLarge,
+    ECamPhotoQualityDescW6mLarge,
+    ECamPhotoQualityDesc5mLarge,
+    ECamPhotoQualityDesc3mLarge,
+    ECamPhotoQualityDesc2mLarge,
+    ECamPhotoQualityDesc3mMed,
+    ECamPhotoQualityDesc2mMed,
+    ECamPhotoQualityDesc1mMed,
+    ECamPhotoQualityDesc1_3mSmall,
+    ECamPhotoQualityDesc1mSmall,
+    ECamPhotoQualityDesc0_8mMed,
+    ECamPhotoQualityDescMms,
+    ECamPhotoQualityDescLast
+    };
+
+// Ids for different photo compression levels.
+enum TCamPhotoQualityId
+    {
+    ECamPhotoQualitySuperFine = 99,
+    ECamPhotoQualityFine = 85,
+    ECamPhotoQualityStandard = 70,
+    ECamPhotoQualityBasic = 50,
+    ECamPhotoQualityMMS = 25
+    };
+
+// Burst capture on product requires less than 85% quality to avoid
+// hardware performing hardware post-processing on the images during
+// a burst capture (which slows the saving of the burst down)
+#define KCamPhotoQualityBurst 84
+
+// Ids for different photo size settings.
+enum TCamPhotoSizeId
+    {
+    ECamPhotoSizeVGA,   // (640 x 480)
+    ECamPhotoSizeSVGA,  // (800 X 600 )
+    ECamPhotoSizeXGA,   // 0.8MegaPixel (1024 x 768 )
+    ECamPhotoSize1MP,
+    ECamPhotoSize1_3MP,   // 1.3 Megapixel (1280x960)
+    ECamPhotoSize2MP,  // 2 MegaPixel (1600 x 1200)
+    ECamPhotoSize3MP,   // 3 MegaPixel (2048 x 1536)
+    ECamPhotoSize5MP,     // 5 MegaPixel
+    ECamPhotoSize8MP,     // 8 MegaPixel
+    ECamPhotoSize12MP,    // 12 MegaPixel
+    ECamPhotoSizeW6MP,  //  6   MegaPixel 16:9 (3264 x 1832)
+    ECamPhotoSizeW9MP,  //  9   MegaPixel 16:9 (4000 x 2248)
+    ECamPhotoSizeCIF,
+    ECamPhotoSizeQVGA,
+    ECamPhotoSizeWVGA, // @todo: only VF layout implemented (VF size 640x356)
+    ECamPhotoSizeLast
+    };
+
+// Ids for video resolution
+enum TCamVideoResolution
+    {
+    ECamVideoResolutionSubQCIF,     // Small (128 x 96)
+    ECamVideoResolutionQCIF,        // Medium (176 x 144)
+    ECamVideoResolutionCIF,         // Large (352 x 288)
+    ECamVideoResolutionVGA,         // VGA (640 x 480)
+    ECamVideoResolutionQVGA,        // QVGA (320 x 240)
+    ECamVideoResolutionNHD,         // NHD (640 x 352)
+    ECamVideoResolutionWVGA,        // WVGA (864 x 480)
+    ECamVideoResolutionHD,          // HD (1280 x 720)
+    ECamVideoResolutionLast
+    };
+
+// Ids for video file type
+enum TCamVideoFileType
+    {
+    ECamVideoMpeg4,
+    ECamVideoH263,
+    ECamVideoTypeLast
+    };
+
+// Ids for different scenes
+// Values associated with the key "UserSceneBasedOnScene" for
+// the shared.ini file
+enum TCamSceneId
+    {
+    ECamSceneAuto,
+    ECamSceneUser,
+    ECamScenePortrait,
+    ECamSceneMacro,
+    ECamSceneScenery,  // landscape
+    ECamSceneSports,
+    ECamSceneNight,
+    ECamSceneNightPortrait,
+
+    ECamSceneNormal,
+    ECamSceneNightScenery,
+    ECamSceneCandlelight,
+    ECamSceneLowLight
+    };
+
+
+
+// Ids for location setting
+enum TCamLocationId
+    {
+    ECamLocationOff,
+    ECamLocationOn
+    };
+
+// Ids for different AE mode settings of a scene
+enum TCamSceneAEMode
+    {
+    ECamSceneAEModeAuto       = 0x000,
+    ECamSceneAEModeNight      = 0x001,
+    ECamSceneAEModeBacklight  = 0x002,
+    ECamSceneAEModeCenter     = 0x004,
+    ECamSceneAEModeSports     = 0x008
+    };
+
+// Ids for different AF mode settings of a scene
+enum TCamSceneAFMode
+    {
+    ECamSceneAFModeMacro    = 0x001,
+    ECamSceneAFPortrait         = 0x002,
+    ECamSceneAFModeNormal   = 0x004,
+    ECamSceneAFModeInfinity   = 0x008,
+    ECamSceneAFModeHyperfocal = 0x010,
+    ECamSceneAFModeContinuous = 0x020
+    };
+
+// Ids for different timelapse settings
+enum TCamTimeLapse
+    {
+    ECamTimeLapseOff,
+    ECamTimeLapseMin,
+    ECamTimeLapse5sec,
+    ECamTimeLapse10sec,
+    ECamTimeLapse30sec,
+    ECamTimeLapse1min,
+    ECamTimeLapse5min,
+    ECamTimeLapse10min,
+    ECamTimeLapse15min,
+    ECamTimeLapse30min,
+    ECamTimeLapseEnd    // Not a selectable option, just reflects the no of options
+    };
+
+
+// Viewfinder setting value enumeration
+enum TCamVfGridState
+  {
+  ECamViewfinderGridOn  = 0, // These are used as indexes to tooltips.
+  ECamViewfinderGridOff = 1  //
+  };
+
+// Advanced / novice user mode setting values
+enum TCamUserMode
+  {
+  ECamUserModeNovice   = 0,
+  ECamUserModeAdvanced = 1
+  };
+
+// Photo mode precapture view Active palette item locations
+//
+//   NOTE:
+//     !!! Current ActivePalette2 implementation ignores the index !!!
+//
+//    0 mode
+//    1 scene
+//    2 flash
+//    3 face tracking
+//    4 self timer
+//    5 go to photos
+//    6 sequence mode
+//    7 colour tone
+//    8 vf grid
+//    9 white balance
+//   10 exposure compensation
+//   11 sharpness
+//   12 contrast
+//   13 light sensitivity
+enum TCamPhotoPreCaptureAPSlot
+  {
+  ECamAPSlotPhotoPreCaptureMode = 0,
+  ECamAPSlotPhotoPreCaptureScene,
+  ECamAPSlotPhotoPreCaptureFlash,
+  ECamAPSlotPhotoPreCaptureFacetracking,
+  ECamAPSlotPhotoPreCaptureSelfTimer,
+  ECamAPSlotPhotoPreCaptureGotoPhotos,
+  ECamAPSlotPhotoPreCaptureSequence,
+  ECamAPSlotPhotoPreCaptureColour,
+  ECamAPSlotPhotoPreCaptureVfGrid,
+  ECamAPSlotPhotoPreCaptureWB,
+  ECamAPSlotPhotoPreCaptureEV,
+  ECamAPSlotPhotoPreCaptureSharpness,
+  ECamAPSlotPhotoPreCaptureBrightness,
+  ECamAPSlotPhotoPreCaptureContrast,
+  ECamAPSlotPhotoPreCaptureISO
+  };
+
+enum TCamVideoPreCaptureAPSlot
+  {
+  ECamAPSlotVideoPreCaptureMode =  0,
+  ECamAPSlotVideoPreCaptureScene,
+  ECamAPSlotVideoPreCaptureVideoLight,
+  ECamAPSlotVideoPreCaptureWB,
+  ECamAPSlotVideoPreCaptureColour,
+  ECamAPSlotVideoPreCaptureGotoPhotos
+  };
+
+
+
+// <CAMERAAPP_CAPI_V2_MIGRATION>
+
+// Moved from camappui.h
+
+
+
+enum TCamCameraMode
+  {
+  ECamControllerIdle,
+  ECamControllerImage,
+  ECamControllerVideo,
+  ECamControllerShutdown
+  };
+
+enum TCamImageCaptureMode
+  {
+  ECamImageCaptureNone,
+  ECamImageCaptureSingle,
+  ECamImageCaptureBurst,
+  ECamImageCaptureTimeLapse
+  };
+
+enum TCamCaptureOperation
+  {
+  ECamNoOperation,
+  ECamFocusing,
+  ECamFocused,
+  ECamFocusFailed,
+  ECamCapturing,
+  ECamPausing,
+  ECamPaused,
+  ECamResuming,
+  ECamCompleting,
+
+  ECamStandby
+  };
+
+enum TCamActiveCamera
+  {
+  ECamActiveCameraPrimary,
+  ECamActiveCameraSecondary,
+  ECamActiveCameraNone
+  };
+
+enum TCamSupportFlag
+  {
+  ECamSupportUnknown,
+  ECamSupportOff,
+  ECamSupportOn
+  };
+
+// Moved from CCamZoomModel
+/**
+* Zoom mode
+*/
+enum TCamZoomMode
+  {
+  ECamZoomModeUndefined,
+  ECamZoomModeOptical,
+  ECamZoomModeDigital,
+  ECamZoomModeExtended
+  };
+
+
+
+// ---------------------------------------------------------------------------
+// Strings for enumeration values
+#ifndef CAMERAAPP_PLUGIN_BUILD
+#ifdef _DEBUG
+
+#include <e32def.h> // For TUint16
+
+// TCamCameraMode names for debug prints
+const TUint16* const KCamModeNames[] =
+  {
+  (const TUint16* const)_S16("ECamControllerIdle"),
+  (const TUint16* const)_S16("ECamControllerImage"),
+  (const TUint16* const)_S16("ECamControllerVideo"),
+  (const TUint16* const)_S16("ECamControllerShutdown")
+  };
+
+// TCamImageCaptureMode names for debug prints
+const TUint16* const KCamImageModeNames[] =
+  {
+  (const TUint16* const)_S16("ECamImageCaptureNone"),
+  (const TUint16* const)_S16("ECamImageCaptureSingle"),
+  (const TUint16* const)_S16("ECamImageCaptureBurst"),
+  (const TUint16* const)_S16("ECamImageCaptureTimeLapse")
+  };
+
+// TCamCaptureOperation names for debug prints
+const TUint16* const KCamCaptureOperationNames[] =
+  {
+  (const TUint16* const)_S16("ECamNoOperation"),
+  (const TUint16* const)_S16("ECamFocusing"),
+  (const TUint16* const)_S16("ECamFocused"),
+  (const TUint16* const)_S16("ECamFocusFailed"),
+  (const TUint16* const)_S16("ECamCapturing"),
+  (const TUint16* const)_S16("ECamPausing"),
+  (const TUint16* const)_S16("ECamPaused"),
+  (const TUint16* const)_S16("ECamResuming"),
+  (const TUint16* const)_S16("ECamCompleting"),
+  (const TUint16* const)_S16("ECamStandby")
+  };
+
+const TUint16* const KCamSettingItemNames[] =
+  {
+  (const  TUint16* const)_S16("ItemDefaultMode"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemStaticPhotoRangeMin"),
+  (const TUint16* const)_S16("ItemPhotoQuality"),
+  (const TUint16* const)_S16("ItemPhotoShowFocusPoint"),
+  (const TUint16* const)_S16("ItemPhotoStoreInAlbum"),
+  (const TUint16* const)_S16("ItemShowCapturedPhoto"),
+  (const TUint16* const)_S16("ItemPhotoCaptureTone"),
+  (const TUint16* const)_S16("ItemPhotoMediaStorage"),
+  (const TUint16* const)_S16("ItemPhotoNameBase"),
+  (const TUint16* const)_S16("ItemPhotoNameBaseType"),
+  (const TUint16* const)_S16("ItemPhotoNumber"),
+  (const TUint16* const)_S16("ItemPhotoDigitalZoom"),
+  (const TUint16* const)_S16("ItemImageFaceTracking"),
+  (const TUint16* const)_S16("ItemImageRotation"),
+  (const TUint16* const)_S16("ItemFlickerCancel"),
+  (const TUint16* const)_S16("ItemPhotoSize"),
+  (const TUint16* const)_S16("ItemPhotoCompression"),
+  (const TUint16* const)_S16("ItemImageToolbarItems"),
+  (const TUint16* const)_S16("ItemImageToolbarDefaultItems"),
+  (const TUint16* const)_S16("ItemStaticPhotoRangeMax"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemStaticVideoRangeMin"),     
+  (const TUint16* const)_S16("ItemVideoAudioRec"),  
+  (const TUint16* const)_S16("ItemContinuousAutofocus"),  
+  (const TUint16* const)_S16("ItemVideoStoreInAlbum"),       
+  (const TUint16* const)_S16("ItemVideoShowCapturedVideo"),  
+  (const TUint16* const)_S16("ItemVideoMediaStorage"),       
+  (const TUint16* const)_S16("ItemVideoNameBase"),           
+  (const TUint16* const)_S16("ItemVideoNameBaseType"),       
+  (const TUint16* const)_S16("ItemVideoNumber"),             
+  (const TUint16* const)_S16("ItemVideoQuality"),            
+  (const TUint16* const)_S16("ItemVideoDigitalZoom"),       
+  (const TUint16* const)_S16("ItemVideoStab"),
+  (const TUint16* const)_S16("ItemVideoOpZoomOff"),
+  (const TUint16* const)_S16("ItemVideoResolution"),
+  (const TUint16* const)_S16("ItemVideoClipLength"),
+  (const TUint16* const)_S16("ItemVideoFileType"),
+  (const TUint16* const)_S16("ItemStaticVideoRangeMax"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemStaticCommonRangeMin"),
+  (const TUint16* const)_S16("ItemUserMode"),
+  (const TUint16* const)_S16("ItemDefaultAlbumId"),
+  (const TUint16* const)_S16("ItemDefaultAlbumName"),
+  (const TUint16* const)_S16("ItemRecLocation"),
+  (const TUint16* const)_S16("ItemPhotoEditorSupport"),
+  (const TUint16* const)_S16("ItemVideoEditorSupport"),
+  (const TUint16* const)_S16("ItemRemovePhoneMemoryUsage"),
+  (const TUint16* const)_S16("ItemStopRecordingInHdmiMode"),
+  (const TUint16* const)_S16("ItemStaticCommonRangeMax"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemUserSceneRangeMin"),
+  (const TUint16* const)_S16("ItemUserSceneBasedOnScene"),
+  (const TUint16* const)_S16("ItemUserSceneWhitebalance"),
+  (const TUint16* const)_S16("ItemUserSceneColourFilter"),
+  (const TUint16* const)_S16("ItemUserSceneExposure"),
+  (const TUint16* const)_S16("ItemUserSceneFlash"),
+  (const TUint16* const)_S16("ItemUserSceneBrightness"),
+  (const TUint16* const)_S16("ItemUserSceneContrast"),
+  (const TUint16* const)_S16("ItemUserSceneImageSharpness"),
+  (const TUint16* const)_S16("ItemUserSceneColourSaturation"),
+  (const TUint16* const)_S16("ItemUserSceneLightSensitivity"),
+  (const TUint16* const)_S16("ItemUserSceneDefault"), 
+  (const TUint16* const)_S16("ItemUserSceneRangeMax"),
+  (const TUint16* const)_S16("ItemUserSceneReset"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemDynamicPhotoRangeMin"),
+  (const TUint16* const)_S16("ItemDynamicPhotoScene"),
+  (const TUint16* const)_S16("ItemDynamicPhotoWhiteBalance"),
+  (const TUint16* const)_S16("ItemDynamicPhotoExposure"),
+  (const TUint16* const)_S16("ItemDynamicPhotoColourFilter"),
+  (const TUint16* const)_S16("ItemDynamicPhotoFlash"),
+  (const TUint16* const)_S16("ItemDynamicPhotoBrightness"),
+  (const TUint16* const)_S16("ItemDynamicPhotoContrast"),
+  (const TUint16* const)_S16("ItemDynamicPhotoImageSharpness"),
+  (const TUint16* const)_S16("ItemDynamicPhotoColourSaturation"),
+  (const TUint16* const)_S16("ItemDynamicSelfTimer"),
+  (const TUint16* const)_S16("ItemDynamicPhotoLightSensitivity"),
+  (const TUint16* const)_S16("ItemViewfinderGrid"),
+  (const TUint16* const)_S16("ItemHistogram"),
+  (const TUint16* const)_S16("ItemDynamicPhotoFocusMode"),
+  (const TUint16* const)_S16("ItemDynamicPhotoRangeMax"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemDynamicVideoRangeMin"),
+  (const TUint16* const)_S16("ItemDynamicVideoScene"),
+  (const TUint16* const)_S16("ItemDynamicVideoWhiteBalance"),
+  (const TUint16* const)_S16("ItemDynamicVideoExposure"),
+  (const TUint16* const)_S16("ItemDynamicVideoColourFilter"),
+  (const TUint16* const)_S16("ItemDynamicVideoFlash"),
+  (const TUint16* const)_S16("ItemDynamicVideoBrightness"),
+  (const TUint16* const)_S16("ItemDynamicVideoContrast"),
+  (const TUint16* const)_S16("ItemDynamicVideoColourSaturation"),
+  (const TUint16* const)_S16("ItemDynamicVideoLightSensitivity"),
+  (const TUint16* const)_S16("ItemDynamicVideoRangeMax"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemSceneRangeMin"),
+  (const TUint16* const)_S16("ItemSceneAEMode"),
+  (const TUint16* const)_S16("ItemSceneAWBMode"),
+  (const TUint16* const)_S16("ItemSceneAFMode"),
+  (const TUint16* const)_S16("ItemSceneFlashMode"),
+  (const TUint16* const)_S16("ItemSceneMaxRes"),
+  (const TUint16* const)_S16("ItemSceneSharpness"),
+  (const TUint16* const)_S16("ItemSceneContrast"),
+  (const TUint16* const)_S16("ItemSceneISO"),
+  (const TUint16* const)_S16("ItemSceneEV"),
+  (const TUint16* const)_S16("ItemSceneFrameRate"),
+  (const TUint16* const)_S16("ItemSceneRangeMax"),
+  // -----------------------------------------------------
+  (const TUint16* const)_S16("ItemSequenceMode"),
+  (const TUint16* const)_S16("ItemVideoModeSelect"),
+  (const TUint16* const)_S16("ItemImageModeSelect"),
+  (const TUint16* const)_S16("ItemSwitchCamera"),
+  (const TUint16* const)_S16("ItemFullToolbar"),
+  (const TUint16* const)_S16("ItemCustomiseToolbar"),
+  (const TUint16* const)_S16("ItemGotoPhotos"),
+  (const TUint16* const)_S16("ItemRestoreCameraSettings")
+  // -----------------------------------------------------
+  };
+// Verifying there is a description for all the setting ids.
+// The text array is indexed with the id value, so need to have these for all!
+__ASSERT_COMPILE( (sizeof(KCamSettingItemNames) / sizeof(TUint16*)) == ECamSettingItemLast );
+
+
+const TUint16* const KCamSceneNames[] =
+  {
+  (const TUint16* const )_S16("ECamSceneAuto     (still)"),
+  (const TUint16* const )_S16("ECamSceneUser     (still)"),
+  (const TUint16* const )_S16("ECamScenePortrait (still)"),
+  (const TUint16* const )_S16("ECamSceneMacro    (still)"),
+  (const TUint16* const )_S16("ECamSceneScenery  (still)"),
+  (const TUint16* const )_S16("ECamSceneSports   (still)"),
+  (const TUint16* const )_S16("ECamSceneNight    (still)"),
+  (const TUint16* const )_S16("ECamSceneNightPortrait (still)"),
+  // Video scenes
+  (const TUint16* const )_S16("ECamSceneNormal       (video)"),
+  (const TUint16* const )_S16("ECamSceneNightScenery (video)"),
+  (const TUint16* const )_S16("ECamSceneCandlelight  (video)"),
+  (const TUint16* const )_S16("ECamSceneLowLight     (video)")
+    };
+
+
+#endif // _DEBUG
+#endif //CAMERAAPP_PLUGIN_BUILD
+// ---------------------------------------------------------------------------
+
+
+// </CAMERAAPP_CAPI_V2_MIGRATION>
+
+#endif // CAMSETTINGSINTERNAL_HRH

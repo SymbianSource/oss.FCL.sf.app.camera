@@ -1,0 +1,49 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Active Palette 2 API tests
+*
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_TESTEXPORTS
+../conf/ui_ActivePalette2ApiTest.cfg /epoc32/winscw/c/TestFramework/ui_ActivePalette2ApiTest.cfg
+../init/ActivePalette2ApiTest.ini    /epoc32/winscw/c/TestFramework/ActivePalette2ApiTest.ini
+../init/ActivePalette2ApiTest.ini    /epoc32/winscw/c/TestFramework/TestFramework.ini
+../data/zeroth.svg                   /epoc32/s60/icons/zeroth.svg
+../data/first.svg                    /epoc32/s60/icons/first.svg
+../data/second.svg                   /epoc32/s60/icons/second.svg
+../data/third.svg                    /epoc32/s60/icons/third.svg
+../data/fourth.svg                   /epoc32/s60/icons/fourth.svg
+../data/fifth.svg                    /epoc32/s60/icons/fifth.svg
+../data/sixth.svg                    /epoc32/s60/icons/sixth.svg
+../data/seventh.svg                  /epoc32/s60/icons/seventh.svg
+../data/eighth.svg                   /epoc32/s60/icons/eighth.svg
+../data/ninth.svg                    /epoc32/s60/icons/ninth.svg
+
+PRJ_TESTMMPFILES
+ActivePalette2ApiTest.mmp
+// gnumakefile ActivePalette2ApiTestIcons.mk
+
+PRJ_TESTEXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE ActivePalette2ApiTest.mif
+OPTION HEADERFILE ActivePalette2ApiTest.mbg
+OPTION SOURCEFILE ActivePalette2ApiTestIconList.txt
+END
+
+
+PRJ_MMPFILES
+//  End of File

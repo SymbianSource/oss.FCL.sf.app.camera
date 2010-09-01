@@ -1,0 +1,139 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build flags concerning Camera Controller
+*
+*/
+
+
+#ifndef CAM_CAMERACONTROLLERFLAGS_H
+#define CAM_CAMERACONTROLLERFLAGS_H
+
+// ===========================================================================
+
+#if ( defined(__WINSCW__) || defined(__WINS__) || defined(WINSCW) || defined(WINS) )
+  #define CAMERAAPP_EMULATOR_BUILD
+#endif
+
+
+// ---------------------------------------------------------
+// In emulator build need to emulate CCamera
+#ifdef CAMERAAPP_EMULATOR_BUILD
+  #define CAMERAAPP_CAPI_EMULATOR
+#endif
+
+// ---------------------------------------------------------
+// Camera API details
+// 
+// CAMERAAPP_CAPI_V2     : ECam Camera API v2 support.
+//                        Use MCameraObserver2 interface,
+//                        New2L and New2DuplicateL
+//
+// CAMERAAPP_CAPI_V2_SS  : ECam snapshot support 
+//                        (CCameraSnapshot).
+//
+// CAMERAAPP_CAPI_V2_ADV : ECam advanced settings support 
+//                        (CCameraAdvancedSettings).
+//
+// CAMERAAPP_CAPI_V2_DVF : ECam direct viewfinding support
+//                        (CCameraDirectViewFinder).
+//
+// CAMERAAPP_CAPI_V2_OL  : ECam overlays support (CCameraOverlay). 
+//                        Should be defined if direct vf enabled.
+//
+// CAMERAAPP_CAPI_V2_IP  : ECam image processing support
+//                        (CCameraImageProcessing). 
+//
+
+
+// Camera API v2
+#if! defined( CAMERAAPP_CAPI_EMULATOR )
+  // Emulator does not have implementation for new ECam classes.
+  // Only define CAPI v2 for hw.
+    
+    #define CAMERAAPP_CAPI_V2
+
+#endif
+
+// These should only be enabled if Camera API v2 is in use.
+#ifdef  CAMERAAPP_CAPI_V2
+
+  // Snapshot --------------------------
+  #define  CAMERAAPP_CAPI_V2_SS
+  
+  // Advanced settings -----------------
+  #define  CAMERAAPP_CAPI_V2_ADV
+
+  // Image processing ------------------
+  #ifdef CAMERAAPP_CAPI_V2_ADV
+    #define  CAMERAAPP_CAPI_V2_IP
+  #endif
+
+  // Direct viewfinder -----------------
+  #define   CAMERAAPP_CAPI_V2_DVF
+
+  // Overlays --------------------------
+  #ifdef CAMERAAPP_CAPI_V2_DVF
+    #define  CAMERAAPP_CAPI_V2_OL
+  #endif
+  
+  // Histogram -------------------------
+  #undef  CAMERAAPP_CAPI_V2_HG
+
+#endif
+
+// Flash simulation 
+//   - need Advanced settings
+#ifdef CAMERAAPP_CAPI_V2_ADV
+  #undef CAMERAAPP_FLASH_SIMULATOR
+#endif
+
+// ---------------------------------------------------------
+// CAE flags:
+//
+//   CAMERAAPP_CAE_FOR_VIDEO : CCaeEngine is used for video recording
+//   CAMERAAPP_CAE_FIX       : Release CCamera before using CCaeEngine
+//                            and vice versa.
+#define CAMERAAPP_CAE_FOR_VIDEO
+#ifdef  CAMERAAPP_CAE_FOR_VIDEO
+
+#ifdef CAMERAAPP_EMULATOR_BUILD
+  #define CAMERAAPP_CAE_FIX
+#else
+  #undef CAMERAAPP_CAE_FIX
+#endif
+
+#endif // CAMERAAPP_CAE_FOR_VIDEO
+// ---------------------------------------------------------
+
+
+
+// ---------------------------------------------------------
+// Performance tests flags
+// 
+// CAMERAAPP_PERFORMANCE_CONTROLLER : Enable measuring time for 
+//                               Camera Controller operations.
+#ifdef _DEBUG
+  #define CAMERAAPP_PERFORMANCE_CONTROLLER
+#endif
+// ---------------------------------------------------------
+
+
+// moved from camproductvariant.h to here.
+// For simulating errors & delays in CAE callbacks
+#undef CAMERAAPP_CAE_ERR_SIMULATION
+
+// ===========================================================================
+#endif
+
+// end of file

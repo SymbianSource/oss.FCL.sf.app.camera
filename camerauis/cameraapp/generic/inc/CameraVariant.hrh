@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  The file contains bitmask values for shared data keys specifying*
+*/
+
+
+#ifndef CAMERAVARIANT_HRH
+#define CAMERAVARIANT_HRH
+
+// DATA TYPES
+
+/*
+* If this flag is set then the video sharing resolution will be set to SubQCIF.
+* If this flag is clear then the sharing resolution will be set to QCIF -
+* this is the default setting and is read from the resource file.
+*/
+#define KCamCrQualityVideoSharingIsSubQCIF	0x01
+
+/*
+* If this flag is set then the application will go to the background when
+* exited but will remove the application icon from the task switcher and
+* will reset all settings to default values to simulate a true exit
+*/
+#define KCamCrAppAlwaysRunningIsOn	0x01
+
+/*
+* If this flag is set the application will use time lapse functionality
+* otherwise only burst mode functionality will be available
+*/
+#define KCamCrTimeLapseIsSupported  0x01
+
+/*
+* If this flag is set the application the courtesy UI will always be displayed,
+* i.e. "show icons" is on. Else the UI will only be shown for 5 seconds.
+*/
+#define KCamCrAlwaysDrawCourtesyUiIsOn 0x01
+
+#endif
+// End of File

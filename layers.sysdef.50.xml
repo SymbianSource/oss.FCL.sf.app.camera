@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
-  <!ENTITY layer_real_source_path "sf/app/camera" >
+  <!ENTITY layer_real_source_path "s60/app/camera" >
 ]>
 
 <SystemDefinition name="camera" schema="1.4.0">
@@ -8,16 +8,15 @@
     <layer name="app_layer">
       <module name="camera">
         <unit unitID="imm.camera" mrp="" bldFile="&layer_real_source_path;/group" name="camera" />
-        <unit unitID="imm.camera.help" mrp="" bldFile="&layer_real_source_path;/camerauis/cameraapp/help/group" name="camera_help" />
       </module>
     </layer>
     
     <layer name="api_test_layer">
       <module name="camera_api_tests">
-      	<unit unitID="imm.camera.camcorder_ui_constants_api" mrp="" bldFile="sf/app/camera/camera_plat/camcorder_ui_constants_api/tsrc/group"  name="camcorder_ui_constants_api"  />
+      	<unit unitID="imm.camera.camcorder_ui_constants_api" mrp="" bldFile="s60/app/camera/camera_plat/camcorder_ui_constants_api/tsrc/group"  name="camcorder_ui_constants_api"  />
       </module>
       <module name="active_palette_2_api_tests">
-      	<unit unitID="imm.camera.active_palette_2_api" mrp="" bldFile="sf/app/camera/camera_plat/active_palette_2_api/tsrc/group"  name="active_palette_2_api"  />
+      	<unit unitID="imm.camera.active_palette_2_api" mrp="" bldFile="s60/app/camera/camera_plat/active_palette_2_api/tsrc/group"  name="active_palette_2_api"  />
       </module>
     </layer>
     

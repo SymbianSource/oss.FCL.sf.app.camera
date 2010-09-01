@@ -1,0 +1,407 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+#include "camportraitnaviconstants.rh"
+
+// ---------------------------------------------------
+//
+//    r_cam_img_precap_imgcounter_portrait
+//    Layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_img_precap_imgcounter_portrait
+    {
+    //font = EAknLogicalFontSecondaryFont; C=0; l=0; r=KNaviPaneFontRightBorderPT; B=KNaviPaneFontBasePT; W=1; J=ELayoutAlignRight;
+    //font = EAknLogicalFontSecondaryFont; C=0; l=90;  B=KNaviPaneFontBasePT; W=1; J=ELayoutAlignLeft;
+    font = ELatinPlain12; 
+    C    = 0; 
+    r    = KRemainingTimeRight; 
+    B    = KNaviPaneHeight - KNaviBottomClearance; 
+    W    = KRemainingTimePreCaptureWidth; 
+    J    = ELayoutAlignRight;
+    // font = EAknLogicalFontSecondaryFont; C=0; l=0; r=15; B=KNaviPaneFontBasePT - 3; W=1; J=ELayoutAlignRight;    
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_img_precap_imgcounter_ah_portrait
+//    Arabic/Hebrew layout for remaining images in navi pane.
+//
+// ---------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_TEXT r_cam_img_precap_imgcounter_ah_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=0; r=KNaviPaneFontRightBorderPT; B=KNaviPaneFontBasePT - 3; J=ELayoutAlignRight;
+    //font = EAknLogicalFontSecondaryFont; C=0; l=165; r=0; B=KNaviPaneFontBasePT - 3; J=ELayoutAlignLeft;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_image_size_layout_portrait
+//    Layout for image size in post-capture navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_image_size_layout_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=0; r= 14; B=KNaviPaneFontBasePT; W=45; J=ELayoutAlignRight;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_image_size_layout_ah_portrait
+//    Layout for image size in post-capture navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_image_size_layout_ah_portrait
+    {
+    font = EAknLogicalFontSecondaryFont; C=0; l=10; B=KNaviPaneFontBasePT; J=ELayoutAlignLeft;
+    }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_snapshot_rect_still_portrait
+//    The size and position of the snapshot in still post capture
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_snapshot_rect_still_portrait
+    { l = 1; t = 0; W = 238; H = 180; }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_snapshot_rect_cif_portrait
+//    The size and position of the snapshot in video post capture view
+//    for Large (CIF) resolutions
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_snapshot_rect_cif_portrait
+    { l = 1; t = 0; W = 238; H = 180; }
+    
+//-----------------------------------------------------------------------------
+//
+//    r_cam_snapshot_rect_near_cif_portrait
+//    The size and position of the snapshot in video post capture view
+//    for Large (CIF) resolutions in secondary camera
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_snapshot_rect_near_cif_portrait
+    { l = 32; t = 32; W = 176; H = 144; }    
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_snapshot_rect_sqcif
+//    The size and position of the snapshot in video post capture view
+//    for Small resolution
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_snapshot_rect_sqcif_portrait
+//    { l = 80; t = 48; W = 256; H = 192; }
+    { l = 56 ; t = 46; W = 128; H = 96; }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_still_displayed_rect_secondary
+//    The size and position of the viewfinder frame or snapshot in still capture 
+//    (secondary camera)
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_still_displayed_rect_secondary_portrait
+    { l = 1; t = 0; W = 238; H = 180; }    
+    
+//-----------------------------------------------------------------------------
+//
+//    r_cam_still_requested_rect_secondary
+//    The size of the viewfinder and snapshot image requested from the engine in 
+//    still capture (secondary camera). This is different from the displayed size
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_still_requested_rect_secondary_portrait
+    { l = 0; t = 0; W = 238; H = 180; }      
+
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_image_name_layout
+//    Layout for image name in post-capture navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_image_name_layout_portrait
+	{
+    font = EAknLogicalFontSecondaryFont; C=0; l=0; r=56; B=KNaviPaneFontBasePT; W=36; J=ELayoutAlignLeft;
+	}
+	
+
+//----------------------------------------------------
+//   
+//    r_cam_post_capture_image_name_layout_ah_portrait
+//    Arabic/Hebrew layout for video name in post-capture
+//    navi-counter
+//
+//----------------------------------------------------
+//  
+RESOURCE AVKON_LAYOUT_TEXT r_cam_post_capture_image_name_layout_ah_portrait
+	{
+    font = EAknLogicalFontSecondaryFont; C=0; l=0; r=KNaviPaneFontRightBorderPT; B=KNaviPaneFontBasePT; J=ELayoutAlignRight;
+	}
+
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_exit__capture
+//    Softkeys definition which uses ECamMSKCmdAppCapture
+//    to handle the MSK event, without MSK label.
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit__capture
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ECamMSKCmdAppCapture; txt = ""; }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_exit__capture_secondary
+//    Softkeys definition which uses ECamMSKCmdAppCapture
+//    to handle the MSK event, without MSK label.
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit__capture_secondary
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ECamMSKCmdAppCapture; txt = ""; }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_exit__capture_txt
+//    Softkeys definition which uses ECamMSKCmdAppCapture
+//    to handle the MSK event, with MSK label.
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit__capture_txt
+    {
+	buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ECamMSKCmdAppCapture; txt = qtn_lcam_msk_capture; }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_exit
+//
+//----------------------------------------------------
+//RESOURCE CBA r_cam_softkeys_options_exit
+//    {
+//    buttons =
+//        {
+//        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+//        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; }
+//        };
+//    }
+
+//----------------------------------------------------
+//   
+//    r_cam_still_pre_capture_view_portrait
+//    Still pre-capture view
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_cam_still_pre_capture_view_portrait
+    {
+    menubar = r_cam_still_pre_capture_menubar_portrait;
+    cba = r_cam_softkeys_options_exit__capture;    
+    toolbar = r_cam_still_precapture_toolbar_portrait;   
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_still_pre_capture_menubar_portrait
+//   Menubar for still image pre-capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_still_pre_capture_menubar_portrait
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_still_pre_capture_menu_portrait;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_still_pre_capture_menu_portrait
+//   Options menu for still image pre capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_still_pre_capture_menu_portrait
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSwitchCamera;
+            txt = qtn_lcam_options_cam2;
+            },     
+        MENU_ITEM
+            {
+            command = ECamCmdSettings;
+            txt = qtn_lcam_cmd_settings;
+            },            
+       	MENU_ITEM
+            {
+            command = ECamCmdNewVideo;
+            txt = qtn_lcam_options_video_mode;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdPhotos;
+            txt = qtn_lcam_options_go_to_photos;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_still_post_capture_view_portrait
+//    Still post-capture view
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_cam_still_post_capture_view_portrait
+    {
+    menubar = r_cam_still_post_capture_menubar_portrait;
+    cba = r_cam_softkeys_back_secondary;
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_still_post_capture_menubar_portrait
+//   Menubar for still image post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_still_post_capture_menubar_portrait
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_still_post_capture_menu_portrait;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_still_post_capture_menu_portrait
+//   Options menu for still image post capture view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_still_post_capture_menu_portrait
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSend;
+            txt = qtn_options_send_via;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdSendToCallerMultimedia;
+            txt = qtn_lcam_options_send_to_call;
+            },
+        MENU_ITEM
+            {
+            command = KAiwCmdAssign;
+            txt     = qtn_lcam_use_image_postcapture_menu;
+            cascade = AIW_INTELLIGENT_CASCADE_ID;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdShareOnOvi;
+            // AIW provider fills the menu item title.
+            // No submenu, only 1 provider acccepted.
+            txt     = "";
+            },
+        MENU_ITEM // SHARE_AIW
+            {
+            command = ECamCmdShareSettings;
+            // AIW provider fills the menu item title.
+            // No submenu, only 1 provider acccepted.
+            txt     = "";
+            },
+         MENU_ITEM
+            {
+            command = ECamCmdRenameImage;
+            txt = qtn_lcam_cmd_rename_image;
+            },   
+         MENU_ITEM
+            {
+            command = ECamCmdPhotos;
+            txt = qtn_lcam_options_go_to_photos;
+            },
+         MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+         MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+

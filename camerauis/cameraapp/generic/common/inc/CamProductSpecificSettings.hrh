@@ -1,0 +1,39 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This header file defines the default values for settings.
+*
+*/
+
+
+#ifndef CAMPRODUCTSPECIFICSETTINGS_HRH
+#define CAMPRODUCTSPECIFICSETTINGS_HRH
+
+#include <pathconfiguration.hrh>
+
+
+// Minimum, maximum, and EV step values for exposure
+#define KExposureMinimumEV -1.5f
+#define KExposureMaximumEV 1.5f
+#define KExposureStepEV 0.3f
+
+// List of default values for different dynamic settings...
+#define KDefaultPhotoScene ECamSceneAuto
+#define KDefaultVideoScene ECamSceneNormal
+#define KDefaultWhiteBalance ECamWhiteBalanceAWB
+#define KDefaultISO ECamISO50
+#define KDefaultColourFilter ECamColourFilterColour
+#define KDefaultExposure ECamExposureZero
+#define KDefaultFlash ECamFlashAuto
+
+#endif // CAMPRODUCTSPECIFICSETTINGS_HRH

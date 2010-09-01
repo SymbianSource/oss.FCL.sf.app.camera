@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2002 - 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  MMP file for CamAppPerfTest
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET          CamAppPerfTest.dll
+TARGETTYPE      dll
+UID             0x1000008D 0x101FB3E7
+
+CAPABILITY      ALL -TCB
+
+DEFFILE         CamAppPerfTest.def
+
+APP_LAYER_SYSTEMINCLUDE
+USERINCLUDE     ../inc 
+
+SOURCEPATH      ../src
+SOURCE          CamAppPerfTest.cpp
+SOURCE          CamAppPerfTestCases.cpp
+
+LIBRARY         euser.lib
+LIBRARY         stiftestinterface.lib
+LIBRARY         stiftestengine.lib
+LIBRARY         apgrfx.lib
+LIBRARY         apparc.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib
+LIBRARY         avkon.lib
+LIBRARY         commonengine.lib
+LIBRARY         efsrv.lib
+LIBRARY         estor.lib
+LIBRARY	        ws32.lib
+
+LANG            SC
+

@@ -1,0 +1,853 @@
+/*
+* Copyright (c)  Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+#include <bldvariant.hrh>
+#include <avkon.loc>
+
+
+
+//----------------------------------------------------
+//   
+//    r_cam_oom_note
+//    Out of memory note
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_cam_oom_note_ok_empty
+    {
+    flags = EAknWarningNoteFlags|EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY__OK;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control = AVKON_NOTE
+                {
+                layout = EGeneralLayout;
+                animation = R_QGN_NOTE_WARNING_ANIM;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_oom_note
+//    Out of memory note with cancel option
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_cam_oom_note_ok_cancel
+    {
+    flags = EAknWarningNoteFlags|EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control = AVKON_NOTE
+                {
+                layout = EGeneralLayout;
+                animation = R_QGN_NOTE_WARNING_ANIM;
+                };
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_illegal_characters
+//    Information note displayed when there are illegal
+//    characters in the filename user tries to save
+//
+//----------------------------------------------------
+//
+RESOURCE AKN_NOTE_WRAPPER r_cam_illegal_characters 
+    {
+    resId = R_AKN_INFORMATION_NOTE_DIALOG_WAIT;
+    timeout = EAknInformationNoteTimeout;
+    tone = EAknNoteDialogNoTone;
+    text = qtn_fldr_illegal_characters;
+    }
+    
+//----------------------------------------------------
+//
+//    r_cam_query_default_image_name
+//    Prompt for image name base query.
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_query_default_image_name
+    {
+    buf = qtn_lcam_query_default_image_name;
+    }
+
+
+//----------------------------------------------------
+//
+//    r_cam_query_default_video_name
+//    Prompt for video name base query.
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_query_default_video_name
+    {
+    buf = qtn_lcam_query_default_video_name;
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_query_image_name
+//    Prompt for image name base query.
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_query_image_name
+    {
+    buf = qtn_lcam_query_image_name;
+    }
+
+
+//----------------------------------------------------
+//
+//    r_cam_query_video_name
+//    Prompt for video name base query.
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_cam_query_video_name
+    {
+    buf = qtn_lcam_query_video_name;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_rename_query
+//    Resources for image/video rename query dialog
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_cam_rename_query
+    {
+    flags = EAknGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control= AVKON_DATA_QUERY 
+                { 
+                    layout = EDataLayout;
+                    control = EDWIN 
+                        {
+                        };
+                };
+            }
+        };
+    }
+
+   
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_exit
+//    Softkeys definition which uses ECamCmdInternalExit
+//    instead of EAknSoftkeyExit (as in r_avkon_softkeys_exit)
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_unsuitable_filename
+//    Information note displayed when the filename 
+//    user tries to enter contains only "." or ".."
+//
+//----------------------------------------------------
+//
+RESOURCE AKN_NOTE_WRAPPER r_cam_unsuitable_filename 
+    {
+    resId = R_AKN_INFORMATION_NOTE_DIALOG_WAIT;
+    timeout = EAknInformationNoteTimeout;
+    tone = EAknNoteDialogNoTone;
+    text = qtn_fldr_bad_file_name;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_memory_select_dialog
+//    Resource definition for Memory Select dialog in low memory conditions 
+//
+//----------------------------------------------------
+//
+RESOURCE MEMORYSELECTIONDIALOG r_cam_memory_select_dialog
+   {
+   softkey_1 = text_softkey_select;
+   softkey_2 = text_softkey_cancel;
+   }
+
+
+#ifndef CAMERAAPP_PLUGIN_BUILD
+
+//****************************************************************
+// THE FOLLOWING ARE RESOURCES NEEDED BY CAMERA ONLY
+//***************************************************************
+
+//----------------------------------------------------
+//   
+//    r_cam_error_note
+//    Error note
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_cam_error_note
+    {
+    flags = EAknWarningNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control = AVKON_NOTE
+                {
+                layout = EGeneralLayout;
+                animation = R_QGN_NOTE_WARNING_ANIM;
+                };
+            }
+        };
+    }
+
+
+
+// -----------------------------------------------------------------------------
+//
+// r_cam_memlo_not_enough_memory
+// Used when sequence capture fails with KErrNoMemory
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_memlo_not_enough_memory     
+    { 
+    buf = qtn_memlo_not_enough_memory; 
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_free_memory_wait_note
+//    Wait note shown when freeing memory at startup
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_cam_free_memory_wait_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EFreeingMemoryWaitNote;
+            control = AVKON_NOTE 
+                {
+                layout = EWaitLayout;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                singular_label = qtn_lcam_note_free_memory;
+                };
+            }
+        };
+    }
+
+RESOURCE TBUF r_note_text_free_memory
+	{
+	buf = qtn_lcam_note_free_memory;
+	}
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_overwrite_query
+//    Overwrite confirmation query
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_cam_overwrite_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_activate_cancel__select
+//    Softkeys for self-timer state (activate/cancel)
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_activate_cancel__select
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = ECamCmdSelfTimerActivate; txt = qtn_lcam_softkey_activate; },
+        CBA_BUTTON { id = ECamCmdSelfTimerCancel;   txt = text_softkey_cancel; },
+        CBA_BUTTON { id = ECamMSKCmdSelect;         txt = ""; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_selftimer_blank_cancel
+//    Softkeys for self-timer state (blank/cancel)
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_selftimer_blank_cancel
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = EAknSoftkeyEmpty;            txt = ""; },
+        CBA_BUTTON { id = ECamCmdSelfTimerCancel;   txt = text_softkey_cancel; }
+        };
+    }
+    
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_blank_stop
+//    Softkeys for during sequence capture (blank/stop)
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_blank_stop
+    {
+    flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = EAknSoftkeyEmpty;            txt = ""; },
+        CBA_BUTTON { id = EAknSoftkeyCancel;   txt = text_softkey_stop; }
+        };
+    }        
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_blank
+//    Blank softkeys
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_blank
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = EAknSoftkeyEmpty;            txt = ""; },
+        CBA_BUTTON { id = EAknSoftkeyEmpty;            txt = ""; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_blank_secondary
+//    Blank softkeys
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_blank_secondary
+    {
+    buttons  = 
+        {
+        CBA_BUTTON { id = EAknSoftkeyEmpty;            txt = ""; },
+        CBA_BUTTON { id = EAknSoftkeyEmpty;            txt = ""; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_continue_stop
+//    Softkeys for recording paused state (continue/stop)
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_continue_stop
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = ECamCmdStop; txt = text_softkey_stop; },
+        CBA_BUTTON { id = ECamCmdContinue; txt = qtn_lcam_softkey_continue; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_continue_stop
+//    Softkeys for recording paused state (continue/stop)
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_continue_stop_secondary
+    {
+    buttons  = 
+        {
+        CBA_BUTTON { id = ECamCmdStop; txt = text_softkey_stop; },
+        CBA_BUTTON { id = ECamCmdContinue; txt = qtn_lcam_softkey_continue; }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_pause_stop
+//    Softkeys for recording state(pause/stop)
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_pause_stop
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = ECamCmdStop; txt = text_softkey_stop; },
+        CBA_BUTTON { id = ECamCmdPause; txt = text_softkey_pause; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_pause_stop_secondary
+//    Softkeys for recording state(pause/stop)
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_pause_stop_secondary
+    {
+    buttons  = 
+        {
+        CBA_BUTTON { id = ECamCmdStop; txt = text_softkey_stop; },
+        CBA_BUTTON { id = ECamCmdPause; txt = text_softkey_pause; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_select_cancel
+//    Softkeys for when using horizontal selector
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_select_cancel
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = EAknSoftkeySelect; txt = text_softkey_select; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_back
+//    Softkeys for post-capture views when processing image/video
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_back
+    {
+    flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons =
+        {
+        CBA_BUTTON { txt = text_softkey_empty;},
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { txt = text_softkey_empty; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_back_secondary
+//    Softkeys for post-capture views when processing image/video
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_back_secondary
+    {
+    buttons =
+        {
+        CBA_BUTTON { txt = text_softkey_empty;},
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { txt = text_softkey_empty; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_select_delete__select
+//    Softkeys for embedded post-exposure state
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_select_delete__select
+    {
+    flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons  = 
+        {
+        CBA_BUTTON { id = ECamCmdSelect; txt = text_softkey_select; },
+        CBA_BUTTON { id = ECamCmdDelete; txt = qtn_lcam_softkey_delete; },
+        CBA_BUTTON { id = ECamCmdSelect; txt = text_softkey_select; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_select_delete__select_secondary
+//    Softkeys for embedded post-exposure state
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_cam_softkeys_select_delete__select_secondary
+    {
+    buttons  = 
+        {
+        CBA_BUTTON { id = ECamCmdSelect; txt = text_softkey_select; },
+        CBA_BUTTON { id = ECamCmdDelete; txt = qtn_lcam_softkey_delete; },
+        CBA_BUTTON { id = ECamCmdSelect; txt = ""; }
+        };
+    }
+    
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_blank_exit
+//    Softkeys for when application is in a capture mode
+//    transition. Used instead of r_avkon_softkeys_exit
+//    as that uses the wrong command id (EAknSoftkeyBack
+//    instead of ECamCmdPretendExit)
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_blank_exit
+   {
+   flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+   buttons =
+       {
+       CBA_BUTTON { txt = text_softkey_empty; },
+       CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; }
+       };
+   }
+
+//----------------------------------------------------
+//   
+//    r_cam_softkeys_blank_exit_secondary
+//    Softkeys for when application is in a capture mode
+//    transition. Used instead of r_avkon_softkeys_exit
+//    as that uses the wrong command id (EAknSoftkeyBack
+//    instead of ECamCmdPretendExit)
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_blank_exit_secondary
+   {
+   buttons =
+       {
+       CBA_BUTTON { txt = text_softkey_empty; },
+       CBA_BUTTON { id = ECamCmdInternalExit; txt = text_softkey_exit; }
+       };
+   }
+   
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_exit__continue
+//    Softkeys definition which uses ECamCmdContinue
+//    to handle the MSK event to continue from standby mode.
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_exit__continue
+    {
+	//flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons =
+        {
+        CBA_BUTTON { id = ECamCmdExitStandby;     txt = qtn_lcam_softkey_continue; },
+        CBA_BUTTON { id = ECamCmdInternalExit; 		txt = text_softkey_exit; }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_softkeys_options_back__continue
+//    Softkeys definition which uses ECamCmdContinue
+//    to handle the MSK event to continue from standby mode.
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_options_back__continue
+    {
+	//flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions;  txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack;     txt = text_softkey_back; }
+        // CBA_BUTTON { id = ECamCmdExitStandby;     txt = qtn_lcam_msk_continue; }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_softkeys_courtesy
+//    Softkeys definition used when courtesy UI is active
+//
+//----------------------------------------------------
+RESOURCE CBA r_cam_softkeys_courtesy
+    {
+	flags = EEikButtonGroupAddToStack | EEikCbaFlagTransparent;
+    buttons =
+        {
+        CBA_BUTTON { id = ECamCmdRaiseCourtesyUI; txt = ""; },
+        CBA_BUTTON { id = ECamCmdRaiseCourtesyUI; txt = ""; }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_unable_to_rename
+//    Information note displayed when attempting 
+//    an illegal rename (ie. overwriting images that
+//    are part of the same burst capture)
+//
+//----------------------------------------------------
+//
+RESOURCE AKN_NOTE_WRAPPER r_cam_unable_to_rename 
+    {
+    resId = R_AKN_INFORMATION_NOTE_DIALOG_WAIT;
+    timeout = EAknInformationNoteTimeout;
+    tone = EAknNoteDialogNoTone;
+    text = ""; // set from code, see r_qtn_fldr_cant_rename_item below
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_memory_full
+//    Error note text - all memory full
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_allmemory_full
+    {
+    buf = qtn_lcam_note_allmemory_full;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_massmemory_full
+//    Error note text - mass storage memory full
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_massmemory_full
+    {
+    buf = qtn_memlo_not_enough_mass_memory;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_not_enough_memory_card_defaultname
+//    Error note text - not enough memory in memory card with default name
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_not_enough_memory_card_defaultname
+    {
+    buf = qtn_memlo_not_enough_memory_card_defaultname;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_not_enough_memory_card_name
+//    Error note text - not enough memory in memory card with user defined name
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_not_enough_memory_card_name
+    {
+    buf = qtn_memlo_not_enough_memory_card_name;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_not_enough_device_memory
+//    Error note text - not enough memory in phone memory
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_not_enough_device_memory
+    {
+    buf = qtn_memlo_not_enough_device_memory;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_memory_full
+//    Error note text - memory card not inserted/
+//    corrupt/locked
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_card_not_inserted
+    {
+    buf = qtn_lcam_mmc_not_inserted;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_card_read_only
+//    Error note text - memory card read-only
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_card_read_only
+    {
+    buf = qtn_lcam_mmc_read_only_mass_storage;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_memory_full
+//    Error note text - internal memory full
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_internal_full
+    {
+    buf = qtn_lcam_note_internal_full;
+    }
+//----------------------------------------------------
+//   
+//    r_note_text_memory_full
+//    Error note text - memory full
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_memory_full
+    {
+    buf = qtn_lcam_note_memory_full;
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_note_text_card_mem_full
+//    Query note text - Card memory full; switch to internal memory
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_card_mem_full
+    {
+    buf = qtn_lcam_note_card_mem_full;
+    }
+
+//----------------------------------------------------
+//   
+//    r_note_text_internal_mem_full
+//    Query note text - Internal memory full; switch to card memory
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_text_internal_mem_full
+    {
+    buf = qtn_lcam_note_internal_mem_full;
+    }
+	
+
+//----------------------------------------------------
+//   
+//    r_qtn_fldr_cant_rename_item
+//    Text shown when attempting 
+//    an illegal rename (ie. overwriting images that
+//    are part of the same burst capture)
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_qtn_fldr_cant_rename_item
+    {
+    buf = qtn_fldr_cant_rename_item;
+    }
+    
+//-----------------------------------------------------------------------------
+//
+//    r_qtn_fldr_overwrite_query
+//    Overwrite confirmation query text.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_fldr_overwrite_query
+    {
+    buf = qtn_fldr_overwrite_query;
+    }
+
+#endif //CAMERAAPP_PLUGIN_BUILD
+
+
+/*
+//-----------------------------------------------------------------------------
+//
+//    r_qtn_processing_video
+//    Processing video text, displayed on blended background in the bottom of
+//    thescreen in pre- and postcapture view.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_processing_video_text
+    {
+    buf = qtn_lcam_note_processing_video;
+    }    
+*/
+/*
+//-----------------------------------------------------------------------------
+//
+//    r_cam_processing_text_bg
+//    Size and position of the processing text blended background
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AVKON_LAYOUT_RECT r_cam_processing_text_bg
+    { 
+    r = 116; t = 219; W = 204; H = 21;
+    } 
+*/
+

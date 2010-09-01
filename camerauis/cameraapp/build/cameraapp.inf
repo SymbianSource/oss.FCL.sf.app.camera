@@ -1,0 +1,101 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project specification for the Camera App
+*
+*/
+
+
+PRJ_PLATFORMS 
+DEFAULT 
+
+PRJ_EXPORTS
+
+                                
+../generic/data/cameraappCapture1.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCapture1.wav
+../generic/data/cameraappCapture1.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCapture1.wav
+../generic/data/cameraappCapture2.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCapture2.wav
+../generic/data/cameraappCapture2.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCapture2.wav
+../generic/data/cameraappCapture3.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCapture3.wav
+../generic/data/cameraappCapture3.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCapture3.wav
+../generic/data/cameraappCapture4.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCapture4.wav
+../generic/data/cameraappCapture4.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCapture4.wav
+../generic/data/cameraappFocusSucc.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappFocusSucc.wav
+../generic/data/cameraappFocusSucc.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappFocusSucc.wav
+../generic/data/cameraappCapture1.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCapture1.wav
+../generic/data/cameraappCapture1.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCapture1.wav
+../generic/data/cameraappCapture2.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCapture2.wav
+../generic/data/cameraappCapture2.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCapture2.wav
+../generic/data/cameraappCapture3.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCapture3.wav
+../generic/data/cameraappCapture3.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCapture3.wav
+../generic/data/cameraappCapture4.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCapture4.wav
+../generic/data/cameraappCapture4.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCapture4.wav
+../generic/data/cameraappFocusSucc.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappFocusSucc.wav
+../generic/data/cameraappFocusSucc.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappFocusSucc.wav
+../generic/data/cameraappStart.wav    /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappStart.wav
+../generic/data/cameraappStart.wav    /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappStart.wav
+../generic/data/cameraappStop.wav     /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappStop.wav
+../generic/data/cameraappStop.wav     /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappStop.wav
+../generic/data/cameraappStart.wav    /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappStart.wav
+../generic/data/cameraappStart.wav    /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappStart.wav
+../generic/data/cameraappStop.wav    /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappStop.wav
+../generic/data/cameraappStop.wav     /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappStop.wav
+../generic/data/cameraappSelfTimer.wav   /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappSelfTimer.wav
+../generic/data/cameraappSelfTimer.wav   /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappSelfTimer.wav
+
+
+../generic/data/cameraappCaptureShort1.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCaptureShort1.wav
+../generic/data/cameraappCaptureShort1.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCaptureShort1.wav
+../generic/data/cameraappCaptureShort2.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCaptureShort2.wav
+../generic/data/cameraappCaptureShort2.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCaptureShort2.wav
+../generic/data/cameraappCaptureShort3.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCaptureShort3.wav
+../generic/data/cameraappCaptureShort3.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCaptureShort3.wav
+../generic/data/cameraappCaptureShort4.wav /epoc32/release/winscw/urel/z/system/sounds/digital/cameraappCaptureShort4.wav
+../generic/data/cameraappCaptureShort4.wav /epoc32/release/winscw/udeb/z/system/sounds/digital/cameraappCaptureShort4.wav
+../generic/data/cameraappCaptureShort1.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCaptureShort1.wav
+../generic/data/cameraappCaptureShort1.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCaptureShort1.wav
+../generic/data/cameraappCaptureShort2.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCaptureShort2.wav
+../generic/data/cameraappCaptureShort2.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCaptureShort2.wav
+../generic/data/cameraappCaptureShort3.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCaptureShort3.wav
+../generic/data/cameraappCaptureShort3.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCaptureShort3.wav
+../generic/data/cameraappCaptureShort4.wav /epoc32/release/armv5/urel/z/system/sounds/digital/cameraappCaptureShort4.wav
+../generic/data/cameraappCaptureShort4.wav /epoc32/release/armv5/udeb/z/system/sounds/digital/cameraappCaptureShort4.wav
+
+
+../generic/data/capture.jpg           /epoc32/winscw/c/private/101F857A/capture.jpg
+
+
+PRJ_MMPFILES  // List of .mmp files
+
+cameraapp.mmp
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION SOURCEDIR ../generic/icons
+OPTION TARGETFILE cameraapp.mif
+OPTION HEADERFILE cameraapp.mbg
+OPTION SOURCEFILE iconlist.txt
+END
+
+START EXTENSION s60/mifconv
+OPTION SOURCEDIR ../generic/bitmaps
+OPTION TARGETFILE cameraapp2.mif
+OPTION HEADERFILE cameraapp2.mbg
+OPTION SOURCES -c8,1 qgn_indi_lcam_cont_cam_xenon_charging.bmp
+END
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE cameraapp_aif.mif
+OPTION SOURCES -c8,8 qgn_menu_cams
+END

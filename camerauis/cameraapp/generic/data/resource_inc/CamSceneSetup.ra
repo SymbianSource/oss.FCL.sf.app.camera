@@ -1,0 +1,1789 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for the Camera Application*
+*/
+
+
+
+
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_night
+//    Data for the photo scene night settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_night
+    {
+    scene_item_id = ECamSceneNight;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeNight;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeNormal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashOff;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessNorm;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_macro
+//    Data for the photo scene macro settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_macro
+    {
+    scene_item_id = ECamSceneMacro;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeAuto;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeMacro;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashAuto;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessNorm;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }          
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_auto
+//    Data for the photo scene macro settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_auto
+    {
+    scene_item_id = ECamSceneAuto;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeAuto;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeNormal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashAuto;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessNorm;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+            
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_scenery
+//    Data for the photo scene scenery settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_scenery
+    {
+    scene_item_id = ECamSceneScenery;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeAuto;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceDaylight;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeInfinity;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashOff;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessHard;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_sports
+//    Data for the photo scene sports settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_sports
+    {
+    scene_item_id = ECamSceneSports;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeSports;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeHyperfocal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashOff;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessNorm;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_portrait
+//    Data for the photo scene portrait settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_portrait
+    {
+    scene_item_id = ECamScenePortrait;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeBacklight;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeNormal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashAntiRedEye;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessSoft;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_night_landscape
+//    Data for the photo scene night landscape settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_night_landscape
+    {
+    scene_item_id = ECamSceneNightScenery;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeAuto;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeNormal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashOff;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessNorm;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_night_portrait
+//    Data for the photo scene night portrait settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_night_portrait
+    {
+    scene_item_id = ECamSceneNightPortrait;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeNight;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeNormal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashAntiRedEye;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessNorm;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_scene_night_candlelight
+//    Data for the photo scene candlelight settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_photo_scene_candlelight
+    {
+    scene_item_id = ECamSceneCandlelight;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeBacklight;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceDaylight;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeNormal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashOff;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamImageQualityPrint3m;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneSharpness;
+            default = ECamImageSharpnessNorm;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }
+        };
+    }
+
+// Scenes data for settings model.
+//----------------------------------------------------
+//   
+//    r_cam_photo_scenes_data
+//    Data for all the photo scene setting items (except user)
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SETTING_ITEMS_DATA r_cam_photo_scenes_data
+    {
+    settings_items =
+        {
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_macro;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_auto;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_scenery;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_sports;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_portrait;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_night;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_night_landscape;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_night_portrait;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_photo_scene_candlelight;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------
+//
+//    r_cam_scene_description_candlelight
+//    Description of Candlelight scene in scene settings view
+//
+// ---------------------------------------------------
+//
+RESOURCE TBUF r_cam_scene_description_candlelight
+    {
+    buf = qtn_lcam_scene_candle_ex;
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_scene_list_photo
+//    Lists all scenes used to populate the photo scene list
+//
+// ---------------------------------------------------
+//
+RESOURCE ARRAY r_cam_scene_list_photo
+    {
+    items = 
+        {
+        INT16
+            {
+            value = ECamSceneAuto;
+            },
+        INT16
+            {
+            value = ECamSceneUser;
+            },
+        INT16
+            {
+            value = ECamScenePortrait;
+            },
+        INT16
+            {
+            value = ECamSceneScenery;
+            },
+        INT16
+            {
+            value = ECamSceneSports;
+            },
+        INT16
+            {
+            value = ECamSceneNightScenery;
+            },
+        INT16
+            {
+            value = ECamSceneNightPortrait;
+            },
+        INT16
+            {
+            value = ECamSceneCandlelight;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------
+//
+//    r_cam_scene_list_photo_cam2
+//    Lists all scenes used to populate the photo
+//    scene list for the secondary camera
+//
+// ---------------------------------------------------
+//
+RESOURCE ARRAY r_cam_scene_list_photo_cam2
+    {
+    items = 
+        {
+        INT16
+            {
+            value = ECamSceneAuto;
+            },
+        INT16
+            {
+            value = ECamSceneNight;
+            }
+        };
+    }
+    
+// ---------------------------------------------------
+//
+//    r_cam_scene_list_user
+//    Lists all scenes used to populate the user scene list
+//
+// ---------------------------------------------------
+//
+RESOURCE ARRAY r_cam_scene_list_user
+    {
+    items = 
+        {
+        INT16
+            {
+            value = ECamSceneAuto;
+            },
+        INT16
+            {
+            value = ECamScenePortrait;
+            },
+        INT16
+            {
+            value = ECamSceneScenery;
+            },
+        INT16
+            {
+            value = ECamSceneNight;
+            },
+        INT16
+            {
+            value = ECamSceneSports;
+            }
+        };
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_scene_list_video
+//    Lists all scenes used to populate the video scene list
+//
+// ---------------------------------------------------
+//
+RESOURCE ARRAY r_cam_scene_list_video
+    {
+    items = 
+        {
+        INT16
+            {
+            value = ECamSceneNormal;
+            },
+        INT16
+            {
+            value = ECamSceneNight;
+            }
+        };
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_scene_list_video_cam2
+//    Lists all scenes used to populate the video
+//    scene list for the secondary camera
+//
+// ---------------------------------------------------
+//
+RESOURCE ARRAY r_cam_scene_list_video_cam2
+    {
+    items = 
+        {
+        INT16
+            {
+            value = ECamSceneAuto;
+            },
+        INT16
+            {
+            value = ECamSceneNight;
+            }
+        };
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_scene_max_items_to_display
+//    Value for the maximum number of items displayed
+//
+// ---------------------------------------------------
+//
+
+RESOURCE INT16 r_cam_scene_max_items_to_display
+    {
+    value = 4;
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_scene_setting_menubar
+//   Menubar for scene settings view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_scene_setting_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_scene_setting_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_scene_setting_menu
+//   Options menu for scene settings view
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_scene_setting_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSelect;
+            txt = qtn_lcam_options_select;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdEdit;
+            txt = qtn_lcam_options_edit_userdef;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_scene_setting_ok_menubar
+//   Ok menubar for scene setting list
+//   (only opens when user scene is highlighted)
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_scene_setting_ok_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_scene_setting_ok_menu;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_scene_setting_ok_menu
+//   Context specific options menu for scene setting list
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_scene_setting_ok_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = ECamCmdSelect;
+            txt = qtn_lcam_options_select;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdEdit;
+            txt = qtn_lcam_options_edit_userdef;
+            flags = EEikMenuItemAction;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_imagesharpness_data
+//    The data for the image sharpness item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_imagesharpness_data
+    {
+    id = ECamSettingItemUserSceneImageSharpness;
+    text = qtn_lcam_set_user_sharp;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {          
+            id = ECamImageSharpnessHard;
+            text = qtn_lcam_set_hard;
+            },
+   
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamImageSharpnessNorm;
+            text = qtn_lcam_set_normal;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamImageSharpnessSoft;
+            text = qtn_lcam_set_soft;
+            }
+
+        };
+    }
+    
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_coloursaturation_data
+//    The data for the image sharpness item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_coloursaturation_data
+    {
+    id = ECamSettingItemUserSceneColourSaturation;
+    text = qtn_lcam_popm_colsat;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {          
+            id = ECamColourSaturationNorm;
+            text = qtn_lcam_set_normal;
+            },
+   
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamColourSaturationPlus;
+            text = qtn_lcam_set_increased;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamColourSaturationNeg;
+            text = qtn_lcam_set_decreased;
+            }
+
+        };
+    }    
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_whitebalance_data
+//    The data for the white balance item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_whitebalance_data
+    {
+    id = ECamSettingItemUserSceneWhitebalance;
+    text = qtn_lcam_set_user_wb;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {          
+            id = ECamWhiteBalanceAWB;
+            text = qtn_lcam_set_awb;
+            },
+   
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamWhiteBalanceDaylight;
+            text = qtn_lcam_set_day;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamWhiteBalanceCloudy;
+            text = qtn_lcam_set_cloud;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamWhiteBalanceTungsten;
+            text = qtn_lcam_set_tung;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamWhiteBalanceFlourescent;
+            text = qtn_lcam_set_flu;
+            }
+
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_coloureffect_data
+//    The data for the colour effect item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_coloureffect_data
+    {
+    id = ECamSettingItemUserSceneColourFilter;
+    text = qtn_lcam_set_user_ce;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamColourFilterColour;
+            text = qtn_lcam_set_col;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamColourFilterBlackAndWhite;
+            text = qtn_lcam_set_bw;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamColourFilterSepia;
+            text = qtn_lcam_set_sep;
+            },
+            
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamColourFilterNegative;
+            text = qtn_lcam_set_neg;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamColourFilterVivid;
+            text = qtn_lcam_set_viv;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_set_user_default
+//    The data for the set user default item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//    
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_set_user_default
+    {
+    id = ECamSettingItemUserSceneDefault;
+    text = qtn_lcam_set_user_default;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamSettNo;
+            text = qtn_lcam_set_user_default_no;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamSettYes;
+            text = qtn_lcam_set_user_default_yes;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_reset_data
+//    The data for the reset data item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_reset_data
+    {
+    id = ECamSettingItemUserSceneReset;
+    text = qtn_lcam_set_user_reset;
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_flash_data
+//    The data for the flash item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_flash_data
+    {
+    id = ECamSettingItemUserSceneFlash;
+    text = qtn_lcam_set_user_flash;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamFlashAuto;
+            text = qtn_lcam_set_auto;
+            },
+      
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamFlashForced;
+            text = qtn_lcam_set_force;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamFlashAntiRedEye;
+            text = qtn_lcam_set_redeye;
+            },            
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamFlashOff;
+            text = qtn_lcam_set_flash_off;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_brightness_data
+//    The data for the brightness item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_brightness_data
+    {
+    id = ECamSettingItemUserSceneBrightness;
+    text = qtn_lcam_set_user_bright;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamBrightnessNorm;
+            text = qtn_lcam_set_normal;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamBrightnessPlus;
+            text = qtn_lcam_set_increased;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamBrightnessNeg;
+            text = qtn_lcam_set_decreased;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_photo_user_scene_setup_list_ev_data
+//    The data for the EV item in the photo user
+//    scene setup list (for range -2 to +2 in steps of 1/3)
+//
+//----------------------------------------------------
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_ev_data
+    {
+    id = ECamSettingItemUserSceneExposure;
+    text = qtn_lcam_set_user_ev;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = 6;
+            text = qtn_lcam_ev_plus2;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = 5;
+            text = qtn_lcam_ev_plus1_7;
+            },
+         CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = 4;
+            text = qtn_lcam_ev_plus1_3;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = 3;
+            text = qtn_lcam_ev_plus1;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = 2;
+            text = qtn_lcam_ev_plus0_7;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = 1;
+            text = qtn_lcam_ev_plus0_3;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = 0;
+            text = qtn_lcam_ev_0;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = -1;
+            text = qtn_lcam_ev_minus0_3;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = -2;
+            text = qtn_lcam_ev_minus0_7;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = -3;
+            text = qtn_lcam_ev_minus1;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = -4;
+            text = qtn_lcam_ev_minus1_3;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = -5;
+            text = qtn_lcam_ev_minus1_3;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = -6;
+            text = qtn_lcam_ev_minus2;
+            }
+        };
+    }
+    
+//----------------------------------------------------
+//
+//    r_cam_photo_user_scene_setup_list_ev_data2
+//    The data for the EV item in the photo user
+//    scene setup list (for range -2 to +2 in steps of 1/2)
+//
+//----------------------------------------------------
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_ev_data2
+    {
+    id = ECamSettingItemUserSceneExposure;
+    text = qtn_lcam_set_user_ev;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureTwo;
+            text = qtn_lcam_ev_plus2;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureOnePointFive;
+            text = qtn_lcam_ev_plus1_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureOne;
+            text = qtn_lcam_ev_plus1;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposurePointFive;
+            text = qtn_lcam_ev_plus0_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureZero;
+            text = qtn_lcam_ev_0;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusPointFive;
+            text = qtn_lcam_ev_minus0_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusOne;
+            text = qtn_lcam_ev_minus1;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusOnePointFive;
+            text = qtn_lcam_ev_minus1_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusTwo;
+            text = qtn_lcam_ev_minus2;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_photo_user_scene_setup_list_ev_data3
+//    The data for the EV item in the photo user
+//    scene setup list (for range -2 to +2 in steps of 1)
+//
+//----------------------------------------------------
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_ev_data3
+    {
+    id = ECamSettingItemUserSceneExposure;
+    text = qtn_lcam_set_user_ev;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureTwo;
+            text = qtn_lcam_ev_plus2;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureOnePointFive;
+            text = qtn_lcam_ev_plus1_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureOne;
+            text = qtn_lcam_ev_plus1;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposurePointFive;
+            text = qtn_lcam_ev_plus0_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureZero;
+            text = qtn_lcam_ev_0;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusPointFive;
+            text = qtn_lcam_ev_minus0_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusOne;
+            text = qtn_lcam_ev_minus1;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusOnePointFive;
+            text = qtn_lcam_ev_minus1_5;
+            },
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamExposureMinusTwo;
+            text = qtn_lcam_ev_minus2;
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_lightsensitivity_data
+//    The data for the light sensitivity item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_lightsensitivity_data
+    {
+    id = ECamSettingItemUserSceneLightSensitivity;
+    text = qtn_lcam_set_user_iso;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityAuto;
+            text = qtn_lcam_set_iso_auto; // qtn_lcam_isoauto;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityLow;
+            text = qtn_lcam_set_iso_low; // qtn_lcam_isolow;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityMed;
+            text = qtn_lcam_set_iso_medium; // qtn_lcam_isomedium;
+            },
+            
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityHigh;
+            text = qtn_lcam_set_iso_high; // qtn_lcam_isohigh;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_extended_lightsensitivity_data
+//    The data for the light sensitivity item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_extended_lightsensitivity_data
+    {
+    id = ECamSettingItemUserSceneLightSensitivity;
+    text = qtn_lcam_set_user_iso;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityAuto;
+            text = qtn_lcam_set_iso_auto; // qtn_lcam_isoauto;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityLow;
+            text = qtn_lcam_set_iso_low; // qtn_lcam_isolow;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityLowMed;
+            text = qtn_lcam_set_iso_low_medium;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityMed;
+            text = qtn_lcam_set_iso_medium; // qtn_lcam_isomedium;
+            },
+            
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityMedHigh;
+            text = qtn_lcam_set_iso_medium_high;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamLightSensitivityHigh;
+            text = qtn_lcam_set_iso_high; // qtn_lcam_isohigh;
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_list_contrast_data
+//    The data for the contrast item in the 
+//    photo user scene setup list
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_USER_SCENE_SETUP_LIST_ITEM_DATA r_cam_photo_user_scene_setup_list_contrast_data
+    {
+    id = ECamSettingItemUserSceneContrast;
+    text = qtn_lcam_set_user_contr;
+    user_scene_setup_list_item_values =
+        {
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamContrastNorm;
+            text = qtn_lcam_set_contrast_normal;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamContrastPlus;
+            text = qtn_lcam_set_contrast_increased;
+            },
+
+        CAM_USER_SCENE_SETUP_LIST_ITEM_VALUE
+            {
+            id = ECamContrastNeg;
+            text = qtn_lcam_set_contrast_decreased;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_photo_user_scene_setup_title_name
+//    Title name used in photo user scene setup
+//
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_cam_photo_user_scene_setup_title_name
+    {
+    txt = qtn_lcam_title_text_photoscene;
+    }
+
+
+// ---------------------------------------------------------
+//   
+//   r_cam_setup_pane_scene_options_menubar
+//   Menubar for setup pane displaying scene options menu
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_setup_pane_scene_options_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_setup_pane_scene_options_menu;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//   r_cam_setup_pane_scene_options_menu
+//   Options menu for setup pane when showing scene list
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_setup_pane_scene_options_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            {
+            command = EAknSoftkeySelect;
+            txt = qtn_lcam_options_select;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdEdit;
+            txt = qtn_lcam_options_edit_userdef;
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+
+//----------------------------------------------------
+//   
+// Confirmation query for changing the photo scene to 
+// "Sports" when resolution is too high.
+//----------------------------------------------------
+//   
+RESOURCE DIALOG r_cam_sports_scene_change_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items = 
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = ECamCmdConfirmationQuerySportsSceneChange;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = qtn_lcam_conf_sport1m;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_user_scene_setup_title
+//    Title name used in the user scene setup
+//
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_cam_user_scene_setup_title
+     {
+     txt = qtn_lcam_title_text_photoscene;
+     }
+
+
+//----------------------------------------------------
+//   
+//    r_cam_user_scene_setup_view
+//    User scene setup view
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_cam_user_scene_setup_view
+    {
+    menubar = r_cam_user_scene_setup_menubar;
+    cba = R_CAM_SOFTKEYS_OPTIONS_BACK__CHANGE;//R_AVKON_SOFTKEYS_OPTIONS_BACK;    
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_user_scene_setup_menubar
+//    Menubar visible in photo and Video User Scene Setup views
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_cam_user_scene_setup_menubar
+    {
+    titles = 
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_cam_user_scene_setup_menu;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_user_scene_setup_menu
+//    Menu visible in all user scene setup views
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_cam_user_scene_setup_menu
+    {
+    items = 
+        {
+        MENU_ITEM
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+        MENU_ITEM 
+            {
+            command = ECamCmdInternalExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_cam_video_scene_night
+//    Data for the video scene night settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_video_scene_night
+    {
+    scene_item_id = ECamSceneNight;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeNight;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeHyperfocal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashOff;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamVideoResolutionCIF;
+            },
+            
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }     
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_video_scene_setting_title
+//    Title name used in video scene settings view
+//
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_cam_video_scene_setting_title
+     {
+     txt = qtn_lcam_title_text_scenes_vid;
+     }
+
+//----------------------------------------------------
+//   
+//    r_cam_video_scene_video
+//    Data for the video scene video settings
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SCENE_SETTING_DATA r_cam_video_scene_video
+    {
+    scene_item_id = ECamSceneNormal;
+    settings_items =
+        {
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {          
+            id = ECamSettingItemSceneAEMode;
+            default = ECamSceneAEModeAuto;
+            },
+   
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAWBMode;
+            default = ECamWhiteBalanceAWB;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneAFMode;
+            default = ECamSceneAFModeHyperfocal;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneFlashMode;
+            default = ECamFlashOff;
+            },
+
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneMaxRes;
+            default = ECamVideoResolutionCIF;
+            },
+        CAM_NON_STATIC_SETTING_ITEM_DATA
+            {
+            id = ECamSettingItemSceneContrast;
+            default = ECamContrastNorm;
+            }     
+        };
+    }
+
+//----------------------------------------------------
+//   
+//    r_cam_video_scenes_data
+//    Data for all the video scene setting items (except user)
+//
+//----------------------------------------------------
+//
+RESOURCE CAM_SETTING_ITEMS_DATA r_cam_video_scenes_data
+    {
+    settings_items =
+        {
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_video_scene_video;
+            },
+        CAM_SCENE_SETTINGS_DATA_REF
+            {
+            scene_settings_data_ref = r_cam_video_scene_night;
+            }
+        };
+    }
+
+// ---------------------------------------------------
+//
+//    r_cam_reset_user_scene_note
+//    Reset user scene settings confirmation note
+//
+// ---------------------------------------------------
+//
+RESOURCE DIALOG r_cam_reset_user_scene_note
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = "";
+                };
+            }
+        };
+    }
+
+//-----------------------------------------------------------------------------
+//
+//    r_cam_reset_user_scene_note_text
+//    Reset user scene confirmation query text.
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_cam_reset_user_scene_note_text
+    {
+    buf = qtn_lcam_note_user_reset;
+    }
+
