@@ -27,14 +27,13 @@
 
 const char* FAIL_TEST_SETTING = "Fail test";
 const char* EMPTY_STRING = "";
-const int CAMERA_MODE_STILL = 0;
-const int CAMERA_MODE_VIDEO = 1;
 //Default EV compensation value for auto still and auto video scene mode
 const int SCENE_AUTO_EV_VALUE = 0;
 const int SIGNAL_TIMEOUT = 3000; //milliseconds
 
-UnitTestCxeSettingsImp::UnitTestCxeSettingsImp() :
-        mSettingsImp(NULL), mSettingsStore(NULL)
+UnitTestCxeSettingsImp::UnitTestCxeSettingsImp()
+    : mSettingsStore(NULL),
+      mSettingsImp(NULL)
 {
     qRegisterMetaType<CxeScene>("CxeScene");
     qRegisterMetaType<CxeError::Id>("CxeError::Id");
@@ -130,7 +129,6 @@ void UnitTestCxeSettingsImp::testLoadImageAndVideoSettings()
 void UnitTestCxeSettingsImp::testGet()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CxeError::Id err = CxeError::None;
 
     // The idea of this test case is to test as much of different type of settings
     // as possible
@@ -146,7 +144,6 @@ void UnitTestCxeSettingsImp::testGet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
 
     mSettingsStore->get(CxeSettingIds::BRIGHTNESS, testValue);
@@ -161,7 +158,6 @@ void UnitTestCxeSettingsImp::testGet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
 
     QVariant colorTone2;
@@ -177,7 +173,6 @@ void UnitTestCxeSettingsImp::testGet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
 
     mSettingsStore->get(CxeSettingIds::CONTRAST, testValue);
@@ -192,7 +187,6 @@ void UnitTestCxeSettingsImp::testGet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
 
     mSettingsStore->get(CxeSettingIds::FNAME_FOLDER_SUFFIX, testValue);
@@ -211,7 +205,6 @@ void UnitTestCxeSettingsImp::testGet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
 
     QCOMPARE(sceneData[CxeSettingIds::EV_COMPENSATION_VALUE].toInt(), SCENE_AUTO_EV_VALUE);
@@ -226,7 +219,6 @@ void UnitTestCxeSettingsImp::testGet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
 
     QCOMPARE(sceneData[CxeSettingIds::EV_COMPENSATION_VALUE].toInt(), SCENE_AUTO_EV_VALUE);
@@ -332,7 +324,6 @@ void UnitTestCxeSettingsImp::testSet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
     mSettingsStore->get(CxeSettingIds::COLOR_TONE, value);
     QCOMPARE(value.toInt(), (int)Cxe::ColortoneBlackAndWhite);
@@ -346,7 +337,6 @@ void UnitTestCxeSettingsImp::testSet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
     mSettingsStore->get(CxeSettingIds::FNAME_FOLDER_SUFFIX, value);
     QCOMPARE(value.toString(), stringValue);
@@ -360,7 +350,6 @@ void UnitTestCxeSettingsImp::testSet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
     mSettingsStore->get(CxeSettingIds::STILL_SHOWCAPTURED, value);
     QCOMPARE(value.toBool(), boolValue);
@@ -374,7 +363,6 @@ void UnitTestCxeSettingsImp::testSet()
         QString message = "Exception thrown, error id = ";
         message.append(exception.error());
         QFAIL(message.toAscii());
-        return;
     }
     mSettingsStore->get(CxeSettingIds::EV_COMPENSATION_VALUE, value);
     QCOMPARE(value.toReal(), qrealValue);

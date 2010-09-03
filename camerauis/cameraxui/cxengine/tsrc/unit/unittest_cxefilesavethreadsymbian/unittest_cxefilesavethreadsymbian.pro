@@ -14,8 +14,8 @@ CONFIG *= cxeunit_no_system_paths
 
 include(../unittest.pri)
 
-INCLUDEPATH *= ../system_include
-DEPENDPATH  *= ../system_include
+INCLUDEPATH = . ../utils ../system_include ../../fakeclasses ../../../traces
+DEPENDPATH  = . ../utils ../system_include ../../fakeclasses ../../../traces
 
 TARGET = unittest_cxefilesavethreadsymbian
 
@@ -23,37 +23,38 @@ LIBS *= -lsysutil
 LIBS *= -lplatformenv
 LIBS *= -lefsrv
 LIBS *= -lcone
-LIBS *= -lthumbnailmanagerqt
 
-SOURCES *= unittest_cxefilesavethreadsymbian.cpp \
+SOURCES *= ./unittest_cxefilesavethreadsymbian.cpp \
            thumbnailmanager_qt.cpp \
            harvesterclient.cpp \
-           cxefilesavethread.cpp \
-           cxefilesavethreadsymbian.cpp \
+           ../../../src/cxefilesavethread.cpp \
+           ../../../src/cxefilesavethreadsymbian.cpp \
            cxefakeimagedataitem.cpp \
-           cxeimagedataitemsymbian.cpp \
-           cxeharvestercontrolsymbian.cpp \
-           cxethumbnailmanagersymbian.cpp \
-           cxesysutil.cpp \
-           cxestatemachinebase.cpp \
-           cxestatemachine.cpp \
-           cxestate.cpp \
-           cxeerrormappingsymbian.cpp
+           ../../../src/cxeimagedataitemsymbian.cpp \
+           ../../../src/cxeharvestercontrolsymbian.cpp \
+           ../../../src/cxethumbnailmanagersymbian.cpp \
+           ../../../src/cxesysutil.cpp \
+           ../../../src/cxestatemachinebase.cpp \
+           ../../../src/cxestatemachine.cpp \
+           ../../../src/cxestate.cpp \
+           cxetestutils.cpp \
+           ../../../src/cxeerrormappingsymbian.cpp
 
-HEADERS *= unittest_cxefilesavethreadsymbian.h \
+HEADERS *= ./unittest_cxefilesavethreadsymbian.h \
            thumbnailmanager_qt.h \
            harvesterclient.h \
-           cxefilesavethread.h \
-           cxefilesavethreadsymbian.h \
+           ../../../inc/cxefilesavethread.h \
+           ../../../inc/cxefilesavethreadsymbian.h \
            cxefakeimagedataitem.h \
-           cxeimagedataitemsymbian.h \
-           cxeimagedataitem.h \
-           cxeerror.h \
-           cxeharvestercontrolsymbian.h \
-           cxethumbnailmanagersymbian.h \
-           cxesysutil.h \
-           cxestatemachinebase.h \
-           cxestatemachine.h \
-           cxestate.h \
-           cxeerrormappingsymbian.h
+           ../../../inc/cxeimagedataitemsymbian.h \
+           ../../../inc/api/cxeimagedataitem.h \
+           ../../../inc/api/cxeerror.h \
+           ../../../inc/cxeharvestercontrolsymbian.h \
+           ../../../inc/cxethumbnailmanagersymbian.h \
+           ../../../inc/cxesysutil.h \
+           ../../../inc/cxestatemachinebase.h \
+           ../../../inc/cxestatemachine.h \
+           ../../../inc/cxestate.h \
+           cxetestutils.h \
+           ../../../inc/cxeerrormappingsymbian.h
 

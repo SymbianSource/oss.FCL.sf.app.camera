@@ -25,8 +25,8 @@ class CxeViewfinderWidgetDesktop;
 class CxeViewfinderControlDesktop : public CxeViewfinderControl
 {
     Q_OBJECT
-public:
 
+public:
     CxeViewfinderControlDesktop(CxeCameraDeviceDesktop &cameraDevice);
     virtual ~CxeViewfinderControlDesktop();
 
@@ -39,6 +39,9 @@ public:
     virtual CxeViewfinderControl::State state() const;
 
     virtual QSize deviceDisplayResolution() const;
+
+private:
+    void createViewfinderWidget();
 
 private:
     State mState;

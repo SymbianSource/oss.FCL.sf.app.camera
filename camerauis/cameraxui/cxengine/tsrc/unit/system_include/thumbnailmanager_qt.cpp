@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -54,8 +54,9 @@ ThumbnailManager::~ThumbnailManager()
 int ThumbnailManager::getThumbnail(const QString& filename, void * clientData, int priority)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    Q_UNUSED(clientData);
     Q_UNUSED(priority);
-        
+
     int id = 0;
 
     if (filename.isNull() || filename.isEmpty()) {
@@ -116,7 +117,7 @@ void ThumbnailManager::emulateThumbnailReady()
     // get the current thumbnail id
     int id = mCurrentThumbnailId - 1;
     int status = KErrNone;
-    
+
     if (id == -1) {
         // if there are no valid thumbnails
         status = KErrNotFound;

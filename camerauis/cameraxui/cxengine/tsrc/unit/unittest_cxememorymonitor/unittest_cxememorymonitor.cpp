@@ -25,8 +25,8 @@
 #include "unittest_cxememorymonitor.h"
 
 UnitTestCxeMemoryMonitor::UnitTestCxeMemoryMonitor()
-    : mMemoryMonitor(NULL),
-      mFakeFeatureManager(NULL)
+    : mFakeFeatureManager(NULL),
+      mMemoryMonitor(NULL)
 {
 }
 

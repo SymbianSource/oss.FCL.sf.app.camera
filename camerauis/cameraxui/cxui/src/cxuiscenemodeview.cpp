@@ -194,11 +194,18 @@ void CxuiSceneModeView::saveActivity()
     QVariantMap data;
     QVariantHash params;
 
-    //@todo: add pre-capture icon as screenshot
     if (mEngine->mode() == Cxe::ImageMode) {
+        HbIcon activityScreenshot("qtg_graf_taskswitcher_camera");
+        QPixmap screenshot = activityScreenshot.pixmap();
+        params.insert("screenshot", screenshot);
+
         mActivityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
         mActivityManager->addActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY, data, params);
     } else {
+        HbIcon activityScreenshot("qtg_graf_taskswitcher_camcorder");
+        QPixmap screenshot = activityScreenshot.pixmap();
+        params.insert("screenshot", screenshot);
+
         mActivityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
         mActivityManager->addActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY, data, params);
     }

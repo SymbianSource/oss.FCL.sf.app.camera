@@ -16,6 +16,7 @@
 */
 
 #include <HbMainWindow>
+#include <HbTransparentWindow>
 #include <HbView>
 #include <HbLabel>
 #include <QGraphicsLinearLayout>
@@ -52,21 +53,9 @@ void CxeViewfinderControlDesktop::setWindow(WId windowId)
     if (state() != Running) {
         mState = Ready;
         emit stateChanged(mState, CxeError::None);
+    }
+
     CX_DEBUG_EXIT_FUNCTION();
-    }
-
-
-    HbMainWindow* mainWindow = qobject_cast<HbMainWindow*>(QWidget::find(mWindowId));
-
-    if (mainWindow) {
-        if( !mViewfinderWidget) {
-            mViewfinderWidget = new CxeViewfinderWidgetDesktop();
-            connect(&mCameraDevice, SIGNAL(imageChanged(QPixmap)), mViewfinderWidget, SLOT(handleImageChange(QPixmap)));
-        }
-        HbView* view = mainWindow->currentView();
-        view->scene()->addItem(mViewfinderWidget);
-        mViewfinderWidget->setZValue(-1.0);
-    }
 }
 
 /*!
@@ -76,6 +65,9 @@ void CxeViewfinderControlDesktop::setWindow(WId windowId)
 CxeError::Id CxeViewfinderControlDesktop::start()
 {
     CX_DEBUG_ENTER_FUNCTION();
+
+    createViewfinderWidget();
+
     if (mState != Running) {
         mState = Running;
         emit stateChanged(mState, CxeError::None);
@@ -111,6 +103,47 @@ CxeViewfinderControl::State CxeViewfinderControlDesktop::state() const
 QSize CxeViewfinderControlDesktop::deviceDisplayResolution() const
 {
     return mResolution;
+}
+
+/*!
+* Create the viewfinder widget.
+*/
+void CxeViewfinderControlDesktop::createViewfinderWidget()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    HbMainWindow* mainWindow = qobject_cast<HbMainWindow*>(QWidget::find(mWindowId));
+    if (mainWindow) {
+        CX_DEBUG(("Found main window."));
+        // Remove the current viewfinder from previous view scene.
+        // Ownership is returned, so delete it now.
+        if (mViewfinderWidget) {
+            mViewfinderWidget->setParentItem(0);
+            mainWindow->scene()->removeItem(mViewfinderWidget);
+            delete mViewfinderWidget;
+            mViewfinderWidget = 0;
+        }
+
+        // Find the visible transparent window and place our viewfinder widget as it's child.
+        HbView* view = mainWindow->currentView();
+        const QList<QGraphicsItem *> itemList(view->scene()->items());
+        foreach (QGraphicsItem *item, itemList) {
+            if (item->type() == Hb::ItemType_TransparentWindow) {
+                CX_DEBUG(("Found transparent window, name: %s",
+                          item->toGraphicsObject()
+                          ? qPrintable(item->toGraphicsObject()->objectName())
+                          : qPrintable(QString("<unknown>"))));
+                bool visible(item->isVisible());
+                CX_DEBUG(("Is found transparent window visible: %s", qPrintable(QVariant::fromValue(visible).toString())));
+                if (visible) {
+                    mViewfinderWidget = new CxeViewfinderWidgetDesktop();
+                    connect(&mCameraDevice, SIGNAL(imageChanged(QPixmap)), mViewfinderWidget, SLOT(handleImageChange(QPixmap)));
+                    mViewfinderWidget->setParentItem(item);
+                    break;
+                }
+            }
+        }
+    }
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 // end of file

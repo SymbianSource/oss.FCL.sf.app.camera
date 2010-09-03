@@ -19,6 +19,7 @@
 
 #include <QList>
 #include <QVariant>
+#include <QTimer>
 
 #include "cxestillcapturecontrol.h"
 #include "cxeimagedataqueuedesktop.h"
@@ -91,6 +92,9 @@ protected slots:
     // Autofocus events
     void handleAutofocusStateChanged(CxeAutoFocusControl::State newState, CxeError::Id error);
 
+private slots:
+    void startViewfinder();
+
 private: // helper functions
     void updateFlashSetting(QVariant newValue);
     void updateISOSetting(QVariant newValue);
@@ -117,6 +121,8 @@ private: // private data
     CxeAutoFocusControl::State mAfState;
     QList<CxeStillImageDesktop*> mImages;
     CxeFileSaveThread &mSaveThread;
+
+    QTimer mViewFinderStartTimer;
     
     int mNextSnapshotIndex;
     int mNextImageDataIndex;

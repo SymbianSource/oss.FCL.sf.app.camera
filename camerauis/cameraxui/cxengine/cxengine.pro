@@ -94,7 +94,7 @@ symbian {
     BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/data/videoStop.wav    /epoc32/data/z/system/sounds/digital/videoStop.wav"
 }
 
-# confml, crml files
+# confml, crml files, backup registration definition
 symbian {
     CXENGINE_DIR = $$section(PWD,":",1)
     BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
@@ -102,6 +102,7 @@ symbian {
     BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/camerax_20027017.crml             APP_LAYER_CRML(camerax_20027017.crml)
     BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/cameraxvariation.confml           APP_LAYER_CONFML(cameraxvariation.confml)
     BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/cameraxvariation_20027018.crml    APP_LAYER_CRML(cameraxvariation_20027018.crml)
+    BLD_INF_RULES.prj_exports += "$$CXENGINE_DIR/conf/backup_registration.xml           /epoc32/data/z/private/20027017/backup_registration.xml"
 }
 
 

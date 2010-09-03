@@ -159,6 +159,8 @@ void CxeVideoCaptureControlSymbian::init()
     if (state() == Idle) {
         // start initializing resources for video capture
         initVideoRecorder();
+        // inform zoom control to prepare zoom.
+        emit prepareZoomForVideo();
     } else if (state() == Initialized) {
         // video recorder already initalized. Continue to prepare video reocording.
         open();
@@ -329,8 +331,7 @@ void CxeVideoCaptureControlSymbian::prepare()
         // Settings have been applied successfully, start to prepare.
         mVideoRecorder->prepare();
 
-        // Prepare zoom only when there are no errors during prepare.
-        emit prepareZoomForVideo();
+        // Inform client
         emit videoPrepareComplete(CxeError::None);
     } catch (const std::exception &e) {
         // Handle error.
@@ -444,14 +445,18 @@ void CxeVideoCaptureControlSymbian::record()
 void CxeVideoCaptureControlSymbian::pause()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    try {
-        mVideoRecorder->pause();
-        setState(CxeVideoCaptureControl::Paused);
-        // play the sound, but not changing the state
-        mVideoStopSoundPlayer->play();
-    } catch (const std::exception &e) {
-        handleComposeFailed(qt_symbian_exception2Error(e));
+
+    if (state() == Recording) {
+        try {
+            mVideoRecorder->pause();
+            setState(CxeVideoCaptureControl::Paused);
+            // play the sound, but not changing the state
+            mVideoStopSoundPlayer->play();
+        } catch (const std::exception &e) {
+            handleComposeFailed(qt_symbian_exception2Error(e));
+        }
     }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 

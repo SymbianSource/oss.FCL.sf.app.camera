@@ -41,4 +41,7 @@ file = ABI_DIR\BUILD_DIR\cxengine.dll    SHARED_LIB_DIR\cxengine.dll
 // Stub sis for update support
 data = DATAZ_\system\install\camerax_stub.sis    \system\install\camerax_stub.sis
 
+// register for backup/restore of settings.
+data = DATAZ_\private\20027017\backup_registration.xml  private\20027017\backup_registration.xml
+
 #endif // CAMERAX_IBY

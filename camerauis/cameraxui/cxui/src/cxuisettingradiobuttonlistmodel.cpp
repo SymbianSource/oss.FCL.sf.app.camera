@@ -117,6 +117,17 @@ void CxuiSettingRadioButtonListModel::setItems(QStringList items)
 {
     CX_DEBUG_ENTER_FUNCTION();
     mItems = items;
+
+    // Notify radio button list that the data content has changed.
+    if (mItems.size() > 0) {
+        const QModelIndex start = index(0, 0);
+        const QModelIndex end = index(mItems.size() - 1, 0);
+        emit dataChanged(start, end);
+    }
+
+    // Relayouting needed.
+    emit layoutChanged();
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 

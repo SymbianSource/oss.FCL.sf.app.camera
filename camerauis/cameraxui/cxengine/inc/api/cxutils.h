@@ -69,7 +69,7 @@
     #define CX_ASSERT_ALWAYS(x)             ASSERT(x)
 #else // !Q_OS_SYMBIAN
     #define CX_ASSERT_ALWAYS(x)             Q_ASSERT(x)
-    #define OstTrace0(x,y,z)    
+    #define OstTrace0(x,y,z)
 #endif // Q_OS_SYMBIAN
 
 #endif // _DEBUG

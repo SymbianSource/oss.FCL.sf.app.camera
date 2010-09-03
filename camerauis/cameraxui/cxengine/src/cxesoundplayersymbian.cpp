@@ -92,8 +92,8 @@ void CxeSoundPlayerSymbian::play()
             emit playComplete(KErrNone);
         }
 
-    } else if( state() == NotReady ) {
-        // Here sound loading has failed.
+    } else {
+        // Here sound loading has failed or has not finished yet.
         // Emit signal with error code.
         emit playComplete(KErrNotReady);
     }

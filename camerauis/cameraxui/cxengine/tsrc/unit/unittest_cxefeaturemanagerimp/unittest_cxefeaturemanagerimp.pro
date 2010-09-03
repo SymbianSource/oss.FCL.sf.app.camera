@@ -17,7 +17,8 @@ SOURCES *= unittest_cxefeaturemanagerimp.cpp \
            cxefeaturemanagerimp.cpp \
            cxesettingsmappersymbian.cpp \
            cxesettingsimp.cpp \
-           cxefakesettings.cpp
+           cxefakesettings.cpp \
+           cxescenemodestore.cpp
 HEADERS *= unittest_cxefeaturemanagerimp.h \
            cxefeaturemanagerimp.h \
            cxeerror.h \
@@ -25,4 +26,6 @@ HEADERS *= unittest_cxefeaturemanagerimp.h \
            cxesettingsmappersymbian.h \
            cxesettings.h \
            cxesettingsimp.h \
-           cxefakesettings.h
+           cxefakesettings.h \
+           cxescenemodestore.h
+           

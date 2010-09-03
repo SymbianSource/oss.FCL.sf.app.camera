@@ -138,7 +138,9 @@ void UnitTestCxeVideoCaptureControlSymbian::testRecord()
 
     doPrepareStuff();
     QCOMPARE(mCxeVideoCaptureControlSymbian->state(), CxeVideoCaptureControl::Ready);
+
     mCxeVideoCaptureControlSymbian->record();
+    QTest::qWait(1000); // Wait for recording to start.
     QCOMPARE(mCxeVideoCaptureControlSymbian->state(), CxeVideoCaptureControl::Recording);
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -150,6 +152,7 @@ void UnitTestCxeVideoCaptureControlSymbian::testPause()
 
     doPrepareStuff();
     mCxeVideoCaptureControlSymbian->record();
+    QTest::qWait(1000); // Wait for recording to start.
     mCxeVideoCaptureControlSymbian->pause();
     QCOMPARE(mCxeVideoCaptureControlSymbian->state(), CxeVideoCaptureControl::Paused);
 
@@ -162,6 +165,7 @@ void UnitTestCxeVideoCaptureControlSymbian::testStop()
 
     doPrepareStuff();
     mCxeVideoCaptureControlSymbian->record();
+    QTest::qWait(1000); // Wait for recording to start.
     mCxeVideoCaptureControlSymbian->stop();
     QVERIFY((mCxeVideoCaptureControlSymbian->state() == CxeVideoCaptureControl::Stopping)
         || (mCxeVideoCaptureControlSymbian->state() == CxeVideoCaptureControl::Initialized)
@@ -200,7 +204,7 @@ void UnitTestCxeVideoCaptureControlSymbian::testReset()
 
     doPrepareStuff();
     mCxeVideoCaptureControlSymbian->record();
-    QTest::qWait(1000);
+    QTest::qWait(2000);
     mCxeVideoCaptureControlSymbian->stop();
     // just call to see if it doesn't crash
     mCxeVideoCaptureControlSymbian->reset();

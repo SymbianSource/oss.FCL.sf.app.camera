@@ -33,6 +33,7 @@
 #include <hbfeedbacksettings.h>
 #include <hbfeedbacknamespace.h>
 #include <hbactivitymanager.h>
+#include <hbextendedlocale.h>
 
 #include "cxuivideoprecaptureview.h"
 #include "cxeengine.h"
@@ -68,8 +69,6 @@ namespace
     static const int CXUI_RECORD_ANIMATION_DURATION = 3000; // milliseconds
     static const int CXUI_PAUSE_TIMEOUT = 60*1000;   // 60 seconds
 
-    //!@todo Localization?
-    static const char* VIDEO_TIME_FORMAT = "%02d:%02d";
     const int POSTCAPTURE_ON = -1;
 }
 
@@ -715,14 +714,41 @@ void CxuiVideoPrecaptureView::setVideoTime(HbLabel* label,
                                            int elapsedTime,
                                            int remainingTime)
 {
-    // Convert time (seconds) into mm:ss
-    // HbExtendedLocale wraps minutes at 60 so we can't use that.
-    // We need to show times over 1 hour, e.g. "90:00".
-    QString elapsed, remaining;
-    elapsed.sprintf(VIDEO_TIME_FORMAT, elapsedTime/60, elapsedTime%60);
-    remaining.sprintf(VIDEO_TIME_FORMAT, remainingTime/60, remainingTime%60);
+    QString elapsed;
+    QString remaining;
+    QString number;
 
-    label->setPlainText(hbTrId("txt_cam_info_redorcding_time").arg(elapsed).arg(remaining));
+    // Convert time (seconds) into mm:ss in localised form
+    // Since we need to show also times over 1 hour (upto "90:00")
+    // we cannot use time to string conversions directly
+
+    HbExtendedLocale locale = HbExtendedLocale::system();
+
+    number = locale.toString(elapsedTime/60);
+    if (number.length() <= 1) {
+        number.prepend(locale.zeroDigit());
+    }
+    elapsed.append(number);
+    elapsed.append(locale.timeSeparator(2));
+    number = locale.toString(elapsedTime%60);
+    if (number.length() <= 1) {
+        number.prepend(locale.zeroDigit());
+    }
+    elapsed.append(number);
+
+    number = locale.toString(remainingTime/60);
+    if (number.length() <= 1) {
+        number.prepend(locale.zeroDigit());
+    }
+    remaining.append(number);
+    remaining.append(locale.timeSeparator(2));
+    number = locale.toString(remainingTime%60);
+    if (number.length() <= 1) {
+        number.prepend(locale.zeroDigit());
+    }
+    remaining.append(number);
+
+    label->setPlainText(hbTrId("txt_cam_info_recording_time").arg(elapsed).arg(remaining));
 }
 
 bool CxuiVideoPrecaptureView::getElapsedTime()

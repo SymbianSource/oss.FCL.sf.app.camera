@@ -30,6 +30,7 @@ namespace
 {
     // Unit is milliseconds
     static const int CXENGINE_ELAPSED_TIME_TIMEOUT = 1000; // 1 second
+    static const int VIEWFINDER_START_TIMEOUT      =  500; // 0.5 second
 
     // Unit is seconds
     static const int CXENGINE_MAXIMUM_VIDEO_TIME = 90*60; // 90 minutes
@@ -60,6 +61,11 @@ CxeVideoCaptureControlDesktop::CxeVideoCaptureControlDesktop(CxeCameraDeviceDesk
     qRegisterMetaType<CxeVideoCaptureControl::State> ();
     initializeStates();
     setupElapseTimer();
+
+    mViewFinderStartTimer.setSingleShot(true);
+    mViewFinderStartTimer.setInterval(VIEWFINDER_START_TIMEOUT);
+    connect(&mViewFinderStartTimer, SIGNAL(timeout()), this, SLOT(startViewfinder()));
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -108,6 +114,10 @@ void CxeVideoCaptureControlDesktop::deinit()
         CX_DEBUG_EXIT_FUNCTION();
         return;
     }
+
+    mViewFinderStartTimer.stop();
+    mViewfinderControl.stop();
+
     // stop video-recording in-case if its ongoing.
     stop();
 
@@ -224,7 +234,8 @@ void CxeVideoCaptureControlDesktop::prepare()
         emit prepareZoomForVideo();
     }
 
-    mViewfinderControl.start();
+    // Start viewfinder with delay.
+    mViewFinderStartTimer.start();
     setState(Ready);
 
     // emit video prepare status
@@ -319,7 +330,7 @@ QString CxeVideoCaptureControlDesktop::filename() const
 * @Return current video snapshot
 */
 QPixmap CxeVideoCaptureControlDesktop::snapshot() const
-{    
+{
     return mSnapshot;
 }
 
@@ -341,7 +352,7 @@ void CxeVideoCaptureControlDesktop::record()
 
     if (state() == Ready || state() == Paused) {
         //we skip the playing of the sound in the desktop state for now
-        setState(Recording);        
+        setState(Recording);
         mRecordElapseTimer.start();
     }
 
@@ -373,14 +384,13 @@ void CxeVideoCaptureControlDesktop::stop()
 
     if (state() == Recording || state() == Paused) {
         mFilenameGenerator.raiseCounterValue();
+
+        mRecordElapseTimer.stop();
+        mElapsedTime = 0;
+
+        setState(Stopping);
+        setState(Initialized);
     }
-
-    mViewfinderControl.stop();
-    mRecordElapseTimer.stop();
-    mElapsedTime = 0;
-
-    setState(Stopping);
-    setState(Initialized);
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -540,6 +550,18 @@ void CxeVideoCaptureControlDesktop::handleElapseTimeout()
 
     CX_DEBUG( ("CxeVideoCaptureControlDesktop::handleElapseTimeout() <> mElapsedTime: %d", mElapsedTime ) );
 }
+
+/*!
+* Slot for starting viewfinder after a delay.
+* Delay helps viewfinder widget to find the right, visible transparent window to attach to.
+*/
+void CxeVideoCaptureControlDesktop::startViewfinder()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mViewfinderControl.start();
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
 
 void CxeVideoCaptureControlDesktop::setState(CxeVideoCaptureControl::State stateId, CxeError::Id error)
 {

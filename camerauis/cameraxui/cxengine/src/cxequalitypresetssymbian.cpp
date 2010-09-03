@@ -184,9 +184,8 @@ QList<CxeVideoDetails> CxeQualityPresetsSymbian::videoQualityPresets(Cxe::Camera
         int numLevels = levels->Count();
         for(int i = 0; i < numLevels; i++) {
             mIcm->GetVideoQualitySet(set, levels->At(i), displayId);
-
-            // Disable all video sizes larger than VGA
-            if (set.iCamcorderVisible > 0 && set.iVideoWidth <= 864) {
+          
+            if (set.iCamcorderVisible > 0) {
                 // create new quality preset
                 CxeVideoDetails newPreset = createVideoPreset(set);
 

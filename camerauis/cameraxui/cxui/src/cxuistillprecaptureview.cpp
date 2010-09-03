@@ -157,6 +157,10 @@ void CxuiStillPrecaptureView::reloadIndicatorWidgets()
     CX_DEBUG_ENTER_FUNCTION();
     CX_ASSERT_ALWAYS(mDocumentLoader);
 
+    // delete old indicator container and indicators before creating new ones
+    delete mIndicators;
+    mIndicators = NULL;
+
     bool ok = false;
     mDocumentLoader->load(STILL_1ST_XML, STILL_PRE_CAPTURE_INDICATORS_SECTION, &ok);
     CX_ASSERT_ALWAYS(ok);
@@ -224,7 +228,12 @@ void CxuiStillPrecaptureView::reloadIndicatorWidgets()
 
     // create background for indicator container
     createWidgetBackgroundGraphic(mIndicators, TRANSPARENT_BACKGROUND_GRAPHIC);
-
+    
+    // Update the icons that are possibly changed during reloading
+    updateQualityIcon();
+    updateFaceTrackingIcon();
+    updateGeotaggingIcon();
+                
     mIndicators->setVisible(true);
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -652,16 +661,13 @@ void CxuiStillPrecaptureView::handleAutoFocusStateChanged(CxeAutoFocusControl::S
     switch (newstate) {
     case CxeAutoFocusControl::Failed:
     case CxeAutoFocusControl::Ready:
+    case CxeAutoFocusControl::Unknown:
         if (mCapturePending) {
             // focus and capture were grouped together, capture straight away
-            capture();
-        }
-        break;
-    case CxeAutoFocusControl::Unknown:
-        // Capture key was pressed, focus has been cancelled,
-        // continue with capturing.
-        if(mCapturePending) {
             CX_DEBUG(("mCapturePending is true, starting capture now"));
+            OstTrace0(camerax_performance, CXUISTILLPRECAPTUREVIEW_SHOT_TO_SHOT2, "msg: e_CX_SHOT_TO_SHOT 1");
+            OstTrace0(camerax_performance, CXUISTILLPRECAPTUREVIEW_SHOT_TO_SNAP2, "msg: e_CX_SHOT_TO_SNAPSHOT 1");
+            OstTrace0(camerax_performance, CXUISTILLPRECAPTUREVIEW_SHOT_TO_SAVE2, "msg: e_CX_SHOT_TO_SAVE 1");
             capture();
         }
         break;
@@ -775,6 +781,8 @@ void CxuiStillPrecaptureView::showEvent(QShowEvent *event)
     updateImagesLeftLabel();
     updateQualityIcon();
     updateFaceTrackingIcon();
+    updateGeotaggingIcon();
+
 
     // cancel selftimer when returning to precapture
     // since selftimer needs to be turned off after capturing an image
@@ -924,22 +932,18 @@ void CxuiStillPrecaptureView::enterStandby()
 
     \sa CxuiStillPrecaptureView::handleSceneChanged(CxeScene &scene)
  */
-void CxuiStillPrecaptureView::handleSettingValueChanged(const QString& key, QVariant newValue)
+void CxuiStillPrecaptureView::handleSettingValueChanged(const QString &key, QVariant newValue)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
     if (mEngine->mode() == Cxe::ImageMode) {
-
         // update images left and image quality icons
         if (key == CxeSettingIds::IMAGE_QUALITY) {
-            // update the quality indicator on screen
-            updateQualityIcon();
+            reloadIndicatorWidgets();
             // update images left when quality values are changed
             updateImagesLeftLabel();
-        } else if (key == CxeSettingIds::FACE_TRACKING) {
-            reloadIndicatorWidgets();
-            updateFaceTrackingIcon();
-        } else if (key == CxeSettingIds::GEOTAGGING) {
+        } else if (key == CxeSettingIds::FACE_TRACKING ||
+                   key == CxeSettingIds::GEOTAGGING) {
             reloadIndicatorWidgets();
         }
 
@@ -1045,6 +1049,27 @@ void CxuiStillPrecaptureView::updateFaceTrackingIcon()
         mFaceTrackingIcon->setIcon(HbIcon(icon));
     }
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+    Update the geotagging icon
+*/
+void CxuiStillPrecaptureView::updateGeotaggingIcon()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    if (mGeoTaggingIndicatorIcon && mEngine) {
+        QString key = "";
+        QString icon = "";
+
+        key = CxeSettingIds::GEOTAGGING;
+
+        int currentValue = mEngine->settings().get<int>(key, -1);
+        icon = getSettingItemIcon(key, currentValue);
+
+        mGeoTaggingIndicatorIcon->setIcon(HbIcon(icon));
+        mGeoTaggingIndicatorIcon->setVisible(true);
+    }
     CX_DEBUG_EXIT_FUNCTION();
 }
 

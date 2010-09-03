@@ -72,6 +72,8 @@ using namespace CxUiLayout;
 using namespace CxUiSettings;
 using namespace CxUiInternal;
 
+const int CXUI_GEOTAGGING_BLINK_INTERVAL = 500; //milliseconds, for geotagging icon
+
 
 // ---------------------------------------------------------------------------
 // CxuiPrecaptureView::CxuiPrecaptureView
@@ -155,6 +157,9 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
 
     mHideControlsTimeout.setSingleShot(true);
     mHideControlsTimeout.setInterval(CXUI_HIDE_CONTROLS_TIMEOUT);
+
+    mGeoTaggingBlinkTimer = new QTimer(this);
+    connect(mGeoTaggingBlinkTimer, SIGNAL(timeout()), this, SLOT(blinkGeoTaggingIcon()));
 
     hideControls();
 
@@ -888,32 +893,49 @@ void CxuiPrecaptureView::handleSettingValueChanged(const QString& key, QVariant 
 void CxuiPrecaptureView::updateLocationIndicator(CxeGeoTaggingTrail::State newState, CxeError::Id error)
 {
     CX_DEBUG( ("CxuiPrecaptureView::updateLocationIndicator <> error: %d ", error));
-
-    if (mGeoTaggingIndicatorIcon) {
+    Cxe::GeoTagging currentValue = mEngine->settings().get<Cxe::GeoTagging>(CxeSettingIds::GEOTAGGING);
+    if(currentValue == Cxe::GeoTaggingOn && mGeoTaggingIndicatorIcon) {
         if (newState == CxeGeoTaggingTrail::DataAvailable && error == CxeError::None) {
             CX_DEBUG(("CxuiPrecaptureView::updateLocationIndicator GPS data available, showing icon"));
-            mGeoTaggingIndicatorIcon->setIcon(HbIcon("qtg_mono_geotag"));
             mGeoTaggingIndicatorIcon->show();
+            mGeoTaggingBlinkTimer->stop();
         } else {
-            CX_DEBUG(("CxuiPrecaptureView::handleIconChanged GPS data not available"));
-            mGeoTaggingIndicatorIcon->hide();
+            // blinking geotagging indicator while acquiring GPS data
+            CX_DEBUG(("CxuiPrecaptureView::updateLocationIndicator waiting for GPS data, blinking icon"));
+            mGeoTaggingBlinkTimer->setInterval(CXUI_GEOTAGGING_BLINK_INTERVAL);
+            mGeoTaggingBlinkTimer->start();
         }
+    }
+    else {
+        CX_DEBUG(("CxuiPrecaptureView::handleIconChanged GPS data not available"));
+        mGeoTaggingBlinkTimer->stop();
     }
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
-
-void CxuiPrecaptureView::toolbarExtensionDisappearEffectFinished(const HbEffect::EffectStatus &status) {
-    if (mSettingsGrid) {
-        mSettingsGrid->hide();
+/*!
+ * Private method for blinking geotagging icon
+ */
+void CxuiPrecaptureView::blinkGeoTaggingIcon()
+{
+    if (mGeoTaggingIndicatorIcon) {
+        if (mGeoTaggingIndicatorIcon->isVisible()) {
+            mGeoTaggingIndicatorIcon->setVisible(false);
+        } else {
+            mGeoTaggingIndicatorIcon->setVisible(true);
+        }
     }
 }
 
 void CxuiPrecaptureView::toolbarExtensionAppearEffectFinished(const HbEffect::EffectStatus &status) {
 }
 
-
+void CxuiPrecaptureView::toolbarExtensionDisappearEffectFinished(const HbEffect::EffectStatus &status) {
+    if (mSettingsGrid) {
+        mSettingsGrid->hide();
+    }
+}
 
 /*!
 * Lauches "Geotagging first-time use" notification to the user

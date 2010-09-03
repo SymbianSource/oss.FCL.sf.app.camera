@@ -142,6 +142,7 @@ protected slots:
 private slots:
     void disableGeotaggingDisclaimer();
     void launchGeoTaggingSetting();
+    void blinkGeoTaggingIcon();
 
 protected:
     void toggleControls();
@@ -185,6 +186,7 @@ private:
 
     HbAction *mSettingsDialogOkAction;
     HbAction *mSliderSettingsDialogOkAction;
+    QTimer *mGeoTaggingBlinkTimer; // for blinking geotagging icon
 };
 
 #endif // CXUIPRECAPTUREVIEW_H

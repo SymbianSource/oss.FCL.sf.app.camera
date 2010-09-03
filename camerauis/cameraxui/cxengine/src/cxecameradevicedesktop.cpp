@@ -100,6 +100,8 @@ void CxeCameraDeviceDesktop::loadPictures()
 {
     CX_DEBUG_ENTER_FUNCTION();
     QDir currentDir(".","*.jpg");
+    CX_DEBUG(("Searching images from %s", qPrintable(currentDir.absolutePath())));
+    CX_DEBUG(("Number of images found %d", currentDir.count()));
 
     if (!currentDir.count()) {
         mPictureList.append(QPixmap(360, 640));

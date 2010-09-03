@@ -43,7 +43,7 @@ UnitTestCxeFilenameGeneratorSymbian::~UnitTestCxeFilenameGeneratorSymbian()
 void UnitTestCxeFilenameGeneratorSymbian::init()
 {
     mFakeSettings = new CxeFakeSettings();
-    
+
     mFakeSettings->set(CxeSettingIds::FNAME_MONTH_FOLDER, QDate::currentDate().toString("yyyyMM"));
     mFakeSettings->set(CxeSettingIds::FNAME_IMAGE_COUNTER, 0);
     mFakeSettings->set(CxeSettingIds::FNAME_VIDEO_COUNTER, 0);
@@ -112,6 +112,8 @@ QString UnitTestCxeFilenameGeneratorSymbian::generateImageFileName(int counter)
 
 QString UnitTestCxeFilenameGeneratorSymbian::generateSequenceImageFileName(int counter, int burstIndex)
 {
+    Q_UNUSED(burstIndex);
+
     // For now, burst image names are created like normal unique names
     QString filename = generateImageFileName(counter);
     // get the file name suffix

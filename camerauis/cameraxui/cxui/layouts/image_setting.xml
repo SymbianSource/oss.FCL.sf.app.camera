@@ -92,7 +92,7 @@
                       preview="0"
                       type="SingleLineListBox"
                       setting_icon="">
-            <item string="txt_cam_list_geotagging_on"   value="1" icon="" />
+            <item string="txt_cam_list_geotagging_on"   value="1" icon="qtg_mono_geotag" />
             <item string="txt_cam_list_geotagging_off"    value="0" icon="" />
         </setting_list>
 

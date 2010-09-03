@@ -29,6 +29,7 @@ namespace
 {
     // in milliseconds
     const int STOP_TRAIL_INTERVAL = 10*1000;
+    const int START_TRAIL_ATTEMPTS = 5;
 }
 
 /*!
@@ -89,32 +90,39 @@ void CxeGeoTaggingTrailPrivate::start()
     CX_DEBUG_ENTER_FUNCTION();
 
     int err = KErrNone;
+    int retryTrail = START_TRAIL_ATTEMPTS; // In case RLocationTrail::StartLocationTrail() fail, we will retry
     int settingValue = Cxe::GeoTaggingOff;
     settingValue = mSettings.get(CxeSettingIds::GEOTAGGING, settingValue);
     
     if (settingValue == Cxe::GeoTaggingOn) {
-        // geotagging setting is ON, trying to start location trail
-        if (state() == CxeGeoTaggingTrail::NotConnected) {
-            err = mLocationTrail.Connect();
-            if (!err) {
-                CX_DEBUG(("CxeGeoTaggingTrail <> location trail connected"));
-                setState(CxeGeoTaggingTrail::Connected);
+        while(retryTrail) {
+            // geotagging setting is ON, trying to start location trail
+            if (state() == CxeGeoTaggingTrail::NotConnected) {
+                err = mLocationTrail.Connect();
+                if (!err) {
+                    CX_DEBUG(("CxeGeoTaggingTrail <> location trail connected"));
+                    setState(CxeGeoTaggingTrail::Connected);
+                }
+            }
+            // KErrAlreadyExists error means no harm to us
+            if (state() == CxeGeoTaggingTrail::Connected &&
+                (!err || err == KErrAlreadyExists)) {
+                err = mLocationTrail.StartLocationTrail(RLocationTrail::ECaptureAll);
+                if (!err || err == KErrAlreadyExists) {
+                    CX_DEBUG(("CxeGeoTaggingTrail <> starting location trail"));
+                    mStopLocationTrailTimer.stop(); // stop location timer.
+                    setState(CxeGeoTaggingTrail::TrailStarted);
+                }
+            }
+            if (err && err != KErrAlreadyExists) {
+                CX_DEBUG(("CxeGeoTaggingTrailPrivate::start <> FAILED: error = %d . Retries left = %d", err, retryTrail));
+                mLocationTrail.Close();
+                retryTrail--;
+            }
+            else {
+                retryTrail = 0;
             }
         }
-    
-        if (state() == CxeGeoTaggingTrail::Connected && !err) {
-            err = mLocationTrail.StartLocationTrail(RLocationTrail::ECaptureAll);
-            if (!err) {
-                CX_DEBUG(("CxeGeoTaggingTrail <> starting location trail"));
-                mStopLocationTrailTimer.stop(); // stop location timer.
-                setState(CxeGeoTaggingTrail::TrailStarted);
-            }
-        }
-
-        if (err) {
-            CX_DEBUG(("CxeGeoTaggingTrailPrivate::start <> FAILED: error = %d ", err));
-            mLocationTrail.Close();
-        }        
     } else {
         // geotagging setting off, do nothing.
         CX_DEBUG(("CxeGeoTaggingTrail <> start -- Geotagging setting OFF, do nothing.."));

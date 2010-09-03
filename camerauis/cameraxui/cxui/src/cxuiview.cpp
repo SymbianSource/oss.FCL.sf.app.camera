@@ -435,8 +435,7 @@ void CxuiView::createWidgetBackgroundGraphic(HbWidget *widget,
  */
 void CxuiView::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    //! @todo temporary workaround for title bar mouse event handling bug
-    if (event->type() == QEvent::GraphicsSceneMousePress && event->scenePos().y() > 70 &&
+    if (event->type() == QEvent::GraphicsSceneMousePress && 
         isFeedbackEnabled()) {
         mControlsFeedback.setModalities(HbFeedback::All);
         mControlsFeedback.play();
@@ -451,8 +450,7 @@ void CxuiView::mousePressEvent(QGraphicsSceneMouseEvent *event)
  */
 void CxuiView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    //! @todo temporary workaround for title bar mouse event handling bug
-    if (event->type() == QEvent::GraphicsSceneMouseRelease && event->scenePos().y() > 70 &&
+    if (event->type() == QEvent::GraphicsSceneMouseRelease && 
         isFeedbackEnabled()) {        
         mControlsFeedback.setModalities(HbFeedback::Tactile);
         mControlsFeedback.play();
@@ -461,13 +459,15 @@ void CxuiView::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     }
 }
 
-void CxuiView::zoomDisappearEffectFinished(const HbEffect::EffectStatus &status) {
+void CxuiView::zoomDisappearEffectFinished(const HbEffect::EffectStatus &status) 
+{
     if (mSlider) {
         mSlider->hide();
     }
 }
 
-void CxuiView::zoomAppearEffectFinished(const HbEffect::EffectStatus &status) {
+void CxuiView::zoomAppearEffectFinished(const HbEffect::EffectStatus &status) 
+{
 }
 
 // End of file

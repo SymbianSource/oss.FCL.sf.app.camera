@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -26,6 +26,7 @@
 UnitTestCxeCameraDeviceControlSymbian::UnitTestCxeCameraDeviceControlSymbian()
     : mDeviceControl(NULL)
 {
+    qRegisterMetaType<CxeError::Id>("CxeError::Id");
 }
 
 UnitTestCxeCameraDeviceControlSymbian::~UnitTestCxeCameraDeviceControlSymbian()
@@ -80,8 +81,10 @@ void UnitTestCxeCameraDeviceControlSymbian::testSwitchCamera()
 
     mDeviceControl->switchCamera(Cxe::SecondaryCameraIndex);
 
+    // Reserve can last long and we have had hacks with extra delay.
+    // Hence using quite large time out value.
     QVERIFY(CxeTestUtils::waitForState<CxeCameraDeviceControl>(
-            *mDeviceControl, CxeCameraDeviceControl::Ready, 1000));
+            *mDeviceControl, CxeCameraDeviceControl::Ready, 3000));
 
     QVERIFY(mDeviceControl->cameraIndex() == Cxe::SecondaryCameraIndex);
 }
@@ -90,8 +93,9 @@ void UnitTestCxeCameraDeviceControlSymbian::testReserve()
 {
     mDeviceControl->reserve();
 
+    // Using quite large time out value. See testSwitchCamera() comments.
     QVERIFY(CxeTestUtils::waitForState<CxeCameraDeviceControl>(
-            *mDeviceControl, CxeCameraDeviceControl::Ready, 1000));
+            *mDeviceControl, CxeCameraDeviceControl::Ready, 3000));
 }
 
 // main() function

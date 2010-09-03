@@ -59,7 +59,7 @@ CxeError::Id CxeFakeSettings::getVariationValue(const QString &key, QVariant &va
     } else {
         err = CxeError::NotFound;
     }
-    
+
     return err;
     //int variation = mVariationKeyHash[key];
     //value = QVariant(variation);
@@ -96,7 +96,6 @@ void CxeFakeSettings::emulate(long int uid, unsigned long int key, QVariant valu
 QHash<QString, QVariantList> CxeFakeSettings::loadVariationSettings()
 {
     QHash<QString, QVariantList> settings;
-	CxeError::Id err = CxeError::None;
 	QVariantList list;
 	QVariant data;
 

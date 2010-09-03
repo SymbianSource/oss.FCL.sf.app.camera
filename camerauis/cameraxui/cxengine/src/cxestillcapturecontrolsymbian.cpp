@@ -190,9 +190,15 @@ void CxeStillCaptureControlSymbian::init()
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_IN, "msg: e_CX_STILL_CAPCONT_INIT 1");
 
     if (state() == Uninitialized) {
+        
+        // prepare for still capture.
         prepare();
+
         // Initialize orientation sensor and other sensors
         mSensorEventHandler.init();
+        
+        // inform zoom control to prepare zoom
+        emit prepareZoomForStill(mSizeIndex);
     }
 
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_OUT, "msg: e_CX_STILL_CAPCONT_INIT 0");
@@ -284,9 +290,6 @@ void CxeStillCaptureControlSymbian::prepare()
         // Still capture and still snapshot are OK.
         // We can safely set state to READY.
         setState(Ready);
-
-        // inform zoom control to prepare zoom
-        emit prepareZoomForStill(mSizeIndex);
 
     } catch (const std::exception &e) {
         // Exception encountered, free resources.

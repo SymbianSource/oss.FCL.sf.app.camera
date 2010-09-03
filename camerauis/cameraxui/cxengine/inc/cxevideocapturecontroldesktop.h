@@ -109,6 +109,7 @@ private: // helper methods
 
 private slots:
     void handleElapseTimeout();
+    void startViewfinder();
 
 private: // private data
 
@@ -129,6 +130,7 @@ private: // private data
     
     //timer for simulating elapsing time
     QTimer mRecordElapseTimer;
+    QTimer mViewFinderStartTimer;
     
     //elapsed recording time in seconds
     int mElapsedTime;

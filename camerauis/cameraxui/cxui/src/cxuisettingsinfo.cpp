@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -238,7 +238,7 @@ void CxuiSettingsInfo::getImageQualitySettings(RadioButtonListParams &settings)
             qualityIcon = "qtg_mono_12mp";
         } else if (quality.mMpxCount == "9") {
             qualityIcon = "qtg_mono_9mp";
-        } else if (quality.mMpxCount == "3") {
+        } else if (quality.mMpxCount == "3.1") {
             qualityIcon = "qtg_mono_3mp";
         } else if (quality.mMpxCount == "1.2") {
             qualityIcon = "qtg_mono_1_3mp";

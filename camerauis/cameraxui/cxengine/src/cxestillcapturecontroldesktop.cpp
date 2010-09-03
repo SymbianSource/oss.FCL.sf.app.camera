@@ -32,8 +32,11 @@
 #include "cxecameradevicedesktop.h"
 
 // constants
-const int KMaintainAspectRatio = false;
-
+namespace
+{
+    static const int KMaintainAspectRatio = false;
+    static const int VIEWFINDER_START_TIMEOUT = 500; // 0.5 second
+}
 
 
 /**
@@ -61,6 +64,10 @@ CxeStillCaptureControlDesktop::CxeStillCaptureControlDesktop(
     qRegisterMetaType<CxeStillCaptureControl::State>();
     initializeStates();
     reset();
+
+    mViewFinderStartTimer.setSingleShot(true);
+    mViewFinderStartTimer.setInterval(VIEWFINDER_START_TIMEOUT);
+    connect(&mViewFinderStartTimer, SIGNAL(timeout()), this, SLOT(startViewfinder()));
 
     mImageDataQueue = new CxeImageDataQueueDesktop();
 
@@ -131,6 +138,10 @@ void CxeStillCaptureControlDesktop::deinit()
         CX_DEBUG_EXIT_FUNCTION();
         return;
     }
+
+    mViewFinderStartTimer.stop();
+    mViewfinderControl.stop();
+
     mState = Uninitialized;
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -173,8 +184,8 @@ void CxeStillCaptureControlDesktop::prepare()
     }
 
     if (!err) {
-        // If viewfinder is already running, this call does nothing
-        mViewfinderControl.start();
+        // Start viewfinder with delay.
+        mViewFinderStartTimer.start();
         // inform zoom control to prepare zoom
         emit prepareZoomForStill(ecamStillResolutionIndex);
     } else {
@@ -570,6 +581,17 @@ void CxeStillCaptureControlDesktop::handleAutofocusStateChanged(
          mode != CxeAutoFocusControl::Hyperfocal &&
          mode != CxeAutoFocusControl::Infinity) {
     }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Slot for starting viewfinder after a delay.
+* Delay helps viewfinder widget to find the right, visible transparent window to attach to.
+*/
+void CxeStillCaptureControlDesktop::startViewfinder()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    mViewfinderControl.start();
     CX_DEBUG_EXIT_FUNCTION();
 }
 

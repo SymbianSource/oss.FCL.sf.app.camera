@@ -119,6 +119,7 @@ void CxeThumbnailManagerSymbian::thumbnailReady(QPixmap thumbnail, void * data, 
 
     Q_UNUSED(thumbnail);
     Q_UNUSED(data);
+    Q_UNUSED(error);
 
     CX_DEBUG(("CxeThumbnailManagerSymbian::thumbnailReady error = %d", error));
 

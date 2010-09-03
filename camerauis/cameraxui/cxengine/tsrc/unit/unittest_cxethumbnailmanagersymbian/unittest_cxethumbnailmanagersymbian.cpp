@@ -23,8 +23,6 @@
 #include "cxutils.h"
 #include "cxetestutils.h"
 
-const int SIGNAL_TIMEOUT = 3000; //milliseconds
-
 
 UnitTestCxeThumbnailManagerSymbian::UnitTestCxeThumbnailManagerSymbian()
 {
@@ -52,36 +50,11 @@ void UnitTestCxeThumbnailManagerSymbian::testCreateThumbnail()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    QSignalSpy thumbnailReadySpy(mThumbnailManager, SIGNAL(thumbnailReady(QPixmap, void*, int, int)));
-    QString filename;
+    // case 1: Testing with wrong dummy file. Check only that call is made successfully.
+    mThumbnailManager->createThumbnail(QString(""), QImage());
 
-    QVERIFY(thumbnailReadySpy.isValid()); 
-
-    // case 1: testing with wrong dummy file, we should get an error code with thumbnailready
-    // since filename is invalid
-    // DISABLE FOR NOW
-    // TODO: Create a fake implementation for the thumbnailmanager
-    // what is used by cxethumbnailmanagersymbian.
-    //mThumbnailManager->createThumbnail(filename, QImage());
-
-    // we should not get any call back when we have invalid file name.
-    //QCOMPARE(thumbnailReadySpy.count(), 0);
-
-
-    // case 1: testing with proper file name, we shouldnt get an error code with thumbnailready
-    // since filename is valid
-    filename = QString("c:\\test.jpg");    
-    mThumbnailManager->createThumbnail(filename, QImage());
-
-    QVERIFY(CxeTestUtils::waitForSignal(thumbnailReadySpy, SIGNAL_TIMEOUT));
-
- 
-    //QCOMPARE( thumbnailReadySpy.count(), 1 );
-    if (thumbnailReadySpy.count() > 0) {
-        QList<QVariant> initModeArguments = thumbnailReadySpy.takeFirst();
-        // we are only interested in error code in this case 1
-        QCOMPARE(initModeArguments.at(1).toInt(), KErrNone);
-    }
+    // case 2: Testing with proper file name.
+    mThumbnailManager->createThumbnail(QString("C:\\test.jpg"), QImage());
 
     CX_DEBUG_EXIT_FUNCTION();
 }
@@ -91,7 +64,16 @@ void UnitTestCxeThumbnailManagerSymbian::testCancelThumbnail()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    // case 1: Cancel with empty string.
+    mThumbnailManager->cancelThumbnail(QString());
+
+    // case 2: Cancel non-existent file / request.
     mThumbnailManager->cancelThumbnail(QString("filename"));
+
+    // case 3: Cancel actual request.
+    QString file("C:\\test2.jpg");
+    mThumbnailManager->createThumbnail(file, QImage());
+    mThumbnailManager->cancelThumbnail(file);
 
     CX_DEBUG_EXIT_FUNCTION();
 }

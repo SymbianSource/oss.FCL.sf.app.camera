@@ -109,6 +109,7 @@ protected:
     void updateQualityIcon();
     void closeDialogs();
     void updateFaceTrackingIcon();
+    void updateGeotaggingIcon();
 
 private:
     void reloadIndicatorWidgets();
