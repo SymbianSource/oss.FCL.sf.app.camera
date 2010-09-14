@@ -207,12 +207,15 @@ void CCamZoomUpdateManager::ReadDelayValuesL()
     // default values are used in case of error
     iCamZoomCooldown = KCamZoomCooldown;
     iCamMaxZoomCooldown = KCamMaxZoomCooldown;
-    RArray<TInt> delayValues;
+    
     if( iController.UiConfigManagerPtr() )
         {
+        RArray<TInt> delayValues;
+        CleanupClosePushL( delayValues );
         iController.UiConfigManagerPtr()->SupportedZoomDelaysL( delayValues );
         iCamZoomCooldown = delayValues[0]*1000;
         iCamMaxZoomCooldown = delayValues[1]*1000;
+        CleanupStack::PopAndDestroy( &delayValues );
         }
     }
 // End of File

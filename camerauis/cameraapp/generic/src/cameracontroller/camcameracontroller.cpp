@@ -3719,6 +3719,11 @@ CCamCameraController::InitSnapshotL()
   iInfo.iSnapshotSize           = params().iSize;
   iInfo.iSnapshotAspectMaintain = params().iMaintainAspect;
 
+  if( iInfo.iSnapshotSize.iWidth%2 )
+    {
+    //Only even width parameter is accepted
+    iInfo.iSnapshotSize.iWidth++;
+    }
   PRINT( _L("Camera <> Prepare snapshot..") );
   iSnapshotProvider->PrepareSnapshotL( iInfo.iSnapshotFormat,
                                        iInfo.iSnapshotSize,
@@ -4852,6 +4857,7 @@ CCamCameraController::HandleAutoFocusEvent( TInt aStatus, const TUid& aEventUid 
     else
       {
       iFirstAfEventReceived = EFalse;
+      iAfInProgress = EFalse;
       PRINT( _L("Camera <> CCamCameraController: event KUidECamEventCameraSettingAutoFocusType2 - second time") );
       }
     }

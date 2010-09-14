@@ -129,6 +129,7 @@ EXPORT_C TBool CCameraUiConfigManager::IsSecondaryCameraSupported() const
 EXPORT_C TBool CCameraUiConfigManager::IsDSAViewFinderSupported( TBool aPrimaryCamera ) const
     {
     RArray<TInt> supportedItems;
+    CleanupClosePushL( supportedItems );
     TBool supported ( EFalse );
     TRAPD( err,iConfigManagerImp->SupportedSettingItemsL( ECamDynamicSettingDSAViewFinder,
                                                           supportedItems ) );
@@ -137,7 +138,7 @@ EXPORT_C TBool CCameraUiConfigManager::IsDSAViewFinderSupported( TBool aPrimaryC
         if ( aPrimaryCamera ) supported = supportedItems[0];
         else supported = supportedItems[1];
         }
-    supportedItems.Close();
+    CleanupStack::PopAndDestroy( &supportedItems );
     return supported; // not supported
     }
 

@@ -96,7 +96,7 @@ void CCamBurstThumbnailContainer::ConstructL( const TRect& aRect )
     
 
     TAknLayoutRect burstPaneRect;           
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         // use layoutAreaRect for nhd (contains the statuspane)
         burstPaneRect.LayoutRect( layoutAreaRect, AknLayoutScalable_Apps::main_cam4_burst_pane() );

@@ -13,17 +13,6 @@
 *
 * Description:  Control for displaying remaining images/videos in Navi Pane
 *
-*  Copyright © 2007-2008 Nokia.  All rights reserved.
-*  This material, including documentation and any related computer
-*  programs, is protected by copyright controlled by Nokia.  All
-*  rights are reserved.  Copying, including reproducing, storing,
-*  adapting or translating, any or all of this material requires the
-*  prior written consent of Nokia.  This material also contains
-*  confidential information which may not be disclosed to others
-*  without the prior written consent of Nokia.
-
-*
-*
 */
 
 
@@ -209,7 +198,7 @@ OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, CCAMNAVICOUNTERMODEL_LOADRESOURCEDATAL,
         
     iCamOrientation = appUi->CamOrientation();
 
-    if ( Layout_Meta_Data::IsLandscapeOrientation() || CamUtility::IsNhdDevice() )
+    if ( Layout_Meta_Data::IsLandscapeOrientation() || AknLayoutUtils::PenEnabled() )
         {
         TSize screenSize;
         AknLayoutUtils::LayoutMetricsSize( AknLayoutUtils::EScreen, screenSize ); 
@@ -222,7 +211,7 @@ OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, CCAMNAVICOUNTERMODEL_LOADRESOURCEDATAL,
         iExtent = screenRect;
         }
 
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TouchLayoutL();
         }
@@ -1512,7 +1501,7 @@ CCamNaviCounterModel::DrawNaviSelfTimer( CBitmapContext& aGc,
     // Draw self timer icons, if set to on.
     if ( iDrawSelfTimer )
         {
-        if ( CamUtility::IsNhdDevice() )
+        if ( AknLayoutUtils::PenEnabled() )
             {
             aGc.SetBrushColor( KRgbWhite );
             aGc.SetBrushStyle( CGraphicsContext::ENullBrush );

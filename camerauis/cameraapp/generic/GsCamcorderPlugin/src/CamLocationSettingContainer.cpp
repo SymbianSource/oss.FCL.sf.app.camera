@@ -169,7 +169,7 @@ void CCamLocationSettingContainer::ConstructFromResourceL( TResourceReader& /*aR
     layoutAreaRect.BoundingRect( statusPaneRect );
     
     // set the layouts for the rect containing the description
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         if ( Layout_Meta_Data::IsLandscapeOrientation() )
             {
@@ -203,7 +203,7 @@ void CCamLocationSettingContainer::ConstructFromResourceL( TResourceReader& /*aR
     TInt lineCount = listLimits.LastRow() + 1;
     for ( TInt i = 0; i < lineCount; i++ )
         {
-        if ( CamUtility::IsNhdDevice() ) 
+        if ( AknLayoutUtils::PenEnabled() ) 
             {
             layout.LayoutText( iSummaryRect.Rect(), 
                 AknLayoutScalable_Apps::main_cset_text2_pane_t1( i ) );
@@ -259,7 +259,7 @@ void CCamLocationSettingContainer::ConstructFromResourceL( TResourceReader& /*aR
     if ( visibility == CEikScrollBarFrame::EOn )
         {
         // if scrollbars are used, use scrollbar layout
-        if ( CamUtility::IsNhdDevice() ) 
+        if ( AknLayoutUtils::PenEnabled() ) 
             {
             listboxLayoutRect.LayoutRect( listboxRect, 
                 AknLayoutScalable_Apps::main_cset_list_pane( 0 ) );
@@ -272,7 +272,7 @@ void CCamLocationSettingContainer::ConstructFromResourceL( TResourceReader& /*aR
         }
     else
         {
-        if ( CamUtility::IsNhdDevice() ) 
+        if ( AknLayoutUtils::PenEnabled() ) 
             {
             listboxLayoutRect.LayoutRect( listboxRect, 
                 AknLayoutScalable_Apps::main_cset_list_pane( 1 ) );
@@ -286,7 +286,7 @@ void CCamLocationSettingContainer::ConstructFromResourceL( TResourceReader& /*aR
     
     // layout scrollbarpane (will not be visible if not needed)
     TAknLayoutRect scrollbarLayoutRect;
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         scrollbarLayoutRect.LayoutRect( listboxRect, 
             AknLayoutScalable_Apps::scroll_pane_cp028( 0 ) );
@@ -423,7 +423,7 @@ void CCamLocationSettingContainer::SizeChanged()
         if ( visibility == CEikScrollBarFrame::EOn )
             {
             // if scrollbars are used, use scrollbar layout
-            if ( CamUtility::IsNhdDevice() ) 
+            if ( AknLayoutUtils::PenEnabled() ) 
                 {
                 listboxLayoutRect.LayoutRect( listboxRect, 
                     AknLayoutScalable_Apps::main_cset_list_pane( 0 ) );
@@ -436,7 +436,7 @@ void CCamLocationSettingContainer::SizeChanged()
             }
         else
             {
-            if ( CamUtility::IsNhdDevice() ) 
+            if ( AknLayoutUtils::PenEnabled() ) 
                 {
                 listboxLayoutRect.LayoutRect( listboxRect, 
                     AknLayoutScalable_Apps::main_cset_list_pane( 1 ) );
@@ -450,7 +450,7 @@ void CCamLocationSettingContainer::SizeChanged()
         
         // layout scrollbarpane (will not be visible if not needed)
         TAknLayoutRect scrollbarLayoutRect;
-        if ( CamUtility::IsNhdDevice() ) 
+        if ( AknLayoutUtils::PenEnabled() ) 
             {
             scrollbarLayoutRect.LayoutRect( listboxRect, 
                 AknLayoutScalable_Apps::scroll_pane_cp028( 0 ) );
@@ -526,7 +526,7 @@ void CCamLocationSettingContainer::ReadListboxLayoutL( TRect& aRect )
     
     // get the rect size for listbox in the layout
     TAknLayoutRect listboxLayoutRect;
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         if ( Layout_Meta_Data::IsLandscapeOrientation() )
             {

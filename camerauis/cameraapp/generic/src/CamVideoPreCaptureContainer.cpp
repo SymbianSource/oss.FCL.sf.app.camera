@@ -116,7 +116,7 @@ void CCamVideoPreCaptureContainer::ConstructL( const TRect& aRect )
         {
         AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect );
         }
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TInt variant = Layout_Meta_Data::IsLandscapeOrientation();
         vidProgressPane.LayoutRect( rect,
@@ -531,7 +531,7 @@ void CCamVideoPreCaptureContainer::DrawAdditionalIcons(CBitmapContext& aGc) cons
      && appUi->CurrentViewState() == ECamViewStatePreCapture
      && appUi->DrawPreCaptureCourtesyUI()
      && !appUi->IsSecondCameraEnabled() 
-     && ( CamUtility::IsNhdDevice() || videoOperation == ECamNoOperation )
+     && ( AknLayoutUtils::PenEnabled() || videoOperation == ECamNoOperation )
       )
       {
       iFileTypeIndicator->Draw( aGc );
@@ -581,7 +581,7 @@ void CCamVideoPreCaptureContainer::CreateFiletypeIndicatorL()
         {
         AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect );
         }
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TInt variant = Layout_Meta_Data::IsLandscapeOrientation();
         vidProgressPane.LayoutRect( rect,

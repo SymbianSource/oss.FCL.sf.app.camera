@@ -182,7 +182,7 @@ CCamShootingModeContainer::ConstructL( const TRect& aRect )
     iListBox->DisableSingleClick( ETrue );
    
 	TRect listboxRect;
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         listboxRect = TouchLayout();
         }
@@ -514,7 +514,7 @@ void CCamShootingModeContainer::Draw( const TRect& aRect ) const
 	PRINT(_L("Camera => CCamShootingModeContainer::Draw") )
 
     CWindowGc& gc = SystemGc();
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TRgb color;
         if( iFullySkinned )
@@ -616,7 +616,7 @@ TKeyResponse CCamShootingModeContainer::OfferKeyEventL(
     if ( EStdKeyUpArrow == aKeyEvent.iScanCode ||
          EStdKeyDownArrow == aKeyEvent.iScanCode )
         {
-        if ( CamUtility::IsNhdDevice() )  
+        if ( AknLayoutUtils::PenEnabled() )  
             {
             ShowTooltipL(); 
             }
@@ -677,6 +677,8 @@ void CCamShootingModeContainer::ConstructSummaryDetailsFromResourceL(TInt aResou
                 TInt description = R_CAM_SCENE_DESCRIPTION_LANDSCAPE_AUTOFOCUS;
                 Description = StringLoader::LoadL( description );
                 User::LeaveIfError( iDescArray.Append( Description ) );
+                delete descr;
+                descr = NULL;
                 }
             else 
                 {

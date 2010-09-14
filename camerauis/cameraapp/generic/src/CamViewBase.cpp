@@ -180,8 +180,8 @@ void CCamViewBase::HandleCommandL( TInt aCommand )
             if( iContainer )
             	{
             	if(appUi)
-            	    {
-            	    iContainer->DrawNow( appUi->ZoomPane()->Rect() );    
+            	    { 
+                    iContainer->DrawNow( appUi->ZoomPane()->Extent() );
             	    }
             	else
             	    {

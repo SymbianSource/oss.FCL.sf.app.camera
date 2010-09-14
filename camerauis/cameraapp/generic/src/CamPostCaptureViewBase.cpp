@@ -189,6 +189,7 @@ void CCamPostCaptureViewBase::HandleCommandL( TInt aCommand )
             sp->MakeVisible( ETrue );
             title->MakeVisible( ETrue );
             iContainer->SetRect( AppUi()->ClientRect() );
+            DecrementCameraUsers();
             GlxMetadataViewUtility::ActivateViewL( iController.CurrentFullFileName() );
             static_cast<CCamContainerBase*>(iContainer)->CheckForFileName( ETrue );
             title->MakeVisible( EFalse );
@@ -901,6 +902,7 @@ void CCamPostCaptureViewBase::StartAddToAlbumOperationL()
     TBool   allowMultipleSelection = ETrue;
     RArray<TUint32> selectedAlbumIds;
     CleanupClosePushL( selectedAlbumIds );
+    DecrementCameraUsers();
     // Launching the Pop-up menu with the list of albums
     TRAPD( err, TGlxCollectionSelectionPopup::ShowPopupL(
             selectedAlbumIds,

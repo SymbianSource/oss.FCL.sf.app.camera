@@ -13,17 +13,6 @@
 *
 * Description:  Implemantation for CCamLocationIconController class.
 *
-*  Copyright © 2007 Nokia.  All rights reserved.
-*  This material, including documentation and any related computer
-*  programs, is protected by copyright controlled by Nokia.  All
-*  rights are reserved.  Copying, including reproducing, storing,
-*  adapting or translating, any or all of this material requires the
-*  prior written consent of Nokia.  This material also contains
-*  confidential information which may not be disclosed to others
-*  without the prior written consent of Nokia.
-
-*
-*
 */
 
 
@@ -259,7 +248,7 @@ TRect CCamLocationIconController::Rect() const
 			 ( ECamPaused == operation )   ||
 			 ( ECamResuming == operation ))
 			{
-	        if ( CamUtility::IsNhdDevice() ) 
+	        if ( AknLayoutUtils::PenEnabled() ) 
 	            {
                 if ( Layout_Meta_Data::IsLandscapeOrientation() )
                     {
@@ -304,7 +293,7 @@ TRect CCamLocationIconController::Rect() const
 			}
 		else
 			{
-            if ( CamUtility::IsNhdDevice() ) 
+            if ( AknLayoutUtils::PenEnabled() ) 
                 {
                 if ( Layout_Meta_Data::IsLandscapeOrientation() )
                     {
@@ -348,7 +337,7 @@ TRect CCamLocationIconController::Rect() const
 		}
 	else
 		{
-        if ( CamUtility::IsNhdDevice() ) 
+        if ( AknLayoutUtils::PenEnabled() ) 
             {
     	    if ( Layout_Meta_Data::IsLandscapeOrientation() )
     	        {

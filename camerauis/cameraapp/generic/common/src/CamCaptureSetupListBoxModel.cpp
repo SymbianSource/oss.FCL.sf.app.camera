@@ -225,6 +225,10 @@ void CCamCaptureSetupListBoxModel::ConstructL( TInt aArrayResourceId, TInt aSett
         	{
         	iItemArray.AppendL( listItem );
         	}
+        else
+            {
+            delete listItem;
+            }
         
         CleanupStack::Pop( listItem );
         }    
@@ -238,7 +242,7 @@ void CCamCaptureSetupListBoxModel::ConstructL( TInt aArrayResourceId, TInt aSett
 //
 void CCamCaptureSetupListBoxModel::ReadLayoutData( TRect aListBoxRect )
     {
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         { 
         iIconLayoutData.LayoutRect( aListBoxRect, 
                           AknLayoutScalable_Apps::cset_list_set_pane_g3( 0 ) );

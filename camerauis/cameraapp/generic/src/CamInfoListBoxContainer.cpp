@@ -153,7 +153,7 @@ void CCamInfoListBoxContainer::ConstructL( const TRect& aRect, TInt aListBoxReso
     
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() ); 
     TRect listboxRect; 
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         listboxRect = TouchLayout();
         }
@@ -329,7 +329,7 @@ void CCamInfoListBoxContainer::Draw( const TRect& aRect ) const
 	PRINT(_L("Camera => CCamInfoListBoxContainer::Draw") )
 
 	CWindowGc& gc = SystemGc();
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TRgb color;
         if( iSkinnedBackGround )

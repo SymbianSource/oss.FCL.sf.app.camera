@@ -921,7 +921,7 @@ TBool CCamSidePane::IsSecondaryCameraEnabled() const
 //
 void CCamSidePane::UpdateLayout()
     {
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TouchLayout();
         }

@@ -1981,7 +1981,7 @@ CCamPreCaptureContainerBase::DrawNaviControls( CBitmapContext& aGc ) const
       {
       // Draw the resolution indicator
       if ( appUi->ActiveCamera() == ECamActiveCameraPrimary  
-           && ( CamUtility::IsNhdDevice() 
+           && ( AknLayoutUtils::PenEnabled() 
            || videoOperation == ECamNoOperation ) )
           {
           iResolutionIndicators[iCurrentIndicator]->Draw( aGc );
@@ -2626,7 +2626,7 @@ void CCamPreCaptureContainerBase::SizeChanged()
     if ( iController.UiConfigManagerPtr() && 
          iController.UiConfigManagerPtr()->IsAutoFocusSupported() )
         {
-        if ( CamUtility::IsNhdDevice() ) 
+        if ( AknLayoutUtils::PenEnabled() ) 
             {
             TouchLayout();
             }
@@ -2731,7 +2731,7 @@ TRect CCamPreCaptureContainerBase::ResolutionIndicatorRect() const
     CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
     TAknLayoutRect resolutionIconLayout;
     TAknLayoutRect indicatorPane;
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TInt variant = Layout_Meta_Data::IsLandscapeOrientation();
         if ( appUi->TargetMode() ==  ECamControllerVideo ) 

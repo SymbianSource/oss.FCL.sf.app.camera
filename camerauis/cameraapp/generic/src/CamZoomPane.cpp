@@ -411,6 +411,10 @@ void CCamZoomPane::DrawThumb( CBitmapContext& aGc ) const
               iIconZoomMarker[0]->SizeInPixels().iHeight * 
               KDivisorFactor / 2) / KDivisorFactor;                                                        
         
+    // Centralize thumb and slider X-axis.
+    TRect old = TRect(newThumbPos,iIconZoomMarkerCurrent->SizeInPixels());
+    newThumbPos.iX += iSliderParentRect.Center().iX - old.Center().iX;
+
     aGc.BitBlt( newThumbPos, iIconZoomMarkerCurrent ); 
     PRINT( _L( "Camera <= CCamZoomPane::DrawThumb " ) );                   
     }
@@ -612,13 +616,13 @@ void CCamZoomPane::HandleControllerEventL( TCamControllerEvent aEvent,
 
 // -----------------------------------------------------------------------------
 // CCamZoomPane::Rect
-// Returns the zoom pane rect
+// Returns the whole zoom pane rect
 // -----------------------------------------------------------------------------
 //
-TRect CCamZoomPane::Rect() const
+TRect CCamZoomPane::Extent() const
     {
-    PRINT( _L( "Camera =><= CCamZoomPane::Rect " ) );
-    return iZoomPaneRect;
+    PRINT( _L( "Camera =><= CCamZoomPane::Extent " ) );
+    return iExtent;      
     }
 
 // ---------------------------------------------------------
@@ -629,7 +633,7 @@ void CCamZoomPane::ReadLayoutL()
     {   
     PRINT( _L( "Camera =><= CCamZoomPane::ReadLayoutL " ) );
     
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         TouchLayout();
         }
@@ -1064,7 +1068,7 @@ TBool CCamZoomPane::HandlePointerEventL( const TPointerEvent& aPointerEvent )
 void CCamZoomPane::SizeChanged() 
     {
     PRINT( _L( "Camera => CCamZoomPane::SizeChanged" ) );
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         TouchLayout();
         }
@@ -1098,18 +1102,21 @@ void CCamZoomPane::TouchLayout()
     l = AknLayoutScalable_Apps::cam4_zoom_cont_pane(variant); 
     area.LayoutRect( iZoomPaneRect, l.LayoutLine() );
     iSliderParentRect = area.Rect();
+    iExtent = iSliderParentRect;
     
     l = AknLayoutScalable_Apps::cam4_zoom_pane_g1(variant); // +
     area.LayoutRect( iZoomPaneRect, l.LayoutLine() );
     AknIconUtils::SetSize( iIconZoomMax[0], area.Rect().Size(), 
                            EAspectRatioNotPreserved );
-    iPlusPoint = area.Rect().iTl;                       
+    iPlusPoint = area.Rect().iTl;   
+    iExtent.BoundingRect(area.Rect());
     
     l = AknLayoutScalable_Apps::cam4_zoom_pane_g2(variant); // -
     area.LayoutRect( iZoomPaneRect, l.LayoutLine() );
     AknIconUtils::SetSize( iIconZoomMin[0], area.Rect().Size(), 
                            EAspectRatioNotPreserved );
-    iMinusPoint = area.Rect().iTl;                             
+    iMinusPoint = area.Rect().iTl;    
+    iExtent.BoundingRect(area.Rect());
     
     l = AknLayoutScalable_Apps::cam4_zoom_cont_pane_g1(variant); // Top
     area.LayoutRect( iSliderParentRect, l.LayoutLine() );
@@ -1141,6 +1148,20 @@ void CCamZoomPane::TouchLayout()
 	adj.Move( bottomRect.Center() - adj.Center() );
     AknIconUtils::SetSize( iIconZoomMarker[0], adj.Size() );  
     AknIconUtils::SetSize( iIconZoomMarkerGray[0], adj.Size() );
+
+    if( iPlusPoint.iY < iTopPoint.iY )
+        {
+        // Thumb is drawn further than shaft.
+        // If Max(+) and Min(-) marks are extending shaft,
+        // parent rectangle covers everything.
+        iExtent = iZoomPaneRect;
+        }
+    else
+        {
+        // If marks are drawn right side of shaft,
+        // extend area to redraw.
+        iExtent.Grow(0, adj.Size().iHeight/2);
+        }
    
     }
 
@@ -1166,18 +1187,21 @@ void CCamZoomPane::NonTouchLayout()
     l = AknLayoutScalable_Apps::cam6_zoom_cont_pane(variant); 
     area.LayoutRect( iZoomPaneRect, l.LayoutLine() );
     iSliderParentRect = area.Rect();
+    iExtent = iSliderParentRect;
     
     l = AknLayoutScalable_Apps::cam6_zoom_pane_g1(variant); // +
     area.LayoutRect( iZoomPaneRect, l.LayoutLine() );
     AknIconUtils::SetSize( iIconZoomMax[0], area.Rect().Size(), 
                            EAspectRatioNotPreserved );
-    iPlusPoint = area.Rect().iTl;                       
+    iPlusPoint = area.Rect().iTl;       
+    iExtent.BoundingRect(area.Rect());
     
     l = AknLayoutScalable_Apps::cam6_zoom_pane_g2(variant); // -
     area.LayoutRect( iZoomPaneRect, l.LayoutLine() );
     AknIconUtils::SetSize( iIconZoomMin[0], area.Rect().Size(), 
                            EAspectRatioNotPreserved );
-    iMinusPoint = area.Rect().iTl;                             
+    iMinusPoint = area.Rect().iTl;       
+    iExtent.BoundingRect(area.Rect());
     
     l = AknLayoutScalable_Apps::cam6_zoom_cont_pane_g1(variant); // Top
     area.LayoutRect( iSliderParentRect, l.LayoutLine() );
@@ -1207,6 +1231,20 @@ void CCamZoomPane::NonTouchLayout()
     iZoomPaneRect.iTl.iX += area.Rect().Width()/2;
     AknIconUtils::SetSize( iIconZoomMarker[0], area.Rect().Size() );  
     AknIconUtils::SetSize( iIconZoomMarkerGray[0], area.Rect().Size() );    
+
+    if( iPlusPoint.iY < iTopPoint.iY )
+        {
+        // Thumb is drawn further than shaft.
+        // If Max(+) and Min(-) marks are extending shaft,
+        // parent rectangle covers everything.
+        iExtent = iZoomPaneRect;
+        }
+    else
+        {
+        // If marks are drawn right side of shaft,
+        // extend area to redraw.
+        iExtent.Grow(0, area.Rect().Size().iHeight/2);
+        }
     }
     
 // ---------------------------------------------------------

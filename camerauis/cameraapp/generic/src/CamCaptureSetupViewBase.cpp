@@ -68,6 +68,12 @@ CCamCaptureSetupViewBase::~CCamCaptureSetupViewBase()
       delete iInfoListBoxContainer;
       }        
     }
+
+  
+  if( iCaptureSetupControlHandler )
+      {
+      delete iCaptureSetupControlHandler;
+      }
   PRINT( _L("Camera <= ~CCamCaptureSetupViewBase") );
   }
 
@@ -553,7 +559,7 @@ void CCamCaptureSetupViewBase::SwitchToCaptureSetupModeL( TInt aSetupCommand, TB
     CCamAppUiBase* appUi = static_cast<CCamAppUiBase*>( AppUi() );
 
     TRect rect = appUi->ApplicationRect();
-    if ( !CamUtility::IsNhdDevice() ) 
+    if ( !AknLayoutUtils::PenEnabled() ) 
         {
         // Space for visible statuspane for non-touch device
         AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, rect );

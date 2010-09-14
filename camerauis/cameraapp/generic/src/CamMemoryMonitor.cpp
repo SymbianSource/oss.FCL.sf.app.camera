@@ -58,6 +58,7 @@ CCamMemoryMonitor::~CCamMemoryMonitor()
         iMemoryCheckTimer->Cancel();
         delete iMemoryCheckTimer;
         }
+    Cancel();
     PRINT( _L("Camera <= CCamMemoryMonitor::~CCamMemoryMonitor") )
     }
 

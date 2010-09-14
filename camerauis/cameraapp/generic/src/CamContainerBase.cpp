@@ -622,7 +622,7 @@ void CCamContainerBase::PrepareProcessingTextL( TBool aStillMode )
                 AknLayoutUtils::EAknCbaLocationLeft? 
                 AknLayoutUtils::EAknCbaLocationLeft : 0;
     
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         vidProgressPane.LayoutRect( Rect(),
                 AknLayoutScalable_Apps::vid4_progress_pane( 
@@ -682,7 +682,7 @@ void CCamContainerBase::PrepareBurstProcessingTextL()
                 AknLayoutUtils::EAknCbaLocationLeft : 0;
     
     
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         vidProgressPane.LayoutRect(
                 Rect(),

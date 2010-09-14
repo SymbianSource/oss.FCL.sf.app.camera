@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -12,17 +12,6 @@
 * Contributors:
 *
 * Description:  Implemantation for CCamBatteryPaneDrawer class.
-*
-*  Copyright © 2007-2008 Nokia.  All rights reserved.
-*  This material, including documentation and any related computer
-*  programs, is protected by copyright controlled by Nokia.  All
-*  rights are reserved.  Copying, including reproducing, storing,
-*  adapting or translating, any or all of this material requires the
-*  prior written consent of Nokia.  This material also contains
-*  confidential information which may not be disclosed to others
-*  without the prior written consent of Nokia.
-
-*
 *
 */
 
@@ -199,7 +188,7 @@ void CCamBatteryPaneDrawer::ClearBattery( CBitmapContext& aGc ) const
 void CCamBatteryPaneDrawer::LoadLayoutsL()
     {    
     PRINT( _L("Camera => CCamBatteryPaneDrawer::LoadLayoutsL") );	    	
-    if ( CamUtility::IsNhdDevice() )
+    if ( AknLayoutUtils::PenEnabled() )
         {
         TouchLayoutL();
         }

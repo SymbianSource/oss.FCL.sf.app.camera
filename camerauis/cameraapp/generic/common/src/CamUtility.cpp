@@ -1532,12 +1532,12 @@ CamUtility::ViewfinderLayout( TCamCameraMode aMode,
   {
   PRINT1( _L("Camera => CamUtility::ViewfinderLayout - resolution[%d]"), aResolution );
 
-  TAknWindowLineLayout l = IsNhdDevice() 
+  TAknWindowLineLayout l = AknLayoutUtils::PenEnabled() 
                          ? ViewfinderLayoutTouch(aMode, aResolution)
                          : ViewfinderLayoutNonTouch(aMode, aResolution);  
 
   TRect screenRect;
-  if ( Layout_Meta_Data::IsLandscapeOrientation() || IsNhdDevice() )
+  if ( Layout_Meta_Data::IsLandscapeOrientation() || AknLayoutUtils::PenEnabled() )
       {
       AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, screenRect );
       }

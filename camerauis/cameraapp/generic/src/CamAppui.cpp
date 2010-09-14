@@ -334,12 +334,15 @@ void CCamAppUi::ConstructL()
   TBool uiOrientationOverride = iController.UiConfigManagerPtr()->IsUIOrientationOverrideSupported();
   
   // Get the screenmode values used for setting  the orientation
-  RArray<TInt> screenModeValues;
+  
   if ( uiOrientationOverride )
       {
+      RArray<TInt> screenModeValues;
+      CleanupClosePushL( screenModeValues );
       iController.UiConfigManagerPtr()->SupportedScreenModesL( screenModeValues );
       iLandscapeScreenMode = screenModeValues[0];
       iPortraitScreenMode = screenModeValues[1];
+      CleanupStack::PopAndDestroy( &screenModeValues );
       }
   
   // The embedded views are set after ConstructL completes
@@ -5489,6 +5492,14 @@ void CCamAppUi::InternalExitL()
     PRINT( _L("Camera => CCamAppUi::InternalExitL") );
 
     iController.StoreFaceTrackingValue(); // store the current FT setting
+
+    if ( iMode == ECamControllerVideo ) 
+        {
+        // Prevent flickering when returning to default Still image mode
+        CCamViewBase* precapView = static_cast<CCamViewBase*>( iView ); 
+    	__ASSERT_DEBUG( precapView, CamPanic( ECamPanicNullPointer ));
+        precapView->ViewCba()->MakeVisible( EFalse );
+        } 
 	
     if ( iController.UiConfigManagerPtr() && 
          iController.UiConfigManagerPtr()->IsLocationSupported() )
@@ -7868,7 +7879,7 @@ void CCamAppUi::SetPreCaptureModeL(TCamPreCaptureMode aMode)
 
     if ( iViewState != ECamViewStateUserSceneSetup )
         {
-	    if ( CamUtility::IsNhdDevice() ) 
+	    if ( AknLayoutUtils::PenEnabled() ) 
 	        {
 	        StatusPane()->MakeVisible( aMode == ECamPreCapStandby || 
 	                                   IsSecondCameraEnabled() && 

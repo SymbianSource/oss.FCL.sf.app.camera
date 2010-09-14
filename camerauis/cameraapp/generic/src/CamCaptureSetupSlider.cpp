@@ -583,7 +583,7 @@ void CCamCaptureSetupSlider::ReadLayoutL()
 
     // We're starting again from scratch, so delete the old legend layouts
     iLegendArray.ResetAndDestroy();
-    if ( CamUtility::IsNhdDevice() ) 
+    if ( AknLayoutUtils::PenEnabled() ) 
         {
         TouchLayoutL();
         }

@@ -1232,7 +1232,7 @@ CCamAppController::RecordTimeRemaining()
         // In case settings plugin is being run or mmc dismount is pending
         // due to usb activation, we calculate the remaining time here, 
         // instead of repreparing the engine and getting it from there  
-        TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL() );
+        TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL( static_cast < TCamMediaStorage >(CurrentVideoStorageLocation()) ) );
         if( KErrNone != err )
             {
             iVideoTimeRemaining = 0;
@@ -1251,7 +1251,7 @@ CCamAppController::RecordTimeRemaining()
         else 
             {
             PRINT( _L("Camera <> CCamAppController::RecordTimeRemaining - video mode not yet initialized" ));
-            TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL() );
+            TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL( static_cast < TCamMediaStorage >(CurrentVideoStorageLocation()) ) );
             if( KErrNone != err )
                 {
                 iVideoTimeRemaining = 0;
@@ -2558,9 +2558,11 @@ void CCamAppController::SwitchCameraL()
   if( UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )
       {
       RArray<TInt> screenModeValues;
+      CleanupClosePushL( screenModeValues );
       UiConfigManagerPtr()->SupportedScreenModesL( screenModeValues );
       TInt landscapeScreenMode = screenModeValues[0];
       SetCameraOrientationModeL( landscapeScreenMode );
+      CleanupStack::PopAndDestroy( &screenModeValues );
       }
   iCameraController->CompleteSwitchCameraL();
   // Force to get a sensor data after switch camera from primary to secondary 
@@ -3057,7 +3059,9 @@ CCamAppController::IssueModeChangeSequenceL( TBool aStartup )
             }
         else
             {
-            CamPanic(ECamPanicInvalidState);
+            // Memory card and mass storage not accessible. Storage may be locked or corrupted.
+            PRINT1( _L("Camera <> Storage is locked/corrupted. USB personality:%d"), usbPersonality );
+            SwitchToStandbyL( ECamErrMassStorageMode );
             }
         
         iIssueModeChangeSequenceSucceeded = EFalse;
@@ -8513,7 +8517,10 @@ void CCamAppController::HandleCaptureCompletion()
   {
   PRINT( _L( "Camera => CCamAppController::HandleCaptureCompletion()" ) )
 
-  SetOperation( ECamNoOperation );
+  if ( iInfo.iOperation != ECamFocused && iInfo.iOperation != ECamFocusing )
+      {
+      SetOperation( ECamNoOperation );
+      }
   
   // Re-enable screensaver
   EnableScreenSaver( ETrue );
