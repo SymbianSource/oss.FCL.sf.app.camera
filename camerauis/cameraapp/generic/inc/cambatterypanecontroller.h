@@ -150,6 +150,13 @@ class CCamBatteryPaneController: public CBase, public MPropertyObserver
         * @param aType Type of the resource change
         */
         void HandleResourceChange( TInt aType );        
+
+        /**
+         * Checks if battery level is low.
+         * @return ETrue if battery level is low and
+         * charger is not connected
+         */
+        TBool IsBatteryLow();
         
     protected:
         /**

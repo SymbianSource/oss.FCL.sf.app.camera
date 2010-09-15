@@ -75,10 +75,10 @@ const TInt KAFIconCorners = 4; // Hip to be square
 
 const TInt KIndicatorBlinkDelay = 250 * 1000;
 const TInt KNumberOfBlinks = 3;
-const TInt KNumberOfBlinksVideo = 8;
+const TInt KNumberOfBlinksVideo = 7;
 
 const TSize  KCaptureButtonSize( 50, 50 );
-const TSize  KAdditionalArea( 25, 11 );
+const TSize  KAdditionalArea( 25, 9 );
 const TInt32 KCaptureButtonYDelta( 10 );
 
 // Snapshot data is needed in timelapse mode
@@ -2414,6 +2414,13 @@ CCamPreCaptureContainerBase::BatteryPaneUpdated()
 
     DeactivateGc();        
     }
+  if( iBatteryPaneController )
+      {
+      if( ECamControllerVideo == iController.CurrentMode() ) 
+          {
+          iController.SetIdleTimerTimeout( !iBatteryPaneController->IsBatteryLow() );
+          }      
+      }
   
   }
 

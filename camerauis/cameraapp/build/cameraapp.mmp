@@ -254,55 +254,55 @@ APP_LAYER_SYSTEMINCLUDE
 // Libraries
 
 LIBRARY ecom.lib
-LIBRARY gsecomplugin.lib 
+LIBRARY gsecomplugin.lib
 LIBRARY euser.lib 
 LIBRARY apparc.lib 
 LIBRARY cone.lib 
 LIBRARY eikcore.lib  
 LIBRARY eikcoctl.lib 
 LIBRARY avkon.lib 
-LIBRARY CaeEngine.lib 
-LIBRARY aknskins.lib 
+LIBRARY CaeEngine.lib
+LIBRARY AKNSKINS.lib
 LIBRARY efsrv.lib 
-LIBRARY platformenv.lib // PathInfo 
-LIBRARY sysutil.lib 
+LIBRARY platformenv.lib // PathInfo
+LIBRARY sysutil.lib
 LIBRARY fbscli.lib 
 LIBRARY bitgdi.lib 
 LIBRARY ws32.lib 
-LIBRARY CommonEngine.lib 
+LIBRARY CommonEngine.lib
 LIBRARY egul.lib
 LIBRARY bafl.lib
 LIBRARY sendui.lib
 LIBRARY CdlEngine.lib
-LIBRARY bitmaptransforms.lib 
-LIBRARY commondialogs.lib
+LIBRARY bitmaptransforms.lib
+LIBRARY CommonDialogs.lib
 LIBRARY featmgr.lib
-LIBRARY servicehandler.lib  // AIW library 
-LIBRARY aknicon.lib 
-LIBRARY mediaclientaudio.lib  
+LIBRARY ServiceHandler.lib  // AIW library
+LIBRARY AknIcon.lib
+LIBRARY mediaclientaudio.lib
 LIBRARY eikctl.lib
 LIBRARY apgrfx.lib
 LIBRARY charconv.lib
 LIBRARY hlplch.lib // Help Launcher
-LIBRARY commonui.lib        // CDocumentHandler 
+LIBRARY CommonUI.lib        // CDocumentHandler
 LIBRARY apmime.lib          // TDataType
-LIBRARY centralrepository.lib 
+LIBRARY centralrepository.lib
 LIBRARY eikdlg.lib
 LIBRARY numberconversion.lib 
-LIBRARY newservice.lib 
+LIBRARY NewService.lib
 LIBRARY camerauiconfigmanager.lib
-LIBRARY cfclient.lib 
-LIBRARY cfservices.lib 
+LIBRARY CFClient.lib
+LIBRARY CFServices.lib
 LIBRARY ActivePalette.lib
 LIBRARY aknlayout2.lib
 LIBRARY akntouchgesturefw.lib
 LIBRARY accmonitor.lib
 
 // Remote Controller framework
-LIBRARY remconcoreapi.lib 
-LIBRARY remconinterfacebase.lib 
+LIBRARY remconcoreapi.lib
+LIBRARY remconinterfacebase.lib
 
-LIBRARY AknLayout2Scalable.lib 
+LIBRARY AknLayout2Scalable.lib
 LIBRARY gdi.lib
 LIBRARY estor.lib // RWriteStream
 
@@ -317,16 +317,16 @@ LIBRARY         ecamhistogram.lib
 LIBRARY         ecamoverlay.lib
 #endif // CAMERAAPP_CAPI_V2
 
-LIBRARY imageconversion.lib 
-LIBRARY Exiflib.lib          // CExifRead 
+LIBRARY imageconversion.lib
+LIBRARY ExifLib.lib          // CExifRead
 LIBRARY hal.lib              // HAL, HALData
 
 LIBRARY         ecampluginsupport.lib
 
-LIBRARY sensrvclient.lib 
+LIBRARY sensrvclient.lib
 LIBRARY sensrvutil.lib
 
-LIBRARY svgengine.lib // For reading share SVGs
+LIBRARY SVGEngine.lib // For reading share SVGs
 
 #ifdef CAMERAAPP_LOGGING
 LIBRARY flogger.lib
@@ -335,16 +335,16 @@ LIBRARY flogger.lib
 LIBRARY cntmodel.lib 
 
 #ifndef __WINSCW__
-LIBRARY Locationtrail.lib 
+LIBRARY LocationTrail.lib
 #ifdef RD_MDS_2_5
 LIBRARY locationmanager.lib
 #endif //RD_MDS_2_5
 #endif //WINSCW
 
 LIBRARY oommonitor.lib
-LIBRARY aknnotify.lib
+LIBRARY AknNotify.lib
 
-LIBRARY ImagingConfigManager.lib 
+LIBRARY imagingconfigmanager.lib
 LIBRARY touchfeedback.lib 
 
 #ifdef RD_UI_TRANSITION_EFFECTS_LIST

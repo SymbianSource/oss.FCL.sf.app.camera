@@ -15,7 +15,7 @@
 */
 
 #include <eikenv.h>
-#include <accpolgenericiddefinitions.h> 
+#include <AccPolGenericIdDefinitions.h>
 #include <AccPolSubblockNameArray.h>
 
 #include "camtvaccessorymonitor.h"

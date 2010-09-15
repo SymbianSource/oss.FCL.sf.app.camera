@@ -1424,7 +1424,7 @@ public:
    *                takes ownership.
    * @since S60 v5.0
    */
-void SetSettingsPlugin( CCamGSInterface* aPlugin );
+void SetSettingsPlugin( TUid aPlugin );
 
   /**
   * Set viewfinder window for direct screen viewfinder. The handle must remain
@@ -2287,7 +2287,12 @@ public:
         * Set value defining if capturing with touch capture button 
         */
         void SetTouchCapture( TBool aTouchCapture );
-
+        
+        /**
+        * Set value used for idle timeout
+        * @param aLong should idle timer be long 
+        */
+        void SetIdleTimerTimeout( TBool aLong = EFalse );        
   private:
 
     // -----------------------------------------------------
@@ -2565,6 +2570,8 @@ public:
     TCamImageOrientation  iImageOrientation;
     TCamImageOrientation  iLastImageOrientation;
     
+    // Idle timeout for paused videorecording.
+    TInt iLongIdleTimeout;    
     // Property watcher to report changes in the slide state
     CCamPropertyWatcher* iSlideStateWatcher;
     // Property watcher to report changes in the keylock state
@@ -2650,7 +2657,7 @@ public:
     TBool iDefineContextSuccessful;
     TBool iStorageChangeProcessOngoing;
     // own.
-    CCamGSInterface* iPlugin;
+    TUid iPlugin;
     TBool iSilentProfile;
     TInt iTimeLapseCaptureCount;
     RFs iFs;

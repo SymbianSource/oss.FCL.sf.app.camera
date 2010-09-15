@@ -22,7 +22,7 @@
 #include <AccessoryServer.h>        // for RAccessoryServer
 #include <AccessoryMode.h>          // for RAccessoryMode
 #include <AccessoryConnection.h>    // for RAccessoryConnection
-#include <accpolgenericidarray.h> 
+#include <AccPolGenericIDArray.h>
 
 
 class MCamTvAccessoryObserver

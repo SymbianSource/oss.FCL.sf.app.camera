@@ -674,8 +674,8 @@ void CCamShootingModeContainer::ConstructSummaryDetailsFromResourceL(TInt aResou
                 {
                 // the description of the icon
                 HBufC* Description;
-                TInt description = R_CAM_SCENE_DESCRIPTION_LANDSCAPE_AUTOFOCUS;
-                Description = StringLoader::LoadL( description );
+                TInt DescResouceId = R_CAM_SCENE_DESCRIPTION_LANDSCAPE_AUTOFOCUS;
+                Description = StringLoader::LoadL( DescResouceId );
                 User::LeaveIfError( iDescArray.Append( Description ) );
                 delete descr;
                 descr = NULL;

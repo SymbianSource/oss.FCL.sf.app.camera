@@ -3894,6 +3894,7 @@ void CCamAppUi::ConstructViewIfRequiredL()
         CleanupStack::PushL( plugin );
         AddViewL( plugin ); // Transfer ownership to AppUi
         CleanupStack::Pop( plugin );
+        iController.SetSettingsPlugin( plugin->iDtor_ID_Key );
         iPlugin = plugin;        
         }
       break;
@@ -4627,8 +4628,8 @@ CCamAppUi::CheckMemoryL()
     			"e_CCamAppUi_CheckMemoryL 1" );
     PRINT( _L("Camera => CCamAppUi::CheckMemoryL") );
     TBool capture = ETrue;
-
-    if ( IsMemoryAvailableForCapturing() )
+    if ( ( ECamControllerImage == iController.CurrentMode() ) &&  
+            IsMemoryAvailableForCapturing() )
         {
         capture = ETrue; 
         }

@@ -558,7 +558,7 @@ void CCamPreCaptureViewBase::HandleControllerEventL( TCamControllerEvent aEvent,
                 ( iController.CurrentOperation() != ECamCapturing && iController.CurrentOperation() != ECamPaused ) );
 
         TBool precaptureToolbarState = !appUi->IsBurstEnabled()
-                && !iStandbyModeActive && !appUi->IsInPretendExit();
+                && !iStandbyModeActive && !appUi->IsInPretendExit() && !iController.IsKeyLockOn();
         
         if ( ( ECamCameraPreparedImage == iController.CameraState() || 
                 showVideoModeToolbar ) &&     

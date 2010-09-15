@@ -36,8 +36,8 @@ SOURCE          ActivePalette2ApiTest.cpp
 SOURCE          ActivePalette2ApiTestBlocks.cpp ActivePaletteContainer.cpp
 
 LIBRARY         euser.lib
-LIBRARY         stiftestinterface.lib
-LIBRARY         stiftestengine.lib cone.lib activepalette.lib eikcore.lib apgrfx.lib ws32.lib 
+LIBRARY         StifTestInterface.lib
+LIBRARY         StifTestEngine.lib cone.lib ActivePalette.lib eikcore.lib apgrfx.lib ws32.lib
 LIBRARY         fbscli.lib bitgdi.lib 
 
 LANG            SC

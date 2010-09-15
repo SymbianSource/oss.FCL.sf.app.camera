@@ -37,7 +37,7 @@
 #include <akntoolbar.h>
 #include <aknbutton.h>
 #include <StringLoader.h>
-
+#include <aknnotewrappers.h>
 
 #include "Cam.hrh"
 #include "CamUtility.h"
@@ -965,12 +965,17 @@ TInt CCamPostCaptureViewBase::ShowAddToAlbumConfirmationQueryL()
     }
 
 /*
-* CCamPostCaptureViewBase::AddToAlbumIdOperationComplete()
+* CCamPostCaptureViewBase::AddToAlbumIdOperationCompleteL()
 */
-void CCamPostCaptureViewBase::AddToAlbumIdOperationComplete()
+void CCamPostCaptureViewBase::AddToAlbumIdOperationCompleteL()
     { 
-    PRINT( _L("Camera => CCamPostCaptureViewBase::AddToAlbumIdOperationComplete() ... SUCCESS ") );
+    PRINT( _L("Camera => CCamPostCaptureViewBase::AddToAlbumIdOperationCompleteL() ... SUCCESS ") );
     iAddToAlbumRequestOngoing = EFalse;
+        
+    HBufC* infoText = StringLoader::LoadL( R_NOTE_ADDED_ONE_ITEM_ALBUM );
+    CAknConfirmationNote* confNote =  new( ELeave ) CAknConfirmationNote( ETrue );
+    confNote->ExecuteLD( *infoText );
+
     }
 
 

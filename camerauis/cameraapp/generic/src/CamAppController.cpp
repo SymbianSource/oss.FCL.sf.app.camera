@@ -593,12 +593,12 @@ CCamAppController::~CCamAppController()
   iConfiguration = NULL;  
 
   RProperty::Delete( KPSUidCamcorderNotifier, KCCorFocused );  
-    if( iPlugin )
-        {
-        // Destroy Ecom plugin
-        iPlugin->DestroyPlugin();
-        }
-  iPlugin = NULL;
+  if( TUid::Null() != iPlugin )
+      {
+      // Destroy Ecom plugin
+      REComSession::DestroyedImplementation( iPlugin );    
+      REComSession::FinalClose();
+      }
   delete iDriveChangeNotifier;
   iFs.Close();
   
@@ -1965,7 +1965,8 @@ CCamAppController::StopVideoRecording()
       StopViewFinder(); 
       IssueRequestL( ECamRequestVideoStop ); // Rest handled when event comes.
       });
-    
+
+    iIdleTimer->SetTimeout( KIdleTimeout ); //Set normal idle timeout value
     StartIdleTimer();
     }
   else
@@ -2052,17 +2053,13 @@ CCamAppController::HandleVideoStopEvent( TInt aStatus )
   // Keep track of the fact we are now leaving saving state
   iSaving = EFalse;
   
-  // try closing video record to free up resources
-  // Test - <eo> commented out, no such direct request supported
-  // TRAP_IGNORE( IssueDirectRequestL( ECamRequestVideoRelease ) );
-  
-  // if video post capture is off then force re-prepare so
-  // that remaining record time is updated
-  // REMOVED
-
-  // if using direct viewfinding pause viewfinder
-  // REMOVED
-
+  //create thumbnail before harvesting
+  if( iConfigManager && iConfigManager->IsThumbnailManagerAPISupported() )
+      {
+      TRAP_IGNORE( iImageSaveActive->CreateThumbnailsL( *BurstCaptureArray() ) ;
+                   iImageSaveActive->DoCreateThumbnailL() );
+      }
+        
   // report to LifeBlog
   RProperty::Set( KPSUidCamcorderNotifier, KCamLatestFilePath, iSuggestedVideoPath ); 
   // Add to album if this is enabled for videos
@@ -2077,12 +2074,7 @@ CCamAppController::HandleVideoStopEvent( TInt aStatus )
     {
     iImageSaveActive->AddToAlbum( iSuggestedVideoPath, EFalse, defaultAlbumId );
     }
-
-  //create thumbnail
-  if( iConfigManager && iConfigManager->IsThumbnailManagerAPISupported() )
-      {
-      TRAP_IGNORE( iImageSaveActive->CreateThumbnailsL( *BurstCaptureArray() ) );
-      }
+      
   NotifyControllerObservers( ECamEventRecordComplete,   aStatus );
   SetOperation( ECamNoOperation );
   PRINT( _L( "Camera <> calling HandleCaptureCompletion.." ) )        
@@ -2122,6 +2114,7 @@ void CCamAppController::PauseVideoRecording()
         else
             {
             // start video pause timeout
+            iIdleTimer->SetTimeout( iLongIdleTimeout );            
             StartIdleTimer();
             }
         }  
@@ -2139,6 +2132,7 @@ void CCamAppController::ContinueVideoRecording()
   PRINT( _L("Camera => CCamAppController::ContinueVideoRecording") );
   if ( ECamPaused == CurrentVideoOperation() )
     {
+    iIdleTimer->SetTimeout( KIdleTimeout ); //Set normal idle timeout value
     SetOperation( ECamResuming );
     // Restart video when sound played
     PlaySound( ECamVideoResumeSoundId, ETrue );        
@@ -3470,7 +3464,7 @@ CCamAppController::IntSettingChangedL( TCamSettingItemIds aSettingItem,
            scene != ECamSceneSports && 
            !iSceneModeForcedBySecondaryCamera )
           {
-          PRINT1( _L("Camera MK: Changing face tracking state -> update iPreviousFaceTrack to %d"), aSettingValue );
+          PRINT1( _L("Camera <> Changing face tracking state -> update iPreviousFaceTrack to %d"), aSettingValue );
           iSettingsModel->SetPreviousFaceTrack( static_cast<TCamSettingsOnOff>( aSettingValue ) );
           }
       
@@ -4791,6 +4785,8 @@ CCamAppController::CCamAppController()
   , iRamDiskCriticalLevel( KErrNotFound )
   , iImageOrientation( ECamOrientation0 )
   , iLastImageOrientation( ECamOrientation0 )
+  , iLongIdleTimeout( KIdleTimeout * 5 )
+  , iPlugin( TUid::Null() )
   , iPendingHdmiEvent( ECamHdmiNoEvent )
   {
   }
@@ -6638,6 +6634,38 @@ CCamAppController::HandleImageStopEventL( TInt aStatus, TInt aFullCaptureCount )
 
 
 // ---------------------------------------------------------------------------
+// CCamAppController::SetIdleTimerTimeout
+// ---------------------------------------------------------------------------
+//
+void CCamAppController::SetIdleTimerTimeout( TBool aLong )
+    {
+    PRINT1( _L( "Camera => CCamAppController::SetIdleTimerTimeout aLong=%d" ),aLong );
+    TBool changed = EFalse;
+    if( aLong )
+        {
+        if( iLongIdleTimeout < ( KIdleTimeout * 5 ) )
+            {
+            iLongIdleTimeout = KIdleTimeout * 5;
+            changed = ETrue;
+            }
+        }
+    else
+        {
+        if( iLongIdleTimeout > KIdleTimeout )
+            {
+            iLongIdleTimeout = KIdleTimeout; //Low power. Set normal idle timeout value
+            changed = ETrue;            
+            }
+        }
+    
+    if( changed && ECamPaused == CurrentVideoOperation() )
+        {
+        iIdleTimer->SetTimeout( iLongIdleTimeout );            
+        }
+    PRINT1( _L( "Camera <= CCamAppController::SetIdleTimerTimeout changed=%d" ),changed );
+    }
+
+// ---------------------------------------------------------------------------
 // CCamAppController::IdleTimeoutL
 // ---------------------------------------------------------------------------
 //
@@ -6652,9 +6680,10 @@ TInt CCamAppController::IdleTimeoutL( TAny* aPtr )
 //
 TInt CCamAppController::DoIdleTimeoutL()
   {
-  // if a video recording has been paused for 60 seconds without key presses
+  // if a video recording has been paused for 5 minutes without key presses
   if ( ECamPaused == CurrentVideoOperation() )
     {
+    iIdleTimer->SetTimeout( KIdleTimeout ); //Set normal idle timeout value
     NotifyControllerObservers( ECamEventVideoPauseTimeout, KErrNone );
     }
 
@@ -6703,7 +6732,7 @@ void CCamAppController::StartIdleTimer()
     // don't restart if recording operation in progress
     return;
     }
-  // if recording is paused, use the idle timer to stop recording after 60 secs
+  // if recording is paused, use the idle timer to stop recording after 5 mins
   else
     {
     PRINT( _L( "Camera <> CCamAppController::StartIdleTimer else part" ) );
@@ -9800,7 +9829,11 @@ CCamAppController::ProceedPendingOrNotifyReadyL()
       {
       PRINT( _L("Camera <> starting recording..") );
       iVideoRequested = EFalse;
-      IssueRequestL( ECamRequestVideoStart );
+      // Make sure the MMC have enough free memory to record video.  
+      if( appUi->CheckMemoryL() )
+        {  
+        IssueRequestL( ECamRequestVideoStart );
+    	}
       PRINT( _L("Camera <> ..done") );
       }
 
@@ -10580,7 +10613,7 @@ CCamAppController::IsSavingInProgress() const
 //
 // -----------------------------------------------------------------------------
 //
-void CCamAppController::SetSettingsPlugin( CCamGSInterface* aPlugin )
+void CCamAppController::SetSettingsPlugin( TUid aPlugin )
 	{
 	iPlugin = aPlugin;
 	}
@@ -10908,9 +10941,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
           else if( aType == EDriveDismount &&
                   appUi->IsRecoverableStatus() )
               {
-              TInt mmcInserted = 0;
               TInt usbPersonality = 0;
-              User::LeaveIfError( RProperty::Get( KPSUidUikon, KUikMMCInserted, mmcInserted ) );
               User::LeaveIfError(RProperty::Get(KPSUidUsbWatcher, 
                                             KUsbWatcherSelectedPersonality,
                                             usbPersonality) );
@@ -10921,7 +10952,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
                       {
                       SwitchToStandbyL( ECamErrMassStorageMode );
                       }
-                  else if ( !mmcInserted )
+                  else if ( aType == EDriveDismount )
                       {
                       SwitchToStandbyL( ECamErrMemoryCardNotInserted );
                       }

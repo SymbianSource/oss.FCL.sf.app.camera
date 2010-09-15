@@ -74,7 +74,7 @@ USERINCLUDE ../Inc
 APP_LAYER_SYSTEMINCLUDE
 
 LIBRARY euser.lib cone.lib bitgdi.lib fbscli.lib ws32.lib gdi.lib flogger.lib 
-LIBRARY bafl.lib avkon.lib egul.lib aknskins.lib aknicon.lib 
+LIBRARY bafl.lib avkon.lib egul.lib AKNSKINS.lib AknIcon.lib
 #ifdef AP2_USE_3D_RENDERING
 LIBRARY hitchcock.lib
 #endif

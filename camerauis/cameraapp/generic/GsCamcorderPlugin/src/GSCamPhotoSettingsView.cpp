@@ -233,9 +233,9 @@ CGulIcon* CGSCamPhotoSettingsView::CreateTabIconL()
         AknsUtils::SkinInstance(),  
         KAknsIIDDefault, 
         fileName,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_tab_image,
-        EMbmCamerasettingspluginQgn_lcam_gen_sett_camera_tab_image );
-    
+        EMbmCamerasettingspluginQgn_prop_cams_set_image_tab2,
+        EMbmCamerasettingspluginQgn_prop_cams_set_image_tab2 );
+
     return icon;
     }       
 

@@ -157,6 +157,19 @@ void CCamBatteryPaneController::SetCallbackActive( TBool aActive )
     iCallbackActive = aActive;
     }
 
+
+// ---------------------------------------------------------------------------
+// CCamBatteryPaneController::IsBatteryLow
+// ---------------------------------------------------------------------------
+//    
+TBool CCamBatteryPaneController::IsBatteryLow()
+    {
+    return ( ( iBatteryStrength >= 0 )&& ( iBatteryStrength <= 2 )
+            && !iRecharging );
+    }
+
+
+
 // ---------------------------------------------------------------------------
 // CCamBatteryPaneController::SetBatteryStrength
 // ---------------------------------------------------------------------------

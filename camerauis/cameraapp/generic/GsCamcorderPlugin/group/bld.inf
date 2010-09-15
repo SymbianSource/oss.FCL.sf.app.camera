@@ -32,7 +32,7 @@ PRJ_EXTENSIONS
 START EXTENSION s60/mifconv
 OPTION TARGETFILE camerasettingsplugin.mif
 OPTION HEADERFILE camerasettingsplugin.mbg
-OPTION SOURCEDIR ../icons
+
 OPTION SOURCEFILE iconlist.txt
 END
 

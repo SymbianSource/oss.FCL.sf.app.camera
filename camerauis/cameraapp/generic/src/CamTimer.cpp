@@ -73,6 +73,11 @@ void CCamTimer::StartTimer()
 void CCamTimer::SetTimeout( TInt aTimeout )
     {
     iTimeout = aTimeout;
+    if( IsActive() )
+        {
+        Cancel();
+        StartTimer();
+        }
     }   
 
 // ---------------------------------------------------------------------------

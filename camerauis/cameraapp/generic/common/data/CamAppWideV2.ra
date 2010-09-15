@@ -849,3 +849,17 @@ RESOURCE AVKON_LAYOUT_RECT r_cam_processing_text_bg
     } 
 */
 
+
+//----------------------------------------------------
+//   
+//    r_note_added_one_item_album
+//    Notification to show when an item was added to an album
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_note_added_one_item_album
+    {
+    buf = qtn_lcam_note_added_one_item_album;
+    }    
+    
+    

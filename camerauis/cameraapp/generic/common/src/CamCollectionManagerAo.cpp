@@ -190,7 +190,7 @@ void CCamCollectionManagerAO::DoAddToAlbumOperationL()
         PRINT( _L("Camera <> CCamCollectionManagerAO::DoAddToAlbumOperationL ... Enters Else Loop") );
         iAddToAlbum = EFalse;
         iSelectedAlbumIds.Reset();
-        iObserver.AddToAlbumIdOperationComplete();
+        iObserver.AddToAlbumIdOperationCompleteL();
         }
     PRINT1( _L("Camera <= CCamCollectionManagerAO::DoAddToAlbumOperationL ... Before leaving iCurrentAlbumIndex (%d)"), iCurrentAlbumIndex )
     }

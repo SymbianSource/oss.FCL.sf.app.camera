@@ -26,11 +26,6 @@
 
 // CONSTANTS
 _LIT(KCamBitmapFile, "z:\\resource\\apps\\cameraapp.mif");
-const TSize KIconSize( 35, 35 );
-const TSize KAdditionalArea( 25, 11 );
-const TInt32 KCaptureIconDelta( 7 );
-const TUint32 KToolbarExtensionBgColor = 0x00000000;
-const TInt KToolBarExtensionBgAlpha = 0x7F;
 const TInt KCaptureButtonOrdinalPriority( 1 );
 const TSize KIconMargin( 7, 7 );
 
