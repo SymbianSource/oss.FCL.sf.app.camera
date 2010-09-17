@@ -20,6 +20,7 @@
 #include <QObject>
 #include "cxenamespace.h"
 #include "cxengine_global.h"
+#include "cxeerror.h"
 
 class CxeCameraDeviceControl;
 class CxeViewfinderControl;
@@ -124,6 +125,9 @@ public:
 
     //! returns if the engine is ready or not
     virtual bool isEngineReady() = 0;
+
+signals:
+    void fileSaved(CxeError::Id status, const QString &filename);
 
 protected:
     CxeEngine();

@@ -50,7 +50,7 @@
                 <anchoritem dst="transparent" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
-        <string name="title" value="Camera"/>
+        <string locid="txt_cam_title_camera" name="title" value="Camera"/>
         <bool name="contentFullScreen" value="TRUE"/>
         <enums name="viewFlags" value="ViewTitleBarTransparent|ViewTitleBarFloating|ViewTitleBarHidden|ViewStatusBarTransparent|ViewStatusBarFloating|ViewStatusBarHidden"/>
     </widget>

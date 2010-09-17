@@ -10,7 +10,7 @@
     </object>
     <widget name="settings_dialog" type="HbDialog">
         <widget name="settings_dialog_heading" role="HbDialog:headingWidget" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <enums name="alignment" value="AlignVCenter|AlignLeft"/>
             <string name="plainText" value="Dummy settings dialog"/>
             <fontspec name="fontSpec" role="Primary" textheight="var(hb-param-text-height-primary)"/>
         </widget>

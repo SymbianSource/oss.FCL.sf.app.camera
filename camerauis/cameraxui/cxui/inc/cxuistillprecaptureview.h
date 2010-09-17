@@ -55,8 +55,7 @@ public:
     virtual void construct(HbMainWindow *mainwindow, 
                            CxeEngine *engine,
                            CxuiDocumentLoader *documentLoader, 
-                           CxuiCaptureKeyHandler *keyHandler,
-                           HbActivityManager *activityManager);
+                           CxuiCaptureKeyHandler *keyHandler);
 
     virtual void loadDefaultWidgets();
     virtual void loadWidgets();
@@ -93,7 +92,7 @@ protected slots:
 
     // Engine signals
     void handleAutoFocusStateChanged(CxeAutoFocusControl::State newState, CxeError::Id error);
-    void handleViewfinderStateChanged(CxeViewfinderControl::State newState, CxeError::Id error);
+    void handleVfStateChanged(CxeViewfinderControl::State newState, CxeError::Id error);
     void handleStillCaptureStateChanged(CxeStillCaptureControl::State newState, CxeError::Id error);
     void handleSnapshot(CxeError::Id error);
 

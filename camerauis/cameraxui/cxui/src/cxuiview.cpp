@@ -66,8 +66,7 @@ CxuiView::~CxuiView()
 */
 void CxuiView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
                          CxuiDocumentLoader *documentLoader,
-                         CxuiCaptureKeyHandler * keyHandler,
-                         HbActivityManager *activityManager)
+                         CxuiCaptureKeyHandler * keyHandler)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
@@ -75,13 +74,11 @@ void CxuiView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
     CX_ASSERT_ALWAYS(mainWindow);
     CX_ASSERT_ALWAYS(engine);
     CX_ASSERT_ALWAYS(documentLoader);
-    CX_ASSERT_ALWAYS(activityManager);
 
     mMainWindow = mainWindow;
     mDocumentLoader = documentLoader;
     mCaptureKeyHandler = keyHandler;
     mEngine = engine;
-    mActivityManager = activityManager;
 
     // adjust the timer, and connect it to correct slot
     connect(&mHideControlsTimeout, SIGNAL(timeout()), this, SLOT(hideControls()));
@@ -147,7 +144,7 @@ void CxuiView::saveActivity()
 }
 
 /*!
- * Clear activity from activity manager. Default implementation does nothing.
+ * Clear activity from activity storage. Default implementation does nothing.
  */
 void CxuiView::clearActivity()
 {
@@ -194,9 +191,9 @@ void CxuiView::toggleControls()
 */
 void CxuiView::enterStandby()
 {
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_ENTER_FUNCTION();
     releaseCamera();
-    CX_DEBUG_IN_FUNCTION();
+    CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
@@ -268,26 +265,28 @@ void CxuiView::hideControls()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (mHideControlsTimeout.isActive()) {
-        mHideControlsTimeout.stop();
+    if (mMainWindow->currentView() == this) {
+        if (mHideControlsTimeout.isActive()) {
+            mHideControlsTimeout.stop();
+        }
+
+        setTitleBarVisible(false);
+        setStatusBarVisible(false);
+
+        hideZoom();
+
+        hideToolbar();
+
+        // show indicators when controls are hidden
+        showIndicators();
+
+        mControlsVisible = false;
+
+        // give the keyboard focus back to the view
+        // for the view to receive key events
+        setFocus();
+
     }
-
-    setTitleBarVisible(false);
-    setStatusBarVisible(false);
-
-    hideZoom();
-
-    hideToolbar();
-
-    // show indicators when controls are hidden
-    showIndicators();
-
-    mControlsVisible = false;
-
-    // give the keyboard focus back to the view
-    // for the view to receive key events
-    setFocus();
-
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -296,7 +295,7 @@ void CxuiView::hideControls()
  */
 void CxuiView::showControls()
 {
-    if (allowShowControls()) {
+    if (mMainWindow->currentView() == this && allowShowControls()) {
         // show toolbar
         showToolbar();
 

@@ -32,8 +32,9 @@
 #include <hbnotificationdialog.h>
 #include <hbfeedbacksettings.h>
 #include <hbfeedbacknamespace.h>
-#include <hbactivitymanager.h>
+#include <afactivitystorage.h>
 #include <hbextendedlocale.h>
+#include <hbparameterlengthlimiter>
 
 #include "cxuivideoprecaptureview.h"
 #include "cxeengine.h"
@@ -109,12 +110,11 @@ CxuiVideoPrecaptureView::~CxuiVideoPrecaptureView()
  */
 void CxuiVideoPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
                                         CxuiDocumentLoader *documentLoader,
-                                        CxuiCaptureKeyHandler *keyHandler,
-                                        HbActivityManager *activityManager)
+                                        CxuiCaptureKeyHandler *keyHandler)
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler, activityManager);
+    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler);
     mCaptureKeyHandler = keyHandler;
 
     mVideoCaptureControl = &(engine->videoCaptureControl());
@@ -290,6 +290,7 @@ void CxuiVideoPrecaptureView::loadWidgets()
 
     if (CxuiServiceProvider::isCameraEmbedded()) {
         CX_DEBUG(("EMBEDDED: camera in embedded mode"));
+        setTitle(CxuiServiceProvider::instance()->windowTitle());
 
         if (!CxuiServiceProvider::instance()->allowQualityChange()) {
 
@@ -381,25 +382,27 @@ void CxuiVideoPrecaptureView::saveActivity()
     CX_DEBUG_ENTER_FUNCTION();
     QVariantMap data;
     QVariantHash params;
+    AfActivityStorage activityStorage;
 
     HbIcon activityScreenshot("qtg_graf_taskswitcher_camcorder");
     QPixmap screenshot = activityScreenshot.pixmap();
     params.insert("screenshot", screenshot);
 
-    mActivityManager->removeActivity(
+    activityStorage.removeActivity(
             CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
-    mActivityManager->addActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY,
+    activityStorage.saveActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY,
                                   data, params);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
- * Clear activity from activity manager.
+ * Clear activity from activity storage.
  */
 void CxuiVideoPrecaptureView::clearActivity()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mActivityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
+    AfActivityStorage activityStorage;
+    activityStorage.removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -538,6 +541,10 @@ void CxuiVideoPrecaptureView::pause()
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Stops video recording if it is ongoing or paused.
+ * \sa handleVideoStateChanged()
+ */
 void CxuiVideoPrecaptureView::stop()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -748,7 +755,8 @@ void CxuiVideoPrecaptureView::setVideoTime(HbLabel* label,
     }
     remaining.append(number);
 
-    label->setPlainText(hbTrId("txt_cam_info_recording_time").arg(elapsed).arg(remaining));
+    label->setPlainText(
+		HbParameterLengthLimiter("txt_cam_info_recording_time").arg(elapsed).arg(remaining));
 }
 
 bool CxuiVideoPrecaptureView::getElapsedTime()
@@ -848,7 +856,6 @@ void CxuiVideoPrecaptureView::handleVideoStateChanged(CxeVideoCaptureControl::St
         enableFeedback();
         emit startStandbyTimer();
         mElapsedTimer.stop();
-        hideControls();
 
         if (mMenu) {
             setMenu(mMenu);
@@ -914,15 +921,16 @@ void CxuiVideoPrecaptureView::handleQuitClicked()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxeVideoCaptureControl::State state = mVideoCaptureControl->state();
-    if (state == CxeVideoCaptureControl::Recording ||
-        state == CxeVideoCaptureControl::Paused) {
-        // Disable going to post-capture when video capture control goes to stopping state.
-        disconnect(mVideoCaptureControl, SIGNAL(stateChanged(CxeVideoCaptureControl::State, CxeError::Id)),
-                   this, SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,CxeError::Id)));
-        mVideoCaptureControl->stop();
-        mElapsedTimer.stop();
-    }
+    // Disable going to post-capture when video capture control goes to stopping state.
+    disconnect(mVideoCaptureControl,
+               SIGNAL(stateChanged(CxeVideoCaptureControl::State,
+                                   CxeError::Id)),
+               this,
+               SLOT(handleVideoStateChanged(CxeVideoCaptureControl::State,
+                                            CxeError::Id)));
+
+    // stop video recording (if it is ongoing or paused)
+    stop();
 
     QCoreApplication::exit();
 
@@ -979,6 +987,26 @@ void CxuiVideoPrecaptureView::handleSettingValueChanged(const QString& key, QVar
         }
     }
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+ * Overridden version of CxuiPreCaptureView::enterStandby().
+ * Handles video precapture specific standby preparations and calls
+ * base class implementation. Standby is entered either via standby timer
+ * or when application goes to background.
+ * \sa CxuiView::enterStandby()
+ * \sa CxuiPrecaptureView::enterStandby()
+ */
+void CxuiVideoPrecaptureView::enterStandby()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    // stop video recording (if it is ongoing or paused)
+    stop();
+
+    // call base class implemenation
+    CxuiPrecaptureView::enterStandby();
     CX_DEBUG_EXIT_FUNCTION();
 }
 

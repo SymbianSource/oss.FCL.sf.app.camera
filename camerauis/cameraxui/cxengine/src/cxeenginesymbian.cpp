@@ -166,6 +166,9 @@ void CxeEngineSymbian::createControls()
 
         mFileSaveThread = CxeFileSaveThreadFactory::createFileSaveThread();
 
+        connect(mFileSaveThread, SIGNAL(fileSaved(CxeError::Id, const QString&)),
+                    this, SIGNAL(fileSaved(CxeError::Id, const QString&)));
+
         mStillCaptureControl = new CxeStillCaptureControlSymbian(
             *mCameraDevice, *mViewfinderControl, *mSnapshotControl, *mCameraDeviceControl,
             *mFilenameGenerator, *mSensorEventHandler, *mAutoFocusControl,

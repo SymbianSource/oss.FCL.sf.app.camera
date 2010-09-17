@@ -69,6 +69,7 @@ public slots:
 private slots:
     void handleForegroundStateChanged(CxuiApplicationFrameworkMonitor::ForegroundState state);
     void handleUsbMassMemoryModeChanged(bool active);
+    void handleTaskSwitcherStateChanged(bool active);
     void handleBatteryEmpty();
     void handleSevereError();
     void handleErrorCleared();

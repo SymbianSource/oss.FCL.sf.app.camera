@@ -10,7 +10,7 @@
     </object>
     <widget name="slider_settings_dialog" type="HbDialog">
         <widget name="slider_settings_dialog_heading" role="HbDialog:headingWidget" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <enums name="alignment" value="AlignVCenter|AlignLeft"/>
             <string name="plainText" value="Setting dialog"/>
         </widget>
         <widget name="slider_dialog_container" role="HbDialog:contentWidget" type="HbWidget">

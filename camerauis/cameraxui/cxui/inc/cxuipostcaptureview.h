@@ -44,8 +44,7 @@ public:
     CxuiPostcaptureView(QGraphicsItem *parent = 0);
     virtual ~CxuiPostcaptureView();
     void construct(HbMainWindow *mainwindow, CxeEngine *engine,
-                   CxuiDocumentLoader *documentLoader, CxuiCaptureKeyHandler *keyHandler,
-                   HbActivityManager *activityManager);
+                   CxuiDocumentLoader *documentLoader, CxuiCaptureKeyHandler *keyHandler);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
@@ -85,6 +84,7 @@ protected slots:
 
     void handleDeleteDialogClosed(int action);
 
+    void handleFileSaved();
 private:
     bool isFileDeleted();
     QString getCurrentFilename();

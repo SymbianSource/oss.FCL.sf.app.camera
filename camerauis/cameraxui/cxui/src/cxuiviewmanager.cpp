@@ -19,7 +19,8 @@
 #include <hbmainwindow.h>
 #include <QGraphicsSceneEvent>
 #include <hbstyleloader.h>
-#include <hbactivitymanager.h>
+#include <afactivitystorage.h>
+#include <afactivation.h>
 #include <hbaction.h>
 #include <xqserviceutil.h>
 
@@ -276,7 +277,9 @@ void CxuiViewManager::initStartupView()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (mApplication.activateReason() == Hb::ActivationReasonService ||
+    AfActivation activation;
+    AfActivityStorage activityStorage;
+    if (activation.reason() == Hb::ActivationReasonService ||
         // @todo: There's a bug in orbit and we never get Hb::ActivationReasonService as
         // activation reason. Use XQServiceUtil to determine if starting service as
         // a workaround for now
@@ -289,14 +292,14 @@ void CxuiViewManager::initStartupView()
         connect(&mEngine.videoCaptureControl(), SIGNAL(videoPrepareComplete(CxeError::Id)),
                 this, SLOT(changeToPrecaptureView()));
 
-    } else if (mApplication.activateReason() == Hb::ActivationReasonActivity) {
+    } else if (activation.reason() == Hb::ActivationReasonActivity) {
         // restoring activity, read startup view from stored activity
 
         // view to start in
         QString viewName = STILL_PRE_CAPTURE_VIEW;
 
         bool preCapture = true;
-        QString activityId = mApplication.activateId();
+        QString activityId = activation.name();
         if (activityId == CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY) {
             viewName = STILL_PRE_CAPTURE_VIEW;
         } else if (activityId == CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY) {
@@ -318,10 +321,7 @@ void CxuiViewManager::initStartupView()
         mMainWindow.setCurrentView(view, false);
 
         // restore view from activity
-        bool ok = mApplication.activityManager()->waitActivity();
-
-        view->restoreActivity(activityId,
-                              mApplication.activityManager()->activityData(mApplication.activateId()));
+        view->restoreActivity(activityId, activityStorage.activityData(activityId));
 
         clearAllActivities();
     } else {
@@ -380,7 +380,7 @@ CxuiView* CxuiViewManager::createView(const QString &viewName)
         OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_8, "msg: e_CX_DOCUMENTLOADER_FINDWIDGET 1");
 
         // call for needed consturction methods
-        view->construct(&mMainWindow, &mEngine, mCameraDocumentLoader, mKeyHandler, mApplication.activityManager());
+        view->construct(&mMainWindow, &mEngine, mCameraDocumentLoader, mKeyHandler);
         // .. and add to main window (which also takes ownership)
         OstTrace0(camerax_performance, CXUIVIEWMANAGER_CREATEVIEW_10, "msg: e_CX_MAINWINDOW_ADDVIEW 1");
         mMainWindow.addView(view);
@@ -759,11 +759,11 @@ void CxuiViewManager::connectCaptureKeySignals(CxuiView *view)
  */
 void CxuiViewManager::clearAllActivities()
 {
-    HbActivityManager *activityManager = mApplication.activityManager();
-    activityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
-    activityManager->removeActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY);
-    activityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
-    activityManager->removeActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY);
+    AfActivityStorage activityStorage;
+    activityStorage.removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
+    activityStorage.removeActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY);
+    activityStorage.removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
+    activityStorage.removeActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY);
 }
 
 /*!

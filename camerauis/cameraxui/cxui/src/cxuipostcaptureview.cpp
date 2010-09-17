@@ -29,7 +29,7 @@
 #include <hbtoolbar.h>
 #include <hbaction.h>
 #include <hbmessagebox.h>
-#include <hbactivitymanager.h>
+#include <afactivitystorage.h>
 
 #include <xqaiwdecl.h>
 #include <shareui.h>
@@ -111,13 +111,12 @@ CxuiPostcaptureView::~CxuiPostcaptureView()
 */
 void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
                                     CxuiDocumentLoader *documentLoader,
-                                    CxuiCaptureKeyHandler *keyHandler,
-                                    HbActivityManager *activityManager)
+                                    CxuiCaptureKeyHandler *keyHandler)
 {
     Q_UNUSED(keyHandler);
     CX_DEBUG_ENTER_FUNCTION();
 
-    CxuiView::construct(mainwindow, engine, documentLoader, NULL, activityManager);
+    CxuiView::construct(mainwindow, engine, documentLoader, NULL);
 
     // set back action to go back to pre-capture
     HbAction *backAction = new HbAction(Hb::BackNaviAction, this);
@@ -162,10 +161,6 @@ void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
     connect(&mReleaseCameraTimer, SIGNAL(timeout()),
             this, SLOT(releaseCamera()));
 
-    mHideControlsTimeout.setSingleShot(true);
-    connect(&mHideControlsTimeout, SIGNAL(timeout()),
-            this, SLOT(hideControls()));
-
     mPostcaptureTimer.setSingleShot(true);
     connect(&mPostcaptureTimer, SIGNAL(timeout()),
             this, SLOT(goToPrecaptureView()));
@@ -175,6 +170,13 @@ void CxuiPostcaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
     setFocusPolicy(Qt::StrongFocus);
 
     QCoreApplication::instance()->installEventFilter(this);
+
+    connect(mEngine, SIGNAL(fileSaved(CxeError::Id, const QString&)), this, SLOT(handleFileSaved()));
+
+    if (CxuiServiceProvider::isCameraEmbedded()) {
+        setTitle(CxuiServiceProvider::instance()->windowTitle());
+    }
+
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -297,6 +299,15 @@ void CxuiPostcaptureView::handleDeleteDialogClosed(int action)
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ *  Handle file saving complete event. Toolbar is shown when file is saved.
+ */
+void CxuiPostcaptureView::handleFileSaved()
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    showControls();
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
 /*!
     Slot for handling image/video sharing.
@@ -441,6 +452,7 @@ void CxuiPostcaptureView::saveActivity()
     CX_DEBUG_ENTER_FUNCTION();
     QVariantMap data;
     QVariantHash params;
+    AfActivityStorage activityStorage;
 
     QString filename = getCurrentFilename();
     CX_DEBUG(("Saving filename [%s]", qPrintable(filename)));
@@ -454,23 +466,24 @@ void CxuiPostcaptureView::saveActivity()
 
     params.insert("screenshot", screenshot);
     if (mEngine->mode() == Cxe::ImageMode) {
-        mActivityManager->removeActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY);
-        mActivityManager->addActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY, data, params);
+        activityStorage.removeActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY);
+        activityStorage.saveActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY, data, params);
     } else {
-        mActivityManager->removeActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY);
-        mActivityManager->addActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY, data, params);
+        activityStorage.removeActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY);
+        activityStorage.saveActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY, data, params);
     }
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
- * Clear activity from activity manager.
+ * Clear activity from activity storage.
  */
 void CxuiPostcaptureView::clearActivity()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mActivityManager->removeActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY);
-    mActivityManager->removeActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY);
+    AfActivityStorage activityStorage;
+    activityStorage.removeActivity(CxuiActivityIds::STILL_POSTCAPTURE_ACTIVITY);
+    activityStorage.removeActivity(CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -494,7 +507,8 @@ void CxuiPostcaptureView::showEvent(QShowEvent *event)
         // If the image / video has been deleted, control returned to pre-capture view.
         // No point to start timers or show controls then.
         if (mMainWindow->currentView() == this) {
-            showControls();
+            setTitleBarVisible(true);
+            setStatusBarVisible(true);
             startTimers();
         }
 

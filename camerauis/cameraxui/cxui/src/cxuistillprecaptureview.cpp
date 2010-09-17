@@ -33,7 +33,8 @@
 #include <hbdeviceprofile.h> // HbDeviceProfile
 #include <hbmenu.h>
 #include <hbicon.h>
-#include <hbactivitymanager.h>
+#include <afactivitystorage.h>
+#include <hbextendedlocale.h>
 
 #include "cxuiselftimer.h"
 #include "cxeengine.h"
@@ -101,14 +102,13 @@ CxuiStillPrecaptureView::~CxuiStillPrecaptureView()
  */
 void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *engine,
                                         CxuiDocumentLoader *documentLoader,
-                                        CxuiCaptureKeyHandler *keyHandler,
-                                        HbActivityManager *activityManager)
+                                        CxuiCaptureKeyHandler *keyHandler)
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0( camerax_performance, CXUISTILLPRECAPTUREVIEW_CONSTRUCT, "msg: e_CX_STILLPRECAPVIEW_CONSTRUCT 1" );
 
     // constuct base class
-    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler, activityManager);
+    CxuiPrecaptureView::construct(mainwindow, engine, documentLoader, keyHandler);
 
     connect(&mEngine->autoFocusControl(), SIGNAL(stateChanged(CxeAutoFocusControl::State,CxeError::Id)),
             this, SLOT(handleAutoFocusStateChanged(CxeAutoFocusControl::State,CxeError::Id)));
@@ -116,8 +116,6 @@ void CxuiStillPrecaptureView::construct(HbMainWindow *mainwindow, CxeEngine *eng
             this, SLOT(handleSnapshot(CxeError::Id)));
     connect(&mEngine->stillCaptureControl(), SIGNAL(stateChanged(CxeStillCaptureControl::State, CxeError::Id)),
             this, SLOT(handleStillCaptureStateChanged(CxeStillCaptureControl::State, CxeError::Id)));
-    connect(&mEngine->viewfinderControl(), SIGNAL(stateChanged(CxeViewfinderControl::State, CxeError::Id)),
-            this, SLOT(handleViewfinderStateChanged(CxeViewfinderControl::State, CxeError::Id)));
     connect(&mEngine->stillCaptureControl(), SIGNAL(availableImagesChanged()),
             this, SLOT(updateImagesLeftLabel()));
 
@@ -319,6 +317,7 @@ void CxuiStillPrecaptureView::loadWidgets()
 
     if (CxuiServiceProvider::isCameraEmbedded()) {
         CX_DEBUG(("EMBEDDED: camera in embedded mode"));
+        setTitle(CxuiServiceProvider::instance()->windowTitle());
 
         if (!CxuiServiceProvider::instance()->allowQualityChange()) {
 
@@ -390,25 +389,27 @@ void CxuiStillPrecaptureView::saveActivity()
     CX_DEBUG_ENTER_FUNCTION();
     QVariantMap data;
     QVariantHash params;
+    AfActivityStorage activityStorage;
 
     HbIcon activityScreenshot("qtg_graf_taskswitcher_camera");
     QPixmap screenshot = activityScreenshot.pixmap();
     params.insert("screenshot", screenshot);
 
-    mActivityManager->removeActivity(
+    activityStorage.removeActivity(
             CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
-    mActivityManager->addActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY,
+    activityStorage.saveActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY,
                                   data, params);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
 /*!
- * Clear activity from activity manager.
+ * Clear activity from activity storage.
  */
 void CxuiStillPrecaptureView::clearActivity()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mActivityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
+    AfActivityStorage activityStorage;
+    activityStorage.removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -819,7 +820,7 @@ bool CxuiStillPrecaptureView::allowShowControls() const
 /*!
 * Handle change in viewfinder state.
 */
-void CxuiStillPrecaptureView::handleViewfinderStateChanged(
+void CxuiStillPrecaptureView::handleVfStateChanged(
     CxeViewfinderControl::State newState, CxeError::Id error)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -1015,6 +1016,9 @@ void CxuiStillPrecaptureView::updateImagesLeftLabel()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    QString imagesStr;
+    HbExtendedLocale locale = HbExtendedLocale::system();
+
     if (mImagesLeft && mImagesLeftContainer) {
         int images = mEngine->stillCaptureControl().imagesLeft();
 
@@ -1025,7 +1029,9 @@ void CxuiStillPrecaptureView::updateImagesLeftLabel()
         }
 
         CX_DEBUG(("Images left %d", images));
-        mImagesLeft->setPlainText(hbTrId("txt_cam_fullscreen_imagesleft").arg(images));
+        imagesStr = locale.toString(images);
+
+        mImagesLeft->setPlainText(imagesStr);
     }
 
     CX_DEBUG_EXIT_FUNCTION();

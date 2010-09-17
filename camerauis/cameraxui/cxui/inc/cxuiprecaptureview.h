@@ -27,7 +27,6 @@
 #include "cxezoomcontrol.h"
 #include "cxegeotaggingtrail.h"
 #include "cxeviewfindercontrol.h"
-#include "cxuidisplaypropertyhandler.h"
 #include "cxuiview.h"
 
 
@@ -40,7 +39,6 @@ class CxuiSettingsInfo;
 class HbToolBarExtension;
 class CxuiDocumentLoader;
 class HbTransparentWindow;
-class CxuiCaptureKeyHandler;
 class CxuiCaptureKeyHandler;
 class CxuiSettingDialog;
 class CxuiSettingRadioButtonList;
@@ -68,8 +66,7 @@ public:
     virtual void construct(HbMainWindow *mainWindow,
                            CxeEngine *engine,
                            CxuiDocumentLoader *documentLoader,
-                           CxuiCaptureKeyHandler *keyHandler,
-                           HbActivityManager *activityManager);
+                           CxuiCaptureKeyHandler *keyHandler);
 
     virtual bool isStandbyModeSupported() const;
     /**
@@ -123,7 +120,7 @@ protected slots:
     // Camera / Engine
     void handleEngineZoomStateChange(CxeZoomControl::State newState, CxeError::Id error);
     void handleZoomLevelChange(int);
-    void handleVfStateChanged(CxeViewfinderControl::State newState, CxeError::Id error);
+    virtual void handleVfStateChanged(CxeViewfinderControl::State newState, CxeError::Id error);
     // UI: Zoom slider change notification
     void zoomTo(int value);
 
@@ -165,7 +162,6 @@ private:
 
 protected:
     HbTransparentWindow *mViewfinder; // not own, owned by the graphics scene
-    CxuiDisplayPropertyHandler *mDisplayHandler;
     HbToolBarExtension *mSettingsGrid;
     bool mWidgetsLoaded;
     CxuiSettingDialog *mSettingsDialog;

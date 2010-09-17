@@ -15,7 +15,7 @@
 *
 */
 #include <hbframeitem.h>
-#include <hbactivitymanager.h>
+#include <afactivitystorage.h>
 
 #include "cxenamespace.h"
 #include "cxesettings.h"
@@ -78,11 +78,10 @@ CxuiSceneModeView::~CxuiSceneModeView()
 void CxuiSceneModeView::construct(HbMainWindow *mainwindow,
                                CxeEngine *engine,
                                CxuiDocumentLoader *documentLoader,
-                               CxuiCaptureKeyHandler *keyHandler,
-                               HbActivityManager *activityManager)
+                               CxuiCaptureKeyHandler *keyHandler)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    CxuiView::construct(mainwindow, engine, documentLoader, keyHandler, activityManager);
+    CxuiView::construct(mainwindow, engine, documentLoader, keyHandler);
 
     mSettingsInfo = new CxuiSettingsInfo(mEngine);
     setContentFullScreen(true);
@@ -193,21 +192,22 @@ void CxuiSceneModeView::saveActivity()
     CX_DEBUG_ENTER_FUNCTION();
     QVariantMap data;
     QVariantHash params;
+    AfActivityStorage activityStorage;
 
     if (mEngine->mode() == Cxe::ImageMode) {
         HbIcon activityScreenshot("qtg_graf_taskswitcher_camera");
         QPixmap screenshot = activityScreenshot.pixmap();
         params.insert("screenshot", screenshot);
 
-        mActivityManager->removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
-        mActivityManager->addActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY, data, params);
+        activityStorage.removeActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY);
+        activityStorage.saveActivity(CxuiActivityIds::STILL_PRECAPTURE_ACTIVITY, data, params);
     } else {
         HbIcon activityScreenshot("qtg_graf_taskswitcher_camcorder");
         QPixmap screenshot = activityScreenshot.pixmap();
         params.insert("screenshot", screenshot);
 
-        mActivityManager->removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
-        mActivityManager->addActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY, data, params);
+        activityStorage.removeActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY);
+        activityStorage.saveActivity(CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY, data, params);
     }
 
     CX_DEBUG_EXIT_FUNCTION();

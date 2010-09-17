@@ -31,7 +31,6 @@ class CxuiZoomSlider;
 class CxuiCaptureKeyHandler;
 class CxeEngine;
 class HbWidget;
-class HbActivityManager;
 
 // CONSTANTS
 const int CXUI_HIDE_CONTROLS_TIMEOUT     = 6000; // 6 seconds
@@ -50,8 +49,7 @@ public:
 
     virtual void construct(HbMainWindow *mainWindow, CxeEngine *engine,
                            CxuiDocumentLoader *documentLoader,
-                           CxuiCaptureKeyHandler * keyHandler,
-                           HbActivityManager *activityManager);
+                           CxuiCaptureKeyHandler * keyHandler);
 
 public:
     virtual bool isStandbyModeSupported() const;
@@ -118,7 +116,6 @@ protected: //common data
     QTimer mHideControlsTimeout;
 
     HbInstantFeedback mControlsFeedback;
-    HbActivityManager *mActivityManager;
 };
 
 #endif // CXUIVIEW_H

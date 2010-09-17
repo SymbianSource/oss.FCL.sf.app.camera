@@ -47,7 +47,6 @@
 #include "cxutils.h"
 #include "cxuienums.h"
 #include "cxuidocumentloader.h"
-#include "cxuidisplaypropertyhandler.h"
 #include "cxuicapturekeyhandler.h"
 #include "cxuiprecaptureview.h"
 #include "cxuisettingdialog.h"
@@ -83,7 +82,6 @@ const int CXUI_GEOTAGGING_BLINK_INTERVAL = 500; //milliseconds, for geotagging i
 CxuiPrecaptureView::CxuiPrecaptureView(QGraphicsItem *parent) :
     CxuiView(parent),
     mViewfinder(0),
-    mDisplayHandler(0),
     mSettingsGrid(0),
     mWidgetsLoaded(false),
     mSettingsDialog(NULL),
@@ -101,7 +99,6 @@ CxuiPrecaptureView::CxuiPrecaptureView(QGraphicsItem *parent) :
     mSliderSettingsDialogOkAction(NULL)
 {
     CX_DEBUG_ENTER_FUNCTION();
-    mDisplayHandler = new CxuiDisplayPropertyHandler();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -123,13 +120,12 @@ CxuiPrecaptureView::~CxuiPrecaptureView()
  */
 void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
                                    CxuiDocumentLoader *documentLoader,
-                                   CxuiCaptureKeyHandler * keyHandler,
-                                   HbActivityManager *activityManager)
+                                   CxuiCaptureKeyHandler * keyHandler)
 {
     CX_DEBUG_ENTER_FUNCTION();
     OstTrace0(camerax_performance, CXUIPRECAPTUREVIEW_CONSTRUCT_1, "msg: e_CX_PRECAPVIEW_CONSTRUCT 1");
 
-    CxuiView::construct(mainWindow, engine, documentLoader, keyHandler, activityManager);
+    CxuiView::construct(mainWindow, engine, documentLoader, keyHandler);
 
     mSettingsInfo = new CxuiSettingsInfo(engine);
     CX_DEBUG_ASSERT(mSettingsInfo);
@@ -151,12 +147,6 @@ void CxuiPrecaptureView::construct(HbMainWindow *mainWindow, CxeEngine *engine,
 
     connect(&(mEngine->settings()), SIGNAL(settingValueChanged(const QString&,QVariant)),
             this, SLOT(handleSettingValueChanged(const QString&, QVariant)));
-
-    // adjust the timer, and connect it to correct slot
-    connect(&mHideControlsTimeout, SIGNAL(timeout()), this, SLOT(hideControls()));
-
-    mHideControlsTimeout.setSingleShot(true);
-    mHideControlsTimeout.setInterval(CXUI_HIDE_CONTROLS_TIMEOUT);
 
     mGeoTaggingBlinkTimer = new QTimer(this);
     connect(mGeoTaggingBlinkTimer, SIGNAL(timeout()), this, SLOT(blinkGeoTaggingIcon()));
@@ -335,6 +325,7 @@ void CxuiPrecaptureView::showEvent(QShowEvent *event)
 
     if (event->type() == QEvent::Show) {
         QCoreApplication::instance()->installEventFilter(this);
+        hideControls();
         event->accept();
     }
 
@@ -355,6 +346,7 @@ void CxuiPrecaptureView::hideEvent(QHideEvent *event)
     if (event->type() == QEvent::Hide) {
         QCoreApplication::instance()->removeEventFilter(this);
         hideZoom();
+        hideToolbar();
         event->accept();
     }
 
@@ -419,26 +411,22 @@ void CxuiPrecaptureView::initCamera()
 }
 
 
-/*
- * viewfinder state call backs
+
+/*!
+ * Handles viewfinder state changes.
+ * @param newState new viewfinder state
+ * @param error error code in case of error
  */
 void CxuiPrecaptureView::handleVfStateChanged(
-    CxeViewfinderControl::State newState, CxeError::Id /*error*/)
+    CxeViewfinderControl::State newState, CxeError::Id error)
 {
     CX_DEBUG_ENTER_FUNCTION();
+    Q_UNUSED(error);
 
     if (newState == CxeViewfinderControl::Running) {
-        // switch off screen saver and turn on backlight
-        if(mDisplayHandler) {
-            mDisplayHandler->setDisplayAlwaysVisible(true);
-        }
         // start the standby timer
         emit startStandbyTimer();
     } else {
-        // switch on screen saver and turn off backlight
-        if(mDisplayHandler) {
-            mDisplayHandler->setDisplayAlwaysVisible(false);
-        }
         // stop the standby timer when vf is not running.
         emit stopStandbyTimer();
     }

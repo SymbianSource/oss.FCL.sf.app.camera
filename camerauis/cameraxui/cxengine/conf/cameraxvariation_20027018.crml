@@ -25,4 +25,8 @@
     <access type="R" capabilities="AlwaysPass"/>
   </key>
 
+  <key ref="CxRuntimeFeaturesCrUid/UseRasterGraphicsSystemCr" name="Use Qt raster graphics system" int="0x7" type="int" readOnly="true">
+    <access type="R" capabilities="AlwaysPass"/>
+  </key>
+
 </repository>

@@ -48,6 +48,9 @@ CxuiApplicationState::CxuiApplicationState(CxuiApplication &application,
     // USB mass memory mode signal
     connect(mApplicationMonitor, SIGNAL(usbMassMemoryModeToggled(bool)),
             this, SLOT(handleUsbMassMemoryModeChanged(bool)));
+    
+    // Task switcher state signal
+    connect(mApplicationMonitor, SIGNAL(taskSwitcherStateChanged(bool)), this, SLOT(handleTaskSwitcherStateChanged(bool)));
 
     // Severe error signals
     connect(mErrorManager, SIGNAL(errorPopupShown()), this, SLOT(handleSevereError()));
@@ -121,10 +124,10 @@ void CxuiApplicationState::handleForegroundStateChanged(CxuiApplicationFramework
         mErrorManager->clear();
     } else {
         CX_DEBUG(("CxuiApplicationState - application is in partial / full foreground"));
-        // Check that we were in background. Switching between partial and full background
-        // needs no actions.
-        if (currentState() == Background) {
-           CX_DEBUG(("CxuiApplicationState - application was in background before, moving to foreground"));
+        // Check that we were in background or standby state. 
+        // State can be standby, if camera lost focus to task switcher.
+        if (currentState() == Background || currentState() == Standby) {
+           CX_DEBUG(("CxuiApplicationState - application was in partial/full background, moving to foreground"));
             // Check that there's no active errors that have been ignored in background.
             checkErrors();
             if (currentState() != Error) {
@@ -159,6 +162,26 @@ void CxuiApplicationState::handleUsbMassMemoryModeChanged(bool active)
             setState(Standby);
             // Clear memory not accessible error.
             mErrorManager->clear();
+        }
+    }
+    CX_DEBUG_EXIT_FUNCTION();
+}
+
+/*!
+* Handle Task Switcher state changes.
+* If Task Switcher activates, we enter standby mode.
+* When we receive foreground event, we can move back to Normal mode.
+* @param foreground Is the Task Switcher in foreground/active.
+*/
+void CxuiApplicationState::handleTaskSwitcherStateChanged(bool foreground)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    if (foreground) {
+        // When task switcher is active, we enter standby mode.
+        if (currentState() == Normal) {
+            // Go to standby mode (release camera).
+            CX_DEBUG(("CxuiApplicationState - application losing partial-foreground to task switcher"));
+            setState(Standby);
         }
     }
     CX_DEBUG_EXIT_FUNCTION();

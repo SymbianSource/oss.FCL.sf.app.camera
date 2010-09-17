@@ -187,21 +187,22 @@ void CxeStillCaptureControlSymbian::initializeStates()
 void CxeStillCaptureControlSymbian::init()
 {
     CX_DEBUG_ENTER_FUNCTION();
-    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_IN, "msg: e_CX_STILL_CAPCONT_INIT 1");
 
     if (state() == Uninitialized) {
-        
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_IN, "msg: e_CX_STILL_CAPCONT_INIT 1");
+
         // prepare for still capture.
         prepare();
 
         // Initialize orientation sensor and other sensors
         mSensorEventHandler.init();
-        
+
         // inform zoom control to prepare zoom
         emit prepareZoomForStill(mSizeIndex);
+
+        OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_OUT, "msg: e_CX_STILL_CAPCONT_INIT 0");
     }
 
-    OstTrace0(camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_INIT_OUT, "msg: e_CX_STILL_CAPCONT_INIT 0");
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -212,32 +213,30 @@ void CxeStillCaptureControlSymbian::deinit()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
-    if (state() == Uninitialized) {
-        // nothing to do
-        return;
+    if (state() != Uninitialized) {
+        OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_IN, "msg: e_CX_STILLCAPCONT_DEINIT 1" );
+
+        // Stop monitoring disk space.
+        mDiskMonitor.stop();
+        disconnect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
+
+        //stop viewfinder
+        mViewfinderControl.stop();
+
+        if (state() == Capturing) {
+            mCameraDevice.camera()->CancelCaptureImage();
+        }
+
+        // disable sensor event handler.
+        mSensorEventHandler.deinit();
+
+        mSnapshotControl.stop();
+
+        setState(Uninitialized);
+
+        OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_OUT, "msg: e_CX_STILLCAPCONT_DEINIT 0" );
     }
 
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_IN, "msg: e_CX_STILLCAPCONT_DEINIT 1" );
-
-    // Stop monitoring disk space.
-    mDiskMonitor.stop();
-    disconnect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
-
-    //stop viewfinder
-    mViewfinderControl.stop();
-
-    if (state() == Capturing) {
-        mCameraDevice.camera()->CancelCaptureImage();
-    }
-
-    // disable sensor event handler.
-    mSensorEventHandler.deinit();
-
-    mSnapshotControl.stop();
-
-    setState(Uninitialized);
-
-    OstTrace0( camerax_performance, CXESTILLCAPTURECONTROLSYMBIAN_DEINIT_OUT, "msg: e_CX_STILLCAPCONT_DEINIT 0" );
     CX_DEBUG_EXIT_FUNCTION();
 }
 
@@ -248,12 +247,6 @@ void CxeStillCaptureControlSymbian::deinit()
 void CxeStillCaptureControlSymbian::prepare()
 {
     CX_DEBUG_ENTER_FUNCTION();
-
-    if (state() != Uninitialized) {
-        // wrong state and we return
-        return;
-    }
-
     OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_PREPARE_IN, "msg: e_CX_STILLCAPCONT_PREPARE 1");
 
     CxeError::Id status(CxeError::None);
@@ -279,7 +272,7 @@ void CxeStillCaptureControlSymbian::prepare()
 
         // Start monitoring disk space.
         mDiskMonitor.start();
-        connect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()));
+        connect(&mDiskMonitor, SIGNAL(diskSpaceChanged()), this, SLOT(handleDiskSpaceChanged()), Qt::UniqueConnection);
 
         // Enable AF reticule drawing by adaptation
         MCameraFaceTracking *faceTracking = mCameraDevice.faceTracking();
@@ -470,12 +463,6 @@ void CxeStillCaptureControlSymbian::handleSnapshotReady(CxeError::Id status, con
         // Emit snapshotReady signal in all cases (error or not)
         emit snapshotReady(status, snapshot, stillImage->id());
 
-        // When the snapshot ready event is handled, prepare new filename.
-        if (stillImage->filename().isEmpty()) {
-            // Error ignored at this point, try again when image data arrives.
-            prepareFilename(stillImage);
-        }
-
         OstTrace0(camerax_performance, CXESTILLCAPTURECONTROL_HANDLESNAPSHOT_2, "msg: e_CX_HANDLE_SNAPSHOT 0");
     }
 
@@ -578,7 +565,7 @@ void CxeStillCaptureControlSymbian::handleImageData(MCameraBuffer* cameraBuffer,
 
 
 /*!
- * Settings changed, needs updated
+ * Settings changed, needs updated.
  */
 void CxeStillCaptureControlSymbian::handleSettingValueChanged(const QString& settingId, QVariant newValue)
 {
@@ -587,10 +574,21 @@ void CxeStillCaptureControlSymbian::handleSettingValueChanged(const QString& set
     Q_UNUSED(newValue);
 
     if (settingId == CxeSettingIds::IMAGE_QUALITY) {
-        // re-prepare for still
+        // Re-prepare for still, if already prepared.
         if (state() == Ready) {
-            deinit();
-            init();
+            // Avoid problems with AF status overlays.
+            mAutoFocusControl.cancel();
+
+            // Viewfinder and snapshot need to be re-prepared if active.
+            // Stop them now to get proper re-prepare done.
+            mSnapshotControl.stop();
+            mViewfinderControl.stop();
+
+            // Re-prepare image capture for the new quality.
+            prepare();
+
+            // Inform zoom control to prepare zoom for new quality.
+            emit prepareZoomForStill(mSizeIndex);
         }
     }
 

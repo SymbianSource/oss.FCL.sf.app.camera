@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -28,6 +28,7 @@
 #include <UsbWatcherInternalPSKeys.h> // usb status
 #include <usbman.h>
 #include <usbpersonalityids.h>
+#include <tspropertydefs.h>
 
 #include <QMetaEnum>
 #include <QString>
@@ -43,13 +44,11 @@
 #include "cxesettings.h"
 #include "cxuiapplicationframeworkmonitorprivate.h"
 
-namespace{
-    const int CXUI_USB_MODE_CHECK_TIMER_DELAY = 1000; // 1 second
-}
-
-#ifdef Q_OS_SYMBIAN
 namespace
 {
+    const int CXUI_USB_MODE_CHECK_TIMER_DELAY = 1000; // 1 second
+
+#ifdef Q_OS_SYMBIAN
     inline QString convertTDesC2QString(const TDesC& aDescriptor)
     {
         #ifdef QT_NO_UNICODE
@@ -73,16 +72,6 @@ namespace
         return convertTDesC2QString(name);
     }
 
-    inline QString bitString(int number, char fill = '0', int width = 32)
-    {
-        return QString::number(number, 2).rightJustified(width, fill);
-    }
-
-    //!@todo: Avkon UIDs not needed once device dialogs fully implemented in Orbit.
-
-    // AknCapServer
-    static const unsigned int UID_AKNCAPSERVER    = 0x10207218;
-
     // Phone ui
     static const unsigned int UID_PHONEUI         = 0x100058B3;
     // Task switcher
@@ -93,8 +82,9 @@ namespace
     // Log event types
     static const char *EVENT_USB        = "usb";
     static const char *EVENT_FOREGROUND = "foreground";
-}
+
 #endif // Q_OS_SYMBIAN
+} // namespace
 
 
 /*!
@@ -114,6 +104,7 @@ CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(C
        mKeyLockState(EKeyguardNotActive),
        mBatteryStatus(EBatteryStatusUnknown),
        mUsbPersonality(0),
+       mTaskManagerVisibility(false),
        mUsbModeCheckTimer(this),
        mEventLog(NULL),
 #endif // Q_OS_SYMBIAN
@@ -124,7 +115,9 @@ CxuiApplicationFrameworkMonitorPrivate::CxuiApplicationFrameworkMonitorPrivate(C
     mWindowGroup.EnableFocusChangeEvents();
     mWindowGroupName = windowGroupName(mWsSession, mWindowGroupId);
     mEventLog = new CxuiEventLog("CxuiApplicationFrameworkMonitorPrivate");
+
     init();
+
     mUsbModeCheckTimer.setSingleShot(true);
     mUsbModeCheckTimer.setInterval(CXUI_USB_MODE_CHECK_TIMER_DELAY);
     connect(&mUsbModeCheckTimer, SIGNAL(timeout()),
@@ -259,6 +252,15 @@ void CxuiApplicationFrameworkMonitorPrivate::handlePropertyEvent(long int uid, u
 
             }
         }
+    } else if (uid == TsProperty::KCategory.iUid && key == TsProperty::KVisibilityKey) {
+        CX_DEBUG(("CxuiApplicationFrameworkMonitor - Task Manager visibility: %d -> %d", mTaskManagerVisibility, value.toBool()));
+        const bool newTsVisibility(value.toBool());
+
+        // If the task switcher state is changed, then emit signal to inform client(s).
+        if (mTaskManagerVisibility != newTsVisibility) {
+            mTaskManagerVisibility = newTsVisibility;
+            emit q->taskSwitcherStateChanged(mTaskManagerVisibility);
+        }
     }
 
     CX_DEBUG_EXIT_FUNCTION();
@@ -288,6 +290,12 @@ void CxuiApplicationFrameworkMonitorPrivate::init()
 {
     CX_DEBUG_ENTER_FUNCTION();
 
+    // To be able to release resources fast enough, we need foreground
+    // priority also when moving to background. Once we have moved to
+    // background fully, we re-adjust Window Server "compute mode"
+    // to the normal value.
+    mWsSession.ComputeMode(RWsSession::EPriorityControlDisabled);
+
     // Connect to application (window server) events.
     connect(&mApplication, SIGNAL(symbianEvent(const QSymbianEvent *)), this, SLOT(handleEvent(const QSymbianEvent *)));
 
@@ -304,6 +312,10 @@ void CxuiApplicationFrameworkMonitorPrivate::init()
     // Get current USB personality
     mSettings.get(KPSUidUsbWatcher.iUid, KUsbWatcherSelectedPersonality, Cxe::PublishAndSubscribe, value);
     mUsbPersonality = value.toInt();
+
+    // Get current Task Switcher foreground status
+    mSettings.get(TsProperty::KCategory.iUid, TsProperty::KVisibilityKey, Cxe::PublishAndSubscribe, value);
+    mTaskManagerVisibility = value.toBool();
 
     bool ok = connect(&mSettings, SIGNAL(settingValueChanged(long int, unsigned long int, QVariant)),
                       this, SLOT(handlePropertyEvent(long int, unsigned long int, QVariant)));
@@ -342,20 +354,6 @@ void CxuiApplicationFrameworkMonitorPrivate::handleWindowServerEvent(const QSymb
             setState(getCurrentState());
             break;
         }
-        case EEventWindowVisibilityChanged: {
-            const TWsVisibilityChangedEvent *visibilityEvent = wsEvent->VisibilityChanged();
-            if (visibilityEvent) {
-                CX_DEBUG(("CxuiApplicationFrameworkMonitor - EFullyVisible: bits[%s]",
-                    bitString(TWsVisibilityChangedEvent::EFullyVisible).toAscii().constData() ));
-                CX_DEBUG(("CxuiApplicationFrameworkMonitor - EPartiallyVisible: bits[%s]",
-                    bitString(TWsVisibilityChangedEvent::EPartiallyVisible).toAscii().constData() ));
-                CX_DEBUG(("CxuiApplicationFrameworkMonitor - ENotVisible: bits[%s]",
-                    bitString(TWsVisibilityChangedEvent::ENotVisible).toAscii().constData() ));
-                CX_DEBUG(("CxuiApplicationFrameworkMonitor - event:       bits[%s]",
-                    bitString(visibilityEvent->iFlags).toAscii().constData() ));
-            }
-            break;
-        }
         default:
             break;
         }
@@ -370,7 +368,6 @@ void CxuiApplicationFrameworkMonitorPrivate::setState(CxuiApplicationFrameworkMo
 {
     if (mState != state) {
         const CxuiApplicationFrameworkMonitor::ForegroundState original(mState);
-
         // Check if state transition is acceptable in current state.
         switch (mState) {
         case CxuiApplicationFrameworkMonitor::ForegroundOwned:
@@ -389,6 +386,22 @@ void CxuiApplicationFrameworkMonitorPrivate::setState(CxuiApplicationFrameworkMo
         }
 
         if (mState != original) {
+            if (mState == CxuiApplicationFrameworkMonitor::ForegroundOwned) {
+                // Keep foreground priority until fully in background.
+                // See init() for more comments.
+                mWsSession.ComputeMode(RWsSession::EPriorityControlDisabled);
+            }
+
+            // If state was changed, signal it to listeners.
+            emit q->foregroundStateChanged(mState);
+
+            if (mState == CxuiApplicationFrameworkMonitor::ForegroundFullyLost) {
+                // Background has been entered.
+                // Return Window Server "compute mode" to the normal value.
+                mWsSession.ComputeMode(RWsSession::EPriorityControlComputeOff);
+            }
+
+#ifdef CX_DEBUG
             // Print the event log with this foreground event included.
             if (mEventLog) {
                 mEventLog->append(
@@ -397,9 +410,7 @@ void CxuiApplicationFrameworkMonitorPrivate::setState(CxuiApplicationFrameworkMo
                         CxuiApplicationFrameworkMonitor::staticMetaObject.indexOfEnumerator("ForegroundState")).valueToKey(mState));
                 mEventLog->print();
             }
-
-            // If state was changed, signal it to listeners.
-            emit q->foregroundStateChanged(mState);
+#endif // CX_DEBUG
         }
     }
 }
@@ -430,7 +441,6 @@ CxuiApplicationFrameworkMonitor::ForegroundState CxuiApplicationFrameworkMonitor
 
         // Check the app uid.
         switch (uid) {
-        case UID_AKNCAPSERVER:
         case UID_TASKSWITCHER:
         case UID_DIALOGAPPSERVER:
             // Note or task switcher in foreground.

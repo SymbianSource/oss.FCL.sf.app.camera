@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -66,4 +66,26 @@ void CxuiDisplayPropertyHandler::setDisplayAlwaysVisible(bool enabled)
 void CxuiDisplayPropertyHandler::simulateActivity()
 {
     mUtility.resetInactivityTime();
+}
+
+/*!
+ * Handles viewfinder state changes.
+ * @param newState new viewfinder state
+ * @param error error code in case of error
+ */
+void CxuiDisplayPropertyHandler::handleVfStateChanged(
+    CxeViewfinderControl::State newState, CxeError::Id error)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+    Q_UNUSED(error);
+
+    if (newState == CxeViewfinderControl::Running) {
+        // switch off screen saver and turn on backlight
+         setDisplayAlwaysVisible(true);
+    } else {
+        // switch on screen saver and turn off backlight
+        setDisplayAlwaysVisible(false);
+    }
+
+    CX_DEBUG_EXIT_FUNCTION();
 }

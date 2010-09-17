@@ -30,6 +30,9 @@
 
 CxuiServiceProvider* CxuiServiceProvider::mInstance = NULL;
 
+/*!
+ * Constructor.
+ */
 CxuiServiceProvider::CxuiServiceProvider(CxeEngine *engine)
 :
     XQServiceProvider("cxui." + XQI_CAMERA_CAPTURE),
@@ -40,13 +43,17 @@ CxuiServiceProvider::CxuiServiceProvider(CxeEngine *engine)
     mQuality(0),
     mAllowModeSwitching(true),
     mAllowQualityChange(true),
-    mAllowCameraSwitching(true)
+    mAllowCameraSwitching(true),
+    mWindowTitle("")
 {
     CX_DEBUG_ENTER_FUNCTION();
     publishAll();
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Destructor.
+ */
 CxuiServiceProvider::~CxuiServiceProvider()
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -102,64 +109,50 @@ bool CxuiServiceProvider::isCameraEmbedded()
 }
 
 /*!
- *
+ * Returns camera mode requested by client.
  */
-Cxe::CameraMode CxuiServiceProvider::requestedMode()
+Cxe::CameraMode CxuiServiceProvider::requestedMode() const
 {
     return mRequestedMode;
 }
 
 /*!
- *
+ * Returns boolean to indicate whether client app allows camera mode switching.
  */
-bool CxuiServiceProvider::allowModeSwitching()
+bool CxuiServiceProvider::allowModeSwitching() const
 {
     return mAllowModeSwitching;
 }
 
 /*!
- *
+ * Returns boolean to indicate whether client app allows image/video quality to be
+ * changed.
  */
-bool CxuiServiceProvider::allowQualityChange()
+bool CxuiServiceProvider::allowQualityChange() const
 {
     return mAllowQualityChange;
 }
 
 /*!
- *
+ * Returns boolean to indicate whether client app allows switching
+ * between primary and secondary camera.
  */
-bool CxuiServiceProvider::allowCameraSwitching()
+bool CxuiServiceProvider::allowCameraSwitching() const
 {
     return mAllowCameraSwitching;
 }
 
 /*!
- *
+ * Returns window title provided by client application.
  */
-void CxuiServiceProvider::sendFilenameToClientAndExit(QString filename)
+QString CxuiServiceProvider::windowTitle() const
 {
-    CX_DEBUG_ENTER_FUNCTION();
-
-    if (mRequestIndex == -1) {
-        CX_DEBUG(("CxuiServiceProvider: no request in progress"));
-        QCoreApplication::instance()->quit();
-        CX_DEBUG_EXIT_FUNCTION();
-        return;
-    }
-
-    connect(this, SIGNAL(returnValueDelivered()), QCoreApplication::instance(), SLOT(quit()));
-
-    CX_DEBUG(("CxuiServiceProvider: completing request"));
-    if (!completeRequest(mRequestIndex, QVariant(filename))) {
-        // if request completion fails call quit immediately because signal is not coming
-        CX_DEBUG(("completeRequest() failed, quitting now"));
-        QCoreApplication::instance()->quit();
-    }
-    mRequestIndex = -1;
-
-    CX_DEBUG_EXIT_FUNCTION();
+    return mWindowTitle;
 }
 
+/*!
+ * Function that is called when request arrives. Sets up camera to requested state.
+ */
 void CxuiServiceProvider::capture(int mode, const QVariantMap &parameters)
 {
     CX_DEBUG_ENTER_FUNCTION();
@@ -183,6 +176,14 @@ void CxuiServiceProvider::capture(int mode, const QVariantMap &parameters)
         return;
     }
 
+    CX_DEBUG(("Getting request info"));
+    XQRequestInfo info = requestInfo();
+
+    QString windowTitle = info.info(XQINFO_KEY_WINDOW_TITLE).toString();
+    if (!windowTitle.isNull() && !windowTitle.isEmpty()) {
+        CX_DEBUG(("Got window title=%s", qPrintable(windowTitle)));
+        mWindowTitle = windowTitle;
+    }
     mRequestIndex = setCurrentRequestAsync();
 
     mEngine->cameraDeviceControl().switchCamera(static_cast<Cxe::CameraIndex> (mCameraIndex));
@@ -219,11 +220,39 @@ void CxuiServiceProvider::capture(int mode, const QVariantMap &parameters)
 
     mEngine->initMode(mRequestedMode);
 
+    CX_DEBUG_EXIT_FUNCTION();
+}
 
+/*!
+ * Sends filename of captured image/video to client and exits camera app.
+ */
+void CxuiServiceProvider::sendFilenameToClientAndExit(QString filename)
+{
+    CX_DEBUG_ENTER_FUNCTION();
+
+    if (mRequestIndex == -1) {
+        CX_DEBUG(("CxuiServiceProvider: no request in progress"));
+        QCoreApplication::instance()->quit();
+        CX_DEBUG_EXIT_FUNCTION();
+        return;
+    }
+
+    connect(this, SIGNAL(returnValueDelivered()), QCoreApplication::instance(), SLOT(quit()));
+
+    CX_DEBUG(("CxuiServiceProvider: completing request"));
+    if (!completeRequest(mRequestIndex, QVariant(filename))) {
+        // if request completion fails call quit immediately because signal is not coming
+        CX_DEBUG(("completeRequest() failed, quitting now"));
+        QCoreApplication::instance()->quit();
+    }
+    mRequestIndex = -1;
 
     CX_DEBUG_EXIT_FUNCTION();
 }
 
+/*!
+ * Helper function to read request parameters.
+ */
 bool CxuiServiceProvider::readParameters(const QVariantMap& parameters)
 {
 

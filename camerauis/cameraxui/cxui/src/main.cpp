@@ -22,10 +22,12 @@
 #include <HbTranslator>
 #include <hbmainwindow.h>
 #include <xqserviceutil.h>
+#include <afactivation.h>
 
 #ifdef Q_OS_SYMBIAN
 #include <coemain.h>
 #include <eikenv.h>
+#include <XQSettingsManager>
 #endif // Q_OS_SYMBIAN
 
 #include "cxeengine.h"
@@ -36,6 +38,7 @@
 #include "cxuienums.h"
 #include "cxutils.h"
 #include "cxuiserviceprovider.h"
+#include "cxuidisplaypropertyhandler.h"
 
 #ifdef Q_OS_SYMBIAN
 #include "OstTraceDefinitions.h"
@@ -50,6 +53,9 @@ using namespace Cxe;
 const QString TRANSLATIONS_PATH = "/resource/qt/translations/";
 const QString TRANSLATIONS_FILE = "camera";
 
+const long int RUNTIME_FEATURES_CENREP_UID = 0x20027018;
+const unsigned long int USE_RASTER_GRAPHICS_SYSTEM_KEY = 0x07;
+
 int main(int argc, char *argv[])
 {
     CX_DEBUG(("CxUI: entering main()"));
@@ -57,9 +63,22 @@ int main(int argc, char *argv[])
 
     Q_INIT_RESOURCE(cxui);
 
-    // Use software rendering / raster graphics system to save graphics memory
-    CX_DEBUG(("CxUI: Take raster graphics system into use"));
-    QApplication::setGraphicsSystem("raster");
+#ifdef Q_OS_SYMBIAN
+    XQSettingsManager settingManager;
+    XQCentralRepositorySettingsKey useRasterGraphicsSystemKey(
+            RUNTIME_FEATURES_CENREP_UID, USE_RASTER_GRAPHICS_SYSTEM_KEY);
+    QVariant useRasterGraphicsSystemValue =
+            settingManager.readItemValue(useRasterGraphicsSystemKey,
+                                         XQSettingsManager::TypeInt);
+
+    if (useRasterGraphicsSystemValue.isNull()
+        || useRasterGraphicsSystemValue.toInt()) {
+        // Either there was an error reading the value or the value was
+        // non-zero. Raster graphics system should be forced
+        CX_DEBUG(("CxUI: Take raster graphics system into use"));
+        QApplication::setGraphicsSystem("raster");
+    }
+#endif
 
     OstTrace0( camerax_performance, DUP1__MAIN, "msg: e_CX_HBAPP_CREATION 1" );
     CxuiApplication app(argc, argv);
@@ -72,7 +91,8 @@ int main(int argc, char *argv[])
     CxeEngine *engine = CxeEngine::createEngine();
     OstTrace0( camerax_performance, DUP8__MAIN, "msg: e_CX_CREATE_ENGINE 0" );
 
-    if (app.activateReason() == Hb::ActivationReasonService ||
+    AfActivation activation;
+    if (activation.reason() == Hb::ActivationReasonService ||
         // @todo: There's a bug in orbit and we never get Hb::ActivationReasonService as
         // activation reason. Use XQServiceUtil to determine if starting service as
         // a workaround for now
@@ -83,10 +103,10 @@ int main(int argc, char *argv[])
         CX_DEBUG(("CxUI: creating serviceprovider"));
         CxuiServiceProvider::create(engine);
         CX_DEBUG(("CxUI: done"));
-    } else if (app.activateReason() == Hb::ActivationReasonActivity) {
+    } else if (activation.reason() == Hb::ActivationReasonActivity) {
         CX_DEBUG(("CxUI: Camera started as activity"));
         Cxe::CameraMode mode = Cxe::ImageMode;
-        QString activityId = app.activateId();
+        QString activityId = activation.name();
         if (activityId == CxuiActivityIds::VIDEO_PRECAPTURE_ACTIVITY ||
             activityId == CxuiActivityIds::VIDEO_POSTCAPTURE_ACTIVITY) {
             mode = Cxe::VideoMode;
@@ -119,44 +139,54 @@ int main(int argc, char *argv[])
 
     // Create main window
     OstTrace0( camerax_performance, DUP5__MAIN, "msg: e_CX_MAINWINDOW_CREATION 1" );
-    HbMainWindow mainWindow(0, Hb::WindowFlagTransparent | Hb::WindowFlagNoBackground);
-    mainWindow.setAttribute(Qt::WA_NoBackground);
+    HbMainWindow *mainWindow = new HbMainWindow(0, Hb::WindowFlagTransparent | Hb::WindowFlagNoBackground);
+    mainWindow->setAttribute(Qt::WA_NoBackground);
     OstTrace0( camerax_performance, DUP6__MAIN, "msg: e_CX_MAINWINDOW_CREATION 0" );
 
     // Set main window to landscape and full screen
     OstTrace0( camerax_performance, DUP13__MAIN, "msg: e_CX_MAINWINDOW_SETORIENTATION 1" );
-    mainWindow.setOrientation(Qt::Horizontal);
+    mainWindow->setOrientation(Qt::Horizontal);
     OstTrace0( camerax_performance, DUP14__MAIN, "msg: e_CX_MAINWINDOW_SETORIENTATION 0" );
     OstTrace0( camerax_performance, DUP15__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 1" );
 
 #ifdef Q_OS_SYMBIAN
-    mainWindow.showFullScreen();
+    mainWindow->showFullScreen();
 #else
     /*
      * todo : check if this is an Orbit bug or if there's a better solution
     */
-    mainWindow.resize(640, 360);
-    mainWindow.setOrientation(Qt::Vertical, false);
-    mainWindow.show();
-    mainWindow.setOrientation(Qt::Horizontal, false);
+    mainWindow->resize(640, 360);
+    mainWindow->setOrientation(Qt::Vertical, false);
+    mainWindow->show();
+    mainWindow->setOrientation(Qt::Horizontal, false);
 #endif //Q_OS_SYMBIAN
     OstTrace0( camerax_performance, DUP16__MAIN, "msg: e_CX_MAINWINDOW_FULLSCREEN 0" );
 
     // Create view manager
     OstTrace0( camerax_performance, DUP11__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 1" );
-    CxuiViewManager *viewManager = new CxuiViewManager(app, mainWindow, *engine);
+    CxuiViewManager *viewManager = new CxuiViewManager(app, *mainWindow, *engine);
     OstTrace0( camerax_performance, DUP12__MAIN, "msg: e_CX_CREATE_VIEW_MANAGER 0" );
 
     // Give main window id to engine for setting up viewfinder window behind it
     OstTrace0( camerax_performance, DUP17__MAIN, "msg: e_CX_PREPAREWINDOW 1" );
-    engine->viewfinderControl().setWindow(mainWindow.effectiveWinId());
+    engine->viewfinderControl().setWindow(mainWindow->effectiveWinId());
     OstTrace0( camerax_performance, DUP18__MAIN, "msg: e_CX_PREPAREWINDOW 0" );
+
+    // connect display handler to vf state changes
+    CxuiDisplayPropertyHandler displayHandler;
+    QObject::connect(&engine->viewfinderControl(), SIGNAL(stateChanged(CxeViewfinderControl::State, CxeError::Id)),
+                     &displayHandler, SLOT(handleVfStateChanged(CxeViewfinderControl::State, CxeError::Id)));
 
     int returnValue = app.exec();
 
     delete viewManager;
+	viewManager = NULL;
     CxuiServiceProvider::destroy(); // delete service provider instance
+    engine->cameraDeviceControl().release();
+    delete mainWindow;
+	mainWindow = NULL;
     delete engine;
+	engine = NULL;
 
     return returnValue;
 }

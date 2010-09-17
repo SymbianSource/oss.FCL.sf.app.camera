@@ -29,6 +29,7 @@ symbian {
     # and TraceCompiler needing USERINCLUDE.
     MMP_RULES           += "USERINCLUDE traces"
     MMP_RULES           += SMPSAFE
+    VERSION = 10.0.1
 }
 
 # export sound file
@@ -68,7 +69,9 @@ symbian {
             -lgdi \
             -lapgrfx \
             -lusbman \
-            -lthumbnailmanagerqt
+            -lxqsettingsmanager \
+            -lthumbnailmanagerqt \
+            -lafservice
 } else {
     win32 {
         debug {

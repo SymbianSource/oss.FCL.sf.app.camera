@@ -60,8 +60,7 @@ public:
     void construct(HbMainWindow *mainwindow,
                    CxeEngine *engine,
                    CxuiDocumentLoader *documentLoader,
-                   CxuiCaptureKeyHandler *keyHandler,
-                   HbActivityManager *activityManager);
+                   CxuiCaptureKeyHandler *keyHandler);
 
     void loadDefaultWidgets();
     void loadBackgroundImages();

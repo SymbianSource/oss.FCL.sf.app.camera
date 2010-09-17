@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -37,11 +37,13 @@ public:
     static void destroy();
     static bool isCameraEmbedded();
 
-    Cxe::CameraMode requestedMode();
+    Cxe::CameraMode requestedMode() const;
 
-    bool allowModeSwitching();
-    bool allowQualityChange();
-    bool allowCameraSwitching();
+    bool allowModeSwitching() const;
+    bool allowQualityChange() const;
+    bool allowCameraSwitching() const;
+
+    QString windowTitle() const;
 
 public slots:
 
@@ -75,6 +77,7 @@ private:
     bool mAllowModeSwitching;
     bool mAllowQualityChange;
     bool mAllowCameraSwitching;
+    QString mWindowTitle;
 
 };
 

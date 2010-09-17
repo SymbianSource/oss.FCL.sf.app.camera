@@ -47,8 +47,7 @@ public:
 
     void construct(HbMainWindow *mainwindow, CxeEngine *engine,
                    CxuiDocumentLoader *documentLoader,
-                   CxuiCaptureKeyHandler *keyHandler,
-                   HbActivityManager *activityManager);
+                   CxuiCaptureKeyHandler *keyHandler);
 
     virtual void loadDefaultWidgets();
 
@@ -62,6 +61,7 @@ public slots:
 
     // from CxuiPrecaptureView
     virtual void handleSettingValueChanged(const QString& key, QVariant newValue);
+    virtual void enterStandby();
 
     void handleSceneChanged(const QVariant &scene);
     void handleQuitClicked();

@@ -44,6 +44,11 @@
       </desc>
     </setting>
 
+    <setting ref="UseRasterGraphicsSystemCr" name="Use Qt raster graphics system" type="int" readOnly="true">
+      <desc>Force the use of Qt raster graphics system instead of the default graphics system.
+      </desc>
+    </setting>
+
   </feature>
 
   <data>
@@ -54,6 +59,7 @@
       <FreeMemoryLevelsCr>8000000,10000000</FreeMemoryLevelsCr>
       <StillMaxZoomValuesCr>32,32,32,32,32</StillMaxZoomValuesCr>
       <VideoMaxZoomValuesCr>40,40,40,-1,-1</VideoMaxZoomValuesCr>
+      <UseRasterGraphicsSystemCr>1</UseRasterGraphicsSystemCr>
     </CxRuntimeFeaturesCrUid>
   </data>
 

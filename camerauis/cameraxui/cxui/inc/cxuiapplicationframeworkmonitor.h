@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -71,7 +71,12 @@ signals:
     * Otherwise mass memory mode was deactivated, and mass memory is again accessible.
     */
     void usbMassMemoryModeToggled(bool active);
-
+    
+    /*!
+    * Signal when task switcher state changes.
+    * @param foreground If true, task switcher is in foreground. Otherwise it has moved to background. 
+    */
+    void taskSwitcherStateChanged(bool foreground);
 
 private:
     CxuiApplicationFrameworkMonitorPrivate *p;
