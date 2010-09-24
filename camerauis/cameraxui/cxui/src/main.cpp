@@ -21,7 +21,6 @@
 #include <QLocale>
 #include <HbTranslator>
 #include <hbmainwindow.h>
-#include <xqserviceutil.h>
 #include <afactivation.h>
 
 #ifdef Q_OS_SYMBIAN
@@ -53,8 +52,8 @@ using namespace Cxe;
 const QString TRANSLATIONS_PATH = "/resource/qt/translations/";
 const QString TRANSLATIONS_FILE = "camera";
 
-const long int RUNTIME_FEATURES_CENREP_UID = 0x20027018;
-const unsigned long int USE_RASTER_GRAPHICS_SYSTEM_KEY = 0x07;
+const long int CAMERAX_USE_RASTER_PS_UID = 0x2726beef;
+const unsigned long int CAMERAX_USE_RASTER_PS_KEY = 0;
 
 int main(int argc, char *argv[])
 {
@@ -65,16 +64,16 @@ int main(int argc, char *argv[])
 
 #ifdef Q_OS_SYMBIAN
     XQSettingsManager settingManager;
-    XQCentralRepositorySettingsKey useRasterGraphicsSystemKey(
-            RUNTIME_FEATURES_CENREP_UID, USE_RASTER_GRAPHICS_SYSTEM_KEY);
+    XQPublishAndSubscribeSettingsKey useRasterGraphicsSystemKey(
+            CAMERAX_USE_RASTER_PS_UID, CAMERAX_USE_RASTER_PS_KEY);
     QVariant useRasterGraphicsSystemValue =
             settingManager.readItemValue(useRasterGraphicsSystemKey,
                                          XQSettingsManager::TypeInt);
 
     if (useRasterGraphicsSystemValue.isNull()
-        || useRasterGraphicsSystemValue.toInt()) {
+        || !useRasterGraphicsSystemValue.toInt()) {
         // Either there was an error reading the value or the value was
-        // non-zero. Raster graphics system should be forced
+        // zero. Raster graphics system should be forced
         CX_DEBUG(("CxUI: Take raster graphics system into use"));
         QApplication::setGraphicsSystem("raster");
     }
@@ -92,18 +91,14 @@ int main(int argc, char *argv[])
     OstTrace0( camerax_performance, DUP8__MAIN, "msg: e_CX_CREATE_ENGINE 0" );
 
     AfActivation activation;
-    if (activation.reason() == Hb::ActivationReasonService ||
-        // @todo: There's a bug in orbit and we never get Hb::ActivationReasonService as
-        // activation reason. Use XQServiceUtil to determine if starting service as
-        // a workaround for now
-        XQServiceUtil::isService()) {
+    if (activation.reason() == Af::ActivationReasonService) {
         CX_DEBUG(("CxUI: Camera started as service"));
         // Embedded mode.  Engine is inited to correct mode
         // by service provider when request arrives
         CX_DEBUG(("CxUI: creating serviceprovider"));
         CxuiServiceProvider::create(engine);
         CX_DEBUG(("CxUI: done"));
-    } else if (activation.reason() == Hb::ActivationReasonActivity) {
+    } else if (activation.reason() == Af::ActivationReasonActivity) {
         CX_DEBUG(("CxUI: Camera started as activity"));
         Cxe::CameraMode mode = Cxe::ImageMode;
         QString activityId = activation.name();
