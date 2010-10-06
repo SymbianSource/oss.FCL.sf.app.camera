@@ -39,18 +39,8 @@ class CxeDummyBuffer : public CBase,
                        public MCameraBuffer
 {
 public:
-    CxeDummyBuffer() : iData(_L8("ABC"))
-        {
-        CX_DEBUG_IN_FUNCTION();
-        }
-
-    ~CxeDummyBuffer()
-        {
-        CX_DEBUG_ENTER_FUNCTION();
-        delete iBitmap;
-        CX_DEBUG_EXIT_FUNCTION();
-        }
-
+    CxeDummyBuffer();
+    ~CxeDummyBuffer();
     void CreateBitmapL(  const TSize& aSize );
 
 public:
@@ -73,17 +63,8 @@ class CxeDummySnapshot : public CBase,
                          public MCameraSnapshot
 {
 public:
-    CxeDummySnapshot()
-        {
-        CX_DEBUG(("snap this = 0x%08x", this));
-        CX_DEBUG_IN_FUNCTION();
-        }
-    ~CxeDummySnapshot()
-        {
-        CX_DEBUG_ENTER_FUNCTION();
-        delete iBuffer;
-        CX_DEBUG_EXIT_FUNCTION();
-        }
+    CxeDummySnapshot();
+    ~CxeDummySnapshot();
 
     TUint32 SupportedFormats() { return 0; }
     void PrepareSnapshotL(CCamera::TFormat aFormat, const TPoint& aPosition, const TSize& aSize, const TRgb& aBgColor, TBool aMaintainAspectRatio);

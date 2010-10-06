@@ -22,7 +22,6 @@
 #include <afactivitystorage.h>
 #include <afactivation.h>
 #include <hbaction.h>
-#include <xqserviceutil.h>
 
 #include "cxuiapplication.h"
 #include "cxuiapplicationstate.h"
@@ -279,12 +278,7 @@ void CxuiViewManager::initStartupView()
 
     AfActivation activation;
     AfActivityStorage activityStorage;
-    if (activation.reason() == Hb::ActivationReasonService ||
-        // @todo: There's a bug in orbit and we never get Hb::ActivationReasonService as
-        // activation reason. Use XQServiceUtil to determine if starting service as
-        // a workaround for now
-        XQServiceUtil::isService()) {
-
+    if (activation.reason() == Af::ActivationReasonService) {
         // For embedded mode: don't create view yet, create when engine inits to correct mode.
         // Connect signals to set up the view after image/video prepare
         connect(&mEngine.stillCaptureControl(), SIGNAL(imagePrepareComplete(CxeError::Id)),
@@ -292,7 +286,7 @@ void CxuiViewManager::initStartupView()
         connect(&mEngine.videoCaptureControl(), SIGNAL(videoPrepareComplete(CxeError::Id)),
                 this, SLOT(changeToPrecaptureView()));
 
-    } else if (activation.reason() == Hb::ActivationReasonActivity) {
+    } else if (activation.reason() == Af::ActivationReasonActivity) {
         // restoring activity, read startup view from stored activity
 
         // view to start in

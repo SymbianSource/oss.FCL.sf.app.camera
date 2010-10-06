@@ -128,6 +128,7 @@
                     <sizehint height="40un" type="PREFERRED" width="9un"/>
                     <enums name="orientation" value="Vertical"/>
                     <bool name="visible" value="FALSE"/>
+                    <bool name="toolTipVisible" value="FALSE"/>
                 </widget>
                 <widget name="images_left_container" type="HbWidget">
                     <widget name="images_remaining" type="HbLabel">

@@ -29,7 +29,7 @@ symbian {
     # and TraceCompiler needing USERINCLUDE.
     MMP_RULES           += "USERINCLUDE traces"
     MMP_RULES           += SMPSAFE
-    VERSION = 10.0.1
+    VERSION = 10.0.2
 }
 
 # export sound file
@@ -144,7 +144,11 @@ else {
                thumbnailmanager_qt.h \
                xqappmgr.h \
                xqserviceprovider.h \
-               XQUtils
+               XQUtils \
+               afactivation.h \
+               afactivities_global.h \
+               afactivitystorage.h \
+               xqrequestinfo.h
 }
 
 SOURCES += main.cpp \

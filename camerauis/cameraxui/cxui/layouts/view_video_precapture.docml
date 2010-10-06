@@ -131,6 +131,7 @@
                     <real name="z" value="8"/>
                     <sizehint height="40un" type="PREFERRED" width="9un"/>
                     <enums name="orientation" value="Vertical"/>
+                    <bool name="toolTipVisible" value="FALSE"/>
                 </widget>
                 <widget name="video_toolbar_paused" type="HbToolBar">
                     <enums name="layoutDirection" value="RightToLeft"/>

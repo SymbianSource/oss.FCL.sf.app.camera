@@ -74,8 +74,8 @@
       <FolderNameCr>200904</FolderNameCr>
       <FileNameImageCounterCr>1</FileNameImageCounterCr>
       <FileNameVideoCounterCr>1</FileNameVideoCounterCr>
-      <StillShowCapturedCr>4000</StillShowCapturedCr>
-      <VideoShowCapturedCr>4000</VideoShowCapturedCr>
+      <StillShowCapturedCr>-1</StillShowCapturedCr>
+      <VideoShowCapturedCr>-1</VideoShowCapturedCr>
       <ImageQualityCr>1</ImageQualityCr>
       <VideoQualityCr>0</VideoQualityCr>
       <AudioMuteCr>0</AudioMuteCr>

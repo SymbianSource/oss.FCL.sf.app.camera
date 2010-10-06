@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QString>
+#include "xqrequestinfo.h"
 
 class XQServiceProvider : public QObject
 {
@@ -31,7 +32,7 @@ protected:
     virtual void publishAll(){}
     bool completeRequest(int index, const QVariant &retValue) {return true;}
     int setCurrentRequestAsync() {return 0;}
-
+    XQRequestInfo requestInfo() const {return XQRequestInfo();}
 };
 
 #endif // XQSERVICEPROVIDER_H

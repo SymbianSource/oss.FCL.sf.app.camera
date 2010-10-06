@@ -60,6 +60,7 @@ void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
             mSettingValues.append(setting.mValue); // engine value for setting
         }
 
+        setListBoxType(data->mListboxType);
         // Set the setting strings to the model.
         setItems(settingStrings);
         // Set the preview mode.
@@ -68,7 +69,6 @@ void CxuiSettingRadioButtonList::init(CxUiSettings::RadioButtonListParams *data)
         mPreview = data->mPreview;
 
         setSettingId(data->mSettingId);
-        setListBoxType(data->mListboxType);
 
         // Store the original setting value and focus matching item.
         QString value = mEngine->settings().get<QString>(mSettingId, "");

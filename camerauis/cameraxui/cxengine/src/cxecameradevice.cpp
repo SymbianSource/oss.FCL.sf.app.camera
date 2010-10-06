@@ -28,6 +28,7 @@
 #include "cxecameradeviceTraces.h"
 #endif
 
+const int KCameraPriority = -1;
 
 
 CxeCameraDevice::CxeCameraDevice() :
@@ -227,10 +228,12 @@ CxeError::Id CxeCameraDevice::newCamera( Cxe::CameraIndex cameraIndex, MCameraOb
     CCamera* camera = NULL;
 
 #if defined(CXE_USE_DUMMY_CAMERA) || defined(__WINSCW__)
-    TRAPD(err, camera = CxeDummyCamera::NewL(*observer, cameraIndex, 100, 2));
+    TRAPD(err, camera = CxeDummyCamera::NewL(*observer, cameraIndex,
+                                             KCameraPriority, 2));
     CX_DEBUG(("CxeCameraDevice::newCamera <> new CxeDummyCamera"));
 #else
-    TRAPD(err, camera = CCamera::New2L(*observer, cameraIndex, 100 /*KCameraClientPriority*/));
+    TRAPD(err, camera = CCamera::New2L(*observer,
+                                       cameraIndex, KCameraPriority));
     CX_DEBUG(("CxeCameraDevice::newCamera <> new CCamera"));
 #endif
 

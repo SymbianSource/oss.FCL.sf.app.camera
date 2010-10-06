@@ -68,7 +68,7 @@ namespace
 {
     static const int CXUI_ELAPSED_TIME_TIMEOUT = 1000; // 1 second
     static const int CXUI_RECORD_ANIMATION_DURATION = 3000; // milliseconds
-    static const int CXUI_PAUSE_TIMEOUT = 60*1000;   // 60 seconds
+    static const int CXUI_PAUSE_TIMEOUT = 5*60*1000;   // 5 minutes
 
     const int POSTCAPTURE_ON = -1;
 }

@@ -18,6 +18,7 @@
                 <enums name="orientation" value="Horizontal"/>
                 <bool name="visible" value="TRUE"/>
                 <bool name="trackFilled" value="FALSE"/>
+                <bool name="toolTipVisible" value="FALSE"/>
             </widget>
             <layout orientation="Horizontal" type="linear">
                 <linearitem itemname="settings_dialog_slider"/>

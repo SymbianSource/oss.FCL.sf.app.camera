@@ -47,6 +47,35 @@ namespace
     _LIT( PANICDUMMYCAMERA, "DummyCamera" );
 }
 
+CxeDummyBuffer::CxeDummyBuffer() : iData(_L8("ABC"))
+    {
+    CX_DEBUG_IN_FUNCTION();
+    }
+
+CxeDummyBuffer::~CxeDummyBuffer()
+    {
+    CX_DEBUG_ENTER_FUNCTION();
+    delete iBitmap;
+    CX_DEBUG_EXIT_FUNCTION();
+    }
+
+
+
+CxeDummySnapshot::CxeDummySnapshot()
+    {
+    CX_DEBUG(("snap this = 0x%08x", this));
+    CX_DEBUG_IN_FUNCTION();
+    }
+
+CxeDummySnapshot::~CxeDummySnapshot()
+    {
+    CX_DEBUG_ENTER_FUNCTION();
+    delete iBuffer;
+    CX_DEBUG_EXIT_FUNCTION();
+    }
+
+
+
 
 CxeDummyCamera* CxeDummyCamera::NewL(MCameraObserver2& aObserver,TInt aCameraIndex,TInt aPriority, TInt aCameraVersion)
 {

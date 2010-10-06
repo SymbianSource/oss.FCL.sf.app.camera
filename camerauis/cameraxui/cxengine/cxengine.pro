@@ -22,7 +22,7 @@ include(../camerax.pri)
 } else {
     CONFIG  += dll
     DEFINES += CAMERAX_ENGINE_LIBRARY
-    VERSION = 10.0.1
+    VERSION = 10.0.2
 }
 
 TEMPLATE = lib

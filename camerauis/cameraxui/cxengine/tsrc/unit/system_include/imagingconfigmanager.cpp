@@ -50,6 +50,8 @@ CImagingConfigManager::CImagingConfigManager()
 //
 CImagingConfigManager::~CImagingConfigManager()
 {
+    delete iVideoQualitySets;
+    delete iImageQualitySets;
 }
 
 
