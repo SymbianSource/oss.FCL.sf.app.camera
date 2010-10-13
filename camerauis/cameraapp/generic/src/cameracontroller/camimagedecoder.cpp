@@ -231,6 +231,9 @@ void CCamImageDecoder::StartIconConversionL( TDesC* aFilePath, TSize& aSize )
     CleanupStack::PopAndDestroy( frameBuffer );
     if ( !IsActive() )
         {
+        iStatus=KRequestPending;
+        TRequestStatus *pS=(&iStatus);
+        User::RequestComplete(pS,0);
         SetActive();
         }
 

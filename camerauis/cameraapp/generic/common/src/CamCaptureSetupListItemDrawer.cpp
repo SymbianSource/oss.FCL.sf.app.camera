@@ -552,7 +552,7 @@ void CCamCaptureSetupListItemDrawer::SetParentControl(
 //
 void CCamCaptureSetupListItemDrawer::ReadLayout()  
     {
-    if ( AknLayoutUtils::PenEnabled() ) 
+    if ( CamUtility::IsNhdDevice() ) 
         {
         iTxtLayout = AknLayoutScalable_Apps::cset_list_set_pane_t1( 0 );
         iBmpLayout = AknLayoutScalable_Apps::cset_list_set_pane_g3( 0 );

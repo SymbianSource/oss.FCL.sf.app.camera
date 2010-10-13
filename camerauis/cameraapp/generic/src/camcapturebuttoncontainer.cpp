@@ -285,6 +285,13 @@ void CCamCaptureButtonContainer::DrawCaptureButton( CBitmapContext& aGc ) const
     TRect boundingRect( iCaptureRect );
     boundingRect.Move( -boundingRect.iTl.iX, -boundingRect.iTl.iY );
 
+    // Clear the window
+    aGc.SetPenStyle( CGraphicsContext::ENullPen );
+    aGc.SetBrushStyle( CGraphicsContext::ESolidBrush );
+    aGc.SetDrawMode( CGraphicsContext::EDrawModeWriteAlpha );
+    aGc.SetBrushColor( TRgb::Color16MA( 0 ) );
+    aGc.Clear( boundingRect ); 
+
     if ( iCaptureButtonPressed )
         {
         aGc.BitBltMasked( iCaptureRect.iTl, iCaptureIconPressed, boundingRect, iCaptureIconPressedMask, EFalse );

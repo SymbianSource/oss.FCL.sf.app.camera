@@ -716,7 +716,7 @@ void CCamBurstThumbnailView::DoActivateL( const TVwsViewId& aPrevViewId, TUid aC
     iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
                                      R_CAM_MOVE_TO_STILL_IMAGE_SEQUENCE_INTEREST );
     
-    if ( iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport) != ECamNoEditorSupport )
+    if ( iController.IntegerSettingValue(ECamSettingItemPhotoEditorSupport) )
         {    
         iAiwServiceHandler->AttachMenuL( R_CAM_BURST_THUMBNAIL_MENU, 
                 R_CAM_SET_AS_CALL_IMAGE_INTEREST_EDITOR );

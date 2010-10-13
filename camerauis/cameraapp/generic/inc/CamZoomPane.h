@@ -182,7 +182,7 @@ class CCamZoomPane : public CBase,
         * @since 3.0
         * @return the zoom pane rect
         */
-        TRect Extent() const;
+        TRect Rect() const;
         
         /**
         * Called when the parent gains or loses foreground
@@ -405,7 +405,6 @@ class CCamZoomPane : public CBase,
 
         TRect iZoomPaneRect;
         TRect iSliderParentRect;
-        TRect iExtent;
         TPoint iPlusPoint;
         TPoint iMinusPoint;
         TPoint iTopPoint;

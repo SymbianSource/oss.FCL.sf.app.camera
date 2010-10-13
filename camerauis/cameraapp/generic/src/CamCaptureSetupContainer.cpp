@@ -148,7 +148,7 @@ void CCamCaptureSetupContainer::ConstructL( const TRect& aRect )
     // go around the problem
 
     TRect listboxRect;  
-    if ( AknLayoutUtils::PenEnabled() ) 
+    if ( CamUtility::IsNhdDevice() ) 
         {
         listboxRect = TouchLayout();
         }
@@ -327,7 +327,7 @@ void CCamCaptureSetupContainer::Draw( const TRect& aRect ) const
     TRgb color;
     AknsUtils::GetCachedColor( skin, color, KAknsIIDQsnTextColors,
                                             EAknsCIQsnTextColorsCG6 );
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
         if( appUi->IsDirectViewfinderActive() &&
             iViewFinding && iFullScreenVF )

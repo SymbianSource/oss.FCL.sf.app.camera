@@ -2246,7 +2246,7 @@ void CCamSettingsModel::LoadResourcesL()
         {
         TFileName resourceFile;
         TParse parse;
-        if ( AknLayoutUtils::PenEnabled() )  
+        if ( CamUtility::IsNhdDevice() )  
             {
             parse.Set( KCamNhdResourceFileName, &KDC_APP_RESOURCE_DIR, NULL ); 
             }

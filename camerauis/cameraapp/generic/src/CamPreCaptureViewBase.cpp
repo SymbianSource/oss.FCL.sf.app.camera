@@ -558,7 +558,7 @@ void CCamPreCaptureViewBase::HandleControllerEventL( TCamControllerEvent aEvent,
                 ( iController.CurrentOperation() != ECamCapturing && iController.CurrentOperation() != ECamPaused ) );
 
         TBool precaptureToolbarState = !appUi->IsBurstEnabled()
-                && !iStandbyModeActive && !appUi->IsInPretendExit() && !iController.IsKeyLockOn();
+                && !iStandbyModeActive && !appUi->IsInPretendExit();
         
         if ( ( ECamCameraPreparedImage == iController.CameraState() || 
                 showVideoModeToolbar ) &&     
@@ -1877,8 +1877,7 @@ void CCamPreCaptureViewBase::HandleTouchGestureL( MAknTouchGestureFwEvent& aEven
         }
     else if ( EAknTouchGestureFwDoubleTap == aEvent.Type() 
               && ( ECamNoOperation == iController.CurrentOperation() 
-                   || ( ( ECamCapturing   == iController.CurrentOperation() 
-                            || ECamPaused   == iController.CurrentOperation() )
+                   || ( ECamCapturing   == iController.CurrentOperation() 
                         && iController.CurrentMode() == ECamControllerVideo ) ) )
         {
         PRINT( _L("Camera <> double tap event") );

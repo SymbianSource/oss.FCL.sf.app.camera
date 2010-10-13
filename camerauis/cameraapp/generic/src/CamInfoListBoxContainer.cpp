@@ -153,7 +153,7 @@ void CCamInfoListBoxContainer::ConstructL( const TRect& aRect, TInt aListBoxReso
     
     CCamAppUi* appUi = static_cast<CCamAppUi*>( iEikonEnv->AppUi() ); 
     TRect listboxRect; 
-    if ( AknLayoutUtils::PenEnabled() ) 
+    if ( CamUtility::IsNhdDevice() ) 
         {
         listboxRect = TouchLayout();
         }
@@ -329,7 +329,7 @@ void CCamInfoListBoxContainer::Draw( const TRect& aRect ) const
 	PRINT(_L("Camera => CCamInfoListBoxContainer::Draw") )
 
 	CWindowGc& gc = SystemGc();
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
         TRgb color;
         if( iSkinnedBackGround )
@@ -597,15 +597,7 @@ void CCamInfoListBoxContainer::HandleListBoxEventL( CEikListBox* aListBox, TList
         case EEventItemSingleClicked:
             {
             TInt settingValue = CurrentSettingItemValue();
-
-            if ( iView.Id().iUid == ECamViewIdPhotoUserSceneSetup )
-                {                   
-                iController.PreviewSettingChangeL( ECamSettingItemUserSceneLightSensitivity, settingValue );
-                }
-     	    else
-       	        {
-		        iController.PreviewSettingChangeL( ECamSettingItemDynamicPhotoLightSensitivity, settingValue );
-          	    }
+            iController.PreviewSettingChangeL( ECamSettingItemDynamicPhotoLightSensitivity, settingValue );
             }
             break;
         default:

@@ -363,7 +363,12 @@ class CCamAppController : public CBase,
     * Return whether saving is still in progress.
     */    
     TBool IsSavingInProgress() const;
-     
+    
+    /** 
+    * Return whether snapshot rotation is still active.
+    */    
+    TBool IsRotationActive() const;
+    
     /**
     * Return if settings restore is set pending.
     */
@@ -1424,7 +1429,7 @@ public:
    *                takes ownership.
    * @since S60 v5.0
    */
-void SetSettingsPlugin( TUid aPlugin );
+void SetSettingsPlugin( CCamGSInterface* aPlugin );
 
   /**
   * Set viewfinder window for direct screen viewfinder. The handle must remain
@@ -2657,7 +2662,7 @@ public:
     TBool iDefineContextSuccessful;
     TBool iStorageChangeProcessOngoing;
     // own.
-    TUid iPlugin;
+    CCamGSInterface* iPlugin;
     TBool iSilentProfile;
     TInt iTimeLapseCaptureCount;
     RFs iFs;

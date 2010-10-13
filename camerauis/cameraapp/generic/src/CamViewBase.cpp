@@ -180,8 +180,8 @@ void CCamViewBase::HandleCommandL( TInt aCommand )
             if( iContainer )
             	{
             	if(appUi)
-            	    { 
-                    iContainer->DrawNow( appUi->ZoomPane()->Extent() );
+            	    {
+            	    iContainer->DrawNow( appUi->ZoomPane()->Rect() );    
             	    }
             	else
             	    {
@@ -515,13 +515,6 @@ void CCamViewBase::SwitchToStandbyModeL( TCamAppViewIds aViewId, TInt aError )
 
     SetStandbyModeActive(ETrue);
 
-    UpdateCbaL();
-    if ( Cba() )
-        {
-        Cba()->DrawNow();
-        }
-        
-    
     // Release the camera hardware
     iController.ReleaseCamera();
     

@@ -241,7 +241,7 @@ void CCamDecorator::CreateRecordingIconL(TResourceReader& /* aResourceReader */)
     PRINT( _L("Camera => CCamDecorator::CreateRecordingIconL") );	
     
     TRect screenRect;
-    if ( Layout_Meta_Data::IsLandscapeOrientation() || AknLayoutUtils::PenEnabled() )
+    if ( Layout_Meta_Data::IsLandscapeOrientation() || CamUtility::IsNhdDevice() )
         {
         AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, screenRect );
         }
@@ -253,7 +253,7 @@ void CCamDecorator::CreateRecordingIconL(TResourceReader& /* aResourceReader */)
     TAknLayoutRect progressPaneLayout;
     TAknLayoutRect recIconLayout;
     TInt vari = Layout_Meta_Data::IsLandscapeOrientation();
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
          progressPaneLayout.LayoutRect( screenRect,
              AknLayoutScalable_Apps::vid4_progress_pane( vari ) );

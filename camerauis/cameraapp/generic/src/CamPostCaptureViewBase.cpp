@@ -37,7 +37,7 @@
 #include <akntoolbar.h>
 #include <aknbutton.h>
 #include <StringLoader.h>
-#include <aknnotewrappers.h>
+
 
 #include "Cam.hrh"
 #include "CamUtility.h"
@@ -189,7 +189,6 @@ void CCamPostCaptureViewBase::HandleCommandL( TInt aCommand )
             sp->MakeVisible( ETrue );
             title->MakeVisible( ETrue );
             iContainer->SetRect( AppUi()->ClientRect() );
-            DecrementCameraUsers();
             GlxMetadataViewUtility::ActivateViewL( iController.CurrentFullFileName() );
             static_cast<CCamContainerBase*>(iContainer)->CheckForFileName( ETrue );
             title->MakeVisible( EFalse );
@@ -218,8 +217,6 @@ void CCamPostCaptureViewBase::HandleCommandL( TInt aCommand )
             break;
         case KAiwCmdEdit:
         case ECamCmdEdit:
-        case ECamCmdEditPhoto:
-        case ECamCmdEditVideo:    
             {
             CAiwGenericParamList& inputParams = iAiwServiceHandler->InParamListL();
             TPtrC currentFullFileName(iController.CurrentFullFileName());
@@ -585,8 +582,7 @@ void CCamPostCaptureViewBase::DoActivateL( const TVwsViewId& aPrevViewId, TUid a
                 {
                 fixedToolbar->SetToolbarObserver( this );
                 UpdateToolbarIconsL();
-                if( Id().iUid != ECamViewIdVideoPostCapture && !appui->IsSelfTimedCapture() && 
-                    !iController.SavedCurrentImage() )
+                if( Id().iUid != ECamViewIdVideoPostCapture && !appui->IsSelfTimedCapture() )
                     {
                     fixedToolbar->SetDimmed(ETrue);
                     }
@@ -902,7 +898,6 @@ void CCamPostCaptureViewBase::StartAddToAlbumOperationL()
     TBool   allowMultipleSelection = ETrue;
     RArray<TUint32> selectedAlbumIds;
     CleanupClosePushL( selectedAlbumIds );
-    DecrementCameraUsers();
     // Launching the Pop-up menu with the list of albums
     TRAPD( err, TGlxCollectionSelectionPopup::ShowPopupL(
             selectedAlbumIds,
@@ -965,17 +960,12 @@ TInt CCamPostCaptureViewBase::ShowAddToAlbumConfirmationQueryL()
     }
 
 /*
-* CCamPostCaptureViewBase::AddToAlbumIdOperationCompleteL()
+* CCamPostCaptureViewBase::AddToAlbumIdOperationComplete()
 */
-void CCamPostCaptureViewBase::AddToAlbumIdOperationCompleteL()
+void CCamPostCaptureViewBase::AddToAlbumIdOperationComplete()
     { 
-    PRINT( _L("Camera => CCamPostCaptureViewBase::AddToAlbumIdOperationCompleteL() ... SUCCESS ") );
+    PRINT( _L("Camera => CCamPostCaptureViewBase::AddToAlbumIdOperationComplete() ... SUCCESS ") );
     iAddToAlbumRequestOngoing = EFalse;
-        
-    HBufC* infoText = StringLoader::LoadL( R_NOTE_ADDED_ONE_ITEM_ALBUM );
-    CAknConfirmationNote* confNote =  new( ELeave ) CAknConfirmationNote( ETrue );
-    confNote->ExecuteLD( *infoText );
-
     }
 
 

@@ -36,7 +36,7 @@ class CCamGSInterface : public CAknView
         */
         void DestroyPlugin();
         
-	public:
+	protected:
 	    /** iDtor_ID_Key Instance identifier key. When instance of an
 	     *               implementation is created by ECOM framework, the
 	     *               framework will assign UID for it. The UID is used in

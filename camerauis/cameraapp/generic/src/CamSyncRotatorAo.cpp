@@ -96,8 +96,11 @@ CCamSyncRotatorAo::~CCamSyncRotatorAo()
 //
 void CCamSyncRotatorAo::RotateL( CFbsBitmap* aBitmap, CBitmapRotator::TRotationAngle aRotation )
     {
-    iRotator->Rotate( &iStatus, *aBitmap, aRotation );
-    SetActive();    
+    if( !IsActive() )
+        {
+        iRotator->Rotate( &iStatus, *aBitmap, aRotation );
+        SetActive();
+        }
     }
    
 // -----------------------------------------------------------------------------

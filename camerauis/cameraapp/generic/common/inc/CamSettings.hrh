@@ -279,13 +279,6 @@ enum TCameraSwitchRequired
     ESwitchSecondaryOrientation
     };
 
-enum TCamEditorSupport
-    {
-    ECamNoEditorSupport,
-    ECamEditorSupportInToolbar,
-    ECamEditorSupportInOptions
-    };
-	
 #ifdef _DEBUG
 #ifndef CAMERAAPP_PLUGIN_BUILD
 const TUint16* const KCamOrientationNames[] =

@@ -182,7 +182,7 @@ CCamShootingModeContainer::ConstructL( const TRect& aRect )
     iListBox->DisableSingleClick( ETrue );
    
 	TRect listboxRect;
-    if ( AknLayoutUtils::PenEnabled() ) 
+    if ( CamUtility::IsNhdDevice() ) 
         {
         listboxRect = TouchLayout();
         }
@@ -514,7 +514,7 @@ void CCamShootingModeContainer::Draw( const TRect& aRect ) const
 	PRINT(_L("Camera => CCamShootingModeContainer::Draw") )
 
     CWindowGc& gc = SystemGc();
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
         TRgb color;
         if( iFullySkinned )
@@ -616,7 +616,7 @@ TKeyResponse CCamShootingModeContainer::OfferKeyEventL(
     if ( EStdKeyUpArrow == aKeyEvent.iScanCode ||
          EStdKeyDownArrow == aKeyEvent.iScanCode )
         {
-        if ( AknLayoutUtils::PenEnabled() )  
+        if ( CamUtility::IsNhdDevice() )  
             {
             ShowTooltipL(); 
             }
@@ -674,11 +674,9 @@ void CCamShootingModeContainer::ConstructSummaryDetailsFromResourceL(TInt aResou
                 {
                 // the description of the icon
                 HBufC* Description;
-                TInt DescResouceId = R_CAM_SCENE_DESCRIPTION_LANDSCAPE_AUTOFOCUS;
-                Description = StringLoader::LoadL( DescResouceId );
+                TInt description = R_CAM_SCENE_DESCRIPTION_LANDSCAPE_AUTOFOCUS;
+                Description = StringLoader::LoadL( description );
                 User::LeaveIfError( iDescArray.Append( Description ) );
-                delete descr;
-                descr = NULL;
                 }
             else 
                 {

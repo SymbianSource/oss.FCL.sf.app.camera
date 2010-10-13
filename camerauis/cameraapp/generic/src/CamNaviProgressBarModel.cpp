@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -13,6 +13,17 @@
 *
 * Description:  Control for displaying elapse/remaining record time
 *                in Navi Pane
+*
+*  Copyright (c) 2007-2008 Nokia.  All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+
+*
 *
 */
 
@@ -184,7 +195,7 @@ void CCamNaviProgressBarModel::LoadResourceDataL()
 
     iCamOrientation = appUi->CamOrientation();
 
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
         TouchLayoutL();
         }
@@ -243,7 +254,7 @@ void CCamNaviProgressBarModel::LoadResourceDataL()
 
     // Create component bitmaps
     TSize size;    
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
         size =  iProgressIconRect.Rect().Size();
         }
@@ -363,7 +374,7 @@ CCamNaviProgressBarModel::DrawProgBar(       CBitmapContext& aGc,
 
     DrawElapsedTimeText( aGc );
     DrawRemainingTimeText( aGc, skin );
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
         aGc.BitBltMasked( iProgressIconRect.Rect().iTl,
             icon, icon->SizeInPixels(), mask, ETrue );
@@ -373,11 +384,8 @@ CCamNaviProgressBarModel::DrawProgBar(       CBitmapContext& aGc,
         aGc.BitBltMasked( iVidStorageIconRect.Rect().iTl,
             icon, icon->SizeInPixels(), mask, ETrue );
         }
-    if( CamUtility::IsNhdDevice() )
-        {
-        // VGA layout doesn't use progress bar
-        DrawProgressBar( aGc );
-        }
+    
+    DrawProgressBar( aGc );
     }
 
 // ---------------------------------------------------------
@@ -543,11 +551,6 @@ void CCamNaviProgressBarModel::FormatTimeL()
 
     time = iRecordTimeRemaining.Int64();
     time.FormatL( iRemainingTimeText, *iTimeFormat );
-    if( !CamUtility::IsNhdDevice() )
-        {
-        // VGA layout is using backslash instead of progress bar
-        iElapsedTimeText.Append(_L("  /"));
-        }
     
     if ( iElapsedTimeTextItem )
         {

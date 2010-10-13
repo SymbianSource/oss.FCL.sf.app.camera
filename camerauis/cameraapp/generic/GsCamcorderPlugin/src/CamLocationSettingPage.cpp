@@ -216,7 +216,7 @@ void CCamLocationSettingPage::SizeChanged()
     {
     CAknSettingPage::SizeChanged();
 
-    if ( AknLayoutUtils::PenEnabled() ) 
+    if ( CamUtility::IsNhdDevice() ) 
         {
         if ( Layout_Meta_Data::IsLandscapeOrientation() )
             {

@@ -593,12 +593,12 @@ CCamAppController::~CCamAppController()
   iConfiguration = NULL;  
 
   RProperty::Delete( KPSUidCamcorderNotifier, KCCorFocused );  
-  if( TUid::Null() != iPlugin )
-      {
-      // Destroy Ecom plugin
-      REComSession::DestroyedImplementation( iPlugin );    
-      REComSession::FinalClose();
-      }
+    if( iPlugin )
+        {
+        // Destroy Ecom plugin
+        iPlugin->DestroyPlugin();
+        }
+  iPlugin = NULL;
   delete iDriveChangeNotifier;
   iFs.Close();
   
@@ -608,6 +608,11 @@ CCamAppController::~CCamAppController()
       }
 
   delete iSnapShotRotator;
+
+  if( iRotatedSnapshot )
+      {
+      delete iRotatedSnapshot;
+      }
   
   if( iTvAccessoryMonitor )
       {
@@ -1232,7 +1237,7 @@ CCamAppController::RecordTimeRemaining()
         // In case settings plugin is being run or mmc dismount is pending
         // due to usb activation, we calculate the remaining time here, 
         // instead of repreparing the engine and getting it from there  
-        TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL( static_cast < TCamMediaStorage >(CurrentVideoStorageLocation()) ) );
+        TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL() );
         if( KErrNone != err )
             {
             iVideoTimeRemaining = 0;
@@ -1251,7 +1256,7 @@ CCamAppController::RecordTimeRemaining()
         else 
             {
             PRINT( _L("Camera <> CCamAppController::RecordTimeRemaining - video mode not yet initialized" ));
-            TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL( static_cast < TCamMediaStorage >(CurrentVideoStorageLocation()) ) );
+            TRAPD( err, iVideoTimeRemaining = CalculateVideoTimeRemainingL() );
             if( KErrNone != err )
                 {
                 iVideoTimeRemaining = 0;
@@ -2053,13 +2058,17 @@ CCamAppController::HandleVideoStopEvent( TInt aStatus )
   // Keep track of the fact we are now leaving saving state
   iSaving = EFalse;
   
-  //create thumbnail before harvesting
-  if( iConfigManager && iConfigManager->IsThumbnailManagerAPISupported() )
-      {
-      TRAP_IGNORE( iImageSaveActive->CreateThumbnailsL( *BurstCaptureArray() ) ;
-                   iImageSaveActive->DoCreateThumbnailL() );
-      }
-        
+  // try closing video record to free up resources
+  // Test - <eo> commented out, no such direct request supported
+  // TRAP_IGNORE( IssueDirectRequestL( ECamRequestVideoRelease ) );
+  
+  // if video post capture is off then force re-prepare so
+  // that remaining record time is updated
+  // REMOVED
+
+  // if using direct viewfinding pause viewfinder
+  // REMOVED
+
   // report to LifeBlog
   RProperty::Set( KPSUidCamcorderNotifier, KCamLatestFilePath, iSuggestedVideoPath ); 
   // Add to album if this is enabled for videos
@@ -2074,7 +2083,12 @@ CCamAppController::HandleVideoStopEvent( TInt aStatus )
     {
     iImageSaveActive->AddToAlbum( iSuggestedVideoPath, EFalse, defaultAlbumId );
     }
-      
+
+  //create thumbnail
+  if( iConfigManager && iConfigManager->IsThumbnailManagerAPISupported() )
+      {
+      TRAP_IGNORE( iImageSaveActive->CreateThumbnailsL( *BurstCaptureArray() ) );
+      }
   NotifyControllerObservers( ECamEventRecordComplete,   aStatus );
   SetOperation( ECamNoOperation );
   PRINT( _L( "Camera <> calling HandleCaptureCompletion.." ) )        
@@ -2552,29 +2566,11 @@ void CCamAppController::SwitchCameraL()
   if( UiConfigManagerPtr()->IsUIOrientationOverrideSupported() )
       {
       RArray<TInt> screenModeValues;
-      CleanupClosePushL( screenModeValues );
       UiConfigManagerPtr()->SupportedScreenModesL( screenModeValues );
       TInt landscapeScreenMode = screenModeValues[0];
       SetCameraOrientationModeL( landscapeScreenMode );
-      CleanupStack::PopAndDestroy( &screenModeValues );
       }
   iCameraController->CompleteSwitchCameraL();
-  // Force to get a sensor data after switch camera from primary to secondary 
-  // when always holding in camera with portrait mode. 
-  if( iConfigManager 
-      && iConfigManager->IsOrientationSensorSupported() )
-    {
-    if( iAccSensorListening )
-      {
-      iAccSensorListening = EFalse;
-      }
-    if( iAccSensorChannel )
-      {
-      delete iAccSensorChannel;
-      iAccSensorChannel = NULL;
-      }        
-    TRAP_IGNORE( UpdateSensorApiL( ETrue ) );            
-    }
 
   // Camera switched.
   // a) Set current camera index to the new one.
@@ -4009,7 +4005,6 @@ TBool CCamAppController::IsInShutdownMode() const
 //
 TBool CCamAppController::IsAppUiAvailable() const
     {
-    PRINT1(_L("Camera <> CCamAppController::IsAppUiAvailable=%d"),iAppUiAvailable);
     return iAppUiAvailable;
     }       
     
@@ -4786,7 +4781,6 @@ CCamAppController::CCamAppController()
   , iImageOrientation( ECamOrientation0 )
   , iLastImageOrientation( ECamOrientation0 )
   , iLongIdleTimeout( KIdleTimeout * 5 )
-  , iPlugin( TUid::Null() )
   , iPendingHdmiEvent( ECamHdmiNoEvent )
   {
   }
@@ -8546,10 +8540,7 @@ void CCamAppController::HandleCaptureCompletion()
   {
   PRINT( _L( "Camera => CCamAppController::HandleCaptureCompletion()" ) )
 
-  if ( iInfo.iOperation != ECamFocused && iInfo.iOperation != ECamFocusing )
-      {
-      SetOperation( ECamNoOperation );
-      }
+  SetOperation( ECamNoOperation );
   
   // Re-enable screensaver
   EnableScreenSaver( ETrue );
@@ -8806,26 +8797,6 @@ void CCamAppController::StartLocationTrailL()
   {
   PRINT( _L("Camera => CCamAppController::StartLocationTrailL") );
   CCamAppUi* appUI = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
-
-  if( !iRepository )
-    {
-    iRepository = CRepository::NewL( KCRUidCameraappSettings ); 
-    }
-
-    TInt ftuValue=-1;
-    TInt retErr=0;
-    retErr = iRepository->Get( KCamCrFtuMessageFlag, ftuValue );
-	if( ftuValue == 0 )
-		{
-		return;
-		}
-
-	if( iRepository )
-		{
-		delete  iRepository;
-		iRepository = NULL;
-		}
-
 
   // If a stop request is pending but the trail is being restarted, stop 
   // and delete the timer
@@ -10601,6 +10572,22 @@ CCamAppController::IsSavingInProgress() const
   }
 
 // ---------------------------------------------------------------------------
+// IsRotationActive
+// ---------------------------------------------------------------------------
+//
+TBool CCamAppController::IsRotationActive() const
+  {
+  PRINT( _L("Camera => CCamAppController::IsRotationActive" ));  
+  TBool rotationactive=iSnapShotRotator->IsActive();
+  if( !rotationactive && iRotatorAo )
+      {
+      rotationactive=iRotatorAo->IsActive();
+      }
+  PRINT1( _L("Camera <= CCamAppController::IsRotationActive rotationactive=%d" ), rotationactive );  
+  return rotationactive;
+  }
+
+// ---------------------------------------------------------------------------
 // CapturedImages
 // ---------------------------------------------------------------------------
 //
@@ -10613,7 +10600,7 @@ CCamAppController::IsSavingInProgress() const
 //
 // -----------------------------------------------------------------------------
 //
-void CCamAppController::SetSettingsPlugin( TUid aPlugin )
+void CCamAppController::SetSettingsPlugin( CCamGSInterface* aPlugin )
 	{
 	iPlugin = aPlugin;
 	}
@@ -10941,7 +10928,9 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
           else if( aType == EDriveDismount &&
                   appUi->IsRecoverableStatus() )
               {
+              TInt mmcInserted = 0;
               TInt usbPersonality = 0;
+              User::LeaveIfError( RProperty::Get( KPSUidUikon, KUikMMCInserted, mmcInserted ) );
               User::LeaveIfError(RProperty::Get(KPSUidUsbWatcher, 
                                             KUsbWatcherSelectedPersonality,
                                             usbPersonality) );
@@ -10952,7 +10941,7 @@ TInt CCamAppController::DriveChangeL( const TCamDriveChangeType aType )
                       {
                       SwitchToStandbyL( ECamErrMassStorageMode );
                       }
-                  else if ( aType == EDriveDismount )
+                  else if ( !mmcInserted )
                       {
                       SwitchToStandbyL( ECamErrMemoryCardNotInserted );
                       }
@@ -11253,32 +11242,32 @@ void CCamAppController::RotateSnapshotL()
         }
     if( BurstCaptureArray()->Snapshot( iCurrentImageIndex ) ) 
         {
-    // copy snapshot to preserve the original snapshot bitmap
-    // first get the handle for the original snapshot bitmap
-    CFbsBitmap* snapshot = new (ELeave)CFbsBitmap();
-    CleanupStack::PushL( snapshot );
-    snapshot->Duplicate( BurstCaptureArray()->Snapshot( iCurrentImageIndex )->Handle() );
-    //create a new bitmap with the same dimensions as the original snapshot
-    iRotatedSnapshot = new (ELeave)CFbsBitmap();
-    iRotatedSnapshot->Create( snapshot->SizeInPixels(), snapshot->DisplayMode() );
-    TRect tmpRect( TPoint( 0, 0 ), snapshot->SizeInPixels() );
-    TInt tmpLen = tmpRect.Width() * tmpRect.Height() * 4;
-    //copy the snapshot data
-    iRotatedSnapshot->BeginDataAccess();
-    snapshot->BeginDataAccess();
-    Mem::Copy( iRotatedSnapshot->DataAddress(), snapshot->DataAddress(), tmpLen );
-    iRotatedSnapshot->EndDataAccess();
-    snapshot->EndDataAccess();
-    // copy the filename 
-    iRotationArray->SetNextNameL( BurstCaptureArray()->FileName( iCurrentImageIndex ), BurstCaptureArray()->ImageName( iCurrentImageIndex ));
-    // rotate the copied snapshot 
-    if ( !iRotatorAo )
-        {
-        iRotatorAo = CCamSyncRotatorAo::NewL( *this );
-        }    
-    iRotatorAo->RotateL( iRotatedSnapshot, MapCamOrientation2RotationAngle( iCaptureOrientation ) );
-        
-    CleanupStack::PopAndDestroy(snapshot);
+        // copy snapshot to preserve the original snapshot bitmap
+        // first get the handle for the original snapshot bitmap
+        CFbsBitmap* snapshot = new (ELeave)CFbsBitmap();
+        CleanupStack::PushL( snapshot );
+        snapshot->Duplicate( BurstCaptureArray()->Snapshot( iCurrentImageIndex )->Handle() );
+        //create a new bitmap with the same dimensions as the original snapshot
+        iRotatedSnapshot = new (ELeave)CFbsBitmap();
+        iRotatedSnapshot->Create( snapshot->SizeInPixels(), snapshot->DisplayMode() );
+        TRect tmpRect( TPoint( 0, 0 ), snapshot->SizeInPixels() );
+        TInt tmpLen = tmpRect.Width() * tmpRect.Height() * 4;
+        //copy the snapshot data
+        iRotatedSnapshot->BeginDataAccess();
+        snapshot->BeginDataAccess();
+        Mem::Copy( iRotatedSnapshot->DataAddress(), snapshot->DataAddress(), tmpLen );
+        iRotatedSnapshot->EndDataAccess();
+        snapshot->EndDataAccess();
+        // copy the filename 
+        iRotationArray->SetNextNameL( BurstCaptureArray()->FileName( iCurrentImageIndex ), BurstCaptureArray()->ImageName( iCurrentImageIndex ));
+        // rotate the copied snapshot 
+        if ( !iRotatorAo )
+            {
+            iRotatorAo = CCamSyncRotatorAo::NewL( *this );
+            }    
+        iRotatorAo->RotateL( iRotatedSnapshot, MapCamOrientation2RotationAngle( iCaptureOrientation ) );
+            
+        CleanupStack::PopAndDestroy(snapshot);
         } 
     PRINT( _L( "Camera <= CCamAppController::RotateSnapshotL" ) );    
     } 

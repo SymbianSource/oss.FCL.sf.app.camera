@@ -99,54 +99,5 @@ RESOURCE LOCALISABLE_APP_INFO r_cam_localisable_app_info
         };
     }
 
-// ---------------------------------------------------------
-//   
-//    r_ftu_message_dialog_text
-//    FTU message dialog text
-// ---------------------------------------------------------
-//
-RESOURCE TBUF r_ftu_message_dialog_text { buf=qtn_lcam_location_ftu_text; }
-
-// ---------------------------------------------------------
-//   
-//    r_ftu_message_hyperlink_text
-//    FTU message hyperlink text
-// ---------------------------------------------------------
-//
-RESOURCE TBUF r_ftu_message_hyperlink_text{ buf=qtn_lcam_location_ftu; }
-    
-    
-// ---------------------------------------------------------
-//   
-//    r_ftu_message_dialog
-//    The FTU message dialog resource
-// ---------------------------------------------------------
-//    
-RESOURCE DIALOG r_ftu_message_dialog
-    {
-    flags=EEikDialogFlagNoDrag |EEikDialogFlagCbaButtons |EEikDialogFlagWait;
-    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
-       items =
-         {
-          DLG_LINE 
-              {
-                type = EAknCtPopupHeadingPane;  
-                id = EAknMessageQueryHeaderId;
-                control = AVKON_HEADING 
-                    {
-                    headinglayout = R_AVKON_LIST_HEADING_PANE_POPUPS;
-                    };
-                },
-                DLG_LINE    
-                    {
-                    type = EAknCtMessageQuery;   
-                    id = EAknMessageQueryContentId;        
-                    control = AVKON_MESSAGE_QUERY               
-                        {              
-                        message = "";             
-                        };          
-                    }
-         };
-    }
 // ===========================================================================
 // end of file

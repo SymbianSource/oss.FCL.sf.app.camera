@@ -63,7 +63,6 @@
 
 #include <AknCommonDialogsDynMem.h>
 #include <CAknMemorySelectionDialogMultiDrive.h>
-#include <aknmessagequerydialog.h>
 
 #include "CameraappPrivateCRKeys.h"
 #include "CamAppUi.h"
@@ -147,45 +146,7 @@ const TUint KCameraEventInterest = ( ECamCameraEventClassBasicControl
                                    | ECamCameraEventClassVfControl
                                    | ECamCameraEventClassSsControl
                                    | ECamCameraEventClassSettings );
-/**
- * class CCamFtuDisplay
- * This class is used to give a notification to Camera First Time User regarding the 
- * geotagging of captured images or videos.
- */
 
-class CCamFtuDisplay : public CAsyncOneShot 
-    {
-public:
-    /**
-     * CCamFtuDisplay
-     * Default Constructor
-     */
-    CCamFtuDisplay( CCamAppUi * aCamAppUi )
-    : CAsyncOneShot( CActive::EPriorityLow), iCamAppUi(aCamAppUi)
-            {
-            }
-    enum TEnableCamFtu
-        {
-        ECamFtuEnable = 0,
-        ECamFtuDisable
-        };
-    
-protected:
-    /**
-     * RunL
-     * Callback method
-     */
-    void RunL()
-        {
-        iCamAppUi->CamFtuDisplayL();
-        }
-private:
-    /**
-     * iCamAppUi
-     * An instance of the CCamAppUi
-     */
-    CCamAppUi* iCamAppUi;
-    };
 
 
 // ===========================================================================
@@ -291,12 +252,6 @@ CCamAppUi::~CCamAppUi()
     delete iCollectionManager;
     iCollectionManager = NULL;
 
-    if( iCamFtuDisplay )
-        {
-        delete iCamFtuDisplay;
-        iCamFtuDisplay = NULL;
-        }
-
     PRINT( _L("Camera <= ~CCamAppUi" ))
     }
 
@@ -334,15 +289,12 @@ void CCamAppUi::ConstructL()
   TBool uiOrientationOverride = iController.UiConfigManagerPtr()->IsUIOrientationOverrideSupported();
   
   // Get the screenmode values used for setting  the orientation
-  
+  RArray<TInt> screenModeValues;
   if ( uiOrientationOverride )
       {
-      RArray<TInt> screenModeValues;
-      CleanupClosePushL( screenModeValues );
       iController.UiConfigManagerPtr()->SupportedScreenModesL( screenModeValues );
       iLandscapeScreenMode = screenModeValues[0];
       iPortraitScreenMode = screenModeValues[1];
-      CleanupStack::PopAndDestroy( &screenModeValues );
       }
   
   // The embedded views are set after ConstructL completes
@@ -710,20 +662,7 @@ OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP7_CCAMAPPUI_CONSTRUCTL, "e_ReadUiOri
 
   PRINT( _L("Camera <= CCamAppUi::ConstructL") )
   OstTrace0( CAMERAAPP_PERFORMANCE_DETAIL, DUP3_CCAMAPPUI_CONSTRUCTL, "e_CCamAppUi_ConstructL 0" );
-   
-  //  To get FTU flag value
-
-    TInt ftuValue=0;
-    TInt retErr=0;
-    retErr=iRepository->Get( KCamCrFtuMessageFlag, ftuValue );
-   
-    if( !IsEmbedded() && ftuValue == CCamFtuDisplay::ECamFtuEnable 
-	        && retErr==KErrNone )
-        {
-        iCamFtuDisplay = new (ELeave)CCamFtuDisplay(this);
-        iCamFtuDisplay->Call();
-        }
-    }
+  }
     
 
 
@@ -755,73 +694,9 @@ TBool CCamAppUi::IsInternalView( TCamViewState aViewState ) const
   PRINT1( _L("Camera <= CCamAppUi::IsInternalView, return %d"), internal );
   return internal;
   }
-// -----------------------------------------------------------------------------
-// CCamAppUi:: HyperlinkCallback
-// Call back method for the hyper link text 
-// -----------------------------------------------------------------------------
-//
-TInt CCamAppUi:: HyperlinkCallback(TAny* aAny)
-    {
-    (static_cast<CCamAppUi*>(aAny))->OpenSettingView();
-    return EFalse;
-    }
-// -----------------------------------------------------------------------------
-// CCamAppUi::OpenSettingView
-// Non static public method , to launch the settings view
-// -----------------------------------------------------------------------------
-//
-void CCamAppUi::OpenSettingView()
-    {
-    TRAP_IGNORE( HandleCommandL( ECamCmdSettings ) );
-    }
-// -----------------------------------------------------------------------------
-// CCamAppUi::CamFtuDisplayL()
-// TO Display FTU message for first time camera launched
-// -----------------------------------------------------------------------------
-//
-void CCamAppUi::CamFtuDisplayL()
-    {    
 
-	iController.SetIntegerSettingValueL( ECamSettingItemRecLocation, ECamLocationOn );
 
-    CAknMessageQueryDialog* dlg =
-    new (ELeave) CAknMessageQueryDialog();
-    dlg->PrepareLC( R_FTU_MESSAGE_DIALOG );
-    HBufC* msg = iEikonEnv->AllocReadResourceLC( R_FTU_MESSAGE_DIALOG_TEXT );
-    HBufC* hyperLinkMsg = iEikonEnv->AllocReadResourceLC(
-            R_FTU_MESSAGE_HYPERLINK_TEXT );
-   
-    TInt len = msg->Length() 
-            + hyperLinkMsg->Length() 
-            + KOpeningLinkTag().Length() 
-            + KClosingLinkTag().Length();
-    
-    HBufC* displayMsg = HBufC::NewLC( len );
-    _LIT(KMsgFormat, "%S%S%S%S");
-    displayMsg->Des().Format(KMsgFormat, 
-            msg, 
-            &KOpeningLinkTag(),
-            hyperLinkMsg,
-            &KClosingLinkTag());
-
-    dlg->SetMessageTextL( *displayMsg );
-    CleanupStack::PopAndDestroy(3); //msg, hyperLinkMsg, displayMsg
-    
-    TCallBack callback( HyperlinkCallback, this );
-
-    dlg->SetLink( callback );
-
-    dlg->RunLD();
-
-    iRepository->Set( KCamCrFtuMessageFlag, CCamFtuDisplay::ECamFtuDisable );
-
-	//Read the location record value in case its changed by hyperlink
-
-	TInt value = 0;
-	iRepository->Get( KCamCrPhotoStoreLocation, value );
-	iController.SetIntegerSettingValueL( ECamSettingItemRecLocation, value );
-	
-    } 
+ 
 // -----------------------------------------------------------------------------
 // CCamAppUi::IsConstructionComplete
 // Returns whether or not all construction has completed
@@ -1018,16 +893,13 @@ void CCamAppUi::SelfTimerEnableL( TCamSelfTimerFunctions aState )
         iSelfTimer->Cancel();
 
         // In capture setup mode, toolbar and indicators are not visible
-        // They will be updated when returning to precap, similarily to
-        // when setting the self timer mode above
-        // during changing from still pre-capture view to video pre-capture view, no need 
-        // to show toolbar of still image. It will display toolbar of video when entering video pre-capture  
-
-        if( ( iPreCaptureMode != ECamPreCapCaptureSetup && 
-              iPreCaptureMode != ECamPreCapSceneSetting ) &&                           
-            !( IsViewFinderInTransit() && 
-                iMode == ECamControllerImage &&
-                iTargetMode == ECamControllerVideo ) )    
+        // They will be updated when returning to precap, similar to
+        // when setting the self timer mode above.
+        // Also, during transition from still pre-capture view to video 
+        // pre-capture view, there's no need to show toolbar of still image. 
+        // It will display toolbar of video when entering video pre-capture.
+        if ( iPreCaptureMode != ECamPreCapCaptureSetup && 
+             iPreCaptureMode != ECamPreCapSceneSetting )
             {
             // Re-show the active palette
             iActivePaletteHandler->UpdateActivePaletteL();
@@ -1045,24 +917,16 @@ void CCamAppUi::SelfTimerEnableL( TCamSelfTimerFunctions aState )
             // Cancel any active focusing operation
             // this won't cancel if capture has already been requested
             iController.CancelFocusAndCapture();
-                
+
             iStillCaptureView->UpdateToolbarIconsL();
             
             // Raise precapture UI and restart courtesy UI timer,
             // if hide icons is enabled.
             RaisePreCaptureCourtesyUI(EFalse);        
-            }        
+            }
         
         UpdateCba();
-        CCamViewBase* precapView = static_cast<CCamViewBase*>( iView );              
-        if( precapView && 
-            IsViewFinderInTransit() && 
-            iMode == ECamControllerImage &&
-            iTargetMode == ECamControllerVideo )
-          {
-          precapView->ViewCba()->DrawNow();       
-          }
-        }    
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -1614,10 +1478,7 @@ void CCamAppUi::HandleCommandL( TInt aCommand )
         SetActivePaletteVisibility( EFalse );           
            
         // Update CBA
-        if ( iSelfTimer && iSelfTimer->IsActive() )
-            {
-            UpdateCba();
-            }
+        UpdateCba();
         }
       }
       break;
@@ -3894,7 +3755,6 @@ void CCamAppUi::ConstructViewIfRequiredL()
         CleanupStack::PushL( plugin );
         AddViewL( plugin ); // Transfer ownership to AppUi
         CleanupStack::Pop( plugin );
-        iController.SetSettingsPlugin( plugin->iDtor_ID_Key );
         iPlugin = plugin;        
         }
       break;
@@ -4091,7 +3951,7 @@ CCamAppUi::TrySwitchViewL( TBool aDeactivateFirst )
       {
       iController.ReleaseArray( ETrue );    
       }
-    if ( iPreCaptureMode != ECamPreCapTimeLapseSlider && !IsEmbedded() )
+    if ( iPreCaptureMode != ECamPreCapTimeLapseSlider )
       {
       iPreCaptureMode = ECamPreCapViewfinder;
       }       
@@ -5180,7 +5040,12 @@ CCamAppUi::StartCaptureL( const TKeyEvent& /*aKeyEvent*/ )
                 PRINT( _L("Camera <= CCamAppUi::StartCaptureL - already processing - ignored capture key") );
                 return EKeyWasNotConsumed;
                 }
-
+            else if( iController.ActiveCamera() == ECamActiveCameraSecondary &&
+                    iController.IsRotationActive() )
+                {
+                PRINT( _L("Camera <= CCamAppUi::StartCaptureL - rotation in processing - ignored capture key") );
+                return EKeyWasNotConsumed;                
+                }
             // Start capture
             iController.Capture();
 
@@ -5493,14 +5358,6 @@ void CCamAppUi::InternalExitL()
     PRINT( _L("Camera => CCamAppUi::InternalExitL") );
 
     iController.StoreFaceTrackingValue(); // store the current FT setting
-
-    if ( iMode == ECamControllerVideo ) 
-        {
-        // Prevent flickering when returning to default Still image mode
-        CCamViewBase* precapView = static_cast<CCamViewBase*>( iView ); 
-    	__ASSERT_DEBUG( precapView, CamPanic( ECamPanicNullPointer ));
-        precapView->ViewCba()->MakeVisible( EFalse );
-        } 
 	
     if ( iController.UiConfigManagerPtr() && 
          iController.UiConfigManagerPtr()->IsLocationSupported() )
@@ -7880,7 +7737,7 @@ void CCamAppUi::SetPreCaptureModeL(TCamPreCaptureMode aMode)
 
     if ( iViewState != ECamViewStateUserSceneSetup )
         {
-	    if ( AknLayoutUtils::PenEnabled() ) 
+	    if ( CamUtility::IsNhdDevice() ) 
 	        {
 	        StatusPane()->MakeVisible( aMode == ECamPreCapStandby || 
 	                                   IsSecondCameraEnabled() && 

@@ -535,7 +535,7 @@ void CGSCamQualitySettingSlider::ReadLayoutL()
 
     if( iSettingType == ECamSettingItemVideoQuality )
     	{
-        if ( AknLayoutUtils::PenEnabled() )
+        if ( CamUtility::IsNhdDevice() )
             {
             TouchLayoutVideo();
             }
@@ -549,7 +549,7 @@ void CGSCamQualitySettingSlider::ReadLayoutL()
     	}   
     else // iSettingType == ECamSettingItemPhotoQuality 
     	{
-        if ( AknLayoutUtils::PenEnabled() )
+        if ( CamUtility::IsNhdDevice() )
             {
             TouchLayoutPhoto();
             }
@@ -653,7 +653,7 @@ void CGSCamQualitySettingSlider::AppendLegendArrayL( TCamPsiKey aKey,
         // get positioning info
         if ( iSettingType == ECamSettingItemVideoQuality )
             {
-            if ( AknLayoutUtils::PenEnabled() )
+            if ( CamUtility::IsNhdDevice() )
                 {
                 layout = GetTouchVideoLegendLayout( Rect(), 
                                                     i/2 + aNumSliderValues );   
@@ -666,7 +666,7 @@ void CGSCamQualitySettingSlider::AppendLegendArrayL( TCamPsiKey aKey,
             }
         else
             {  
-            if ( AknLayoutUtils::PenEnabled() )
+            if ( CamUtility::IsNhdDevice() )
                 {
                 if ( IsThreeTicksSlider() )
                     {

@@ -110,8 +110,8 @@ LANGUAGE_IDS
 END // Plugin resources
 
 LANGUAGE_IDS
-LIBRARY             gsecomplugin.lib
-LIBRARY             platformenv.lib // PathInfo
+LIBRARY             GSEcomPlugin.lib
+LIBRARY             PlatformEnv.lib // PathInfo
 LIBRARY             euser.lib
 LIBRARY             ecom.lib
 LIBRARY             efsrv.lib
@@ -120,23 +120,23 @@ LIBRARY             bafl.lib
 LIBRARY             cone.lib 
 LIBRARY             eikcoctl.lib 
 LIBRARY             eikcore.lib 
-LIBRARY             CommonEngine.lib//For RConeResourceLoader
-LIBRARY             gsframework.lib
+LIBRARY             commonengine.lib//For RConeResourceLoader
+LIBRARY             GSFramework.lib
 LIBRARY             egul.lib // CGulIcon
-LIBRARY             AKNSKINS.lib // AknsUtils.h
+LIBRARY             aknskins.lib // AknsUtils.h
 LIBRARY             centralrepository.lib
-LIBRARY             featmgr.lib           // Feature manager
+LIBRARY             FeatMgr.lib           // Feature manager 
 LIBRARY             AknNotify.lib         // for CAknGlobalNote.h
 LIBRARY             AknIcon.lib     // AknIconUtils
-LIBRARY             gslistbox.lib         // For CGSListBoxItemTextArray
+LIBRARY             GSListBox.lib         // For CGSListBoxItemTextArray
 LIBRARY             charconv.lib // utf
-LIBRARY             CommonDialogs.lib  // CAknMemorySelectionDialog
+LIBRARY             commondialogs.lib  // CAknMemorySelectionDialog
 LIBRARY             eikctl.lib
 LIBRARY             NewService.lib
 LIBRARY             eikdlg.lib
 LIBRARY             bitgdi.lib
 LIBRARY             aknlayout2.lib
-LIBRARY             AknLayout2Scalable.lib
+LIBRARY             aknlayout2scalable.lib
 LIBRARY             CdlEngine.lib
 LIBRARY             camerauiconfigmanager.lib
 

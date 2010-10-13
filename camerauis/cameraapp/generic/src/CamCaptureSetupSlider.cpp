@@ -583,7 +583,7 @@ void CCamCaptureSetupSlider::ReadLayoutL()
 
     // We're starting again from scratch, so delete the old legend layouts
     iLegendArray.ResetAndDestroy();
-    if ( AknLayoutUtils::PenEnabled() ) 
+    if ( CamUtility::IsNhdDevice() ) 
         {
         TouchLayoutL();
         }
@@ -636,7 +636,7 @@ void CCamCaptureSetupSlider::TouchLayoutL()
         {
         // Set the shaft layout and icon size for Contrast slider
         iShaftLayout.LayoutRect( sliderRect, 
-                              AknLayoutScalable_Apps::cset_slider_pane( 5 )  );
+                              AknLayoutScalable_Apps::cset_slider_pane( 7 )  );
         // set Contrast slider legend layouts      
         TouchContrastLayoutL( sliderRect ); 
         }   

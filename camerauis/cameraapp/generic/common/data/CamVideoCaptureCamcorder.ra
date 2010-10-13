@@ -956,11 +956,6 @@ RESOURCE MENU_PANE r_cam_video_post_capture_menu_camcorder
             },
         MENU_ITEM
             {
-            command = ECamCmdEditVideo;
-            txt = qtn_options_video_editor;
-            },
-        MENU_ITEM
-            {
             command = ECamCmdShareOnOvi;
             // AIW provider fills the menu item title.
             // No submenu, only 1 provider acccepted.

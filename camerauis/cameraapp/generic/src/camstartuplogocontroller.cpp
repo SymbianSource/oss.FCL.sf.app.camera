@@ -40,7 +40,6 @@ CCamStartupLogoController::~CCamStartupLogoController()
     {
     PRINT( _L("Camera <> CCamStartupLogoController::~CCamStartupLogoController") );
     delete iFailSafeTimer;
-    iObservers.Reset();
     }
 
 // ---------------------------------------------------------------------------

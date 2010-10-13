@@ -97,7 +97,7 @@ void CGSCamcorderPlugin::ConstructL()
     iSettingsModel = CCamStaticSettingsModel::NewL( *iConfiguration );
 
     RDebug::Print( _L( "[CGSCamcorderPlugin] Loading resource from :" ) );
-    if ( AknLayoutUtils::PenEnabled() )
+    if ( CamUtility::IsNhdDevice() )
         {
         RDebug::Print( KGSCamcorderPluginResourceFileName );
         OpenLocalizedResourceFileL( KGSCamcorderPluginResourceFileName, 

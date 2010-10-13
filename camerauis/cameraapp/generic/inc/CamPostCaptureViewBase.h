@@ -116,7 +116,7 @@ class CCamPostCaptureViewBase : public CCamViewBase,
         * Status of the operation are returned using aStatus
         * e.g. KErrNone
         */
-        void AddToAlbumIdOperationCompleteL();
+        void AddToAlbumIdOperationComplete();
         
         /**
         * From MCamAddToAlbumObserver

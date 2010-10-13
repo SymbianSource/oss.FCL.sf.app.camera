@@ -453,8 +453,7 @@ TKeyResponse CCamUserSceneSetupContainer::OfferKeyEventL(
     {
     if ( aType == EEventKey &&
            ( aKeyEvent.iScanCode == EStdKeyEnter || 
-             aKeyEvent.iScanCode == EStdKeyNkpEnter || 
-             aKeyEvent.iScanCode == EStdKeyDevice3 ) )  //Selection key
+               aKeyEvent.iScanCode == EStdKeyNkpEnter ) )
         {
         HandleSelectionL();
         return EKeyWasConsumed;

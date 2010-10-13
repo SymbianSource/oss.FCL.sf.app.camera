@@ -845,27 +845,27 @@ CHARACTER_SET UTF8
 
 //d:Item text for flash auto value
 //d:Visible in set_up lists
-//l:cset_list_set_pane_t1
+//l:main_cam5_pane_t1
 //
 #define qtn_lcam_set_auto                 "Automatic"
 
 //d:Item text for flash forced value
 //d:Visible in set_up lists
-//l:cset_list_set_pane_t1
+//l:main_cam5_pane_t1
 //
 #define qtn_lcam_set_force                 "On"
 
 //d:Item text for flash off value
 //d:Visible in set_up lists
-//l:cset_list_set_pane_t1
+//l:main_cam5_pane_t1
 //
 #define qtn_lcam_set_flash_off                    "Off"
 
 //d:Item text for flash redeye reduction value
 //d:Visible in set_up lists
-//l:cset_list_set_pane_t1
+//l:main_cam5_pane_t1
 //
-#define qtn_lcam_set_redeye                    "Red eye reduction"
+#define qtn_lcam_set_redeye                    "Red eye redu."
 
 //----------------------------------------------------
 
@@ -4277,94 +4277,6 @@ CHARACTER_SET UTF8
 //d: switch to secondary camera video or still mode.
 //l: cell_tb_ext_pane_t1/opt1
 #define qtn_lcam_tb_switch "Switch"
-
-//d: Options menu item for accessing the Photo editor
-//d: Visible in options menu of still post capture view
-//l: list_single_pane_t1_cp2
-#define qtn_options_image_editor "Image Editor"
-
-//d: Options menu item for accessing the Video editor
-//d: Visible in options menu of video post capture view
-//l: list_single_pane_t1_cp2
-#define qtn_options_video_editor "Video Editor"
-
-//d: Title string of Low FPS video recording note
-//d: Visible in discreet popup during low fps video recording
-//l: popup_discreet_window_t1
-#define qtn_lcam_note_low_fps "Low FPS detected"
-
-//d: Body string of Low FPS video recording note
-//d: Visible in discreet popup during low fps video recording
-//l: popup_discreet_window_t2
-#define qtn_lcam_note_low_fps_help_link "See help"
-
-//d: Description string for close up video shooting mode
-//d: Visible in video scene mode summary
-//l: popup_preview_text_window/opt5
-#define qtn_lcam_scene_vid_close_up_ex "Ideal for filming small objects between 10 and 60 cm"
-
-//d: Description string for strong backlight video shooting mode
-//d: Visible in video scene mode summary
-//l: popup_preview_text_window/opt5
-#define qtn_lcam_scene_vid_backlight_ex "Ideal when capturing subjects with strong backlight"
-
-//d: Description string for concert video shooting mode
-//d: Visible in video scene mode summary
-//l: popup_preview_text_window/opt5
-#define qtn_lcam_scene_vid_concert_ex "Ideal when capturing live concert on stage"
-
-//d: Backlight list item in video scene view
-//d: Visible in video scene mode list box
-//l: list_set_graphic_pane_t1
-#define qtn_lcam_scene_vid_backlight "Backlight"
-
-//d: Concert list item in video scene view
-//d: Visible in video scene mode list box
-//l: list_set_graphic_pane_t1
-#define qtn_lcam_scene_vid_concert "Concert"
-
-//d: Confirmation note shown when the user adds one item to an album 
-//l: popup_note_window
-#define qtn_lcam_note_added_one_item_album              "Added"
-
-//d:Video quality setting description
-//d:Visible in video quality slider control.
-//l: main_cam5_pane_t4/opt1
-#define qtn_lcam_descr_quality_highdefinition_30fps "Best quality for playback on high-definition televisions. 30fps HD 1280x720."
-
-//d:Video quality setting description
-//d:Visible in video quality slider control.
-//l: main_cam5_pane_t4/opt1
-#define qtn_lcam_descr_quality_highdefinition_reduced "For playback on high definition displays, with reduced storage memory consumption"
-
-//d:Video quality setting description
-//d:Visible in video quality slider control.
-//l: main_cam5_pane_t4/opt1
-#define qtn_lcam_descr_quality_widescreen_wvga "High quality for playback in 16:9 aspect ratio"
-
-//d: Settings list item body text
-//l: list_set_graphic_pane_t1
-#define qtn_lcam_set_type_highdefinition_reduced "High definition, reduced storage requirements"
-
-//d: Settings list item body text
-//l: list_set_graphic_pane_t1
-#define qtn_lcam_set_type_widescreen_wvga "Widescreen high quality"
-
-//d: Settings list item header
-//l: list_setting_pane_t1
-#define qtn_lcam_sett_startup_mode "Start-up mode"
-
-//d: Settings list item body text
-//l: list_set_graphic_pane_t1
-#define qtn_lcam_set_startup_mode_still "Still image"
-
-//d: Settings list item body text
-//l: list_set_graphic_pane_t1
-#define qtn_lcam_set_startup_mode_video "Video"
-
-//d: Settings list item body text
-//l: list_set_graphic_pane_t1
-#define qtn_lcam_set_startup_mode_memorized "Memorized"
 
 
 // end of file

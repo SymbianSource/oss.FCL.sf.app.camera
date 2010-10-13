@@ -905,11 +905,6 @@ RESOURCE MENU_PANE r_cam_still_post_capture_menu_camcorder
             },
         MENU_ITEM
             {
-            command = ECamCmdEditPhoto;
-            txt = qtn_options_image_editor;
-            },    
-        MENU_ITEM
-            {
             command = KAiwCmdAssign;
             txt     = qtn_lcam_use_image_postcapture_menu;
             cascade = AIW_INTELLIGENT_CASCADE_ID;

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -13,6 +13,18 @@
 *
 * Description:  Implementation of Collection Manager asynchronous operation
 *  
+
+   Copyright (c) 2007 Nokia Corporation.
+*  This material, including documentation and any related 
+*  computer programs, is protected by copyright controlled by 
+*  Nokia Corporation. All rights are reserved. Copying, 
+*  including reproducing, storing, adapting or translating, any 
+*  or all of this material requires the prior written consent of 
+*  Nokia Corporation. This material also contains confidential 
+*  information which may not be disclosed to others without the 
+*  prior written consent of Nokia Corporation.
+* 
+*
 */
 
 
@@ -190,7 +202,7 @@ void CCamCollectionManagerAO::DoAddToAlbumOperationL()
         PRINT( _L("Camera <> CCamCollectionManagerAO::DoAddToAlbumOperationL ... Enters Else Loop") );
         iAddToAlbum = EFalse;
         iSelectedAlbumIds.Reset();
-        iObserver.AddToAlbumIdOperationCompleteL();
+        iObserver.AddToAlbumIdOperationComplete();
         }
     PRINT1( _L("Camera <= CCamCollectionManagerAO::DoAddToAlbumOperationL ... Before leaving iCurrentAlbumIndex (%d)"), iCurrentAlbumIndex )
     }

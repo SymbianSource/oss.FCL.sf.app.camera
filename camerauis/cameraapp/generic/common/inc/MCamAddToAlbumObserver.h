@@ -44,7 +44,7 @@ class MCamAddToAlbumObserver
     * Notification once the asynchronous operations using
     * CollectionManager interface have completed.
     */
-    virtual void AddToAlbumIdOperationCompleteL() = 0;
+    virtual void AddToAlbumIdOperationComplete() = 0;
                                         
     };
 
