@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -44,8 +44,9 @@
 // C++ constructor
 // -----------------------------------------------------------------------------
 //
-CCamSnapShotRotator::CCamSnapShotRotator( CCamAppController& aController ) 
-    : iController(aController), iRotatedSnapshot(NULL), iRotatorAo(NULL)
+CCamSnapShotRotator::CCamSnapShotRotator( CCamAppController& aController,
+        CCamSyncRotatorAo& aRotatorAo ) 
+    : iController(aController), iRotatedSnapshot(NULL), iRotatorAo( aRotatorAo )
     {    
     }
 
@@ -64,9 +65,10 @@ void CCamSnapShotRotator::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CCamSnapShotRotator* CCamSnapShotRotator::NewL( CCamAppController& aController )
+CCamSnapShotRotator* CCamSnapShotRotator::NewL( CCamAppController& aController,
+        CCamSyncRotatorAo& aRotatorAo )
     {
-    CCamSnapShotRotator* self = new( ELeave ) CCamSnapShotRotator( aController );
+    CCamSnapShotRotator* self = new( ELeave ) CCamSnapShotRotator( aController, aRotatorAo );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -82,11 +84,6 @@ CCamSnapShotRotator* CCamSnapShotRotator::NewL( CCamAppController& aController )
 CCamSnapShotRotator::~CCamSnapShotRotator()
     {
     PRINT( _L("Camera => ~CCamSnapShotRotator") );
-    if ( iRotatorAo && iRotatorAo->IsActive() )
-        {
-        iRotatorAo->Cancel();
-        }
-    delete iRotatorAo;
     delete iRotatedSnapshot;
     PRINT( _L("Camera <= ~CCamSnapShotRotator") );
     }
@@ -133,12 +130,7 @@ void CCamSnapShotRotator::RotateL( CFbsBitmap* aBitmap )
     Mem::Copy( iRotatedSnapshot->DataAddress(), aBitmap->DataAddress(), tmpLen );
     iRotatedSnapshot->EndDataAccess();
     aBitmap->EndDataAccess();
-    if ( !iRotatorAo )
-        {
-        iRotatorAo = CCamSyncRotatorAo::NewL( *this );
-        }    
-    iRotatorAo->RotateL( iRotatedSnapshot, CBitmapRotator::ERotation180DegreesClockwise );
-        
+    iRotatorAo.AddToQueueL( *this, iRotatedSnapshot, CBitmapRotator::ERotation180DegreesClockwise );
     PRINT( _L( "Camera <= CCamSnapShotRotator::Rotate" ) );  
     }
 
@@ -148,12 +140,7 @@ void CCamSnapShotRotator::RotateL( CFbsBitmap* aBitmap )
 //  
 TBool CCamSnapShotRotator::IsActive()
     {
-    TBool ret(EFalse);
-    if ( iRotatorAo )
-        {
-        ret = iRotatorAo->IsActive();
-        }
-    return ret;
+    return iRotatorAo.IsActive();
     }
 
 //  End of File  

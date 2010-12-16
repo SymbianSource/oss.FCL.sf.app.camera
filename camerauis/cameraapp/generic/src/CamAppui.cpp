@@ -5035,16 +5035,10 @@ CCamAppUi::StartCaptureL( const TKeyEvent& /*aKeyEvent*/ )
             }
         else // Not in SelfTimer mode so just take the photo.
             {
-            if ( iController.IsProcessingCapture() )
+            if ( iController.IsProcessingCapture() || iController.IsRotationActive() )
                 {
                 PRINT( _L("Camera <= CCamAppUi::StartCaptureL - already processing - ignored capture key") );
                 return EKeyWasNotConsumed;
-                }
-            else if( iController.ActiveCamera() == ECamActiveCameraSecondary &&
-                    iController.IsRotationActive() )
-                {
-                PRINT( _L("Camera <= CCamAppUi::StartCaptureL - rotation in processing - ignored capture key") );
-                return EKeyWasNotConsumed;                
                 }
             // Start capture
             iController.Capture();
@@ -6380,42 +6374,70 @@ CCamAppUi::StartAsServerAppL( MCamEmbeddedObserver* aEmbeddedObserver,
 
     if ( found )
         {
+        // Get the UID of parent application
         TBuf<100> windowName;
         ws.GetWindowGroupNameFromIdentifier( parentID, windowName );
 
         // The format of windowName is:
         // [number][zero-char][UID of app][zero-char][Title of window][zero-char]
-        // We want to discard everything up to the window title:
-        for ( TInt t = 0; t  < 2; t++ )
-            {
-            TInt zeroPos = windowName.Locate(0);
+        // We want to discard everything up to the UID:
 
-            if ( zeroPos != KErrNotFound 
-                    && zeroPos < windowName.Length() )
-                {
-                windowName.Delete(0, zeroPos + 1);
-                }
+        // 1st Step: Delete number
+        TInt zeroPos = windowName.Locate(0);
+        if ( zeroPos != KErrNotFound && zeroPos < windowName.Length() )
+            {
+            windowName.Delete(0, zeroPos + 1);
+            }
+        // 2nd Step: Delete title
+        zeroPos = windowName.Locate(0);
+        if ( zeroPos != KErrNotFound && zeroPos < windowName.Length() )
+            {
+            windowName.Delete(zeroPos, windowName.Length() - zeroPos);
             }
 
-        // And the final zero-char
-        if ( windowName.Length() > 0 )
+        TLex lex( windowName );
+        TUint32 id = 0;
+        if ( lex.Val(id, EHex) == KErrNone )
             {
-            if ( windowName[windowName.Length() - 1] == 0 )
+            //Get the application information by UID
+            RApaLsSession appSession;
+            TApaAppInfo appInfo;
+            TRAPD( err1, appSession.Connect() );
+            if ( err1 != KErrNone )
                 {
-                windowName.Delete(windowName.Length() - 1, 1);
+                // Can't connect to Apa server - act as if we haven't found it
+                found = EFalse;
                 }
-            }
-
-        if ( windowName.Length() > 0 )
-            {
-            iParentAppName = HBufC::NewL(windowName.Length());
-            iParentAppName->Des().Copy(windowName);
-
-            SetTitleL(windowName);
+            else
+                {
+                // OK, connect successfully
+                TRAPD(err2, appSession.GetAppInfo(appInfo, TUid::Uid(id)) );
+                if ( err2 != KErrNone )
+                    {
+                    // Can't get application information - act as if we haven't found it
+                    found = EFalse;
+                    }
+                appSession.Close();
+                }
+ 
+            if ( found )
+                {
+                if ( appInfo.iCaption.Length() > 0 )
+                    {
+                    iParentAppName = HBufC::NewL(appInfo.iCaption.Length());
+                    iParentAppName->Des().Copy(appInfo.iCaption);
+                    SetTitleL(appInfo.iCaption);
+                    }
+                else
+                    {
+                    // Parent application name is empty - act as if we haven't found it
+                    found = EFalse;
+                    }
+                }
             }
         else
             {
-            // Something's wrong - act as if we haven't found it
+            // Parse UID error - act as if we haven't found it
             found = EFalse;
             }
         }

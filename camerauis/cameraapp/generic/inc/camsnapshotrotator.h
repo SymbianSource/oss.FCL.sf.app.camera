@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -52,7 +52,8 @@ class CCamSnapShotRotator : public CBase, public MBitmapRotationObserver
         /**
         * Two-phased constructor.
         */
-        static CCamSnapShotRotator* NewL( CCamAppController& aController );
+        static CCamSnapShotRotator* NewL( CCamAppController& aController,
+                CCamSyncRotatorAo& aRotatorAo );
         
         /**
         * Destructor.
@@ -88,7 +89,8 @@ class CCamSnapShotRotator : public CBase, public MBitmapRotationObserver
         * C++ default constructor.
         * @since 5.1
         */
-        CCamSnapShotRotator( CCamAppController& aController );
+        CCamSnapShotRotator( CCamAppController& aController,
+                CCamSyncRotatorAo& aRotatorAo );
 
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -100,7 +102,7 @@ class CCamSnapShotRotator : public CBase, public MBitmapRotationObserver
   
         CCamAppController& iController; // not owned
         CFbsBitmap* iRotatedSnapshot;   // owned
-        CCamSyncRotatorAo* iRotatorAo;  // owned
+        CCamSyncRotatorAo& iRotatorAo;  // not owned
         
     };
 

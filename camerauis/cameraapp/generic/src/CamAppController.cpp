@@ -1896,6 +1896,11 @@ void CCamAppController::StartVideoRecordingL()
           PlaySound( ECamVideoStartSoundId , ETrue );  
           }   
   
+          // ReleaseArray();
+          if( iImageSaveActive->Count() <= 0 )
+              {
+              ReleaseArray( ETrue );
+              }
           // initialise the array accessing values
           iArrayUsageCount   = KVideoArrayUsers;
           iCurrentImageIndex = 0;
@@ -4828,7 +4833,10 @@ void CCamAppController::ConstructL()
       }
 
   CleanupStack::PopAndDestroy( &supportedValues );
-    
+
+  // Bitmap Rotator activeobject.
+  iRotatorAo = CCamSyncRotatorAo::NewL( );
+  
   // The Settings Model handles the previews at the moment
   iSettingsPreviewHandler = static_cast<CCamSettingsModel*>( iSettingsModel ); 
 
@@ -4843,7 +4851,7 @@ void CCamAppController::ConstructL()
   iImageSaveActive       = CCamImageSaveActive::NewL( *this , *this );        
   iCaptureArray          = CCamBurstCaptureArray::NewL( *iImageSaveActive );
   iRotationArray         = CCamBurstCaptureArray::NewL( *iImageSaveActive );
-  iSnapShotRotator       = CCamSnapShotRotator::NewL( *this );
+  iSnapShotRotator       = CCamSnapShotRotator::NewL( *this, *iRotatorAo );
   iSequenceFilenameArray = new( ELeave ) CDesCArraySeg( KTimelapseArrayGranularity );
   iSoundPlayer           = CCamAudioPlayerController::NewL( *this, *this );
 
@@ -10578,11 +10586,7 @@ CCamAppController::IsSavingInProgress() const
 TBool CCamAppController::IsRotationActive() const
   {
   PRINT( _L("Camera => CCamAppController::IsRotationActive" ));  
-  TBool rotationactive=iSnapShotRotator->IsActive();
-  if( !rotationactive && iRotatorAo )
-      {
-      rotationactive=iRotatorAo->IsActive();
-      }
+  TBool rotationactive=iRotatorAo->IsActive();
   PRINT1( _L("Camera <= CCamAppController::IsRotationActive rotationactive=%d" ), rotationactive );  
   return rotationactive;
   }
@@ -11261,11 +11265,7 @@ void CCamAppController::RotateSnapshotL()
         // copy the filename 
         iRotationArray->SetNextNameL( BurstCaptureArray()->FileName( iCurrentImageIndex ), BurstCaptureArray()->ImageName( iCurrentImageIndex ));
         // rotate the copied snapshot 
-        if ( !iRotatorAo )
-            {
-            iRotatorAo = CCamSyncRotatorAo::NewL( *this );
-            }    
-        iRotatorAo->RotateL( iRotatedSnapshot, MapCamOrientation2RotationAngle( iCaptureOrientation ) );
+        iRotatorAo->AddToQueueL( *this, iRotatedSnapshot, MapCamOrientation2RotationAngle( iCaptureOrientation ) );
             
         CleanupStack::PopAndDestroy(snapshot);
         } 
@@ -11291,6 +11291,11 @@ void CCamAppController::RotationCompleteL( TInt aErr )
             
     delete iRotatedSnapshot; 
     iRotatedSnapshot = NULL;
+    if ( iSnapshotRedrawNeeded )
+        {
+        CCamAppUi* appUi = static_cast<CCamAppUi*>( CEikonEnv::Static()->AppUi() );
+        appUi->HandleCommandL( ECamCmdRedrawScreen );
+        }
     PRINT( _L( "Camera <= CCamAppController::RotationCompleteL" ) );         
     }     
       

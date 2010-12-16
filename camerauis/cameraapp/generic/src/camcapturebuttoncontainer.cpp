@@ -193,15 +193,18 @@ void CCamCaptureButtonContainer::HandlePointerEventL( const TPointerEvent& aPoin
                 iFeedback->InstantFeedback( ETouchFeedbackBasicButton );        
                 }
 
-            iParentContainer.PrepareForCapture();
-            if ( iCameraMode == ECamControllerVideo ) 
+            if( !iController.IsRotationActive() )
                 {
-                iView.HandleCommandL( ECamCmdRecord );
-                }
-            else
-                {
-                iController.SetTouchCapture( ETrue );
-                iView.HandleCommandL( ECamCmdCaptureImage );
+                iParentContainer.PrepareForCapture();
+                if ( iCameraMode == ECamControllerVideo ) 
+                    {
+                    iView.HandleCommandL( ECamCmdRecord );
+                    }
+                else
+                    {
+                    iController.SetTouchCapture( ETrue );
+                    iView.HandleCommandL( ECamCmdCaptureImage );
+                    }                
                 }
             }
         // Drags can potentially start from inside button area

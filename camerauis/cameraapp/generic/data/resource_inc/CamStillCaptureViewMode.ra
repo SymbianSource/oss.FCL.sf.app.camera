@@ -229,7 +229,7 @@ RESOURCE MENU_PANE r_cam_still_post_capture_menu_viewmode
             {
             command = KAiwCmdAssign;
             txt     = qtn_lcam_use_image_postcapture_menu;
-            cascade = AIW_INTELLIGENT_CASCADE_ID;
+            cascade = AIW_INTELLIGENT_CASCADE_ID|AIW_LOCK_SUBMENU_TITLE;
             },            
         MENU_ITEM
             {

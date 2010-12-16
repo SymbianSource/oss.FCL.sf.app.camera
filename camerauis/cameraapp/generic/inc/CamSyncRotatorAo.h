@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -49,6 +49,23 @@ public:
     };
 
 
+// This structure stores the details of a rotation task.
+// Used only internally, the bitmap is *not* owned by this
+// class, and will be overwritten by the rotation operation.        
+class CRotateTask : public CBase
+    {        
+public:
+    CRotateTask( MBitmapRotationObserver& aObserver ):iObserver( aObserver ){};
+    // The source bitmap to be rotated (and overwritten)
+    CFbsBitmap* iBitmap;
+
+    // The angle to rotate the bitmap by
+    CBitmapRotator::TRotationAngle iAngle;
+
+    // Object to be notified 
+    MBitmapRotationObserver& iObserver;
+    };
+
 /**
 *  Utility class to help in the rotating of bitmaps (for post-capture snapshot)
 *
@@ -57,25 +74,13 @@ public:
 class CCamSyncRotatorAo : public CActive
     {
     private:
-        // This structure stores the details of a rotation task.
-        // Used only internally, the bitmap is *not* owned by this
-        // class, and will be overwritten by the rotation operation.        
-        class CRotateTask : public CBase
-            {        
-        public:
-            // The source bitmap to be rotated (and overwritten)
-            CFbsBitmap* iBitmap;
-
-            // The angle to rotate the bitmap by
-            CBitmapRotator::TRotationAngle iAngle;
-            };
 
     public:  // Constructors and destructor
         
         /**
         * Two-phased constructor.
         */
-        static CCamSyncRotatorAo* NewL(MBitmapRotationObserver& aObserver);
+        static CCamSyncRotatorAo* NewL( );
         
         /**
         * Destructor.
@@ -87,10 +92,17 @@ class CCamSyncRotatorAo : public CActive
         * Rotates the specified bitmap by the supplied angle.  
         * Note that the original bitmap will be overwritten
         * @since 3.0
+        * @param aObserver Observer for RotationCompleteL call
         * @param aBitmap The bitmap to rotate
         * @param aRotation The angle to rotate the bitmap        
         */
-        void RotateL( CFbsBitmap* aBitmap, CBitmapRotator::TRotationAngle aRotation );        
+        void AddToQueueL( MBitmapRotationObserver& aObserver, CFbsBitmap* aBitmap, CBitmapRotator::TRotationAngle aRotation );        
+
+        /**
+        * Starts the next rotation task in the queue (if there is one)
+        * @since 3.0
+        */
+        void StartNextRotate(); 
 
     public: // Functions from base classes
         /**
@@ -112,7 +124,7 @@ class CCamSyncRotatorAo : public CActive
         * C++ default constructor.
         * @since 3.0
         */
-        CCamSyncRotatorAo(MBitmapRotationObserver& aObserver);
+        CCamSyncRotatorAo( );
 
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -121,11 +133,12 @@ class CCamSyncRotatorAo : public CActive
         void ConstructL();
 
     private:    // Data
+        // List of outstanding rotation tasks to perform
+        RPointerArray <CRotateTask> iQueue;    
     
         // ICL utility class that actually does the bitmap rotation
         CBitmapRotator* iRotator;        
         
-        MBitmapRotationObserver& iObserver;
     };
 
 #endif      // __CamSyncRotatorAo_H

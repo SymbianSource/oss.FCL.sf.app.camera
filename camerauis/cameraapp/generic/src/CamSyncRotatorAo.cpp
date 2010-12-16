@@ -43,9 +43,8 @@
 // C++ constructor
 // -----------------------------------------------------------------------------
 //
-CCamSyncRotatorAo::CCamSyncRotatorAo(MBitmapRotationObserver& aObserver) : 
-                         CActive( EPriorityHigh ),
-                         iObserver( aObserver )
+CCamSyncRotatorAo::CCamSyncRotatorAo( ) : 
+                         CActive( EPriorityHigh )
                             
     {    
     }
@@ -66,9 +65,9 @@ void CCamSyncRotatorAo::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CCamSyncRotatorAo* CCamSyncRotatorAo::NewL(MBitmapRotationObserver& aObserver)
+CCamSyncRotatorAo* CCamSyncRotatorAo::NewL( )
     {
-    CCamSyncRotatorAo* self = new( ELeave ) CCamSyncRotatorAo(aObserver);
+    CCamSyncRotatorAo* self = new( ELeave ) CCamSyncRotatorAo( );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -86,19 +85,42 @@ CCamSyncRotatorAo::~CCamSyncRotatorAo()
   PRINT( _L("Camera => ~CCamSyncRotatorAo" ))  
   Cancel();
   delete iRotator;
+  iQueue.ResetAndDestroy();  
   PRINT( _L("Camera <= ~CCamSyncRotatorAo" ))  
   }
 
 // -----------------------------------------------------------------------------
-// CCamSyncRotatorAo::RotateL()
-// Rotate the provided bitmap
+// CCamSyncRotatorAo::AddToQueueL
+// Adds the specified bitmap/rotator to the queue of items to be rotated
 // -----------------------------------------------------------------------------
 //
-void CCamSyncRotatorAo::RotateL( CFbsBitmap* aBitmap, CBitmapRotator::TRotationAngle aRotation )
+void CCamSyncRotatorAo::AddToQueueL( MBitmapRotationObserver& aObserver, 
+        CFbsBitmap* aBitmap, CBitmapRotator::TRotationAngle aAngle )
     {
+    CRotateTask* task = new ( ELeave ) CRotateTask( aObserver );
+    CleanupStack::PushL( task );
+    task->iBitmap = aBitmap;
+    task->iAngle = aAngle;
+    User::LeaveIfError( iQueue.Append( task ) );        
+    CleanupStack::Pop( task );
+    StartNextRotate();
+    }
+
+
+// -----------------------------------------------------------------------------
+// CCamSyncRotatorAo::StartNextRotate
+// Called to start the next queued rotation task.  If no tasks are queued, does nothing
+// -----------------------------------------------------------------------------
+//
+void CCamSyncRotatorAo::StartNextRotate()
+    {
+    if ( iQueue.Count() == 0 )
+        return;
+    
+    CRotateTask* task = iQueue[0];
     if( !IsActive() )
-        {
-        iRotator->Rotate( &iStatus, *aBitmap, aRotation );
+        {       
+        iRotator->Rotate( &iStatus, *task->iBitmap, task->iAngle );
         SetActive();
         }
     }
@@ -109,8 +131,34 @@ void CCamSyncRotatorAo::RotateL( CFbsBitmap* aBitmap, CBitmapRotator::TRotationA
 // -----------------------------------------------------------------------------
 //
 void CCamSyncRotatorAo::RunL()
-    {            
-    iObserver.RotationCompleteL(iStatus.Int());
+    {
+    // Pop the completed image from the queue.
+    CRotateTask* task = iQueue[0];    
+    iQueue.Remove( 0 );    
+
+    task->iObserver.RotationCompleteL(iStatus.Int());
+
+    delete task;  // NOTE: no need to delete bitmap (as not owned)
+        
+    // If rotate completed successfully...
+    // ... and there are more left on the queue...
+    // ... then start the next rotate
+    if ( iStatus.Int() == KErrNone )
+        {
+        if ( iQueue.Count() > 0 )
+            {
+            StartNextRotate();
+            }    
+        }
+    else 
+        {
+        // Rotation failed; cancel further rotation attempts in 
+        // the queue
+        iQueue.ResetAndDestroy();
+        }
+    
+    
+    //iObserver.RotationCompleteL(iStatus.Int());
     }
         
 // -----------------------------------------------------------------------------

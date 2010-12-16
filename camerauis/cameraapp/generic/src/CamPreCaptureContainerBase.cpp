@@ -586,7 +586,14 @@ CCamPreCaptureContainerBase::OfferKeyEventL( const TKeyEvent& aKeyEvent,
     // Stop any zooming activity if capture key detected
     if ( captureKey )
         {
-        PrepareForCapture();
+        if( iController.IsRotationActive() )
+            {
+            return EKeyWasConsumed;            
+            }
+        else
+            {
+            PrepareForCapture();            
+            }
         }
     TBool viewFinderRunning = iReceivedVfFrame;
     if ( iController.UiConfigManagerPtr() &&
